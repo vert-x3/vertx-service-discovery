@@ -26,6 +26,7 @@
   <modules>
     <module>vertx-discovery-service</module>
     <module>vertx-circuit-breaker</module>
+    <module>vertx-discovery-bridge-kubernetes</module>
   </modules>
 
   <dependencyManagement>
