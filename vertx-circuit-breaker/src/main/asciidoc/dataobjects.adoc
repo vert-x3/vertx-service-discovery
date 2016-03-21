@@ -1,0 +1,34 @@
+= Cheatsheets
+
+[[CircuitBreakerOptions]]
+== CircuitBreakerOptions
+
+++++
+ Circuit breaker configuration options.
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[fallbackOnFailure]]`fallbackOnFailure`|`Boolean`|
++++
+Sets whether or not the fallback is executed on failure, even when the circuit is closed.
++++
+|[[maxFailures]]`maxFailures`|`Number (int)`|
++++
+Sets the maximum number of failures before opening the circuit.
++++
+|[[resetTimeoutInMs]]`resetTimeoutInMs`|`Number (long)`|
++++
+Sets the time in ms before it attempts to re-close the circuit (by going to the hal-open state). If the cricuit
+ is closed when the timeout is reached, nothing happens. <code>-1</code> disables this feature.
++++
+|[[timeoutInMs]]`timeoutInMs`|`Number (long)`|
++++
+Sets the timeout in milliseconds. If an action is not completed before this timeout, the action is considered as
+ a failure.
++++
+|===
+

@@ -1,0 +1,3 @@
+io.vertx.ext.discovery.types.EventBusService
+io.vertx.ext.discovery.types.MessageSource
+io.vertx.ext.discovery.types.HttpEndpoint
