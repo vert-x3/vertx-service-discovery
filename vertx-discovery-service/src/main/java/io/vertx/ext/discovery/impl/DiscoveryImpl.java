@@ -65,9 +65,15 @@ public class DiscoveryImpl implements DiscoveryService {
 
   @Override
   public DiscoveryService registerDiscoveryBridge(DiscoveryBridge bridge, JsonObject configuration) {
+    JsonObject conf;
+    if (configuration == null) {
+      conf = new JsonObject();
+    } else {
+      conf = configuration;
+    }
     vertx.<Void>executeBlocking(
         future -> {
-          bridge.start(vertx, this, configuration, (ar) -> {
+          bridge.start(vertx, this, conf, (ar) -> {
             if (ar.failed()) {
               future.fail(ar.cause());
             } else {
