@@ -222,7 +222,7 @@ public class KubernetesDiscoveryBridge implements Watcher<Service>, DiscoveryBri
           .setHost(service.getSpec().getClusterIP())
           .setPort(port.getTargetPort().getIntVal());
 
-      if (isTrue(labels, "ssl") || port.getPort() == 443) {
+      if (isTrue(labels, "ssl") || port.getPort() != null  && port.getPort() == 443) {
         location.setSsl(true);
       }
       record.setLocation(location.toJson());
