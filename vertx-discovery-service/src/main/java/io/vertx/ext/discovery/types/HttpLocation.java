@@ -166,6 +166,7 @@ public class HttpLocation {
    */
   public HttpLocation setSsl(boolean ssl) {
     this.ssl = ssl;
+    updateLocation();
     return this;
   }
 
