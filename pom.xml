@@ -43,6 +43,7 @@
     <module>vertx-discovery-service</module>
     <module>vertx-circuit-breaker</module>
     <module>vertx-discovery-bridge-kubernetes</module>
+    <module>vertx-discovery-bridge-docker</module>
   </modules>
 
   <dependencyManagement>
