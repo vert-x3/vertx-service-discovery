@@ -44,14 +44,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * A discovery bridge listening for kubernetes services and publishing them in the Vert.x discovery. This bridge only
  * support the importation of services from kubernetes in vert.x (and not the opposite).
- *
+ * <p>
  * The bridge is configured using:
- *
+ * <p>
  * * the oauth token (using the content of `/var/run/secrets/kubernetes.io/serviceaccount/token` by default)
  * * the namespace in which the service are searched (defaults to `default`).
- *
+ * <p>
  * Be aware that the application must have access to Kubernetes and must be able to read the chosen namespace.
- *
+ * <p>
  * {@link Record} are created from Kubernetes Service. The service type is deduced from the `service.type` label. If
  * not set, the service is imported as `unknown`. Only `http-endpoint` are supported for now.
  *
@@ -70,7 +70,7 @@ public class KubernetesDiscoveryBridge implements Watcher<Service>, DiscoveryBri
 
   @Override
   public void start(Vertx vertx, DiscoveryService discovery, JsonObject configuration,
-                    Handler<AsyncResult<Void>>  completionHandler) {
+                    Handler<AsyncResult<Void>> completionHandler) {
     this.discovery = discovery;
 
     JsonObject conf;
@@ -154,7 +154,7 @@ public class KubernetesDiscoveryBridge implements Watcher<Service>, DiscoveryBri
 
   static Record createRecord(Service service) {
     Record record = new Record()
-      .setName(service.getMetadata().getName());
+        .setName(service.getMetadata().getName());
 
     Map<String, String> labels = service.getMetadata().getLabels();
     if (labels != null) {
@@ -168,6 +168,9 @@ public class KubernetesDiscoveryBridge implements Watcher<Service>, DiscoveryBri
     record.getMetadata().put("kubernetes.uuid", service.getMetadata().getUid());
 
     String type = labels != null ? labels.get("service.type") : ServiceType.UNKNOWN;
+    if (type == null) {
+      type = ServiceType.UNKNOWN;
+    }
 
     switch (type) {
       case "http-endpoint":
@@ -219,7 +222,7 @@ public class KubernetesDiscoveryBridge implements Watcher<Service>, DiscoveryBri
           .setHost(service.getSpec().getClusterIP())
           .setPort(port.getTargetPort().getIntVal());
 
-      if (isTrue(labels, "ssl")) {
+      if (isTrue(labels, "ssl") || port.getPort() == 443) {
         location.setSsl(true);
       }
       record.setLocation(location.toJson());
