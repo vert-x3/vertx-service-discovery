@@ -33,10 +33,6 @@ import io.vertx.ext.discovery.spi.ServiceType;
 import io.vertx.ext.discovery.types.HttpEndpoint;
 import io.vertx.ext.discovery.types.HttpLocation;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -59,7 +55,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class KubernetesDiscoveryBridge implements Watcher<Service>, DiscoveryBridge {
 
-  private static final String OPENSHIFT_KUBERNETES_TOKEN_FILE = "/var/run/secrets/kubernetes.io/serviceaccount/token";
   private final static Logger LOGGER = LoggerFactory.getLogger(KubernetesDiscoveryBridge.class.getName());
 
   private KubernetesClient client;
@@ -83,16 +78,22 @@ public class KubernetesDiscoveryBridge implements Watcher<Service>, DiscoveryBri
     // 1) get kubernetes auth info
     this.namespace = conf.getString("namespace", "default");
     LOGGER.info("Kubernetes discovery configured for namespace: " + namespace);
-
+    String master = conf.getString("master",
+        KubernetesUtils.getDefaultKubernetesMasterUrl());
+    LOGGER.info("Kubernetes url: " + master);
     vertx.<KubernetesClient>executeBlocking(
         future -> {
           String accountToken = conf.getString("token");
           if (accountToken == null) {
-            accountToken = getAccountTokenFromFile();
+            accountToken = KubernetesUtils.getTokenFromFile();
           }
           LOGGER.info("Kubernetes discovery: Bearer Token { " + accountToken + " }");
 
-          Config config = new ConfigBuilder().withOauthToken(accountToken).build();
+          Config config = new ConfigBuilder()
+              .withOauthToken(accountToken)
+              .withMasterUrl(master)
+              .withTrustCerts(true)
+              .build();
           DefaultKubernetesClient kubernetesClient = null;
           try {
             kubernetesClient = new DefaultKubernetesClient(config);
@@ -148,8 +149,13 @@ public class KubernetesDiscoveryBridge implements Watcher<Service>, DiscoveryBri
   }
 
   private boolean areTheSameService(Record record1, Record record2) {
-    return
-        record1.getMetadata().equals(record2.getMetadata());
+    String uuid = record1.getMetadata().getString("kubernetes.uuid", "");
+    String uuid2 = record2.getMetadata().getString("kubernetes.uuid", "");
+    String endpoint = record1.getLocation().getString(Record.ENDPOINT, "");
+    String endpoint2 = record2.getLocation().getString(Record.ENDPOINT, "");
+
+    // Check the uuid and location
+    return uuid.equals(uuid2) && endpoint.equals(endpoint2);
   }
 
   static Record createRecord(Service service) {
@@ -167,7 +173,7 @@ public class KubernetesDiscoveryBridge implements Watcher<Service>, DiscoveryBri
     record.getMetadata().put("kubernetes.name", service.getMetadata().getName());
     record.getMetadata().put("kubernetes.uuid", service.getMetadata().getUid());
 
-    String type = labels != null ? labels.get("service.type") : ServiceType.UNKNOWN;
+    String type = labels != null ? labels.get("service-type") : ServiceType.UNKNOWN;
     if (type == null) {
       type = ServiceType.UNKNOWN;
     }
@@ -194,11 +200,12 @@ public class KubernetesDiscoveryBridge implements Watcher<Service>, DiscoveryBri
       ServicePort port = ports.get(0);
       JsonObject location = new JsonObject();
       if (port.getTargetPort().getIntVal() != null) {
-        location.put("port", port.getTargetPort().getIntVal());
+        location.put("internal-port", port.getTargetPort().getIntVal());
       }
-      location.put("internal-port", port.getPort());
+      location.put("port", port.getPort());
       location.put("name", port.getName());
       location.put("protocol", port.getProtocol());
+      location.put("host", service.getSpec().getClusterIP());
 
       record.setLocation(location).setType(ServiceType.UNKNOWN);
     } else {
@@ -220,9 +227,9 @@ public class KubernetesDiscoveryBridge implements Watcher<Service>, DiscoveryBri
       record.setType(HttpEndpoint.TYPE);
       HttpLocation location = new HttpLocation()
           .setHost(service.getSpec().getClusterIP())
-          .setPort(port.getTargetPort().getIntVal());
+          .setPort(port.getPort());
 
-      if (isTrue(labels, "ssl") || port.getPort() != null  && port.getPort() == 443) {
+      if (isTrue(labels, "ssl") || port.getPort() != null && port.getPort() == 443) {
         location.setSsl(true);
       }
       record.setLocation(location.toJson());
@@ -252,18 +259,6 @@ public class KubernetesDiscoveryBridge implements Watcher<Service>, DiscoveryBri
     return labels != null && "true".equalsIgnoreCase(labels.get(key));
   }
 
-  private String getAccountTokenFromFile() {
-    try {
-      String tokenFile = OPENSHIFT_KUBERNETES_TOKEN_FILE;
-      File file = new File(tokenFile);
-      byte[] data = new byte[(int) file.length()];
-      InputStream is = new FileInputStream(file);
-      is.read(data);
-      return new String(data);
-    } catch (IOException e) {
-      throw new RuntimeException("Could not get token file", e);
-    }
-  }
 
   @Override
   public synchronized void eventReceived(Action action, Service service) {

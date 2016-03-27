@@ -23,7 +23,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.DiscoveryService;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.Status;
-import io.vertx.ext.discovery.kubernetes.KubernetesDiscoveryBridge;
 import io.vertx.ext.discovery.spi.ServiceType;
 import io.vertx.ext.discovery.types.HttpEndpoint;
 import org.junit.Test;
@@ -53,6 +52,7 @@ public class KubernetesDiscoveryBridgeTest {
     ServiceSpec spec = new ServiceSpec();
     ServicePort port = new ServicePort();
     port.setTargetPort(new IntOrString(8080));
+    port.setPort(8080);
     spec.setPorts(Collections.singletonList(port));
 
     Service service = mock(Service.class);
@@ -86,7 +86,7 @@ public class KubernetesDiscoveryBridgeTest {
 
   private Service getHttpService() {
     Map<String, String> labels = new LinkedHashMap<>();
-    labels.put("service.type", "http-endpoint");
+    labels.put("service-type", "http-endpoint");
 
     ObjectMeta metadata = new ObjectMeta();
     metadata.setName("my-service");
@@ -96,7 +96,8 @@ public class KubernetesDiscoveryBridgeTest {
 
     ServiceSpec spec = new ServiceSpec();
     ServicePort port = new ServicePort();
-    port.setTargetPort(new IntOrString(8080));
+    port.setTargetPort(new IntOrString(80));
+    port.setPort(8080);
     spec.setPorts(Collections.singletonList(port));
 
     Service service = mock(Service.class);
@@ -108,7 +109,7 @@ public class KubernetesDiscoveryBridgeTest {
   @Test
   public void testHttpWithSSLRecordCreation() {
     Map<String, String> labels = new LinkedHashMap<>();
-    labels.put("service.type", "http-endpoint");
+    labels.put("service-type", "http-endpoint");
     labels.put("ssl", "true");
 
     ObjectMeta metadata = new ObjectMeta();
@@ -120,6 +121,7 @@ public class KubernetesDiscoveryBridgeTest {
     ServiceSpec spec = new ServiceSpec();
     ServicePort port = new ServicePort();
     port.setTargetPort(new IntOrString(8080));
+    port.setPort(8080);
     spec.setPorts(Collections.singletonList(port));
 
     Service service = mock(Service.class);
