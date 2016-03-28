@@ -38,8 +38,6 @@ import static org.hamcrest.core.Is.is;
 public class CircuitBreakerImplTest {
   private Vertx vertx;
 
-  // TODO test with event bus
-
   @Before
   public void setUp() {
     vertx = Vertx.vertx();
@@ -424,13 +422,17 @@ public class CircuitBreakerImplTest {
 
   @Test
   public void testTimeoutOnAsynchronousCode() {
-    AtomicBoolean called = new AtomicBoolean(false);
+    AtomicBoolean fallbackCalled = new AtomicBoolean(false);
+    AtomicBoolean openCalled = new AtomicBoolean(false);
     CircuitBreakerOptions options = new CircuitBreakerOptions()
         .setTimeoutInMs(100)
         .setResetTimeoutInMs(-1);
     CircuitBreaker breaker = CircuitBreaker.create("test", vertx, options)
         .fallbackHandler(v -> {
-          called.set(true);
+          fallbackCalled.set(true);
+        })
+        .openHandler(v -> {
+          openCalled.set(true);
         });
     assertThat(breaker.state()).isEqualTo(CircuitBreakerState.CLOSED);
 
@@ -441,13 +443,14 @@ public class CircuitBreakerImplTest {
     }
 
     await().until(() -> breaker.state() == CircuitBreakerState.OPEN);
-    assertThat(called.get()).isEqualTo(false);
+    assertThat(openCalled.get()).isEqualTo(true);
+    assertThat(fallbackCalled.get()).isEqualTo(false);
 
     breaker.executeAsynchronousCode(future -> {
       // Do nothing with the future, this is a very bad thing.
     });
     // Immediate fallback
-    assertThat(called.get()).isEqualTo(true);
+    assertThat(fallbackCalled.get()).isEqualTo(true);
   }
 
   @Test
@@ -507,15 +510,44 @@ public class CircuitBreakerImplTest {
     }
     await().untilAtomic(hasBeenOpened, is(true));
     assertThat(called.get()).isEqualTo(true);
-
     await().until(() -> breaker.state() == CircuitBreakerState.HALF_OPEN);
+    hasBeenOpened.set(false);
     called.set(false);
 
     breaker.executeAsynchronousCode(future -> {
       // Do nothing with the future, this is a very bad thing.
     });
+    // Failed again, open circuit
+    await().until( () -> breaker.state() == CircuitBreakerState.OPEN);
     await().untilAtomic(called, is(true));
-    assertThat(breaker.state()).isEqualTo(CircuitBreakerState.OPEN);
+    await().untilAtomic(hasBeenOpened, is(true));
+
+    hasBeenOpened.set(false);
+    called.set(false);
+
+    breaker.executeAsynchronousCode(future -> {
+      // Do nothing with the future, this is a very bad thing.
+    });
+    // Failed again, open circuit
+    await().until( () -> breaker.state() == CircuitBreakerState.OPEN);
+    await().untilAtomic(called, is(true));
+    await().untilAtomic(hasBeenOpened, is(true));
+
+    hasBeenOpened.set(false);
+    called.set(false);
+
+    hasBeenOpened.set(false);
+    called.set(false);
+
+    for (int i = 0; i < options.getMaxFailures(); i++) {
+      breaker.executeAsynchronousCode(Future::complete);
+    }
+
+    await().until( () -> breaker.state() == CircuitBreakerState.CLOSED);
+    await().untilAtomic(called, is(false));
+    await().untilAtomic(hasBeenOpened, is(false));
+
+
   }
 
   @Test
