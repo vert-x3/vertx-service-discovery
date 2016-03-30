@@ -20,7 +20,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.Status;
-import io.vertx.ext.discovery.backend.impl.RedisBackend;
 import org.junit.*;
 import redis.embedded.RedisServer;
 
