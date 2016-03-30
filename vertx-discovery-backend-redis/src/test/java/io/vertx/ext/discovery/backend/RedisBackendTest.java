@@ -14,18 +14,20 @@
  * You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.discovery.impl;
+package io.vertx.ext.discovery.backend;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.Status;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import io.vertx.ext.discovery.backend.impl.RedisBackend;
+import org.junit.*;
+import redis.embedded.RedisServer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -38,16 +40,33 @@ import static org.hamcrest.core.IsNot.not;
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class DefaultDiscoveryBackendTest {
+public class RedisBackendTest {
 
+  private static final Integer DEFAULT_PORT = 6379;
+  private static RedisServer server;
 
-  protected DefaultDiscoveryBackend backend;
+  private static final Map<Integer, RedisServer> instances = new ConcurrentHashMap<>();
+
+  protected RedisBackend backend;
   protected Vertx vertx;
+
+  @BeforeClass
+  static public void startRedis() throws Exception {
+    System.out.println("Creating redis server on port: " + DEFAULT_PORT);
+    server = new RedisServer(DEFAULT_PORT);
+    System.out.println("Created embedded redis server on port " + DEFAULT_PORT);
+    server.start();
+  }
+
+  @AfterClass
+  static public void stopRedis() throws Exception {
+    server.stop();
+  }
 
   @Before
   public void setUp() {
     vertx = Vertx.vertx();
-    backend = new DefaultDiscoveryBackend();
+    backend = new RedisBackend();
     backend.init(vertx, new JsonObject());
   }
 
@@ -66,7 +85,7 @@ public class DefaultDiscoveryBackendTest {
     // Insertion
     AtomicReference<Record> reference = new AtomicReference<>();
     backend.store(record, ar -> {
-      if (! ar.succeeded()) {
+      if (!ar.succeeded()) {
         ar.cause().printStackTrace();
       }
       reference.set(ar.result());
@@ -131,14 +150,14 @@ public class DefaultDiscoveryBackendTest {
     List<Record> records = new ArrayList<>();
     // Get records
     backend.getRecords(ar -> {
-       records.addAll(ar.result());
+      records.addAll(ar.result());
     });
-    await().until(() -> ! records.isEmpty());
+    await().until(() -> !records.isEmpty());
 
     assertThat(records).hasSize(3);
 
     // Get each records
-    for(Record record : records) {
+    for (Record record : records) {
       AtomicReference<Record> retrieved = new AtomicReference<>();
       backend.getRecord(record.getRegistration(), ar -> retrieved.set(ar.result()));
       await().untilAtomic(retrieved, not(nullValue()));

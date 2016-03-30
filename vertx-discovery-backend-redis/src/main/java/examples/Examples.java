@@ -14,30 +14,26 @@
  * You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.discovery.impl;
+package examples;
 
 import io.vertx.core.Vertx;
-import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
-import org.junit.Before;
-
-import static com.jayway.awaitility.Awaitility.await;
+import io.vertx.ext.discovery.DiscoveryOptions;
+import io.vertx.ext.discovery.DiscoveryService;
 
 /**
+ * Examples for documentation.
+ *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class DefaultDiscoveryBackendClusteredTest extends DefaultDiscoveryBackendTest {
+public class Examples {
 
-
-  @Before
-  public void setUp() {
-    Vertx.clusteredVertx(new VertxOptions().setClusterHost("127.0.0.1"), ar -> {
-      vertx = ar.result();
-    });
-    await().until(() -> vertx != null);
-    backend = new DefaultDiscoveryBackend();
-    backend.init(vertx, new JsonObject());
+  public void configuration1(Vertx vertx) {
+    DiscoveryService.create(vertx, new DiscoveryOptions().setBackendConfiguration(
+        new JsonObject()
+            .put("host", "127.0.0.1")
+            .put("key", "records")
+    ));
   }
-
 
 }

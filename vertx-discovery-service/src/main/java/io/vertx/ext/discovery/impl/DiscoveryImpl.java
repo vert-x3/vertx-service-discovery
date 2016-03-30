@@ -48,7 +48,7 @@ public class DiscoveryImpl implements DiscoveryService {
     this.announce = options.getAnnounceAddress();
 
     this.backend = getBackend();
-    this.backend.init(vertx);
+    this.backend.init(vertx, options.getBackendConfiguration());
 
   }
 

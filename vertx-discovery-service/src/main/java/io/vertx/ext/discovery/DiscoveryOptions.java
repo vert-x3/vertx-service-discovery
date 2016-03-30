@@ -29,6 +29,7 @@ public class DiscoveryOptions {
 
   public static final String DEFAULT_ANNOUNCE_ADDRESS = "vertx.discovery.announce";
   private String announceAddress = DEFAULT_ANNOUNCE_ADDRESS;
+  private JsonObject backendConfiguration = new JsonObject();
 
   /**
    * Creates a new instance of {@link DiscoveryOptions} using the default values.
@@ -38,12 +39,13 @@ public class DiscoveryOptions {
   }
 
   /**
-   * Creates a new instance of {@link DiscoveryOptions} by copying the values from another instance
+   * Creates a new instance of {@link DiscoveryOptions} by copying the values from another instance.
    *
    * @param other the instance to copy
    */
   public DiscoveryOptions(DiscoveryOptions other) {
     this.announceAddress = other.announceAddress;
+    this.backendConfiguration = other.backendConfiguration.copy();
   }
 
   /**
@@ -87,4 +89,27 @@ public class DiscoveryOptions {
     return this;
   }
 
+  /**
+   * @return the backend configuration. Cannot be {@code null}.
+   */
+  public JsonObject getBackendConfiguration() {
+    return backendConfiguration;
+  }
+
+  /**
+   * Sets the configuration passed to the {@link io.vertx.ext.discovery.spi.DiscoveryBackend}.
+   * Refer to the backend documentation to get more details on the requirements. The default backend
+   * does not need any configuration.
+   *
+   * @param backendConfiguration the backend configuration
+   * @return the current {@link DiscoveryOptions}
+   */
+  public DiscoveryOptions setBackendConfiguration(JsonObject backendConfiguration) {
+    if (backendConfiguration == null) {
+      this.backendConfiguration = new JsonObject();
+    } else {
+      this.backendConfiguration = backendConfiguration;
+    }
+    return this;
+  }
 }

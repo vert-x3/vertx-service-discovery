@@ -30,11 +30,17 @@ public class DiscoveryOptionsConverter {
     if (json.getValue("announceAddress") instanceof String) {
       obj.setAnnounceAddress((String)json.getValue("announceAddress"));
     }
+    if (json.getValue("backendConfiguration") instanceof JsonObject) {
+      obj.setBackendConfiguration(((JsonObject)json.getValue("backendConfiguration")).copy());
+    }
   }
 
   public static void toJson(DiscoveryOptions obj, JsonObject json) {
     if (obj.getAnnounceAddress() != null) {
       json.put("announceAddress", obj.getAnnounceAddress());
+    }
+    if (obj.getBackendConfiguration() != null) {
+      json.put("backendConfiguration", obj.getBackendConfiguration());
     }
   }
 }

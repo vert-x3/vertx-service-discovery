@@ -14,7 +14,7 @@
  * You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.discovery.impl;
+package io.vertx.ext.discovery.backend.impl;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -23,6 +23,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.spi.DiscoveryBackend;
+import io.vertx.redis.RedisClient;
+import io.vertx.redis.RedisOptions;
 
 import java.util.List;
 import java.util.Objects;
@@ -30,14 +32,19 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
+ * An implementation of the discovery backend based on Redis.
+ *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class DefaultDiscoveryBackend implements DiscoveryBackend {
-  private AsyncMap<String, String> registry;
+public class RedisBackend implements DiscoveryBackend {
+
+  private RedisClient redis;
+  private String key;
 
   @Override
-  public void init(Vertx vertx, JsonObject config) {
-    this.registry = new AsyncMap<>(vertx, "service.registry");
+  public void init(Vertx vertx, JsonObject configuration) {
+    key = configuration.getString("key", "records");
+    redis = RedisClient.create(vertx, new RedisOptions(configuration));
   }
 
   @Override
@@ -46,9 +53,8 @@ public class DefaultDiscoveryBackend implements DiscoveryBackend {
     if (record.getRegistration() != null) {
       throw new IllegalArgumentException("The record has already been registered");
     }
-
     record.setRegistration(uuid);
-    registry.put(uuid, record.toJson().encode(), ar -> {
+    redis.hset(key, uuid, record.toJson().encode(), ar -> {
       if (ar.succeeded()) {
         resultHandler.handle(Future.succeededFuture(record));
       } else {
@@ -66,14 +72,20 @@ public class DefaultDiscoveryBackend implements DiscoveryBackend {
   @Override
   public void remove(String uuid, Handler<AsyncResult<Record>> resultHandler) {
     Objects.requireNonNull(uuid, "No registration id in the record");
-    registry.remove(uuid, ar -> {
+
+    redis.hget(key, uuid, ar -> {
       if (ar.succeeded()) {
-        if (ar.result() == null) {
-          // Not found
-          resultHandler.handle(Future.failedFuture("Record '" + uuid + "' not found"));
+        if (ar.result() != null) {
+          redis.hdel(key, uuid, deletion -> {
+            if (deletion.succeeded()) {
+              resultHandler.handle(Future.succeededFuture(
+                  new Record(new JsonObject(ar.result()))));
+            } else {
+              resultHandler.handle(Future.failedFuture(deletion.cause()));
+            }
+          });
         } else {
-          resultHandler.handle(Future.succeededFuture(
-              new Record(new JsonObject(ar.result()))));
+          resultHandler.handle(Future.failedFuture("Record '" + uuid + "' not found"));
         }
       } else {
         resultHandler.handle(Future.failedFuture(ar.cause()));
@@ -84,7 +96,7 @@ public class DefaultDiscoveryBackend implements DiscoveryBackend {
   @Override
   public void update(Record record, Handler<AsyncResult<Void>> resultHandler) {
     Objects.requireNonNull(record.getRegistration(), "No registration id in the record");
-    registry.put(record.getRegistration(), record.toJson().encode(), ar -> {
+    redis.hset(key, record.getRegistration(), record.toJson().encode(), ar -> {
       if (ar.succeeded()) {
         resultHandler.handle(Future.succeededFuture());
       } else {
@@ -95,10 +107,11 @@ public class DefaultDiscoveryBackend implements DiscoveryBackend {
 
   @Override
   public void getRecords(Handler<AsyncResult<List<Record>>> resultHandler) {
-    registry.getAll(ar -> {
+    redis.hgetall(key, ar -> {
       if (ar.succeeded()) {
-        resultHandler.handle(Future.succeededFuture(ar.result().values().stream()
-            .map(s -> new Record(new JsonObject(s)))
+        JsonObject entries = ar.result();
+        resultHandler.handle(Future.succeededFuture(entries.fieldNames().stream()
+            .map(key -> new Record(new JsonObject(entries.getString(key))))
             .collect(Collectors.toList())));
       } else {
         resultHandler.handle(Future.failedFuture(ar.cause()));
@@ -108,7 +121,7 @@ public class DefaultDiscoveryBackend implements DiscoveryBackend {
 
   @Override
   public void getRecord(String uuid, Handler<AsyncResult<Record>> resultHandler) {
-    registry.get(uuid, ar -> {
+    redis.hget(key, uuid, ar -> {
       if (ar.succeeded()) {
         if (ar.result() != null) {
           resultHandler.handle(Future.succeededFuture(new Record(new JsonObject(ar.result()))));

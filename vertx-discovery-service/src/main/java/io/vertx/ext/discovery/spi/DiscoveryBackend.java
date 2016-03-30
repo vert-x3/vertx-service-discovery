@@ -19,6 +19,7 @@ package io.vertx.ext.discovery.spi;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.Record;
 
 import java.util.List;
@@ -36,9 +37,10 @@ public interface DiscoveryBackend {
   /**
    * Initializes the backend.
    *
-   * @param vertx the vert.x instance
+   * @param vertx  the vert.x instance
+   * @param config the configuration if any.
    */
-  void init(Vertx vertx);
+  void init(Vertx vertx, JsonObject config);
 
   /**
    * Stores a record.
