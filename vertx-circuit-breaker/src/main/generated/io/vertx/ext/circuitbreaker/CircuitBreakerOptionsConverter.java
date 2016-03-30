@@ -33,6 +33,9 @@ public class CircuitBreakerOptionsConverter {
     if (json.getValue("maxFailures") instanceof Number) {
       obj.setMaxFailures(((Number)json.getValue("maxFailures")).intValue());
     }
+    if (json.getValue("notificationAddress") instanceof String) {
+      obj.setNotificationAddress((String)json.getValue("notificationAddress"));
+    }
     if (json.getValue("resetTimeoutInMs") instanceof Number) {
       obj.setResetTimeoutInMs(((Number)json.getValue("resetTimeoutInMs")).longValue());
     }
@@ -44,6 +47,9 @@ public class CircuitBreakerOptionsConverter {
   public static void toJson(CircuitBreakerOptions obj, JsonObject json) {
     json.put("fallbackOnFailure", obj.isFallbackOnFailure());
     json.put("maxFailures", obj.getMaxFailures());
+    if (obj.getNotificationAddress() != null) {
+      json.put("notificationAddress", obj.getNotificationAddress());
+    }
     json.put("resetTimeoutInMs", obj.getResetTimeoutInMs());
     json.put("timeoutInMs", obj.getTimeoutInMs());
   }

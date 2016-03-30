@@ -47,6 +47,11 @@ public class CircuitBreakerOptions {
    */
   private static final long DEFAULT_RESET_TIMEOUT_IN_MS = 30000;
 
+  /**
+   * Default address on which the circuit breakers are sending their update.
+   */
+  private static final String DEFAULT_NOTIFICATION_ADDRESS = "vertx.circuit-breaker";
+
   private long timeoutInMs = DEFAULT_TIMEOUT_IN_MS;
 
   private int maxFailures = DEFAULT_MAX_FAILURES;
@@ -54,6 +59,8 @@ public class CircuitBreakerOptions {
   private boolean fallbackOnFailure = DEFAULT_FALLBACK_ON_FAILURE;
 
   private long resetTimeout = DEFAULT_RESET_TIMEOUT_IN_MS;
+
+  private String notificationAddress = DEFAULT_NOTIFICATION_ADDRESS;
 
   /**
    * Creates a new instance of {@link CircuitBreakerOptions} using the default values.
@@ -71,6 +78,7 @@ public class CircuitBreakerOptions {
     this.timeoutInMs = other.timeoutInMs;
     this.maxFailures = other.maxFailures;
     this.fallbackOnFailure = other.fallbackOnFailure;
+    this.notificationAddress = other.notificationAddress;
   }
 
   /**
@@ -163,6 +171,25 @@ public class CircuitBreakerOptions {
    */
   public CircuitBreakerOptions setResetTimeoutInMs(long resetTimeout) {
     this.resetTimeout = resetTimeout;
+    return this;
+  }
+
+  /**
+   * @return the eventbus address on which the circuit breaker events are published. {@code null} if this feature has
+   * been disabled.
+   */
+  public String getNotificationAddress() {
+    return notificationAddress;
+  }
+
+  /**
+   * Sets the event bus address on which the circuit breaker publish its state change.
+   *
+   * @param notificationAddress the address, {@code null} to disable this feature.
+   * @return the current {@link CircuitBreakerOptions} instance
+   */
+  public CircuitBreakerOptions setNotificationAddress(String notificationAddress) {
+    this.notificationAddress = notificationAddress;
     return this;
   }
 }

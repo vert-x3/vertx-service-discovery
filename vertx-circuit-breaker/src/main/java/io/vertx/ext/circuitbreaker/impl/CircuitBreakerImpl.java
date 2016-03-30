@@ -110,11 +110,14 @@ public class CircuitBreakerImpl implements CircuitBreaker {
   }
 
   private void sendUpdateOnEventBus() {
-    vertx.eventBus().publish("circuit-breaker[" + name + "]", new JsonObject()
-        .put("name", name)
-        .put("state", state)
-        .put("failures", failures)
-        .put("node", vertx.isClustered() ? ((VertxInternal) vertx).getClusterManager().getNodeID() : "local"));
+    String address = options.getNotificationAddress();
+    if (address != null) {
+      vertx.eventBus().publish(address, new JsonObject()
+          .put("name", name)
+          .put("state", state)
+          .put("failures", failures)
+          .put("node", vertx.isClustered() ? ((VertxInternal) vertx).getClusterManager().getNodeID() : "local"));
+    }
   }
 
   @Override
@@ -277,7 +280,7 @@ public class CircuitBreakerImpl implements CircuitBreaker {
 
   private void executeCode(Handler<Future> code, Future completionFuture,
                            AtomicBoolean timeoutFailure, Handler<Void>
-      fallback) {
+                               fallback) {
     AtomicBoolean completed = new AtomicBoolean(false);
     if (options.getTimeoutInMs() != -1) {
       vertx.setTimer(options.getTimeoutInMs(), (l) -> {

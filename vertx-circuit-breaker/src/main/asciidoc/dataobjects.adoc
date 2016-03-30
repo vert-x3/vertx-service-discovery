@@ -20,6 +20,10 @@ Sets whether or not the fallback is executed on failure, even when the circuit i
 +++
 Sets the maximum number of failures before opening the circuit.
 +++
+|[[notificationAddress]]`notificationAddress`|`String`|
++++
+Sets the event bus address on which the circuit breaker publish its state change.
++++
 |[[resetTimeoutInMs]]`resetTimeoutInMs`|`Number (long)`|
 +++
 Sets the time in ms before it attempts to re-close the circuit (by going to the hal-open state). If the cricuit

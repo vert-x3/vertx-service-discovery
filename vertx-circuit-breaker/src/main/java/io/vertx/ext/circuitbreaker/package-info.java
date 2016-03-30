@@ -98,9 +98,12 @@
  *
  * == Event bus notification
  *
- * Every time the circuit state changes, an event is published on the event bus to `circuit-breaker[name]`, where
- * `name` is replaced with the name passed when creating the {@link io.vertx.ext.circuitbreaker.CircuitBreaker}. Each
- * event contains a Json Object with:
+ * Every time the circuit state changes, an event is published on the event bus. The address on which the event are
+ * sent is configurable with
+ * {@link io.vertx.ext.circuitbreaker.CircuitBreakerOptions#setNotificationAddress(java.lang.String)}. If `null` is
+ * passed to this method, the notifications are disabled. By default, the used address is `vertx.circuit-breaker`.
+ *
+ * Each event contains a Json Object with:
  *
  * * `state` : the new circuit breaker state (`OPEN`, `CLOSED`, `HALF_OPEN`)
  * * `name` : the name of the circuit breaker
