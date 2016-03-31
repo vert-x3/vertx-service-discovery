@@ -24,6 +24,11 @@ Sets the maximum number of failures before opening the circuit.
 +++
 Sets the event bus address on which the circuit breaker publish its state change.
 +++
+|[[notificationPeriod]]`notificationPeriod`|`Number (long)`|
++++
+Configures the period in milliseconds where the circuit breaker send a notification on the event bus with its
+ current state.
++++
 |[[resetTimeoutInMs]]`resetTimeoutInMs`|`Number (long)`|
 +++
 Sets the time in ms before it attempts to re-close the circuit (by going to the hal-open state). If the cricuit

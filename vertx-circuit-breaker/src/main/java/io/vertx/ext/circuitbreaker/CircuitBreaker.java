@@ -54,6 +54,13 @@ public interface CircuitBreaker {
   }
 
   /**
+   * Closes the circuit breaker. It stops sending events on its state on the event bus.
+   * This method is not related to the {@code close} state of the circuit breaker. To set the circuit breaker in the
+   * {@code close} state, use {@link #reset()}.
+   */
+  void close();
+
+  /**
    * Sets a {@link Handler} invoked when the circuit breaker state switches to open.
    *
    * @param handler the handler, must not be {@code null}

@@ -37,6 +37,7 @@ import static org.hamcrest.core.Is.is;
  */
 public class CircuitBreakerImplTest {
   private Vertx vertx;
+  private CircuitBreaker breaker;
 
   @Before
   public void setUp() {
@@ -45,6 +46,9 @@ public class CircuitBreakerImplTest {
 
   @After
   public void tearDown() {
+    if (breaker != null) {
+      breaker.close();
+    }
     AtomicBoolean completed = new AtomicBoolean();
     vertx.close(ar -> completed.set(ar.succeeded()));
     await().untilAtomic(completed, is(true));
@@ -52,14 +56,14 @@ public class CircuitBreakerImplTest {
 
   @Test
   public void testCreationWithDefault() {
-    CircuitBreaker breaker = CircuitBreaker.create("name", vertx);
+    breaker = CircuitBreaker.create("name", vertx);
     assertThat(breaker.name()).isEqualTo("name");
     assertThat(breaker.state()).isEqualTo(CircuitBreakerState.CLOSED);
   }
 
   @Test
   public void testSynchronousOk() {
-    CircuitBreaker breaker = CircuitBreaker.create("test", vertx, new CircuitBreakerOptions());
+    breaker = CircuitBreaker.create("test", vertx, new CircuitBreakerOptions());
     assertThat(breaker.state()).isEqualTo(CircuitBreakerState.CLOSED);
 
     AtomicBoolean called = new AtomicBoolean();
@@ -70,7 +74,7 @@ public class CircuitBreakerImplTest {
 
   @Test
   public void testAsynchronousOk() {
-    CircuitBreaker breaker = CircuitBreaker.create("test", vertx, new CircuitBreakerOptions());
+    breaker = CircuitBreaker.create("test", vertx, new CircuitBreakerOptions());
     assertThat(breaker.state()).isEqualTo(CircuitBreakerState.CLOSED);
 
     AtomicBoolean called = new AtomicBoolean();
@@ -88,7 +92,7 @@ public class CircuitBreakerImplTest {
   public void testOpenAndCloseHandler() {
     AtomicInteger spyOpen = new AtomicInteger();
     AtomicInteger spyClosed = new AtomicInteger();
-    CircuitBreaker breaker = CircuitBreaker.create("name", vertx, new CircuitBreakerOptions().setResetTimeoutInMs(-1))
+    breaker = CircuitBreaker.create("name", vertx, new CircuitBreakerOptions().setResetTimeoutInMs(-1))
         .openHandler((v) -> spyOpen.incrementAndGet())
         .closeHandler((v) -> spyClosed.incrementAndGet());
 
@@ -130,7 +134,7 @@ public class CircuitBreakerImplTest {
   public void testExceptionOnSynchronousCode() {
     AtomicBoolean called = new AtomicBoolean(false);
     CircuitBreakerOptions options = new CircuitBreakerOptions().setResetTimeoutInMs(-1);
-    CircuitBreaker breaker = CircuitBreaker.create("test", vertx, options)
+    breaker = CircuitBreaker.create("test", vertx, options)
         .fallbackHandler(v -> {
           called.set(true);
         });
@@ -160,7 +164,7 @@ public class CircuitBreakerImplTest {
   public void testExceptionOnAsynchronousCode() {
     AtomicBoolean called = new AtomicBoolean(false);
     CircuitBreakerOptions options = new CircuitBreakerOptions().setResetTimeoutInMs(-1);
-    CircuitBreaker breaker = CircuitBreaker.create("test", vertx, options)
+    breaker = CircuitBreaker.create("test", vertx, options)
         .fallbackHandler(v -> {
           called.set(true);
         });
@@ -190,7 +194,7 @@ public class CircuitBreakerImplTest {
   public void testFailureOnAsynchronousCode() {
     AtomicBoolean called = new AtomicBoolean(false);
     CircuitBreakerOptions options = new CircuitBreakerOptions().setResetTimeoutInMs(-1);
-    CircuitBreaker breaker = CircuitBreaker.create("test", vertx, options)
+    breaker = CircuitBreaker.create("test", vertx, options)
         .fallbackHandler(v -> {
           called.set(true);
         });
@@ -221,7 +225,7 @@ public class CircuitBreakerImplTest {
   public void testResetAttemptOnSynchronousCode() {
     AtomicBoolean called = new AtomicBoolean(false);
     CircuitBreakerOptions options = new CircuitBreakerOptions().setResetTimeoutInMs(100);
-    CircuitBreaker breaker = CircuitBreaker.create("test", vertx, options)
+    breaker = CircuitBreaker.create("test", vertx, options)
         .fallbackHandler(v -> {
           called.set(true);
         });
@@ -254,7 +258,7 @@ public class CircuitBreakerImplTest {
   public void testResetAttemptOnAsynchronousCode() {
     AtomicBoolean called = new AtomicBoolean(false);
     CircuitBreakerOptions options = new CircuitBreakerOptions().setResetTimeoutInMs(200);
-    CircuitBreaker breaker = CircuitBreaker.create("test", vertx, options)
+    breaker = CircuitBreaker.create("test", vertx, options)
         .fallbackHandler(v -> {
           called.set(true);
         });
@@ -290,7 +294,7 @@ public class CircuitBreakerImplTest {
     CircuitBreakerOptions options = new CircuitBreakerOptions()
         .setResetTimeoutInMs(100)
         .setFallbackOnFailure(true);
-    CircuitBreaker breaker = CircuitBreaker.create("test", vertx, options)
+    breaker = CircuitBreaker.create("test", vertx, options)
         .fallbackHandler(v -> {
           called.set(true);
         });
@@ -328,7 +332,7 @@ public class CircuitBreakerImplTest {
     CircuitBreakerOptions options = new CircuitBreakerOptions()
         .setResetTimeoutInMs(100)
         .setFallbackOnFailure(true);
-    CircuitBreaker breaker = CircuitBreaker.create("test", vertx, options)
+    breaker = CircuitBreaker.create("test", vertx, options)
         .fallbackHandler(v -> {
           called.set(true);
         });
@@ -361,7 +365,7 @@ public class CircuitBreakerImplTest {
   public void testTimeoutOnSynchronousCode() {
     AtomicBoolean called = new AtomicBoolean(false);
     CircuitBreakerOptions options = new CircuitBreakerOptions().setTimeoutInMs(100);
-    CircuitBreaker breaker = CircuitBreaker.create("test", vertx, options)
+    breaker = CircuitBreaker.create("test", vertx, options)
         .fallbackHandler(v -> {
           called.set(true);
         });
@@ -393,7 +397,7 @@ public class CircuitBreakerImplTest {
     AtomicBoolean called = new AtomicBoolean(false);
     CircuitBreakerOptions options = new CircuitBreakerOptions().setTimeoutInMs(100)
         .setFallbackOnFailure(true);
-    CircuitBreaker breaker = CircuitBreaker.create("test", vertx, options)
+    breaker = CircuitBreaker.create("test", vertx, options)
         .fallbackHandler(v -> {
           called.set(true);
         });
@@ -427,7 +431,7 @@ public class CircuitBreakerImplTest {
     CircuitBreakerOptions options = new CircuitBreakerOptions()
         .setTimeoutInMs(100)
         .setResetTimeoutInMs(-1);
-    CircuitBreaker breaker = CircuitBreaker.create("test", vertx, options)
+    breaker = CircuitBreaker.create("test", vertx, options)
         .fallbackHandler(v -> {
           fallbackCalled.set(true);
         })
@@ -461,7 +465,7 @@ public class CircuitBreakerImplTest {
         .setResetTimeoutInMs(100)
         .setTimeoutInMs(10)
         .setFallbackOnFailure(true);
-    CircuitBreaker breaker = CircuitBreaker.create("test", vertx, options)
+    breaker = CircuitBreaker.create("test", vertx, options)
         .fallbackHandler(v -> {
           called.set(true);
         })
@@ -494,7 +498,7 @@ public class CircuitBreakerImplTest {
         .setResetTimeoutInMs(100)
         .setTimeoutInMs(10)
         .setFallbackOnFailure(true);
-    CircuitBreaker breaker = CircuitBreaker.create("test", vertx, options)
+    breaker = CircuitBreaker.create("test", vertx, options)
         .fallbackHandler(v -> {
           called.set(true);
         })
@@ -557,7 +561,7 @@ public class CircuitBreakerImplTest {
     CircuitBreakerOptions options = new CircuitBreakerOptions()
         .setResetTimeoutInMs(1000)
         .setFallbackOnFailure(true);
-    CircuitBreaker breaker = CircuitBreaker.create("test", vertx, options)
+    breaker = CircuitBreaker.create("test", vertx, options)
         .fallbackHandler(v -> {
           called.set(true);
         })

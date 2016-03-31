@@ -35,6 +35,21 @@ var CircuitBreaker = function(j_val) {
   var that = this;
 
   /**
+   Closes the circuit breaker. It stops sending events on its state on the event bus.
+   This method is not related to the <code>close</code> state of the circuit breaker. To set the circuit breaker in the
+   <code>close</code> state, use {@link CircuitBreaker#reset}.
+
+   @public
+
+   */
+  this.close = function() {
+    var __args = arguments;
+    if (__args.length === 0) {
+      j_circuitBreaker["close()"]();
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
    Sets a  invoked when the circuit breaker state switches to open.
 
    @public

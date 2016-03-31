@@ -36,6 +36,9 @@ public class CircuitBreakerOptionsConverter {
     if (json.getValue("notificationAddress") instanceof String) {
       obj.setNotificationAddress((String)json.getValue("notificationAddress"));
     }
+    if (json.getValue("notificationPeriod") instanceof Number) {
+      obj.setNotificationPeriod(((Number)json.getValue("notificationPeriod")).longValue());
+    }
     if (json.getValue("resetTimeoutInMs") instanceof Number) {
       obj.setResetTimeoutInMs(((Number)json.getValue("resetTimeoutInMs")).longValue());
     }
@@ -50,6 +53,7 @@ public class CircuitBreakerOptionsConverter {
     if (obj.getNotificationAddress() != null) {
       json.put("notificationAddress", obj.getNotificationAddress());
     }
+    json.put("notificationPeriod", obj.getNotificationPeriod());
     json.put("resetTimeoutInMs", obj.getResetTimeoutInMs());
     json.put("timeoutInMs", obj.getTimeoutInMs());
   }

@@ -52,6 +52,11 @@ public class CircuitBreakerOptions {
    */
   private static final String DEFAULT_NOTIFICATION_ADDRESS = "vertx.circuit-breaker";
 
+  /**
+   * Default notification period.
+   */
+  private static final long DEFAULT_NOTIFICATION_PERIOD = 2000;
+
   private long timeoutInMs = DEFAULT_TIMEOUT_IN_MS;
 
   private int maxFailures = DEFAULT_MAX_FAILURES;
@@ -61,6 +66,7 @@ public class CircuitBreakerOptions {
   private long resetTimeout = DEFAULT_RESET_TIMEOUT_IN_MS;
 
   private String notificationAddress = DEFAULT_NOTIFICATION_ADDRESS;
+  private long notificationPeriod = DEFAULT_NOTIFICATION_PERIOD;
 
   /**
    * Creates a new instance of {@link CircuitBreakerOptions} using the default values.
@@ -79,6 +85,7 @@ public class CircuitBreakerOptions {
     this.maxFailures = other.maxFailures;
     this.fallbackOnFailure = other.fallbackOnFailure;
     this.notificationAddress = other.notificationAddress;
+    this.notificationPeriod = other.notificationPeriod;
   }
 
   /**
@@ -190,6 +197,25 @@ public class CircuitBreakerOptions {
    */
   public CircuitBreakerOptions setNotificationAddress(String notificationAddress) {
     this.notificationAddress = notificationAddress;
+    return this;
+  }
+
+  /**
+   * @return the the period in milliseconds where the circuit breaker send a notification about its state.
+   */
+  public long getNotificationPeriod() {
+    return notificationPeriod;
+  }
+
+  /**
+   * Configures the period in milliseconds where the circuit breaker send a notification on the event bus with its
+   * current state.
+   *
+   * @param notificationPeriod the period, 0 to disable this feature.
+   * @return the current {@link CircuitBreaker} instance
+   */
+  public CircuitBreakerOptions setNotificationPeriod(long notificationPeriod) {
+    this.notificationPeriod = notificationPeriod;
     return this;
   }
 }

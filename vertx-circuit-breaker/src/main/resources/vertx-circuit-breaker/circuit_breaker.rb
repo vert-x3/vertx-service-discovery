@@ -28,6 +28,16 @@ module VertxCircuitBreaker
       end
       raise ArgumentError, "Invalid arguments when calling create(name,vertx,options)"
     end
+    #  Closes the circuit breaker. It stops sending events on its state on the event bus.
+    #  This method is not related to the <code>close</code> state of the circuit breaker. To set the circuit breaker in the
+    #  <code>close</code> state, use {::VertxCircuitBreaker::CircuitBreaker#reset}.
+    # @return [void]
+    def close
+      if !block_given?
+        return @j_del.java_method(:close, []).call()
+      end
+      raise ArgumentError, "Invalid arguments when calling close()"
+    end
     #  Sets a  invoked when the circuit breaker state switches to open.
     # @yield the handler, must not be <code>null</code>
     # @return [::VertxCircuitBreaker::CircuitBreaker] the current {::VertxCircuitBreaker::CircuitBreaker}

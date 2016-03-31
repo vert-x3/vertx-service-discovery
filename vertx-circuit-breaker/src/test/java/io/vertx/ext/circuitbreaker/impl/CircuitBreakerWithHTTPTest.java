@@ -46,6 +46,7 @@ public class CircuitBreakerWithHTTPTest {
   private Vertx vertx;
   private HttpServer http;
   private HttpClient client;
+  private CircuitBreaker breaker;
 
   @Before
   public void setUp() {
@@ -78,6 +79,9 @@ public class CircuitBreakerWithHTTPTest {
 
   @After
   public void tearDown() {
+    if (breaker != null) {
+      breaker.close();
+    }
     AtomicBoolean completed = new AtomicBoolean();
     http.close(ar -> {
       completed.set(true);
@@ -93,7 +97,7 @@ public class CircuitBreakerWithHTTPTest {
 
   @Test
   public void testOk() {
-    CircuitBreaker breaker = CircuitBreaker.create("test", vertx, new CircuitBreakerOptions());
+    breaker = CircuitBreaker.create("test", vertx, new CircuitBreakerOptions());
     assertThat(breaker.state()).isEqualTo(CircuitBreakerState.CLOSED);
 
     AtomicReference<HttpClientResponse> reference = new AtomicReference<>();
@@ -112,7 +116,7 @@ public class CircuitBreakerWithHTTPTest {
   @Test
   public void testFailure() {
     CircuitBreakerOptions options = new CircuitBreakerOptions();
-    CircuitBreaker breaker = CircuitBreaker.create("test", vertx, options);
+    breaker = CircuitBreaker.create("test", vertx, options);
     assertThat(breaker.state()).isEqualTo(CircuitBreakerState.CLOSED);
 
     AtomicInteger count = new AtomicInteger();
@@ -155,7 +159,7 @@ public class CircuitBreakerWithHTTPTest {
   @Test
   public void testTimeout() {
     CircuitBreakerOptions options = new CircuitBreakerOptions().setTimeoutInMs(100).setMaxFailures(2);
-    CircuitBreaker breaker = CircuitBreaker.create("test", vertx, options);
+    breaker = CircuitBreaker.create("test", vertx, options);
     assertThat(breaker.state()).isEqualTo(CircuitBreakerState.CLOSED);
 
     AtomicInteger count = new AtomicInteger();

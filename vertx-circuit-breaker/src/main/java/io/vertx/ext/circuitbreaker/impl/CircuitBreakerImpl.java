@@ -43,6 +43,7 @@ public class CircuitBreakerImpl implements CircuitBreaker {
   private final Vertx vertx;
   private final CircuitBreakerOptions options;
   private final String name;
+  private final long periodicUpdateTask;
 
   private Handler<Void> openHandler = NOOP;
   private Handler<Void> halfOpenHandler = NOOP;
@@ -64,6 +65,20 @@ public class CircuitBreakerImpl implements CircuitBreaker {
     }
     this.vertx = vertx;
     this.name = name;
+    sendUpdateOnEventBus();
+
+    if (this.options.getNotificationPeriod() > 0) {
+      this.periodicUpdateTask = vertx.setPeriodic(this.options.getNotificationPeriod(), l -> sendUpdateOnEventBus());
+    } else {
+      this.periodicUpdateTask = -1;
+    }
+  }
+
+  @Override
+  public void close() {
+    if (this.periodicUpdateTask != -1) {
+      vertx.cancelTimer(this.periodicUpdateTask);
+    }
   }
 
   @Override
@@ -109,7 +124,7 @@ public class CircuitBreakerImpl implements CircuitBreaker {
     return this;
   }
 
-  private void sendUpdateOnEventBus() {
+  private synchronized void sendUpdateOnEventBus() {
     String address = options.getNotificationAddress();
     if (address != null) {
       vertx.eventBus().publish(address, new JsonObject()
@@ -279,8 +294,7 @@ public class CircuitBreakerImpl implements CircuitBreaker {
   }
 
   private void executeCode(Handler<Future> code, Future completionFuture,
-                           AtomicBoolean timeoutFailure, Handler<Void>
-                               fallback) {
+                           AtomicBoolean timeoutFailure, Handler<Void> fallback) {
     AtomicBoolean completed = new AtomicBoolean(false);
     if (options.getTimeoutInMs() != -1) {
       vertx.setTimer(options.getTimeoutInMs(), (l) -> {
@@ -311,7 +325,16 @@ public class CircuitBreakerImpl implements CircuitBreaker {
   private synchronized void incrementFailures() {
     failures++;
     if (failures >= options.getMaxFailures()) {
-      open();
+      if (state != OPEN) {
+        open();
+      } else {
+        // No need to do it in the previous case, open() do it.
+        // If open has been called, no need to send update, it will be done by the `open` method.
+        sendUpdateOnEventBus();
+      }
+    } else {
+      // Number of failure has changed, send update.
+      sendUpdateOnEventBus();
     }
   }
 }

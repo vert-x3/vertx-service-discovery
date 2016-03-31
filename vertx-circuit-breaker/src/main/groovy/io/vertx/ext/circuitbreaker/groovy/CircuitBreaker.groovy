@@ -57,6 +57,14 @@ public class CircuitBreaker {
     return ret;
   }
   /**
+   * Closes the circuit breaker. It stops sending events on its state on the event bus.
+   * This method is not related to the <code>close</code> state of the circuit breaker. To set the circuit breaker in the
+   * <code>close</code> state, use {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker#reset}.
+   */
+  public void close() {
+    this.delegate.close();
+  }
+  /**
    * Sets a  invoked when the circuit breaker state switches to open.
    * @param handler the handler, must not be <code>null</code>
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
