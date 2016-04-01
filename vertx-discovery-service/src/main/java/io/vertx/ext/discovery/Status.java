@@ -16,11 +16,14 @@
 
 package io.vertx.ext.discovery;
 
+import io.vertx.codegen.annotations.VertxGen;
+
 /**
  * Service publication status.
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
+@VertxGen
 public enum Status {
 
   /**

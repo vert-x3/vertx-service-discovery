@@ -14,12 +14,14 @@
  * You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.discovery;
+package io.vertx.ext.discovery.spi;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.discovery.DiscoveryService;
+import io.vertx.ext.discovery.Record;
 
 /**
  * Discovery bridge allows integrate other discovery technologies with the Vert.x discovery service. It maps entries

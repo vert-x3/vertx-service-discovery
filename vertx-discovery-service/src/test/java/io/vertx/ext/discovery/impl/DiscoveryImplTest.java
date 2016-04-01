@@ -22,6 +22,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.*;
+import io.vertx.ext.discovery.spi.DiscoveryBridge;
 import io.vertx.ext.discovery.types.HttpEndpoint;
 import io.vertx.ext.service.HelloService;
 import io.vertx.ext.service.HelloServiceImpl;

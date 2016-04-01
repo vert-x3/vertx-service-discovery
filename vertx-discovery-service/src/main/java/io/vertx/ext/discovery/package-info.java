@@ -17,7 +17,7 @@
 /**
  * = Vert.x Discovery Service
  *
- * The discovery service provides an infrastructure to publish and discovery various resources, such as service proxies,
+ * The discovery service provides an infrastructure to publish and discover various resources, such as service proxies,
  * HTTP endpoints, data sources... These resources are called `services`. A `service` is a discoverable
  * functionality. It can be qualified by its type, metadata, and location. So a `service` can be a database, a
  * service proxy, a HTTP endpoint. It does not have to be a vert.x entity, but can be anything. Each service is
@@ -77,13 +77,13 @@
  *
  * == Overall concepts
  *
- * The discovery mechanism is based on a few concepts explaining in this section.
+ * The discovery mechanism is based on a few concepts explained in this section.
  *
  * === Service records
  *
- * A service {@link io.vertx.ext.discovery.Record} is an object describing a service published by a service provider.
- * It contains a name, some metadata, a location object (describing where is the service). This record is the only
- * objects shared by the provider (having published it) and the consumer (retrieve it when doing a lookup).
+ * A service {@link io.vertx.ext.discovery.Record} is an object that describes a service published by a service
+ * provider. It contains a name, some metadata, a location object (describing where is the service). This record is
+ * the only objects shared by the provider (having published it) and the consumer (retrieve it when doing a lookup).
  *
  * The metadata and even the location format depends on the service type.
  *
@@ -244,9 +244,9 @@
  * Bridges let import and export services from / to other discovery mechanism such as Docker, Kubernates, Consul...
  * Each bridge decides how the services are imported and exported. It does not have to be bi-directional.
  *
- * You can provide your own bridge by implementing the {@link io.vertx.ext.discovery.DiscoveryBridge} interface and
+ * You can provide your own bridge by implementing the {@link io.vertx.ext.discovery.spi.DiscoveryBridge} interface and
  * register it using
- * {@link io.vertx.ext.discovery.DiscoveryService#registerDiscoveryBridge(io.vertx.ext.discovery.DiscoveryBridge, io.vertx.core.json.JsonObject)}.
+ * {@link io.vertx.ext.discovery.DiscoveryService#registerDiscoveryBridge(DiscoveryBridge, io.vertx.core.json.JsonObject)}.
  *
  * Notice than in a cluster, only one member needs to register the bridge as the records are accessible by all members.
  */
@@ -254,3 +254,4 @@
 package io.vertx.ext.discovery;
 
 import io.vertx.codegen.annotations.ModuleGen;
+import io.vertx.ext.discovery.spi.DiscoveryBridge;

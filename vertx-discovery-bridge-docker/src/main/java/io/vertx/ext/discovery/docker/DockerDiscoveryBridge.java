@@ -27,7 +27,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.discovery.DiscoveryBridge;
+import io.vertx.ext.discovery.spi.DiscoveryBridge;
 import io.vertx.ext.discovery.DiscoveryService;
 import io.vertx.ext.discovery.Record;
 

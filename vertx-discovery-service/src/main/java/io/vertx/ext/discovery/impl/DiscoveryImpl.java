@@ -25,6 +25,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.discovery.*;
 import io.vertx.ext.discovery.spi.DiscoveryBackend;
+import io.vertx.ext.discovery.spi.DiscoveryBridge;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;

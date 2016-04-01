@@ -16,6 +16,7 @@
 
 package io.vertx.ext.discovery;
 
+import io.vertx.codegen.annotations.CacheReturn;
 import io.vertx.codegen.annotations.VertxGen;
 
 /**
@@ -34,6 +35,7 @@ public interface ServiceReference {
   /**
    * @return the service record.
    */
+  @CacheReturn
   Record record();
 
   /**

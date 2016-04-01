@@ -24,6 +24,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.impl.DiscoveryImpl;
 import io.vertx.ext.discovery.impl.ServiceTypes;
+import io.vertx.ext.discovery.spi.DiscoveryBridge;
 
 import java.util.List;
 import java.util.Objects;
