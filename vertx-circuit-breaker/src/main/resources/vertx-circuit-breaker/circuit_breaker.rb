@@ -31,62 +31,69 @@ module VertxCircuitBreaker
     #  Closes the circuit breaker. It stops sending events on its state on the event bus.
     #  This method is not related to the <code>close</code> state of the circuit breaker. To set the circuit breaker in the
     #  <code>close</code> state, use {::VertxCircuitBreaker::CircuitBreaker#reset}.
-    # @return [void]
+    # @return [self]
     def close
       if !block_given?
-        return @j_del.java_method(:close, []).call()
+        @j_del.java_method(:close, []).call()
+        return self
       end
       raise ArgumentError, "Invalid arguments when calling close()"
     end
     #  Sets a  invoked when the circuit breaker state switches to open.
     # @yield the handler, must not be <code>null</code>
-    # @return [::VertxCircuitBreaker::CircuitBreaker] the current {::VertxCircuitBreaker::CircuitBreaker}
+    # @return [self]
     def open_handler
       if block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:openHandler, [Java::IoVertxCore::Handler.java_class]).call(Proc.new { yield }),::VertxCircuitBreaker::CircuitBreaker)
+        @j_del.java_method(:openHandler, [Java::IoVertxCore::Handler.java_class]).call(Proc.new { yield })
+        return self
       end
       raise ArgumentError, "Invalid arguments when calling open_handler()"
     end
     #  Sets a  invoked when the circuit breaker state switches to half-open.
     # @yield the handler, must not be <code>null</code>
-    # @return [::VertxCircuitBreaker::CircuitBreaker] the current {::VertxCircuitBreaker::CircuitBreaker}
+    # @return [self]
     def half_open_handler
       if block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:halfOpenHandler, [Java::IoVertxCore::Handler.java_class]).call(Proc.new { yield }),::VertxCircuitBreaker::CircuitBreaker)
+        @j_del.java_method(:halfOpenHandler, [Java::IoVertxCore::Handler.java_class]).call(Proc.new { yield })
+        return self
       end
       raise ArgumentError, "Invalid arguments when calling half_open_handler()"
     end
     #  Sets a  invoked when the circuit breaker state switches to close.
     # @yield the handler, must not be <code>null</code>
-    # @return [::VertxCircuitBreaker::CircuitBreaker] the current {::VertxCircuitBreaker::CircuitBreaker}
+    # @return [self]
     def close_handler
       if block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:closeHandler, [Java::IoVertxCore::Handler.java_class]).call(Proc.new { yield }),::VertxCircuitBreaker::CircuitBreaker)
+        @j_del.java_method(:closeHandler, [Java::IoVertxCore::Handler.java_class]).call(Proc.new { yield })
+        return self
       end
       raise ArgumentError, "Invalid arguments when calling close_handler()"
     end
     #  Sets a  invoked when the bridge is open to handle the "request".
     # @yield the handler, must not be <code>null</code>
-    # @return [::VertxCircuitBreaker::CircuitBreaker] the current {::VertxCircuitBreaker::CircuitBreaker}
+    # @return [self]
     def fallback_handler
       if block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:fallbackHandler, [Java::IoVertxCore::Handler.java_class]).call(Proc.new { yield }),::VertxCircuitBreaker::CircuitBreaker)
+        @j_del.java_method(:fallbackHandler, [Java::IoVertxCore::Handler.java_class]).call(Proc.new { yield })
+        return self
       end
       raise ArgumentError, "Invalid arguments when calling fallback_handler()"
     end
     #  Resets the circuit breaker state (number of failure set to 0 and state set to closed).
-    # @return [::VertxCircuitBreaker::CircuitBreaker] the current {::VertxCircuitBreaker::CircuitBreaker}
+    # @return [self]
     def reset
       if !block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:reset, []).call(),::VertxCircuitBreaker::CircuitBreaker)
+        @j_del.java_method(:reset, []).call()
+        return self
       end
       raise ArgumentError, "Invalid arguments when calling reset()"
     end
     #  Explicitly opens the circuit.
-    # @return [::VertxCircuitBreaker::CircuitBreaker] the current {::VertxCircuitBreaker::CircuitBreaker}
+    # @return [self]
     def open
       if !block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:open, []).call(),::VertxCircuitBreaker::CircuitBreaker)
+        @j_del.java_method(:open, []).call()
+        return self
       end
       raise ArgumentError, "Invalid arguments when calling open()"
     end
@@ -108,43 +115,47 @@ module VertxCircuitBreaker
     end
     #  Executes the given code with the control of the circuit breaker.
     # @yield the code
-    # @return [::VertxCircuitBreaker::CircuitBreaker] the current {::VertxCircuitBreaker::CircuitBreaker}
-    def execute_synchronous_block
+    # @return [self]
+    def execute_blocking
       if block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:executeSynchronousBlock, [Java::IoVertxCore::Handler.java_class]).call(Proc.new { yield }),::VertxCircuitBreaker::CircuitBreaker)
+        @j_del.java_method(:executeBlocking, [Java::IoVertxCore::Handler.java_class]).call(Proc.new { yield })
+        return self
       end
-      raise ArgumentError, "Invalid arguments when calling execute_synchronous_block()"
+      raise ArgumentError, "Invalid arguments when calling execute_blocking()"
     end
     #  Executes the given code with the control of the circuit breaker and use the given fallback is the circuit is open.
     # @param [Proc] code the code
     # @yield 
-    # @return [::VertxCircuitBreaker::CircuitBreaker] the current {::VertxCircuitBreaker::CircuitBreaker}
-    def execute_synchronous_code_with_fallback(code=nil)
+    # @return [self]
+    def execute_blocking_with_fallback(code=nil)
       if code.class == Proc && block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:executeSynchronousCodeWithFallback, [Java::IoVertxCore::Handler.java_class,Java::IoVertxCore::Handler.java_class]).call(code,Proc.new { yield }),::VertxCircuitBreaker::CircuitBreaker)
+        @j_del.java_method(:executeBlockingWithFallback, [Java::IoVertxCore::Handler.java_class,Java::IoVertxCore::Handler.java_class]).call(code,Proc.new { yield })
+        return self
       end
-      raise ArgumentError, "Invalid arguments when calling execute_synchronous_code_with_fallback(code)"
+      raise ArgumentError, "Invalid arguments when calling execute_blocking_with_fallback(code)"
     end
     #  Executes the given code with the control of the circuit breaker. The code is asynchronous. Completion is
     #  detected using the given .
     # @yield the code
-    # @return [::VertxCircuitBreaker::CircuitBreaker] the current {::VertxCircuitBreaker::CircuitBreaker}
-    def execute_asynchronous_code
+    # @return [self]
+    def execute
       if block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:executeAsynchronousCode, [Java::IoVertxCore::Handler.java_class]).call((Proc.new { |event| yield(::Vertx::Util::Utils.safe_create(event,::Vertx::Future)) })),::VertxCircuitBreaker::CircuitBreaker)
+        @j_del.java_method(:execute, [Java::IoVertxCore::Handler.java_class]).call((Proc.new { |event| yield(::Vertx::Util::Utils.safe_create(event,::Vertx::Future)) }))
+        return self
       end
-      raise ArgumentError, "Invalid arguments when calling execute_asynchronous_code()"
+      raise ArgumentError, "Invalid arguments when calling execute()"
     end
     #  Executes the given code with the control of the circuit breaker. The code is asynchronous. Completion is
     #  detected using the given . If the circuit is open, this method executes the given fallback.
     # @param [Proc] code the code
     # @yield 
-    # @return [::VertxCircuitBreaker::CircuitBreaker] the current {::VertxCircuitBreaker::CircuitBreaker}
-    def execute_asynchronous_code_with_fallback(code=nil)
+    # @return [self]
+    def execute_with_fallback(code=nil)
       if code.class == Proc && block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:executeAsynchronousCodeWithFallback, [Java::IoVertxCore::Handler.java_class,Java::IoVertxCore::Handler.java_class]).call((Proc.new { |event| code.call(::Vertx::Util::Utils.safe_create(event,::Vertx::Future)) }),Proc.new { yield }),::VertxCircuitBreaker::CircuitBreaker)
+        @j_del.java_method(:executeWithFallback, [Java::IoVertxCore::Handler.java_class,Java::IoVertxCore::Handler.java_class]).call((Proc.new { |event| code.call(::Vertx::Util::Utils.safe_create(event,::Vertx::Future)) }),Proc.new { yield })
+        return self
       end
-      raise ArgumentError, "Invalid arguments when calling execute_asynchronous_code_with_fallback(code)"
+      raise ArgumentError, "Invalid arguments when calling execute_with_fallback(code)"
     end
     #  @return the name of the circuit breaker.
     # @return [String]

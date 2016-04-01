@@ -16,7 +16,6 @@
 
 package io.vertx.ext.circuitbreaker.impl;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -61,7 +60,7 @@ public class CircuitBreakerImpl implements CircuitBreaker {
     if (options == null) {
       this.options = new CircuitBreakerOptions();
     } else {
-      this.options = options;
+      this.options = new CircuitBreakerOptions(options);
     }
     this.vertx = vertx;
     this.name = name;
@@ -75,10 +74,11 @@ public class CircuitBreakerImpl implements CircuitBreaker {
   }
 
   @Override
-  public void close() {
+  public CircuitBreaker close() {
     if (this.periodicUpdateTask != -1) {
       vertx.cancelTimer(this.periodicUpdateTask);
     }
+    return this;
   }
 
   @Override
@@ -142,7 +142,7 @@ public class CircuitBreakerImpl implements CircuitBreaker {
     sendUpdateOnEventBus();
 
     // Set up the attempt reset timer
-    long period = options.getResetTimeoutInMs();
+    long period = options.getResetTimeout();
     if (period != -1) {
       vertx.setTimer(period, l -> attemptReset());
     }
@@ -171,12 +171,12 @@ public class CircuitBreakerImpl implements CircuitBreaker {
   }
 
   @Override
-  public CircuitBreaker executeSynchronousBlock(Handler<Void> code) {
-    return executeSynchronousCodeWithFallback(code, fallback);
+  public CircuitBreaker executeBlocking(Handler<Void> code) {
+    return executeBlockingWithFallback(code, fallback);
   }
 
   @Override
-  public CircuitBreaker executeSynchronousCodeWithFallback(Handler<Void> code, Handler<Void> fallback) {
+  public CircuitBreaker executeBlockingWithFallback(Handler<Void> code, Handler<Void> fallback) {
     CircuitBreakerState currentState;
     synchronized (this) {
       currentState = state;
@@ -206,30 +206,27 @@ public class CircuitBreakerImpl implements CircuitBreaker {
   }
 
   @Override
-  public CircuitBreaker executeAsynchronousCode(Handler<Future> code) {
-    return executeAsynchronousCodeWithFallback(code, fallback);
+  public <T> CircuitBreaker execute(Handler<Future<T>> code) {
+    return executeWithFallback(code, fallback);
   }
 
   @Override
-  public CircuitBreaker executeAsynchronousCodeWithFallback(Handler<Future> code, Handler<Void> fallback) {
+  public <T> CircuitBreaker executeWithFallback(Handler<Future<T>> code, Handler<Void> fallback) {
     CircuitBreakerState currentState;
     synchronized (this) {
       currentState = state;
     }
 
     AtomicBoolean timeoutFailure = new AtomicBoolean();
-    Future future = Future.future();
-    future.setHandler(new Handler<AsyncResult>() {
-      @Override
-      public void handle(AsyncResult event) {
-        if (event.failed()) {
-          incrementFailures();
-          if (options.isFallbackOnFailure()) {
-            fallback.handle(null);
-          }
-        } else if (!timeoutFailure.get()) {
-          reset();
+    Future<T> future = Future.future();
+    future.setHandler(event -> {
+      if (event.failed()) {
+        incrementFailures();
+        if (options.isFallbackOnFailure()) {
+          fallback.handle(null);
         }
+      } else if (!timeoutFailure.get()) {
+        reset();
       }
     });
 
@@ -239,17 +236,14 @@ public class CircuitBreakerImpl implements CircuitBreaker {
       fallback.handle(null);
     } else if (currentState == HALF_OPEN) {
       if (passed.incrementAndGet() == 1) {
-        future.setHandler(new Handler<AsyncResult>() {
-          @Override
-          public void handle(AsyncResult result) {
-            if (result.failed()) {
-              open();
-              if (options.isFallbackOnFailure()) {
-                fallback.handle(null);
-              }
-            } else if (!timeoutFailure.get()) {
-              reset();
+        future.setHandler(result -> {
+          if (result.failed()) {
+            open();
+            if (options.isFallbackOnFailure()) {
+              fallback.handle(null);
             }
+          } else if (!timeoutFailure.get()) {
+            reset();
           }
         });
         executeCode(code, future, timeoutFailure, fallback);
@@ -268,8 +262,8 @@ public class CircuitBreakerImpl implements CircuitBreaker {
 
   private void executeCode(Handler<Void> code) {
     AtomicBoolean completed = new AtomicBoolean(false);
-    if (options.getTimeoutInMs() != -1) {
-      vertx.setTimer(options.getTimeoutInMs(), (l) -> {
+    if (options.getTimeout() != -1) {
+      vertx.setTimer(options.getTimeout(), (l) -> {
         // check it has completed or failed.
         if (!completed.get()) {
           incrementFailures();
@@ -293,11 +287,11 @@ public class CircuitBreakerImpl implements CircuitBreaker {
     }
   }
 
-  private void executeCode(Handler<Future> code, Future completionFuture,
+  private <T> void executeCode(Handler<Future<T>> code, Future<T> completionFuture,
                            AtomicBoolean timeoutFailure, Handler<Void> fallback) {
     AtomicBoolean completed = new AtomicBoolean(false);
-    if (options.getTimeoutInMs() != -1) {
-      vertx.setTimer(options.getTimeoutInMs(), (l) -> {
+    if (options.getTimeout() != -1) {
+      vertx.setTimer(options.getTimeout(), (l) -> {
         // check it has completed or failed.
         if (!completed.get() || (completionFuture != null && !completionFuture.isComplete())) {
           timeoutFailure.set(true);

@@ -20,7 +20,7 @@ import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
 
 /**
- * Circuit breaker configuration options.
+ * Circuit breaker configuration options. All time are given in milliseconds.
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
@@ -28,9 +28,9 @@ import io.vertx.core.json.JsonObject;
 public class CircuitBreakerOptions {
 
   /**
-   * Default timeout.
+   * Default timeout in milliseconds.
    */
-  public static final long DEFAULT_TIMEOUT_IN_MS = 10000L;
+  public static final long DEFAULT_TIMEOUT = 10000L;
 
   /**
    * Default number of failures.
@@ -43,9 +43,9 @@ public class CircuitBreakerOptions {
   private static final boolean DEFAULT_FALLBACK_ON_FAILURE = false;
 
   /**
-   * Default time before it attempts to re-close the circuit (half-open state).
+   * Default time before it attempts to re-close the circuit (half-open state) in milliseconds.
    */
-  private static final long DEFAULT_RESET_TIMEOUT_IN_MS = 30000;
+  private static final long DEFAULT_RESET_TIMEOUT = 30000;
 
   /**
    * Default address on which the circuit breakers are sending their update.
@@ -53,19 +53,20 @@ public class CircuitBreakerOptions {
   private static final String DEFAULT_NOTIFICATION_ADDRESS = "vertx.circuit-breaker";
 
   /**
-   * Default notification period.
+   * Default notification period  in milliseconds.
    */
   private static final long DEFAULT_NOTIFICATION_PERIOD = 2000;
 
-  private long timeoutInMs = DEFAULT_TIMEOUT_IN_MS;
+  private long timeout = DEFAULT_TIMEOUT;
 
   private int maxFailures = DEFAULT_MAX_FAILURES;
 
   private boolean fallbackOnFailure = DEFAULT_FALLBACK_ON_FAILURE;
 
-  private long resetTimeout = DEFAULT_RESET_TIMEOUT_IN_MS;
+  private long resetTimeout = DEFAULT_RESET_TIMEOUT;
 
   private String notificationAddress = DEFAULT_NOTIFICATION_ADDRESS;
+
   private long notificationPeriod = DEFAULT_NOTIFICATION_PERIOD;
 
   /**
@@ -81,11 +82,12 @@ public class CircuitBreakerOptions {
    * @param other the instance fo copy
    */
   public CircuitBreakerOptions(CircuitBreakerOptions other) {
-    this.timeoutInMs = other.timeoutInMs;
+    this.timeout = other.timeout;
     this.maxFailures = other.maxFailures;
     this.fallbackOnFailure = other.fallbackOnFailure;
     this.notificationAddress = other.notificationAddress;
     this.notificationPeriod = other.notificationPeriod;
+    this.resetTimeout = other.resetTimeout;
   }
 
   /**
@@ -128,8 +130,8 @@ public class CircuitBreakerOptions {
   /**
    * @return the configured timeout in milliseconds.
    */
-  public long getTimeoutInMs() {
-    return timeoutInMs;
+  public long getTimeout() {
+    return timeout;
   }
 
   /**
@@ -139,8 +141,8 @@ public class CircuitBreakerOptions {
    * @param timeoutInMs the timeout, -1 to disable the timeout
    * @return the current {@link CircuitBreakerOptions} instance
    */
-  public CircuitBreakerOptions setTimeoutInMs(long timeoutInMs) {
-    this.timeoutInMs = timeoutInMs;
+  public CircuitBreakerOptions setTimeout(long timeoutInMs) {
+    this.timeout = timeoutInMs;
     return this;
   }
 
@@ -165,7 +167,7 @@ public class CircuitBreakerOptions {
   /**
    * @return the time in milliseconds before it attempts to re-close the circuit (by going to the half-open state).
    */
-  public long getResetTimeoutInMs() {
+  public long getResetTimeout() {
     return resetTimeout;
   }
 
@@ -176,7 +178,7 @@ public class CircuitBreakerOptions {
    * @param resetTimeout the time in ms
    * @return the current {@link CircuitBreakerOptions} instance
    */
-  public CircuitBreakerOptions setResetTimeoutInMs(long resetTimeout) {
+  public CircuitBreakerOptions setResetTimeout(long resetTimeout) {
     this.resetTimeout = resetTimeout;
     return this;
   }

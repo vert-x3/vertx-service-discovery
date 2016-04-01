@@ -4,7 +4,7 @@
 == CircuitBreakerOptions
 
 ++++
- Circuit breaker configuration options.
+ Circuit breaker configuration options. All time are given in milliseconds.
 ++++
 '''
 
@@ -29,12 +29,12 @@ Sets the event bus address on which the circuit breaker publish its state change
 Configures the period in milliseconds where the circuit breaker send a notification on the event bus with its
  current state.
 +++
-|[[resetTimeoutInMs]]`resetTimeoutInMs`|`Number (long)`|
+|[[resetTimeout]]`resetTimeout`|`Number (long)`|
 +++
 Sets the time in ms before it attempts to re-close the circuit (by going to the hal-open state). If the cricuit
  is closed when the timeout is reached, nothing happens. <code>-1</code> disables this feature.
 +++
-|[[timeoutInMs]]`timeoutInMs`|`Number (long)`|
+|[[timeout]]`timeout`|`Number (long)`|
 +++
 Sets the timeout in milliseconds. If an action is not completed before this timeout, the action is considered as
  a failure.

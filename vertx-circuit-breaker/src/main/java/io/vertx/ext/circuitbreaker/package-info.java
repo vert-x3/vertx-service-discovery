@@ -114,7 +114,7 @@
  *
  * When the circuit is “open,” calls to the circuit breaker fail immediately, without any attempt to execute the real
  * operation. After a suitable amount of time (configured from
- * {@link io.vertx.ext.circuitbreaker.CircuitBreakerOptions#setResetTimeoutInMs(long)}, the circuit breaker decides that the
+ * {@link io.vertx.ext.circuitbreaker.CircuitBreakerOptions#setResetTimeout(long)}, the circuit breaker decides that the
  * operation has a chance of succeeding, so it goes into the {@code half-open} state. In this state, the next call to the
  * circuit breaker is allowed to execute the dangerous operation. Should the call succeed, the circuit breaker resets
  * and returns to the {@code closed} state, ready for more routine operation. If this trial call fails, however, the circuit

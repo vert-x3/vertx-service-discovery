@@ -101,7 +101,7 @@ public class CircuitBreakerWithHTTPTest {
     assertThat(breaker.state()).isEqualTo(CircuitBreakerState.CLOSED);
 
     AtomicReference<HttpClientResponse> reference = new AtomicReference<>();
-    breaker.executeSynchronousBlock(v -> {
+    breaker.executeBlocking(v -> {
       client.getNow(8080, "localhost", "/", reference::set);
     });
 
@@ -123,7 +123,7 @@ public class CircuitBreakerWithHTTPTest {
 
 
     for (int i = 0; i < options.getMaxFailures(); i++) {
-      breaker.executeAsynchronousCode(future -> {
+      breaker.execute(future -> {
         client.getNow(8080, "localhost", "/error", response -> {
           if (response.statusCode() != 200) {
             future.fail("http error");
@@ -139,7 +139,7 @@ public class CircuitBreakerWithHTTPTest {
     assertThat(breaker.state()).isEqualTo(CircuitBreakerState.OPEN);
 
     AtomicBoolean spy = new AtomicBoolean();
-    breaker.executeAsynchronousCodeWithFallback(future -> {
+    breaker.executeWithFallback(future -> {
       client.getNow(8080, "localhost", "/error", response -> {
         if (response.statusCode() != 200) {
           future.fail("http error");
@@ -158,7 +158,7 @@ public class CircuitBreakerWithHTTPTest {
 
   @Test
   public void testTimeout() {
-    CircuitBreakerOptions options = new CircuitBreakerOptions().setTimeoutInMs(100).setMaxFailures(2);
+    CircuitBreakerOptions options = new CircuitBreakerOptions().setTimeout(100).setMaxFailures(2);
     breaker = CircuitBreaker.create("test", vertx, options);
     assertThat(breaker.state()).isEqualTo(CircuitBreakerState.CLOSED);
 
@@ -166,7 +166,7 @@ public class CircuitBreakerWithHTTPTest {
 
 
     for (int i = 0; i < options.getMaxFailures(); i++) {
-      breaker.executeAsynchronousCode(future -> {
+      breaker.execute(future -> {
         client.getNow(8080, "localhost", "/long", response -> {
           count.incrementAndGet();
           future.complete();
@@ -178,7 +178,7 @@ public class CircuitBreakerWithHTTPTest {
     assertThat(breaker.state()).isEqualTo(CircuitBreakerState.OPEN);
 
     AtomicBoolean spy = new AtomicBoolean();
-    breaker.executeAsynchronousCodeWithFallback(future -> {
+    breaker.executeWithFallback(future -> {
       client.getNow(8080, "localhost", "/long", response -> {
         System.out.println("Got response");
         future.complete();

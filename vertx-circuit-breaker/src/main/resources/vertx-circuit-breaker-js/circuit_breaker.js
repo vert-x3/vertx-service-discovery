@@ -41,11 +41,13 @@ var CircuitBreaker = function(j_val) {
 
    @public
 
+   @return {CircuitBreaker}
    */
   this.close = function() {
     var __args = arguments;
     if (__args.length === 0) {
       j_circuitBreaker["close()"]();
+      return that;
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -59,7 +61,8 @@ var CircuitBreaker = function(j_val) {
   this.openHandler = function(handler) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'function') {
-      return utils.convReturnVertxGen(j_circuitBreaker["openHandler(io.vertx.core.Handler)"](handler), CircuitBreaker);
+      j_circuitBreaker["openHandler(io.vertx.core.Handler)"](handler);
+      return that;
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -73,7 +76,8 @@ var CircuitBreaker = function(j_val) {
   this.halfOpenHandler = function(handler) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'function') {
-      return utils.convReturnVertxGen(j_circuitBreaker["halfOpenHandler(io.vertx.core.Handler)"](handler), CircuitBreaker);
+      j_circuitBreaker["halfOpenHandler(io.vertx.core.Handler)"](handler);
+      return that;
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -87,7 +91,8 @@ var CircuitBreaker = function(j_val) {
   this.closeHandler = function(handler) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'function') {
-      return utils.convReturnVertxGen(j_circuitBreaker["closeHandler(io.vertx.core.Handler)"](handler), CircuitBreaker);
+      j_circuitBreaker["closeHandler(io.vertx.core.Handler)"](handler);
+      return that;
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -101,7 +106,8 @@ var CircuitBreaker = function(j_val) {
   this.fallbackHandler = function(handler) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'function') {
-      return utils.convReturnVertxGen(j_circuitBreaker["fallbackHandler(io.vertx.core.Handler)"](handler), CircuitBreaker);
+      j_circuitBreaker["fallbackHandler(io.vertx.core.Handler)"](handler);
+      return that;
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -115,7 +121,8 @@ var CircuitBreaker = function(j_val) {
   this.reset = function() {
     var __args = arguments;
     if (__args.length === 0) {
-      return utils.convReturnVertxGen(j_circuitBreaker["reset()"](), CircuitBreaker);
+      j_circuitBreaker["reset()"]();
+      return that;
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -129,7 +136,8 @@ var CircuitBreaker = function(j_val) {
   this.open = function() {
     var __args = arguments;
     if (__args.length === 0) {
-      return utils.convReturnVertxGen(j_circuitBreaker["open()"](), CircuitBreaker);
+      j_circuitBreaker["open()"]();
+      return that;
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -168,10 +176,11 @@ var CircuitBreaker = function(j_val) {
    @param code {function} the code 
    @return {CircuitBreaker} the current {@link CircuitBreaker}
    */
-  this.executeSynchronousBlock = function(code) {
+  this.executeBlocking = function(code) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'function') {
-      return utils.convReturnVertxGen(j_circuitBreaker["executeSynchronousBlock(io.vertx.core.Handler)"](code), CircuitBreaker);
+      j_circuitBreaker["executeBlocking(io.vertx.core.Handler)"](code);
+      return that;
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -183,10 +192,11 @@ var CircuitBreaker = function(j_val) {
    @param fallback {function} 
    @return {CircuitBreaker} the current {@link CircuitBreaker}
    */
-  this.executeSynchronousCodeWithFallback = function(code, fallback) {
+  this.executeBlockingWithFallback = function(code, fallback) {
     var __args = arguments;
     if (__args.length === 2 && typeof __args[0] === 'function' && typeof __args[1] === 'function') {
-      return utils.convReturnVertxGen(j_circuitBreaker["executeSynchronousCodeWithFallback(io.vertx.core.Handler,io.vertx.core.Handler)"](code, fallback), CircuitBreaker);
+      j_circuitBreaker["executeBlockingWithFallback(io.vertx.core.Handler,io.vertx.core.Handler)"](code, fallback);
+      return that;
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -198,12 +208,13 @@ var CircuitBreaker = function(j_val) {
    @param code {function} the code 
    @return {CircuitBreaker} the current {@link CircuitBreaker}
    */
-  this.executeAsynchronousCode = function(code) {
+  this.execute = function(code) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'function') {
-      return utils.convReturnVertxGen(j_circuitBreaker["executeAsynchronousCode(io.vertx.core.Handler)"](function(jVal) {
+      j_circuitBreaker["execute(io.vertx.core.Handler)"](function(jVal) {
       code(utils.convReturnVertxGen(jVal, Future));
-    }), CircuitBreaker);
+    });
+      return that;
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -216,12 +227,13 @@ var CircuitBreaker = function(j_val) {
    @param fallback {function} 
    @return {CircuitBreaker} the current {@link CircuitBreaker}
    */
-  this.executeAsynchronousCodeWithFallback = function(code, fallback) {
+  this.executeWithFallback = function(code, fallback) {
     var __args = arguments;
     if (__args.length === 2 && typeof __args[0] === 'function' && typeof __args[1] === 'function') {
-      return utils.convReturnVertxGen(j_circuitBreaker["executeAsynchronousCodeWithFallback(io.vertx.core.Handler,io.vertx.core.Handler)"](function(jVal) {
+      j_circuitBreaker["executeWithFallback(io.vertx.core.Handler,io.vertx.core.Handler)"](function(jVal) {
       code(utils.convReturnVertxGen(jVal, Future));
-    }, fallback), CircuitBreaker);
+    }, fallback);
+      return that;
     } else throw new TypeError('function invoked with invalid arguments');
   };
 

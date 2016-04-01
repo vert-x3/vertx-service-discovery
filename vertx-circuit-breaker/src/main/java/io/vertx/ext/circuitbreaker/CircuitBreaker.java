@@ -16,6 +16,8 @@
 
 package io.vertx.ext.circuitbreaker;
 
+import io.vertx.codegen.annotations.CacheReturn;
+import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -58,7 +60,8 @@ public interface CircuitBreaker {
    * This method is not related to the {@code close} state of the circuit breaker. To set the circuit breaker in the
    * {@code close} state, use {@link #reset()}.
    */
-  void close();
+  @Fluent
+  CircuitBreaker close();
 
   /**
    * Sets a {@link Handler} invoked when the circuit breaker state switches to open.
@@ -66,6 +69,7 @@ public interface CircuitBreaker {
    * @param handler the handler, must not be {@code null}
    * @return the current {@link CircuitBreaker}
    */
+  @Fluent
   CircuitBreaker openHandler(Handler<Void> handler);
 
   /**
@@ -74,6 +78,7 @@ public interface CircuitBreaker {
    * @param handler the handler, must not be {@code null}
    * @return the current {@link CircuitBreaker}
    */
+  @Fluent
   CircuitBreaker halfOpenHandler(Handler<Void> handler);
 
   /**
@@ -82,6 +87,7 @@ public interface CircuitBreaker {
    * @param handler the handler, must not be {@code null}
    * @return the current {@link CircuitBreaker}
    */
+  @Fluent
   CircuitBreaker closeHandler(Handler<Void> handler);
 
   /**
@@ -90,6 +96,7 @@ public interface CircuitBreaker {
    * @param handler the handler, must not be {@code null}
    * @return the current {@link CircuitBreaker}
    */
+  @Fluent
   CircuitBreaker fallbackHandler(Handler<Void> handler);
 
   /**
@@ -97,6 +104,7 @@ public interface CircuitBreaker {
    *
    * @return the current {@link CircuitBreaker}
    */
+  @Fluent
   CircuitBreaker reset();
 
   /**
@@ -104,6 +112,7 @@ public interface CircuitBreaker {
    *
    * @return the current {@link CircuitBreaker}
    */
+  @Fluent
   CircuitBreaker open();
 
   /**
@@ -122,7 +131,8 @@ public interface CircuitBreaker {
    * @param code the code
    * @return the current {@link CircuitBreaker}
    */
-  CircuitBreaker executeSynchronousBlock(Handler<Void> code);
+  @Fluent
+  CircuitBreaker executeBlocking(Handler<Void> code);
 
   /**
    * Executes the given code with the control of the circuit breaker and use the given fallback is the circuit is open.
@@ -130,7 +140,8 @@ public interface CircuitBreaker {
    * @param code the code
    * @return the current {@link CircuitBreaker}
    */
-  CircuitBreaker executeSynchronousCodeWithFallback(Handler<Void> code, Handler<Void> fallback);
+  @Fluent
+  CircuitBreaker executeBlockingWithFallback(Handler<Void> code, Handler<Void> fallback);
 
   /**
    * Executes the given code with the control of the circuit breaker. The code is asynchronous. Completion is
@@ -139,7 +150,8 @@ public interface CircuitBreaker {
    * @param code the code
    * @return the current {@link CircuitBreaker}
    */
-  CircuitBreaker executeAsynchronousCode(Handler<Future> code);
+  @Fluent
+  <T> CircuitBreaker execute(Handler<Future<T>> code);
 
   /**
    * Executes the given code with the control of the circuit breaker. The code is asynchronous. Completion is
@@ -148,12 +160,13 @@ public interface CircuitBreaker {
    * @param code the code
    * @return the current {@link CircuitBreaker}
    */
-  CircuitBreaker executeAsynchronousCodeWithFallback(Handler<Future> code,
-                                                     Handler<Void> fallback);
-
+  @Fluent
+  <T> CircuitBreaker executeWithFallback(Handler<Future<T>> code,
+                                         Handler<Void> fallback);
 
   /**
    * @return the name of the circuit breaker.
    */
+  @CacheReturn
   String name();
 }

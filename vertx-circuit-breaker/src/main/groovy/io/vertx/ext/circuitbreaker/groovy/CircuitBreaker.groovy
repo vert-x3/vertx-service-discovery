@@ -60,9 +60,11 @@ public class CircuitBreaker {
    * Closes the circuit breaker. It stops sending events on its state on the event bus.
    * This method is not related to the <code>close</code> state of the circuit breaker. To set the circuit breaker in the
    * <code>close</code> state, use {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker#reset}.
+   * @return 
    */
-  public void close() {
+  public CircuitBreaker close() {
     this.delegate.close();
+    return this;
   }
   /**
    * Sets a  invoked when the circuit breaker state switches to open.
@@ -70,8 +72,8 @@ public class CircuitBreaker {
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
   public CircuitBreaker openHandler(Handler<Void> handler) {
-    def ret= InternalHelper.safeCreate(this.delegate.openHandler(handler), io.vertx.ext.circuitbreaker.groovy.CircuitBreaker.class);
-    return ret;
+    this.delegate.openHandler(handler);
+    return this;
   }
   /**
    * Sets a  invoked when the circuit breaker state switches to half-open.
@@ -79,8 +81,8 @@ public class CircuitBreaker {
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
   public CircuitBreaker halfOpenHandler(Handler<Void> handler) {
-    def ret= InternalHelper.safeCreate(this.delegate.halfOpenHandler(handler), io.vertx.ext.circuitbreaker.groovy.CircuitBreaker.class);
-    return ret;
+    this.delegate.halfOpenHandler(handler);
+    return this;
   }
   /**
    * Sets a  invoked when the circuit breaker state switches to close.
@@ -88,8 +90,8 @@ public class CircuitBreaker {
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
   public CircuitBreaker closeHandler(Handler<Void> handler) {
-    def ret= InternalHelper.safeCreate(this.delegate.closeHandler(handler), io.vertx.ext.circuitbreaker.groovy.CircuitBreaker.class);
-    return ret;
+    this.delegate.closeHandler(handler);
+    return this;
   }
   /**
    * Sets a  invoked when the bridge is open to handle the "request".
@@ -97,24 +99,24 @@ public class CircuitBreaker {
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
   public CircuitBreaker fallbackHandler(Handler<Void> handler) {
-    def ret= InternalHelper.safeCreate(this.delegate.fallbackHandler(handler), io.vertx.ext.circuitbreaker.groovy.CircuitBreaker.class);
-    return ret;
+    this.delegate.fallbackHandler(handler);
+    return this;
   }
   /**
    * Resets the circuit breaker state (number of failure set to 0 and state set to closed).
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
   public CircuitBreaker reset() {
-    def ret= InternalHelper.safeCreate(this.delegate.reset(), io.vertx.ext.circuitbreaker.groovy.CircuitBreaker.class);
-    return ret;
+    this.delegate.reset();
+    return this;
   }
   /**
    * Explicitly opens the circuit.
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
   public CircuitBreaker open() {
-    def ret= InternalHelper.safeCreate(this.delegate.open(), io.vertx.ext.circuitbreaker.groovy.CircuitBreaker.class);
-    return ret;
+    this.delegate.open();
+    return this;
   }
   /**
    * @return the current state.
@@ -137,9 +139,9 @@ public class CircuitBreaker {
    * @param code the code
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
-  public CircuitBreaker executeSynchronousBlock(Handler<Void> code) {
-    def ret= InternalHelper.safeCreate(this.delegate.executeSynchronousBlock(code), io.vertx.ext.circuitbreaker.groovy.CircuitBreaker.class);
-    return ret;
+  public CircuitBreaker executeBlocking(Handler<Void> code) {
+    this.delegate.executeBlocking(code);
+    return this;
   }
   /**
    * Executes the given code with the control of the circuit breaker and use the given fallback is the circuit is open.
@@ -147,9 +149,9 @@ public class CircuitBreaker {
    * @param fallback 
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
-  public CircuitBreaker executeSynchronousCodeWithFallback(Handler<Void> code, Handler<Void> fallback) {
-    def ret= InternalHelper.safeCreate(this.delegate.executeSynchronousCodeWithFallback(code, fallback), io.vertx.ext.circuitbreaker.groovy.CircuitBreaker.class);
-    return ret;
+  public CircuitBreaker executeBlockingWithFallback(Handler<Void> code, Handler<Void> fallback) {
+    this.delegate.executeBlockingWithFallback(code, fallback);
+    return this;
   }
   /**
    * Executes the given code with the control of the circuit breaker. The code is asynchronous. Completion is
@@ -157,13 +159,13 @@ public class CircuitBreaker {
    * @param code the code
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
-  public CircuitBreaker executeAsynchronousCode(Handler<Future> code) {
-    def ret= InternalHelper.safeCreate(this.delegate.executeAsynchronousCode(new Handler<io.vertx.core.Future>() {
-      public void handle(io.vertx.core.Future event) {
+  public <T> CircuitBreaker execute(Handler<Future<T>> code) {
+    this.delegate.execute(new Handler<io.vertx.core.Future<java.lang.Object>>() {
+      public void handle(io.vertx.core.Future<java.lang.Object> event) {
         code.handle(new io.vertx.groovy.core.Future(event));
       }
-    }), io.vertx.ext.circuitbreaker.groovy.CircuitBreaker.class);
-    return ret;
+    });
+    return this;
   }
   /**
    * Executes the given code with the control of the circuit breaker. The code is asynchronous. Completion is
@@ -172,13 +174,13 @@ public class CircuitBreaker {
    * @param fallback 
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
-  public CircuitBreaker executeAsynchronousCodeWithFallback(Handler<Future> code, Handler<Void> fallback) {
-    def ret= InternalHelper.safeCreate(this.delegate.executeAsynchronousCodeWithFallback(new Handler<io.vertx.core.Future>() {
-      public void handle(io.vertx.core.Future event) {
+  public <T> CircuitBreaker executeWithFallback(Handler<Future<T>> code, Handler<Void> fallback) {
+    this.delegate.executeWithFallback(new Handler<io.vertx.core.Future<java.lang.Object>>() {
+      public void handle(io.vertx.core.Future<java.lang.Object> event) {
         code.handle(new io.vertx.groovy.core.Future(event));
       }
-    }, fallback), io.vertx.ext.circuitbreaker.groovy.CircuitBreaker.class);
-    return ret;
+    }, fallback);
+    return this;
   }
   /**
    * @return the name of the circuit breaker.

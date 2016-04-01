@@ -22,7 +22,20 @@ package io.vertx.ext.circuitbreaker;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 public enum CircuitBreakerState {
+  /**
+   * The {@code OPEN} state. The circuit breaker is executing the fallback, and switches to the {@link #HALF_OPEN}
+   * state after the specified time.
+   */
   OPEN,
+  /**
+   * The {@code CLOSED} state. The circuit breaker lets invocations pass and collects the failures. IF the number of
+   * failures reach the specified threshold, the cricuit breaker switches to the {@link #OPEN} state.
+   */
   CLOSED,
+  /**
+   * The {@code HALF_OPEN} state. The circuit breaker has been opened, and is now checking the current situation. It
+   * lets pass the next invocation and determines from the result (failure or success) if the circuit breaker can
+   * be switched to the {@link #CLOSED} state again.
+   */
   HALF_OPEN
 }
