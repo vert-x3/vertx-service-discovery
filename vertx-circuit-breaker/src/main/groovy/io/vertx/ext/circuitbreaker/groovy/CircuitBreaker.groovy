@@ -47,7 +47,7 @@ public class CircuitBreaker {
     return ret;
   }
   /**
-   * Creates a new instance of {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}, with default options
+   * Creates a new instance of {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}, with default options.
    * @param name the name
    * @param vertx the Vert.x instance
    * @return the created instance
@@ -135,7 +135,12 @@ public class CircuitBreaker {
     return ret;
   }
   /**
-   * Executes the given code with the control of the circuit breaker.
+   * Executes the given code with the control of the circuit breaker. The code is blocking. Failures are detected by
+   * catching thrown exceptions or timeout.
+   *
+   * Be aware that the code is called using the caller thread, so it may be the event loop. So, unlike the
+   *  method using a <em>worker</em> to execute the code, this method
+   * uses the caller thread.
    * @param code the code
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
@@ -145,6 +150,11 @@ public class CircuitBreaker {
   }
   /**
    * Executes the given code with the control of the circuit breaker and use the given fallback is the circuit is open.
+   * The code is blocking. Failures are detected by catching thrown exceptions or timeout.
+   *
+   * Be aware that the code is called using the caller thread, so it may be the event loop. So, unlike the
+   *  method using a <em>worker</em> to execute the code, this method
+   * uses the caller thread.
    * @param code the code
    * @param fallback 
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
@@ -154,8 +164,10 @@ public class CircuitBreaker {
     return this;
   }
   /**
-   * Executes the given code with the control of the circuit breaker. The code is asynchronous. Completion is
-   * detected using the given .
+   * Executes the given code with the control of the circuit breaker. The code is non-blocking and reports the
+   * completion (success, result, failure) with the given .
+   *
+   * Be aware that the code is called using the caller thread, so it may be the event loop.
    * @param code the code
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
@@ -168,8 +180,12 @@ public class CircuitBreaker {
     return this;
   }
   /**
-   * Executes the given code with the control of the circuit breaker. The code is asynchronous. Completion is
-   * detected using the given . If the circuit is open, this method executes the given fallback.
+   * Executes the given code with the control of the circuit breaker. The code is non-blocking and reports the
+   * completion (success, result, failure) with the given .
+   *
+   * Be aware that the code is called using the caller thread, so it may be the event loop.
+   *
+   * If the circuit is open, this method executes the given fallback.
    * @param code the code
    * @param fallback 
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
@@ -187,7 +203,12 @@ public class CircuitBreaker {
    * @return 
    */
   public String name() {
+    if (cached_0 != null) {
+      return cached_0;
+    }
     def ret = this.delegate.name();
+    cached_0 = ret;
     return ret;
   }
+  private String cached_0;
 }

@@ -45,7 +45,7 @@ public interface CircuitBreaker {
   }
 
   /**
-   * Creates a new instance of {@link CircuitBreaker}, with default options
+   * Creates a new instance of {@link CircuitBreaker}, with default options.
    *
    * @param name  the name
    * @param vertx the Vert.x instance
@@ -126,7 +126,12 @@ public interface CircuitBreaker {
   long failureCount();
 
   /**
-   * Executes the given code with the control of the circuit breaker.
+   * Executes the given code with the control of the circuit breaker. The code is blocking. Failures are detected by
+   * catching thrown exceptions or timeout.
+   *
+   * Be aware that the code is called using the caller thread, so it may be the event loop. So, unlike the
+   * {@link Vertx#executeBlocking(Handler, Handler)} method using a <em>worker</em> to execute the code, this method
+   * uses the caller thread.
    *
    * @param code the code
    * @return the current {@link CircuitBreaker}
@@ -136,6 +141,11 @@ public interface CircuitBreaker {
 
   /**
    * Executes the given code with the control of the circuit breaker and use the given fallback is the circuit is open.
+   * The code is blocking. Failures are detected by catching thrown exceptions or timeout.
+   *
+   * Be aware that the code is called using the caller thread, so it may be the event loop. So, unlike the
+   * {@link Vertx#executeBlocking(Handler, Handler)} method using a <em>worker</em> to execute the code, this method
+   * uses the caller thread.
    *
    * @param code the code
    * @return the current {@link CircuitBreaker}
@@ -144,8 +154,10 @@ public interface CircuitBreaker {
   CircuitBreaker executeBlockingWithFallback(Handler<Void> code, Handler<Void> fallback);
 
   /**
-   * Executes the given code with the control of the circuit breaker. The code is asynchronous. Completion is
-   * detected using the given {@link Future}.
+   * Executes the given code with the control of the circuit breaker. The code is non-blocking and reports the
+   * completion (success, result, failure) with the given {@link Future}.
+   *
+   * Be aware that the code is called using the caller thread, so it may be the event loop.
    *
    * @param code the code
    * @return the current {@link CircuitBreaker}
@@ -154,8 +166,12 @@ public interface CircuitBreaker {
   <T> CircuitBreaker execute(Handler<Future<T>> code);
 
   /**
-   * Executes the given code with the control of the circuit breaker. The code is asynchronous. Completion is
-   * detected using the given {@link Future}. If the circuit is open, this method executes the given fallback.
+   * Executes the given code with the control of the circuit breaker. The code is non-blocking and reports the
+   * completion (success, result, failure) with the given {@link Future}.
+   *
+   * Be aware that the code is called using the caller thread, so it may be the event loop.
+   *
+   * If the circuit is open, this method executes the given fallback.
    *
    * @param code the code
    * @return the current {@link CircuitBreaker}

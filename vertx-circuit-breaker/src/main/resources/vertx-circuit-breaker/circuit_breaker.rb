@@ -113,7 +113,12 @@ module VertxCircuitBreaker
       end
       raise ArgumentError, "Invalid arguments when calling failure_count()"
     end
-    #  Executes the given code with the control of the circuit breaker.
+    #  Executes the given code with the control of the circuit breaker. The code is blocking. Failures are detected by
+    #  catching thrown exceptions or timeout.
+    # 
+    #  Be aware that the code is called using the caller thread, so it may be the event loop. So, unlike the
+    #   method using a <em>worker</em> to execute the code, this method
+    #  uses the caller thread.
     # @yield the code
     # @return [self]
     def execute_blocking
@@ -124,6 +129,11 @@ module VertxCircuitBreaker
       raise ArgumentError, "Invalid arguments when calling execute_blocking()"
     end
     #  Executes the given code with the control of the circuit breaker and use the given fallback is the circuit is open.
+    #  The code is blocking. Failures are detected by catching thrown exceptions or timeout.
+    # 
+    #  Be aware that the code is called using the caller thread, so it may be the event loop. So, unlike the
+    #   method using a <em>worker</em> to execute the code, this method
+    #  uses the caller thread.
     # @param [Proc] code the code
     # @yield 
     # @return [self]
@@ -134,8 +144,10 @@ module VertxCircuitBreaker
       end
       raise ArgumentError, "Invalid arguments when calling execute_blocking_with_fallback(code)"
     end
-    #  Executes the given code with the control of the circuit breaker. The code is asynchronous. Completion is
-    #  detected using the given .
+    #  Executes the given code with the control of the circuit breaker. The code is non-blocking and reports the
+    #  completion (success, result, failure) with the given .
+    # 
+    #  Be aware that the code is called using the caller thread, so it may be the event loop.
     # @yield the code
     # @return [self]
     def execute
@@ -145,8 +157,12 @@ module VertxCircuitBreaker
       end
       raise ArgumentError, "Invalid arguments when calling execute()"
     end
-    #  Executes the given code with the control of the circuit breaker. The code is asynchronous. Completion is
-    #  detected using the given . If the circuit is open, this method executes the given fallback.
+    #  Executes the given code with the control of the circuit breaker. The code is non-blocking and reports the
+    #  completion (success, result, failure) with the given .
+    # 
+    #  Be aware that the code is called using the caller thread, so it may be the event loop.
+    # 
+    #  If the circuit is open, this method executes the given fallback.
     # @param [Proc] code the code
     # @yield 
     # @return [self]
@@ -161,7 +177,10 @@ module VertxCircuitBreaker
     # @return [String]
     def name
       if !block_given?
-        return @j_del.java_method(:name, []).call()
+        if @cached_name != nil
+          return @cached_name
+        end
+        return @cached_name = @j_del.java_method(:name, []).call()
       end
       raise ArgumentError, "Invalid arguments when calling name()"
     end
