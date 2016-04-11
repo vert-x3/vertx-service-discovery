@@ -41,7 +41,10 @@ var ServiceReference = function(j_val) {
   this.record = function() {
     var __args = arguments;
     if (__args.length === 0) {
-      return utils.convReturnDataObject(j_serviceReference["record()"]());
+      if (that.cachedrecord == null) {
+        that.cachedrecord = utils.convReturnDataObject(j_serviceReference["record()"]());
+      }
+      return that.cachedrecord;
     } else throw new TypeError('function invoked with invalid arguments');
   };
 

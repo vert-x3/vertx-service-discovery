@@ -122,9 +122,9 @@ public class DiscoveryRestEndpointTest {
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
 
-    Record record1 = EventBusService.createRecord("Hello", HelloService.class, "address",
+    Record record1 = EventBusService.createRecord("Hello", "address", HelloService.class,
         new JsonObject().put("key", "foo"));
-    Record record2 = EventBusService.createRecord("Hello-2", HelloService.class, "address",
+    Record record2 = EventBusService.createRecord("Hello-2", "address", HelloService.class,
         new JsonObject().put("key", "bar"));
 
     discovery.publish(record1, (r) -> { });
@@ -224,9 +224,9 @@ public class DiscoveryRestEndpointTest {
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
 
-    Record record1 = EventBusService.createRecord("Hello", HelloService.class, "address",
+    Record record1 = EventBusService.createRecord("Hello", "address", HelloService.class,
         new JsonObject().put("key", "foo"));
-    Record record2 = EventBusService.createRecord("Hello-2", HelloService.class, "address",
+    Record record2 = EventBusService.createRecord("Hello-2", "address", HelloService.class,
         new JsonObject().put("key", "bar"));
 
     discovery.publish(record1, (r) -> { });
@@ -247,9 +247,9 @@ public class DiscoveryRestEndpointTest {
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
 
-    Record record1 = EventBusService.createRecord("Hello", HelloService.class, "address",
+    Record record1 = EventBusService.createRecord("Hello", "address", HelloService.class,
         new JsonObject().put("key", "foo"));
-    Record record2 = EventBusService.createRecord("Hello-2", HelloService.class, "address",
+    Record record2 = EventBusService.createRecord("Hello-2", "address", HelloService.class,
         new JsonObject().put("key", "bar"));
 
     discovery.publish(record1, (r) -> { });

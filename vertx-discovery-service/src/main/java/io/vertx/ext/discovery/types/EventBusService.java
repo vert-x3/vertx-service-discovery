@@ -52,12 +52,12 @@ public class EventBusService implements ServiceType {
    * The java interface is added to the metadata in the `service.interface` key.
    *
    * @param name     the name of the service.
-   * @param itf      the Java interface
    * @param address  the event bus address on which the service available
+   * @param itf      the Java interface
    * @param metadata the metadata
    * @return the created record
    */
-  public static Record createRecord(String name, Class itf, String address, JsonObject metadata) {
+  public static Record createRecord(String name, String address, Class itf, JsonObject metadata) {
     Objects.requireNonNull(name);
     Objects.requireNonNull(itf);
     Objects.requireNonNull(address);
@@ -77,15 +77,15 @@ public class EventBusService implements ServiceType {
   }
 
   /**
-   * Same as {@link #createRecord(String, Class, String, JsonObject)} but without metadata.
+   * Same as {@link #createRecord(String, String, Class, JsonObject)} but without metadata.
    *
    * @param name    the name of the service
    * @param itf     the Java interface
    * @param address the event bus address on which the service available
    * @return the created record
    */
-  public static Record createRecord(String name, Class itf, String address) {
-    return createRecord(name, itf, address, null);
+  public static Record createRecord(String name, String address, Class itf) {
+    return createRecord(name, address, itf, null);
   }
 
   /**

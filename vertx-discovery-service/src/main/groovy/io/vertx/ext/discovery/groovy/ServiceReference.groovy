@@ -41,7 +41,11 @@ public class ServiceReference {
    * @return  (see <a href="../../../../../../../cheatsheet/Record.html">Record</a>)
    */
   public Map<String, Object> record() {
+    if (cached_0 != null) {
+      return cached_0;
+    }
     def ret = (Map<String, Object>)InternalHelper.wrapObject(this.delegate.record()?.toJson());
+    cached_0 = ret;
     return ret;
   }
   /**
@@ -60,4 +64,5 @@ public class ServiceReference {
   public void release() {
     this.delegate.release();
   }
+  private Map<String, Object> cached_0;
 }

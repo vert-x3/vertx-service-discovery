@@ -62,7 +62,7 @@ public class ServiceProxiesTest {
   public void test() {
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
-    Record record = EventBusService.createRecord("Hello", HelloService.class, "address");
+    Record record = EventBusService.createRecord("Hello", "address", HelloService.class);
 
     discovery.publish(record, (r) -> {
     });
@@ -91,7 +91,7 @@ public class ServiceProxiesTest {
   public void testUsingGetMethod() {
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
-    Record record = EventBusService.createRecord("Hello", HelloService.class, "address");
+    Record record = EventBusService.createRecord("Hello", "address", HelloService.class);
 
     discovery.publish(record, (r) -> {
     });

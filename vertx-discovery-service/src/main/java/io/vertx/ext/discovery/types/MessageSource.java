@@ -16,9 +16,13 @@
 
 package io.vertx.ext.discovery.types;
 
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.discovery.DiscoveryService;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.ServiceReference;
 import io.vertx.ext.discovery.spi.ServiceType;
@@ -94,6 +98,29 @@ public class MessageSource implements ServiceType {
   public static Record createRecord(String name, String address) {
     return createRecord(name, address, null);
   }
+
+  /**
+   * Convenient method that looks for a message source and provides the configured {@link MessageConsumer}. The
+   * async result is marked as failed is there are no matching services, or if the lookup fails.
+   *
+   * @param vertx         The vert.x instance
+   * @param discovery     The discovery service
+   * @param filter        The filter, optional
+   * @param resultHandler the result handler
+   * @param <T>           the class of the message
+   */
+  public static <T> void get(Vertx vertx, DiscoveryService discovery, JsonObject filter,
+                             Handler<AsyncResult<MessageConsumer<T>>>
+                                 resultHandler) {
+    discovery.getRecord(filter, ar -> {
+      if (ar.failed() || ar.result() == null) {
+        resultHandler.handle(Future.failedFuture("No matching record"));
+      } else {
+        resultHandler.handle(Future.succeededFuture(DiscoveryService.getServiceReference(vertx, ar.result()).get()));
+      }
+    });
+  }
+
 
   /**
    * Implementation of {@link ServiceReference} for data producer.

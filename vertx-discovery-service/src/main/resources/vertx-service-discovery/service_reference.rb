@@ -22,7 +22,10 @@ module VertxServiceDiscovery
     # @return [Hash]
     def record
       if !block_given?
-        return @j_del.java_method(:record, []).call() != nil ? JSON.parse(@j_del.java_method(:record, []).call().toJson.encode) : nil
+        if @cached_record != nil
+          return @cached_record
+        end
+        return @cached_record = @j_del.java_method(:record, []).call() != nil ? JSON.parse(@j_del.java_method(:record, []).call().toJson.encode) : nil
       end
       raise ArgumentError, "Invalid arguments when calling record()"
     end
