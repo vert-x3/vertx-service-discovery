@@ -35,6 +35,14 @@ import java.util.List;
 public interface DiscoveryBackend {
 
   /**
+   * @return the name of the implementation, used to select the right one (when there are several implementation on
+   * the classpath). By default it ruturns the class name of the implementation (as String).
+   */
+  default String name() {
+    return this.getClass().getName();
+  }
+
+  /**
    * Initializes the backend.
    *
    * @param vertx  the vert.x instance

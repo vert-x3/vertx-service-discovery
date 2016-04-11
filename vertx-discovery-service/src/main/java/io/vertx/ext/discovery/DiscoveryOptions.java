@@ -18,6 +18,7 @@ package io.vertx.ext.discovery;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.discovery.spi.DiscoveryBackend;
 
 /**
  * Options to configure the discovery service.
@@ -28,6 +29,7 @@ import io.vertx.core.json.JsonObject;
 public class DiscoveryOptions {
 
   public static final String DEFAULT_ANNOUNCE_ADDRESS = "vertx.discovery.announce";
+
   private String announceAddress = DEFAULT_ANNOUNCE_ADDRESS;
   private JsonObject backendConfiguration = new JsonObject();
 

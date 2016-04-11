@@ -23,7 +23,10 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.discovery.*;
+import io.vertx.ext.discovery.DiscoveryOptions;
+import io.vertx.ext.discovery.DiscoveryService;
+import io.vertx.ext.discovery.Record;
+import io.vertx.ext.discovery.Status;
 import io.vertx.ext.discovery.spi.DiscoveryBackend;
 import io.vertx.ext.discovery.spi.DiscoveryBridge;
 
@@ -48,19 +51,37 @@ public class DiscoveryImpl implements DiscoveryService {
     this.vertx = vertx;
     this.announce = options.getAnnounceAddress();
 
-    this.backend = getBackend();
+    this.backend = getBackend(options.getBackendConfiguration().getString("backend-name", null));
     this.backend.init(vertx, options.getBackendConfiguration());
 
   }
 
-  private DiscoveryBackend getBackend() {
+  private DiscoveryBackend getBackend(String maybeName) {
     ServiceLoader<DiscoveryBackend> backends = ServiceLoader.load(DiscoveryBackend.class);
     Iterator<DiscoveryBackend> iterator = backends.iterator();
-    if (!iterator.hasNext()) {
-      return new DefaultDiscoveryBackend();
-    } else {
-      return iterator.next();
+
+    if (maybeName == null) {
+      if (!iterator.hasNext()) {
+        return new DefaultDiscoveryBackend();
+      } else {
+        return iterator.next();
+      }
     }
+
+    if (maybeName.equals(DefaultDiscoveryBackend.class.getName())) {
+      return new DefaultDiscoveryBackend();
+    }
+
+    // We have a name
+    while (iterator.hasNext()) {
+      DiscoveryBackend backend = iterator.next();
+      if (backend.name().equals(maybeName)) {
+        return backend;
+      }
+    }
+
+    throw new IllegalStateException("Cannot find the discovery backend implementation with name " + maybeName + " in " +
+        "the classpath");
   }
 
 
