@@ -49,10 +49,11 @@ public class RedisBackend implements DiscoveryBackend {
 
   @Override
   public void store(Record record, Handler<AsyncResult<Record>> resultHandler) {
-    String uuid = UUID.randomUUID().toString();
     if (record.getRegistration() != null) {
-      throw new IllegalArgumentException("The record has already been registered");
+      resultHandler.handle(Future.failedFuture("The record has already been registered"));
+      return;
     }
+    String uuid = UUID.randomUUID().toString();
     record.setRegistration(uuid);
     redis.hset(key, uuid, record.toJson().encode(), ar -> {
       if (ar.succeeded()) {
