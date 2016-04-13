@@ -16,6 +16,8 @@
 
 package io.vertx.ext.discovery.types;
 
+import io.vertx.codegen.annotations.GenIgnore;
+import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -24,7 +26,6 @@ import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.DiscoveryService;
 import io.vertx.ext.discovery.Record;
-import io.vertx.ext.discovery.ServiceReference;
 import io.vertx.ext.discovery.spi.ServiceType;
 
 import java.util.Objects;
@@ -34,30 +35,21 @@ import java.util.Objects;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class MessageSource implements ServiceType {
+@VertxGen
+public interface MessageSource extends ServiceType {
 
-  public static final String TYPE = "message-source";
-
-  @Override
-  public String name() {
-    return TYPE;
-  }
-
-  @Override
-  public ServiceReference get(Vertx vertx, Record record) {
-    return new MessageSourceReference(vertx, record);
-  }
+  String TYPE = "message-source";
 
   /**
    * Create a record representing a data producer.
    *
    * @param name     the name of the service
    * @param address  the address on which the data is sent
-   * @param type     the type of payload
+   * @param type     the type of payload (fully qualified name of the class)
    * @param metadata additional metadata
    * @return the created record
    */
-  public static Record createRecord(String name, String address, Class type, JsonObject metadata) {
+  static Record createRecord(String name, String address, String type, JsonObject metadata) {
     Objects.requireNonNull(name);
     Objects.requireNonNull(address);
     Record record = new Record().setName(name)
@@ -69,10 +61,24 @@ public class MessageSource implements ServiceType {
     }
 
     if (type != null) {
-      record.setMetadata(new JsonObject().put("message.type", type.getName()));
+      record.setMetadata(new JsonObject().put("message.type", type));
     }
 
     return record;
+  }
+
+  /**
+   * Create a record representing a data producer.
+   *
+   * @param name     the name of the service
+   * @param address  the address on which the data is sent
+   * @param type     the type of payload
+   * @param metadata additional metadata
+   * @return the created record
+   */
+  @GenIgnore
+  static Record createRecord(String name, String address, Class type, JsonObject metadata) {
+    return createRecord(name, address, type != null ? type.getName() : null, metadata);
   }
 
   /**
@@ -83,7 +89,20 @@ public class MessageSource implements ServiceType {
    * @param type    the type of payload
    * @return the created record
    */
-  public static Record createRecord(String name, String address, Class type) {
+  @GenIgnore
+  static Record createRecord(String name, String address, Class type) {
+    return createRecord(name, address, type, null);
+  }
+
+  /**
+   * Same as {@link #createRecord(String, String, String, JsonObject)} without additional metadata.
+   *
+   * @param name    the name of the service
+   * @param address the address on which the data is sent
+   * @param type    the type of payload
+   * @return the created record
+   */
+  static Record createRecord(String name, String address, String type) {
     return createRecord(name, address, type, null);
   }
 
@@ -95,8 +114,8 @@ public class MessageSource implements ServiceType {
    * @param address the address on which the data is sent.
    * @return the created record
    */
-  public static Record createRecord(String name, String address) {
-    return createRecord(name, address, null);
+  static Record createRecord(String name, String address) {
+    return createRecord(name, address, (String) null);
   }
 
   /**
@@ -109,9 +128,9 @@ public class MessageSource implements ServiceType {
    * @param resultHandler the result handler
    * @param <T>           the class of the message
    */
-  public static <T> void get(Vertx vertx, DiscoveryService discovery, JsonObject filter,
-                             Handler<AsyncResult<MessageConsumer<T>>>
-                                 resultHandler) {
+  static <T> void get(Vertx vertx, DiscoveryService discovery, JsonObject filter,
+                      Handler<AsyncResult<MessageConsumer<T>>>
+                          resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
@@ -119,53 +138,5 @@ public class MessageSource implements ServiceType {
         resultHandler.handle(Future.succeededFuture(DiscoveryService.getServiceReference(vertx, ar.result()).get()));
       }
     });
-  }
-
-
-  /**
-   * Implementation of {@link ServiceReference} for data producer.
-   */
-  private class MessageSourceReference implements ServiceReference {
-
-    private final Record record;
-    private final Vertx vertx;
-    private MessageConsumer consumer;
-
-    MessageSourceReference(Vertx vertx, Record record) {
-      this.vertx = vertx;
-      this.record = record;
-    }
-
-    /**
-     * @return the service record.
-     */
-    @Override
-    public Record record() {
-      return record;
-    }
-
-    /**
-     * Creates the event bus consumer for the service. If already created, reuse the same.
-     *
-     * @param <T> the type of the message payload.
-     * @return the consumer
-     */
-    @Override
-    public synchronized <T> T get() {
-      if (consumer != null) {
-        return (T) consumer;
-      }
-      consumer = vertx.eventBus().consumer(record.getLocation().getString(Record.ENDPOINT));
-      return (T) consumer;
-    }
-
-    /**
-     * Releases the consumer.
-     */
-    @Override
-    public synchronized void release() {
-      consumer.unregister();
-      consumer = null;
-    }
   }
 }

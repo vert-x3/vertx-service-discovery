@@ -33,6 +33,6 @@ public class HelloService {
     return delegate;
   }
   public void hello(String name, Handler<AsyncResult<String>> resultHandler) {
-    this.delegate.hello(name, resultHandler);
+    delegate.hello(name, resultHandler);
   }
 }

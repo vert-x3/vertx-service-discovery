@@ -25,6 +25,42 @@ Sets the configuration passed to the link.
 +++
 |===
 
+[[HttpLocation]]
+== HttpLocation
+
+++++
+ Represents the location of a HTTP endpoint. This object (its json representation) will be used as "location" in a
+ service record.
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[endpoint]]`endpoint`|`String`|
++++
+Sets the endpoint, which is the URL of the service. The endpoint is automatically computed when you use the
+ other `setX` method.
++++
+|[[host]]`host`|`String`|
++++
+Sets the host.
++++
+|[[port]]`port`|`Number (int)`|
++++
+Sets the port
++++
+|[[root]]`root`|`String`|
++++
+Sets the path of the service (root)
++++
+|[[ssl]]`ssl`|`Boolean`|
++++
+Sets whether or not the HTTP service is using <code>https</code>.
++++
+|===
+
 [[Record]]
 == Record
 
@@ -63,42 +99,6 @@ Sets the status of the service. When published, the status is set to. When withd
 |[[type]]`type`|`String`|
 +++
 Sets the type of service.
-+++
-|===
-
-[[HttpLocation]]
-== HttpLocation
-
-++++
- Represents the location of a HTTP endpoint. This object (its json representation) will be used as "location" in a
- service record.
-++++
-'''
-
-[cols=">25%,^25%,50%"]
-[frame="topbot"]
-|===
-^|Name | Type ^| Description
-|[[endpoint]]`endpoint`|`String`|
-+++
-Sets the endpoint, which is the URL of the service. The endpoint is automatically computed when you use the
- other `setX` method.
-+++
-|[[host]]`host`|`String`|
-+++
-Sets the host.
-+++
-|[[port]]`port`|`Number (int)`|
-+++
-Sets the port
-+++
-|[[root]]`root`|`String`|
-+++
-Sets the path of the service (root)
-+++
-|[[ssl]]`ssl`|`Boolean`|
-+++
-Sets whether or not the HTTP service is using <code>https</code>.
 +++
 |===
 

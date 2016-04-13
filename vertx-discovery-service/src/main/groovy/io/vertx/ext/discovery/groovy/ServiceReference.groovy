@@ -44,7 +44,7 @@ public class ServiceReference {
     if (cached_0 != null) {
       return cached_0;
     }
-    def ret = (Map<String, Object>)InternalHelper.wrapObject(this.delegate.record()?.toJson());
+    def ret = (Map<String, Object>)InternalHelper.wrapObject(delegate.record()?.toJson());
     cached_0 = ret;
     return ret;
   }
@@ -54,15 +54,14 @@ public class ServiceReference {
    * @return the object to access the service
    */
   public <T> T get() {
-    // This cast is cleary flawed
-    def ret = (T) InternalHelper.wrapObject(this.delegate.get());
+    def ret = (T) InternalHelper.wrapObject(delegate.get());
     return ret;
   }
   /**
    * Releases the reference. Once released, the consumer must not use the reference anymore.
    */
   public void release() {
-    this.delegate.release();
+    delegate.release();
   }
   private Map<String, Object> cached_0;
 }

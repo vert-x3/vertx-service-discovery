@@ -1,0 +1,93 @@
+/*
+ * Copyright 2014 Red Hat, Inc.
+ *
+ * Red Hat licenses this file to you under the Apache License, version 2.0
+ * (the "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at:
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+
+/** @module vertx-service-discovery-js/http_endpoint */
+var utils = require('vertx-js/util/utils');
+var DiscoveryService = require('vertx-service-discovery-js/discovery_service');
+var Vertx = require('vertx-js/vertx');
+var HttpClient = require('vertx-js/http_client');
+
+var io = Packages.io;
+var JsonObject = io.vertx.core.json.JsonObject;
+var JHttpEndpoint = io.vertx.ext.discovery.types.HttpEndpoint;
+var Record = io.vertx.ext.discovery.Record;
+
+/**
+
+ @class
+*/
+var HttpEndpoint = function(j_val) {
+
+  var j_httpEndpoint = j_val;
+  var that = this;
+
+  // A reference to the underlying Java delegate
+  // NOTE! This is an internal API and must not be used in user code.
+  // If you rely on this property your code is likely to break if we change it / remove it without warning.
+  this._jdel = j_httpEndpoint;
+};
+
+/**
+ Same as {@link HttpEndpoint#createRecord} but let you configure whether or not the
+ service is using <code>https</code>.
+
+ @memberof module:vertx-service-discovery-js/http_endpoint
+ @param name {string} the service name 
+ @param ssl {boolean} whether or not the service is using HTTPS 
+ @param host {string} the host (IP or DNS name), it must be the _public_ IP / name 
+ @param port {number} the port, it must be the _public_ port 
+ @param root {string} the path of the service, "/" if not set 
+ @param metadata {Object} additional metadata 
+ @return {Object} the created record
+ */
+HttpEndpoint.createRecord = function() {
+  var __args = arguments;
+  if (__args.length === 2 && typeof __args[0] === 'string' && typeof __args[1] === 'string') {
+    return utils.convReturnDataObject(JHttpEndpoint["createRecord(java.lang.String,java.lang.String)"](__args[0], __args[1]));
+  }else if (__args.length === 4 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && typeof __args[2] ==='number' && typeof __args[3] === 'string') {
+    return utils.convReturnDataObject(JHttpEndpoint["createRecord(java.lang.String,java.lang.String,int,java.lang.String)"](__args[0], __args[1], __args[2], __args[3]));
+  }else if (__args.length === 5 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && typeof __args[2] ==='number' && typeof __args[3] === 'string' && (typeof __args[4] === 'object' && __args[4] != null)) {
+    return utils.convReturnDataObject(JHttpEndpoint["createRecord(java.lang.String,java.lang.String,int,java.lang.String,io.vertx.core.json.JsonObject)"](__args[0], __args[1], __args[2], __args[3], utils.convParamJsonObject(__args[4])));
+  }else if (__args.length === 6 && typeof __args[0] === 'string' && typeof __args[1] ==='boolean' && typeof __args[2] === 'string' && typeof __args[3] ==='number' && typeof __args[4] === 'string' && (typeof __args[5] === 'object' && __args[5] != null)) {
+    return utils.convReturnDataObject(JHttpEndpoint["createRecord(java.lang.String,boolean,java.lang.String,int,java.lang.String,io.vertx.core.json.JsonObject)"](__args[0], __args[1], __args[2], __args[3], __args[4], utils.convParamJsonObject(__args[5])));
+  } else throw new TypeError('function invoked with invalid arguments');
+};
+
+/**
+ Convenient method that looks for a HTTP endpoint and provides the configured . The async result
+ is marked as failed is there are no matching services, or if the lookup fails.
+
+ @memberof module:vertx-service-discovery-js/http_endpoint
+ @param vertx {Vertx} The vert.x instance 
+ @param discovery {DiscoveryService} The discovery service 
+ @param filter {Object} The filter, optional 
+ @param resultHandler {function} the result handler 
+ */
+HttpEndpoint.get = function(vertx, discovery, filter, resultHandler) {
+  var __args = arguments;
+  if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
+    JHttpEndpoint["get(io.vertx.core.Vertx,io.vertx.ext.discovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](vertx._jdel, discovery._jdel, utils.convParamJsonObject(filter), function(ar) {
+    if (ar.succeeded()) {
+      resultHandler(utils.convReturnVertxGen(ar.result(), HttpClient), null);
+    } else {
+      resultHandler(null, ar.cause());
+    }
+  });
+  } else throw new TypeError('function invoked with invalid arguments');
+};
+
+// We export the Constructor function
+module.exports = HttpEndpoint;

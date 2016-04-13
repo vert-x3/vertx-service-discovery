@@ -16,39 +16,29 @@
 
 package io.vertx.ext.discovery.types;
 
+import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.DiscoveryService;
 import io.vertx.ext.discovery.Record;
-import io.vertx.ext.discovery.ServiceReference;
 import io.vertx.ext.discovery.spi.ServiceType;
 
 import java.util.Objects;
 
 /**
- * Implementation of {@link ServiceType} for HTTP endpoint (REST api).
+ * {@link ServiceType} for HTTP endpoint (REST api).
  * Consumers receive a HTTP client configured with the host and port of the endpoint.
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class HttpEndpoint implements ServiceType {
+@VertxGen
+public interface HttpEndpoint extends ServiceType {
 
-  public static final String TYPE = "http-endpoint";
-
-  @Override
-  public String name() {
-    return TYPE;
-  }
-
-  @Override
-  public ServiceReference get(Vertx vertx, Record record) {
-    return new HttpEndpointReference(vertx, record);
-  }
+  String TYPE = "http-endpoint";
 
   /**
    * Convenient method to create a record for a HTTP endpoint.
@@ -60,7 +50,7 @@ public class HttpEndpoint implements ServiceType {
    * @param metadata additional metadata
    * @return the created record
    */
-  public static Record createRecord(String name, String host, int port, String root, JsonObject metadata) {
+  static Record createRecord(String name, String host, int port, String root, JsonObject metadata) {
     return createRecord(name, false, host, port, root, metadata);
   }
 
@@ -76,7 +66,7 @@ public class HttpEndpoint implements ServiceType {
    * @param metadata additional metadata
    * @return the created record
    */
-  public static Record createRecord(String name, boolean ssl, String host, int port, String root, JsonObject metadata) {
+  static Record createRecord(String name, boolean ssl, String host, int port, String root, JsonObject metadata) {
     Objects.requireNonNull(name);
     Objects.requireNonNull(host);
     if (root == null) {
@@ -103,7 +93,7 @@ public class HttpEndpoint implements ServiceType {
    * @param root the root, if not set "/" is used
    * @return the created record
    */
-  public static Record createRecord(String name, String host, int port, String root) {
+  static Record createRecord(String name, String host, int port, String root) {
     return createRecord(name, host, port, root, null);
   }
 
@@ -115,7 +105,7 @@ public class HttpEndpoint implements ServiceType {
    * @param host the host
    * @return the created record
    */
-  public static Record createRecord(String name, String host) {
+  static Record createRecord(String name, String host) {
     return createRecord(name, host, 80, "/", null);
   }
 
@@ -128,7 +118,7 @@ public class HttpEndpoint implements ServiceType {
    * @param filter        The filter, optional
    * @param resultHandler the result handler
    */
-  public static void get(Vertx vertx, DiscoveryService discovery, JsonObject filter, Handler<AsyncResult<HttpClient>>
+  static void get(Vertx vertx, DiscoveryService discovery, JsonObject filter, Handler<AsyncResult<HttpClient>>
       resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {
@@ -137,61 +127,5 @@ public class HttpEndpoint implements ServiceType {
         resultHandler.handle(Future.succeededFuture(DiscoveryService.getServiceReference(vertx, ar.result()).get()));
       }
     });
-  }
-
-  /**
-   * {@link ServiceReference} implementation for the HTTP endpoint.
-   */
-  private class HttpEndpointReference implements ServiceReference {
-
-    private final Vertx vertx;
-    private final HttpLocation location;
-    private final Record record;
-    private HttpClient client;
-
-    HttpEndpointReference(Vertx vertx, Record record) {
-      this.vertx = vertx;
-      this.location = new HttpLocation(record.getLocation());
-      this.record = record;
-    }
-
-    /**
-     * @return the service record.
-     */
-    @Override
-    public Record record() {
-      return record;
-    }
-
-    /**
-     * Gets a HTTP client to access the service.
-     *
-     * @param <T> {@link HttpClient}
-     * @return the HTTP client, configured to access the service
-     */
-    @Override
-    public synchronized <T> T get() {
-      if (client != null) {
-        return (T) client;
-      } else {
-        HttpClientOptions options = new HttpClientOptions().setDefaultPort(location.getPort())
-            .setDefaultHost(location.getHost());
-        if (location.isSsl()) {
-          options.setSsl(true);
-        }
-
-        client = vertx.createHttpClient(options);
-        return (T) client;
-      }
-    }
-
-    /**
-     * Closes the client.
-     */
-    @Override
-    public synchronized void release() {
-      client.close();
-      client = null;
-    }
   }
 }

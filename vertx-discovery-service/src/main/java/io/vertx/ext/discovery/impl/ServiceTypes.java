@@ -19,11 +19,12 @@ package io.vertx.ext.discovery.impl;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.spi.ServiceType;
 
-import java.util.Iterator;
 import java.util.Objects;
 import java.util.ServiceLoader;
 
 /**
+ * Classes responsible for finding the service type implementations on the classpath.
+ *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 public class ServiceTypes {
@@ -45,5 +46,5 @@ public class ServiceTypes {
     throw new IllegalArgumentException("Unsupported service type " + type);
   }
 
-  private static ServiceLoader<ServiceType> types;
+  private static final ServiceLoader<ServiceType> types;
 }

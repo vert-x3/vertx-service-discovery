@@ -74,7 +74,7 @@ public class DiscoveryService {
    * @return the create discovery service.
    */
   public static DiscoveryService create(Vertx vertx, Map<String, Object> options) {
-    def ret= InternalHelper.safeCreate(io.vertx.ext.discovery.DiscoveryService.create((io.vertx.core.Vertx)vertx.getDelegate(), options != null ? new io.vertx.ext.discovery.DiscoveryOptions(new io.vertx.core.json.JsonObject(options)) : null), io.vertx.ext.discovery.groovy.DiscoveryService.class);
+    def ret = InternalHelper.safeCreate(io.vertx.ext.discovery.DiscoveryService.create(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, options != null ? new io.vertx.ext.discovery.DiscoveryOptions(new io.vertx.core.json.JsonObject(options)) : null), io.vertx.ext.discovery.groovy.DiscoveryService.class);
     return ret;
   }
   /**
@@ -83,7 +83,7 @@ public class DiscoveryService {
    * @return the created instance
    */
   public static DiscoveryService create(Vertx vertx) {
-    def ret= InternalHelper.safeCreate(io.vertx.ext.discovery.DiscoveryService.create((io.vertx.core.Vertx)vertx.getDelegate()), io.vertx.ext.discovery.groovy.DiscoveryService.class);
+    def ret = InternalHelper.safeCreate(io.vertx.ext.discovery.DiscoveryService.create(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null), io.vertx.ext.discovery.groovy.DiscoveryService.class);
     return ret;
   }
   /**
@@ -93,14 +93,14 @@ public class DiscoveryService {
    * @return the service, that allows retrieving the service object
    */
   public static ServiceReference getServiceReference(Vertx vertx, Map<String, Object> record) {
-    def ret= InternalHelper.safeCreate(io.vertx.ext.discovery.DiscoveryService.getServiceReference((io.vertx.core.Vertx)vertx.getDelegate(), record != null ? new io.vertx.ext.discovery.Record(new io.vertx.core.json.JsonObject(record)) : null), io.vertx.ext.discovery.groovy.ServiceReference.class);
+    def ret = InternalHelper.safeCreate(io.vertx.ext.discovery.DiscoveryService.getServiceReference(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, record != null ? new io.vertx.ext.discovery.Record(new io.vertx.core.json.JsonObject(record)) : null), io.vertx.ext.discovery.groovy.ServiceReference.class);
     return ret;
   }
   /**
    * Closes the discovery service
    */
   public void close() {
-    this.delegate.close();
+    delegate.close();
   }
   /**
    * Publishes a record.
@@ -108,17 +108,15 @@ public class DiscoveryService {
    * @param resultHandler handler called when the operation has completed (successfully or not). In case of success, the passed record has a registration id required to modify and un-register the service.
    */
   public void publish(Map<String, Object> record = [:], Handler<AsyncResult<Map<String, Object>>> resultHandler) {
-    this.delegate.publish(record != null ? new io.vertx.ext.discovery.Record(new io.vertx.core.json.JsonObject(record)) : null, new Handler<AsyncResult<io.vertx.ext.discovery.Record>>() {
-      public void handle(AsyncResult<io.vertx.ext.discovery.Record> event) {
-        AsyncResult<Map<String, Object>> f
-        if (event.succeeded()) {
-          f = InternalHelper.<Map<String, Object>>result((Map<String, Object>)InternalHelper.wrapObject(event.result()?.toJson()))
+    delegate.publish(record != null ? new io.vertx.ext.discovery.Record(new io.vertx.core.json.JsonObject(record)) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.ext.discovery.Record>>() {
+      public void handle(AsyncResult<io.vertx.ext.discovery.Record> ar) {
+        if (ar.succeeded()) {
+          resultHandler.handle(io.vertx.core.Future.succeededFuture((Map<String, Object>)InternalHelper.wrapObject(ar.result()?.toJson())));
         } else {
-          f = InternalHelper.<Map<String, Object>>failure(event.cause())
+          resultHandler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
         }
-        resultHandler.handle(f)
       }
-    });
+    } : null);
   }
   /**
    * Un-publishes a record.
@@ -126,7 +124,7 @@ public class DiscoveryService {
    * @param resultHandler handler called when the operation has completed (successfully or not).
    */
   public void unpublish(String id, Handler<AsyncResult<Void>> resultHandler) {
-    this.delegate.unpublish(id, resultHandler);
+    delegate.unpublish(id, resultHandler);
   }
   /**
    * Lookups for a single record.
@@ -150,17 +148,15 @@ public class DiscoveryService {
    * @param resultHandler handler called when the lookup has been completed. When there are no matching record, the operation succeed, but the async result has no result.
    */
   public void getRecord(Map<String, Object> filter, Handler<AsyncResult<Map<String, Object>>> resultHandler) {
-    this.delegate.getRecord(filter != null ? new io.vertx.core.json.JsonObject(filter) : null, new Handler<AsyncResult<io.vertx.ext.discovery.Record>>() {
-      public void handle(AsyncResult<io.vertx.ext.discovery.Record> event) {
-        AsyncResult<Map<String, Object>> f
-        if (event.succeeded()) {
-          f = InternalHelper.<Map<String, Object>>result((Map<String, Object>)InternalHelper.wrapObject(event.result()?.toJson()))
+    delegate.getRecord(filter != null ? new io.vertx.core.json.JsonObject(filter) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.ext.discovery.Record>>() {
+      public void handle(AsyncResult<io.vertx.ext.discovery.Record> ar) {
+        if (ar.succeeded()) {
+          resultHandler.handle(io.vertx.core.Future.succeededFuture((Map<String, Object>)InternalHelper.wrapObject(ar.result()?.toJson())));
         } else {
-          f = InternalHelper.<Map<String, Object>>failure(event.cause())
+          resultHandler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
         }
-        resultHandler.handle(f)
       }
-    });
+    } : null);
   }
   /**
    * Lookups for a set of records. Unlike {@link io.vertx.ext.discovery.groovy.DiscoveryService#getRecord}, this method returns all matching
@@ -169,20 +165,15 @@ public class DiscoveryService {
    * @param resultHandler handler called when the lookup has been completed. When there are no matching record, the operation succeed, but the async result has an empty list as result.
    */
   public void getRecords(Map<String, Object> filter, Handler<AsyncResult<List<Map<String, Object>>>> resultHandler) {
-    this.delegate.getRecords(filter != null ? new io.vertx.core.json.JsonObject(filter) : null, new Handler<AsyncResult<List<Record>>>() {
-      public void handle(AsyncResult<List<Record>> event) {
-        AsyncResult<List<Map<String, Object>>> f
-        if (event.succeeded()) {
-          f = InternalHelper.<List<Map<String, Object>>>result(event.result().collect({
-            io.vertx.ext.discovery.Record element ->
-            (Map<String, Object>)InternalHelper.wrapObject(element?.toJson())
-          }) as List)
+    delegate.getRecords(filter != null ? new io.vertx.core.json.JsonObject(filter) : null, resultHandler != null ? new Handler<AsyncResult<java.util.List<io.vertx.ext.discovery.Record>>>() {
+      public void handle(AsyncResult<java.util.List<io.vertx.ext.discovery.Record>> ar) {
+        if (ar.succeeded()) {
+          resultHandler.handle(io.vertx.core.Future.succeededFuture((List)ar.result()?.collect({(Map<String, Object>)InternalHelper.wrapObject(it?.toJson())})));
         } else {
-          f = InternalHelper.<List<Map<String, Object>>>failure(event.cause())
+          resultHandler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
         }
-        resultHandler.handle(f)
       }
-    });
+    } : null);
   }
   /**
    * Updates the given record. The record must has been published, and has it's registration id set.
@@ -190,16 +181,14 @@ public class DiscoveryService {
    * @param resultHandler handler called when the lookup has been completed.
    */
   public void update(Map<String, Object> record = [:], Handler<AsyncResult<Map<String, Object>>> resultHandler) {
-    this.delegate.update(record != null ? new io.vertx.ext.discovery.Record(new io.vertx.core.json.JsonObject(record)) : null, new Handler<AsyncResult<io.vertx.ext.discovery.Record>>() {
-      public void handle(AsyncResult<io.vertx.ext.discovery.Record> event) {
-        AsyncResult<Map<String, Object>> f
-        if (event.succeeded()) {
-          f = InternalHelper.<Map<String, Object>>result((Map<String, Object>)InternalHelper.wrapObject(event.result()?.toJson()))
+    delegate.update(record != null ? new io.vertx.ext.discovery.Record(new io.vertx.core.json.JsonObject(record)) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.ext.discovery.Record>>() {
+      public void handle(AsyncResult<io.vertx.ext.discovery.Record> ar) {
+        if (ar.succeeded()) {
+          resultHandler.handle(io.vertx.core.Future.succeededFuture((Map<String, Object>)InternalHelper.wrapObject(ar.result()?.toJson())));
         } else {
-          f = InternalHelper.<Map<String, Object>>failure(event.cause())
+          resultHandler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
         }
-        resultHandler.handle(f)
       }
-    });
+    } : null);
   }
 }
