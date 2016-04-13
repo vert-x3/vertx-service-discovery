@@ -84,14 +84,22 @@ EventBusService.bindings = function() {
  @param itf {string} the service interface 
  @param resultHandler {function} the result handler 
  */
-EventBusService.get = function(vertx, discovery, itf, resultHandler) {
+EventBusService.get = function() {
   var __args = arguments;
-  if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && typeof __args[2] === 'string' && typeof __args[3] === 'function') {
-    JEventBusService["get(io.vertx.core.Vertx,io.vertx.ext.discovery.DiscoveryService,java.lang.String,io.vertx.core.Handler)"](vertx._jdel, discovery._jdel, itf, function(ar) {
+  if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
+    JEventBusService["get(io.vertx.core.Vertx,io.vertx.ext.discovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](__args[0]._jdel, __args[1]._jdel, utils.convParamJsonObject(__args[2]), function(ar) {
     if (ar.succeeded()) {
-      resultHandler(utils.convReturnTypeUnknown(ar.result()), null);
+      __args[3](utils.convReturnTypeUnknown(ar.result()), null);
     } else {
-      resultHandler(null, ar.cause());
+      __args[3](null, ar.cause());
+    }
+  });
+  }else if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && typeof __args[2] === 'string' && typeof __args[3] === 'function') {
+    JEventBusService["get(io.vertx.core.Vertx,io.vertx.ext.discovery.DiscoveryService,java.lang.String,io.vertx.core.Handler)"](__args[0]._jdel, __args[1]._jdel, __args[2], function(ar) {
+    if (ar.succeeded()) {
+      __args[3](utils.convReturnTypeUnknown(ar.result()), null);
+    } else {
+      __args[3](null, ar.cause());
     }
   });
   } else throw new TypeError('function invoked with invalid arguments');

@@ -42,16 +42,24 @@ module VertxServiceDiscovery
     #  Lookup for a service record and if found, retrieve it and return the service object (used to consume the service).
     #  This is a convenient method to avoid explicit lookup and then retrieval of the service. A filter based on the
     #  request interface is used.
-    # @param [::Vertx::Vertx] vertx the vert.x instance
-    # @param [::VertxServiceDiscovery::DiscoveryService] discovery the discovery service
-    # @param [String] itf the service interface
-    # @yield the result handler
+    # @overload get(vertx,discovery,filter,resultHandler)
+    #   @param [::Vertx::Vertx] vertx the vert.x instance
+    #   @param [::VertxServiceDiscovery::DiscoveryService] discovery the discovery service
+    #   @param [Hash{String => Object}] filter the filter to select the service
+    #   @yield the result handler
+    # @overload get(vertx,discovery,itf,resultHandler)
+    #   @param [::Vertx::Vertx] vertx the vert.x instance
+    #   @param [::VertxServiceDiscovery::DiscoveryService] discovery the discovery service
+    #   @param [String] itf the service interface
+    #   @yield the result handler
     # @return [void]
-    def self.get(vertx=nil,discovery=nil,itf=nil)
-      if vertx.class.method_defined?(:j_del) && discovery.class.method_defined?(:j_del) && itf.class == String && block_given?
-        return Java::IoVertxExtDiscoveryTypes::EventBusService.java_method(:get, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(vertx.j_del,discovery.j_del,itf,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.from_object(ar.result) : nil) }))
+    def self.get(param_1=nil,param_2=nil,param_3=nil)
+      if param_1.class.method_defined?(:j_del) && param_2.class.method_defined?(:j_del) && param_3.class == Hash && block_given?
+        return Java::IoVertxExtDiscoveryTypes::EventBusService.java_method(:get, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,param_2.j_del,::Vertx::Util::Utils.to_json_object(param_3),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.from_object(ar.result) : nil) }))
+      elsif param_1.class.method_defined?(:j_del) && param_2.class.method_defined?(:j_del) && param_3.class == String && block_given?
+        return Java::IoVertxExtDiscoveryTypes::EventBusService.java_method(:get, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,param_2.j_del,param_3,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.from_object(ar.result) : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling get(vertx,discovery,itf)"
+      raise ArgumentError, "Invalid arguments when calling get(param_1,param_2,param_3)"
     end
     #  Convenient method to release a used service object.
     # @param [Object] svcObject the service object
