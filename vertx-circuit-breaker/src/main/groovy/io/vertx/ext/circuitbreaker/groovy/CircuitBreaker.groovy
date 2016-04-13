@@ -43,7 +43,7 @@ public class CircuitBreaker {
    * @return the created instance
    */
   public static CircuitBreaker create(String name, Vertx vertx, Map<String, Object> options) {
-    def ret= InternalHelper.safeCreate(io.vertx.ext.circuitbreaker.CircuitBreaker.create(name, (io.vertx.core.Vertx)vertx.getDelegate(), options != null ? new io.vertx.ext.circuitbreaker.CircuitBreakerOptions(new io.vertx.core.json.JsonObject(options)) : null), io.vertx.ext.circuitbreaker.groovy.CircuitBreaker.class);
+    def ret = InternalHelper.safeCreate(io.vertx.ext.circuitbreaker.CircuitBreaker.create(name, vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, options != null ? new io.vertx.ext.circuitbreaker.CircuitBreakerOptions(new io.vertx.core.json.JsonObject(options)) : null), io.vertx.ext.circuitbreaker.groovy.CircuitBreaker.class);
     return ret;
   }
   /**
@@ -53,7 +53,7 @@ public class CircuitBreaker {
    * @return the created instance
    */
   public static CircuitBreaker create(String name, Vertx vertx) {
-    def ret= InternalHelper.safeCreate(io.vertx.ext.circuitbreaker.CircuitBreaker.create(name, (io.vertx.core.Vertx)vertx.getDelegate()), io.vertx.ext.circuitbreaker.groovy.CircuitBreaker.class);
+    def ret = InternalHelper.safeCreate(io.vertx.ext.circuitbreaker.CircuitBreaker.create(name, vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null), io.vertx.ext.circuitbreaker.groovy.CircuitBreaker.class);
     return ret;
   }
   /**
@@ -63,7 +63,7 @@ public class CircuitBreaker {
    * @return 
    */
   public CircuitBreaker close() {
-    this.delegate.close();
+    delegate.close();
     return this;
   }
   /**
@@ -72,7 +72,7 @@ public class CircuitBreaker {
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
   public CircuitBreaker openHandler(Handler<Void> handler) {
-    this.delegate.openHandler(handler);
+    delegate.openHandler(handler);
     return this;
   }
   /**
@@ -81,7 +81,7 @@ public class CircuitBreaker {
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
   public CircuitBreaker halfOpenHandler(Handler<Void> handler) {
-    this.delegate.halfOpenHandler(handler);
+    delegate.halfOpenHandler(handler);
     return this;
   }
   /**
@@ -90,7 +90,7 @@ public class CircuitBreaker {
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
   public CircuitBreaker closeHandler(Handler<Void> handler) {
-    this.delegate.closeHandler(handler);
+    delegate.closeHandler(handler);
     return this;
   }
   /**
@@ -99,7 +99,7 @@ public class CircuitBreaker {
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
   public CircuitBreaker fallbackHandler(Handler<Void> handler) {
-    this.delegate.fallbackHandler(handler);
+    delegate.fallbackHandler(handler);
     return this;
   }
   /**
@@ -107,7 +107,7 @@ public class CircuitBreaker {
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
   public CircuitBreaker reset() {
-    this.delegate.reset();
+    delegate.reset();
     return this;
   }
   /**
@@ -115,7 +115,7 @@ public class CircuitBreaker {
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
   public CircuitBreaker open() {
-    this.delegate.open();
+    delegate.open();
     return this;
   }
   /**
@@ -123,7 +123,7 @@ public class CircuitBreaker {
    * @return 
    */
   public CircuitBreakerState state() {
-    def ret = this.delegate.state();
+    def ret = delegate.state();
     return ret;
   }
   /**
@@ -131,7 +131,7 @@ public class CircuitBreaker {
    * @return 
    */
   public long failureCount() {
-    def ret = this.delegate.failureCount();
+    def ret = delegate.failureCount();
     return ret;
   }
   /**
@@ -145,7 +145,7 @@ public class CircuitBreaker {
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
   public CircuitBreaker executeBlocking(Handler<Void> code) {
-    this.delegate.executeBlocking(code);
+    delegate.executeBlocking(code);
     return this;
   }
   /**
@@ -160,7 +160,7 @@ public class CircuitBreaker {
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
   public CircuitBreaker executeBlockingWithFallback(Handler<Void> code, Handler<Void> fallback) {
-    this.delegate.executeBlockingWithFallback(code, fallback);
+    delegate.executeBlockingWithFallback(code, fallback);
     return this;
   }
   /**
@@ -172,11 +172,11 @@ public class CircuitBreaker {
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
   public <T> CircuitBreaker execute(Handler<Future<T>> code) {
-    this.delegate.execute(new Handler<io.vertx.core.Future<java.lang.Object>>() {
+    delegate.execute(code != null ? new Handler<io.vertx.core.Future<java.lang.Object>>(){
       public void handle(io.vertx.core.Future<java.lang.Object> event) {
-        code.handle(new io.vertx.groovy.core.Future(event));
+        code.handle(InternalHelper.safeCreate(event, io.vertx.groovy.core.Future.class));
       }
-    });
+    } : null);
     return this;
   }
   /**
@@ -191,11 +191,11 @@ public class CircuitBreaker {
    * @return the current {@link io.vertx.ext.circuitbreaker.groovy.CircuitBreaker}
    */
   public <T> CircuitBreaker executeWithFallback(Handler<Future<T>> code, Handler<Void> fallback) {
-    this.delegate.executeWithFallback(new Handler<io.vertx.core.Future<java.lang.Object>>() {
+    delegate.executeWithFallback(code != null ? new Handler<io.vertx.core.Future<java.lang.Object>>(){
       public void handle(io.vertx.core.Future<java.lang.Object> event) {
-        code.handle(new io.vertx.groovy.core.Future(event));
+        code.handle(InternalHelper.safeCreate(event, io.vertx.groovy.core.Future.class));
       }
-    }, fallback);
+    } : null, fallback);
     return this;
   }
   /**
@@ -206,7 +206,7 @@ public class CircuitBreaker {
     if (cached_0 != null) {
       return cached_0;
     }
-    def ret = this.delegate.name();
+    def ret = delegate.name();
     cached_0 = ret;
     return ret;
   }

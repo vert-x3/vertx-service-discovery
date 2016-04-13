@@ -22,3 +22,13 @@ The discovery service can be extended using bridges to import services from Dock
 
 The `vertx-discovery-bridge-kubernetes` is a discovery bridge importing the services from Kubernetes in the Vert.x 
 discovery service.
+
+## Docker Discovery Bridge (experimental)
+
+The `vertx-discovery-bridge-docker` is a discovery bridge importing the services from Docker container in the Vert.x 
+discovery service.
+
+## Discovery Backend - Redis
+
+The `vertx-discovery-backend-redis` is another implementation of the Vert.x discovery backend (where service record 
+are stored) using Redis instead of a distributed map.

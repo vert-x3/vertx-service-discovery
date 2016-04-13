@@ -64,6 +64,25 @@ public class EventBusService {
   }
   /**
    * Lookup for a service record and if found, retrieve it and return the service object (used to consume the service).
+   * This is a convenient method to avoid explicit lookup and then retrieval of the service.
+   * @param vertx the vert.x instance
+   * @param discovery the discovery service
+   * @param filter the filter to select the service
+   * @param resultHandler the result handler
+   */
+  public static <T> void get(Vertx vertx, DiscoveryService discovery, Map<String, Object> filter, Handler<AsyncResult<T>> resultHandler) {
+    io.vertx.ext.discovery.types.EventBusService.get(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, resultHandler != null ? new Handler<AsyncResult<java.lang.Object>>() {
+      public void handle(AsyncResult<java.lang.Object> ar) {
+        if (ar.succeeded()) {
+          resultHandler.handle(io.vertx.core.Future.succeededFuture((Object) InternalHelper.wrapObject(ar.result())));
+        } else {
+          resultHandler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
+        }
+      }
+    } : null);
+  }
+  /**
+   * Lookup for a service record and if found, retrieve it and return the service object (used to consume the service).
    * This is a convenient method to avoid explicit lookup and then retrieval of the service. A filter based on the
    * request interface is used.
    * @param vertx the vert.x instance
