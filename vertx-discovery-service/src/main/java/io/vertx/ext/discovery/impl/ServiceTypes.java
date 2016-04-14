@@ -29,22 +29,24 @@ import java.util.ServiceLoader;
  */
 public class ServiceTypes {
 
-  static {
-    types = ServiceLoader.load(ServiceType.class);
-  }
-
   public static ServiceType get(Record record) {
-    String type = record.getType();
-    Objects.requireNonNull(type);
-
-    for (ServiceType next : types) {
-      if (next.name().equalsIgnoreCase(type)) {
-        return next;
+    synchronized (ServiceTypes.class) {
+      if (types == null  || ! types.iterator().hasNext())  {
+        types = ServiceLoader.load(ServiceType.class);
       }
-    }
 
-    throw new IllegalArgumentException("Unsupported service type " + type);
+      String type = record.getType();
+      Objects.requireNonNull(type);
+
+      for (ServiceType next : types) {
+        if (next.name().equalsIgnoreCase(type)) {
+          return next;
+        }
+      }
+
+      throw new IllegalArgumentException("Unsupported service type " + type);
+    }
   }
 
-  private static final ServiceLoader<ServiceType> types;
+  private static ServiceLoader<ServiceType> types;
 }
