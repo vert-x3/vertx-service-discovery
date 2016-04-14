@@ -1,0 +1,191 @@
+== Vert.x Circuit Breaker
+
+Vert.x Circuit Breaker is an implementation of the Circuit Breaker _pattern_ for Vert.x.
+
+It keeps track of the
+number of failures and _open the circuit_ when a threshold is reached. Optionally, a fallback is executed.
+
+Supported failures are:
+
+* failures reported by your code in a `link:../../jsdoc/future-Future.html[Future]`
+* exception thrown by your code
+* uncompleted futures (timeout)
+
+== Using the vert.x circuit breaker
+
+To use the Vert.x Circuit Breaker, add the following dependency to the _dependencies_ section of your build
+descriptor:
+
+* Maven (in your `pom.xml`):
+
+[source,xml,subs="+attributes"]
+----
+<dependency>
+  <groupId>io.vertx</groupId>
+  <artifactId>vertx-circuit-breaker</artifactId>
+  <version>3.3.0-SNAPSHOT</version>
+</dependency>
+----
+
+* Gradle (in your `build.gradle` file):
+
+[source,groovy,subs="+attributes"]
+----
+compile 'io.vertx:vertx-circuit-breaker:3.3.0-SNAPSHOT'
+----
+
+== Using the circuit breaker
+
+To use the circuit breaker you need to:
+
+1. Create a circuit breaker, with the configuration you want (timeout, number of failure before opening the circuit)
+2. Execute some code using the breaker
+
+Here is an example:
+
+[source,js]
+----
+var CircuitBreaker = require("vertx-circuit-breaker-js/circuit_breaker");
+var breaker = CircuitBreaker.create("my-circuit-breaker", vertx, {
+  "maxFailures" : 5,
+  "timeout" : 2000,
+  "fallbackOnFailure" : true,
+  "resetTimeout" : 10000
+});
+
+breaker.executeBlocking(function (v) {
+  // some code executing with the breaker
+  // if this code fails, the breker increased the
+  // number of failures
+});
+
+----
+
+Your code can take a `link:../../jsdoc/future-Future.html[Future]` as parameter when the completion is asynchronous:
+
+[source,js]
+----
+var CircuitBreaker = require("vertx-circuit-breaker-js/circuit_breaker");
+var breaker = CircuitBreaker.create("my-circuit-breaker", vertx, {
+  "maxFailures" : 5,
+  "timeout" : 2000
+});
+
+breaker.execute(function (future) {
+  vertx.createHttpClient().getNow(8080, "localhost", "/", function (response) {
+    if (response.statusCode() !== 200) {
+      future.fail("HTTP error");
+    } else {
+      // Do something with the response
+      future.complete();
+    }
+  });
+});
+
+----
+
+Optionally, you can provide a fallback executed when the circuit is open:
+
+[source,js]
+----
+var CircuitBreaker = require("vertx-circuit-breaker-js/circuit_breaker");
+var breaker = CircuitBreaker.create("my-circuit-breaker", vertx, {
+  "maxFailures" : 5,
+  "timeout" : 2000
+});
+
+breaker.executeWithFallback(function (future) {
+  vertx.createHttpClient().getNow(8080, "localhost", "/", function (response) {
+    if (response.statusCode() !== 200) {
+      future.fail("HTTP error");
+    } else {
+      // Do something with the response
+      future.complete();
+    }
+  });
+}, function (v) {
+  // Executed when the circuit is opened
+});
+
+----
+
+The fallback can also be set on the `link:../../jsdoc/circuit_breaker-CircuitBreaker.html[CircuitBreaker]` object directly:
+
+[source,js]
+----
+var CircuitBreaker = require("vertx-circuit-breaker-js/circuit_breaker");
+var breaker = CircuitBreaker.create("my-circuit-breaker", vertx, {
+  "maxFailures" : 5,
+  "timeout" : 2000
+}).fallbackHandler(function (v) {
+  // Executed when the circuit is opened.
+});
+
+breaker.execute(function (future) {
+  vertx.createHttpClient().getNow(8080, "localhost", "/", function (response) {
+    if (response.statusCode() !== 200) {
+      future.fail("HTTP error");
+    } else {
+      // Do something with the response
+      future.complete();
+    }
+  });
+});
+
+----
+
+== Callbacks
+
+You can also configures callbacks invoked when the circuit is opened or closed:
+
+[source,js]
+----
+var CircuitBreaker = require("vertx-circuit-breaker-js/circuit_breaker");
+var breaker = CircuitBreaker.create("my-circuit-breaker", vertx, {
+  "maxFailures" : 5,
+  "timeout" : 2000
+}).openHandler(function (v) {
+  console.log("Circuit opened");
+}).closeHandler(function (v) {
+  console.log("Circuit closed");
+});
+
+breaker.execute(function (future) {
+  vertx.createHttpClient().getNow(8080, "localhost", "/", function (response) {
+    if (response.statusCode() !== 200) {
+      future.fail("HTTP error");
+    } else {
+      // Do something with the response
+      future.complete();
+    }
+  });
+});
+
+----
+
+You can also be notified when the circuit breaker decide to attempt to reset (half-open state). You can register
+such as callback with `link:../../jsdoc/circuit_breaker-CircuitBreaker.html#halfOpenHandler[halfOpenHandler]`.
+
+== Event bus notification
+
+Every time the circuit state changes, an event is published on the event bus. The address on which the event are
+sent is configurable with
+`link:../dataobjects.html#CircuitBreakerOptions#setNotificationAddress[notificationAddress]`. If `null` is
+passed to this method, the notifications are disabled. By default, the used address is `vertx.circuit-breaker`.
+
+Each event contains a Json Object with:
+
+* `state` : the new circuit breaker state (`OPEN`, `CLOSED`, `HALF_OPEN`)
+* `name` : the name of the circuit breaker
+* `failures` : the number of failures
+* `node` : the identifier of the node (`local` is Vert.x is not running in cluster mode)
+
+== The half-open state
+
+When the circuit is “open,” calls to the circuit breaker fail immediately, without any attempt to execute the real
+operation. After a suitable amount of time (configured from
+`link:../dataobjects.html#CircuitBreakerOptions#setResetTimeout[resetTimeout]`, the circuit breaker decides that the
+operation has a chance of succeeding, so it goes into the `half-open` state. In this state, the next call to the
+circuit breaker is allowed to execute the dangerous operation. Should the call succeed, the circuit breaker resets
+and returns to the `closed` state, ready for more routine operation. If this trial call fails, however, the circuit
+breaker returns to the `open` state until another timeout elapses.

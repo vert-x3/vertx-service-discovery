@@ -74,7 +74,9 @@
  * The bridge imports all services on `start` and removes them on `stop`. In between it watches the Kubernetes
  * services and add the new ones and removes the deleted ones.
  */
-@ModuleGen(name = "vertx-service-discovery", groupPackage = "io.vertx.ext.discovery.kubernetes")
+@ModuleGen(name = "vertx-service-discovery-kubernetes", groupPackage = "io.vertx.ext.discovery.kubernetes")
+@Document(fileName = "index.ad")
 package io.vertx.ext.discovery.kubernetes;
 
 import io.vertx.codegen.annotations.ModuleGen;
+import io.vertx.docgen.Document;

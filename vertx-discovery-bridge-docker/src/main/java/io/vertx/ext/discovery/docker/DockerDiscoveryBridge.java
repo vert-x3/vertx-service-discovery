@@ -55,6 +55,8 @@ public class DockerDiscoveryBridge implements DiscoveryBridge {
   private Vertx vertx;
   private String host;
 
+  volatile boolean started;
+
   /**
    * Starts the bridge.
    *
@@ -142,7 +144,7 @@ public class DockerDiscoveryBridge implements DiscoveryBridge {
             completion.handle(Future.failedFuture(ar.cause()));
             return;
           }
-
+          started = true;
           List<Container> running = ar.result();
           List<DockerService> toRemove = new ArrayList<>();
 
@@ -235,6 +237,7 @@ public class DockerDiscoveryBridge implements DiscoveryBridge {
   public void stop(Vertx vertx, DiscoveryService discovery) {
     vertx.cancelTimer(timer);
     try {
+      started = false;
       client.close();
     } catch (IOException e) {
       throw new RuntimeException("Exception caught while closing the docker client", e);

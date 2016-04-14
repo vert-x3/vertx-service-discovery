@@ -68,6 +68,8 @@ public class DockerBridgeTest {
     bridge = new DockerDiscoveryBridge();
     discovery.registerDiscoveryBridge(bridge,
         new JsonObject().put("scan-period", -1));
+
+    await().until(()-> bridge.started);
   }
 
   private void init() {

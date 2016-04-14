@@ -28,6 +28,10 @@
 
   <artifactId>vertx-discovery-service</artifactId>
 
+  <properties>
+    <doc.skip>false</doc.skip>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -46,5 +50,45 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+        <executions>
+          <execution>
+            <id>default-compile</id>
+            <configuration>
+              <annotationProcessors>
+                <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
+                <annotationProcessor>io.vertx.docgen.JavaDocGenProcessor</annotationProcessor>
+                <annotationProcessor>io.vertx.docgen.DocGenProcessor</annotationProcessor>
+              </annotationProcessors>
+              <generatedSourcesDirectory>src/main/generated</generatedSourcesDirectory>
+              <compilerArgs>
+                <arg>-AoutputDirectory=${project.basedir}/src/main</arg>
+              </compilerArgs>
+            </configuration>
+          </execution>
+          <execution>
+            <id>default-testCompile</id>
+            <configuration>
+              <annotationProcessors>
+                <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
+              </annotationProcessors>
+              <generatedTestSourcesDirectory>src/test/generated</generatedTestSourcesDirectory>
+              <compilerArgs>
+                <arg>-AoutputDirectory=${project.basedir}/src/test</arg>
+              </compilerArgs>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>
