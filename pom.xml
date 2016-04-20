@@ -44,6 +44,7 @@
     <module>vertx-circuit-breaker</module>
     <module>vertx-discovery-bridge-kubernetes</module>
     <module>vertx-discovery-bridge-docker</module>
+    <module>vertx-discovery-bridge-docker-links</module>
     <module>vertx-discovery-backend-redis</module>
   </modules>
 
