@@ -113,7 +113,7 @@ EventBusService.get = function() {
  */
 EventBusService.release = function(svcObject) {
   var __args = arguments;
-  if (__args.length === 1 && true) {
+  if (__args.length === 1 && typeof __args[0] !== 'function') {
     JEventBusService["release(java.lang.Object)"](utils.convParamTypeUnknown(svcObject));
   } else throw new TypeError('function invoked with invalid arguments');
 };
