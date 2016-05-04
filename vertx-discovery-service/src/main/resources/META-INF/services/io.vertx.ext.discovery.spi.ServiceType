@@ -17,3 +17,4 @@
 io.vertx.ext.discovery.types.impl.EventBusServiceImpl
 io.vertx.ext.discovery.types.impl.MessageSourceImpl
 io.vertx.ext.discovery.types.impl.HttpEndpointImpl
+io.vertx.ext.discovery.types.impl.JDBCDataSourceImpl
