@@ -70,8 +70,30 @@ public class EventBusService {
    * @param filter the filter to select the service
    * @param resultHandler the result handler
    */
-  public static <T> void get(Vertx vertx, DiscoveryService discovery, Map<String, Object> filter, Handler<AsyncResult<T>> resultHandler) {
-    io.vertx.ext.discovery.types.EventBusService.get(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, resultHandler != null ? new Handler<AsyncResult<java.lang.Object>>() {
+  public static <T> void getProxy(Vertx vertx, DiscoveryService discovery, Map<String, Object> filter, Handler<AsyncResult<T>> resultHandler) {
+    io.vertx.ext.discovery.types.EventBusService.getProxy(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, resultHandler != null ? new Handler<AsyncResult<java.lang.Object>>() {
+      public void handle(AsyncResult<java.lang.Object> ar) {
+        if (ar.succeeded()) {
+          resultHandler.handle(io.vertx.core.Future.succeededFuture((Object) InternalHelper.wrapObject(ar.result())));
+        } else {
+          resultHandler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
+        }
+      }
+    } : null);
+  }
+  public static <T> void getProxy(Vertx vertx, DiscoveryService discovery, String serviceInterface, String proxyInterface, Handler<AsyncResult<T>> resultHandler) {
+    io.vertx.ext.discovery.types.EventBusService.getProxy(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, serviceInterface, proxyInterface, resultHandler != null ? new Handler<AsyncResult<java.lang.Object>>() {
+      public void handle(AsyncResult<java.lang.Object> ar) {
+        if (ar.succeeded()) {
+          resultHandler.handle(io.vertx.core.Future.succeededFuture((Object) InternalHelper.wrapObject(ar.result())));
+        } else {
+          resultHandler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
+        }
+      }
+    } : null);
+  }
+  public static <T> void getProxy(Vertx vertx, DiscoveryService discovery, Map<String, Object> filter, String proxyClass, Handler<AsyncResult<T>> resultHandler) {
+    io.vertx.ext.discovery.types.EventBusService.getProxy(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, proxyClass, resultHandler != null ? new Handler<AsyncResult<java.lang.Object>>() {
       public void handle(AsyncResult<java.lang.Object> ar) {
         if (ar.succeeded()) {
           resultHandler.handle(io.vertx.core.Future.succeededFuture((Object) InternalHelper.wrapObject(ar.result())));
@@ -90,8 +112,8 @@ public class EventBusService {
    * @param itf the service interface
    * @param resultHandler the result handler
    */
-  public static <T> void get(Vertx vertx, DiscoveryService discovery, String itf, Handler<AsyncResult<T>> resultHandler) {
-    io.vertx.ext.discovery.types.EventBusService.get(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, itf, resultHandler != null ? new Handler<AsyncResult<java.lang.Object>>() {
+  public static <T> void getProxy(Vertx vertx, DiscoveryService discovery, String itf, Handler<AsyncResult<T>> resultHandler) {
+    io.vertx.ext.discovery.types.EventBusService.getProxy(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, itf, resultHandler != null ? new Handler<AsyncResult<java.lang.Object>>() {
       public void handle(AsyncResult<java.lang.Object> ar) {
         if (ar.succeeded()) {
           resultHandler.handle(io.vertx.core.Future.succeededFuture((Object) InternalHelper.wrapObject(ar.result())));

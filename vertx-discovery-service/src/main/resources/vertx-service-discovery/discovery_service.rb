@@ -57,15 +57,18 @@ module VertxServiceDiscovery
       end
       raise ArgumentError, "Invalid arguments when calling create(vertx,options)"
     end
-    #  Gets a service from the selected record.
+    #  Gets a service reference for the given record.
     # @param [::Vertx::Vertx] vertx the vert.x instance
     # @param [Hash] record the chosen record
-    # @return [::VertxServiceDiscovery::ServiceReference] the service, that allows retrieving the service object
-    def self.get_service_reference(vertx=nil,record=nil)
-      if vertx.class.method_defined?(:j_del) && record.class == Hash && !block_given?
+    # @param [Hash{String => Object}] consumerConfiguration some additional (optional) configuration to configure the service object created from the service reference.
+    # @return [::VertxServiceDiscovery::ServiceReference] the service reference, that allows retrieving the service object
+    def self.get_service_reference(vertx=nil,record=nil,consumerConfiguration=nil)
+      if vertx.class.method_defined?(:j_del) && record.class == Hash && !block_given? && consumerConfiguration == nil
         return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtDiscovery::DiscoveryService.java_method(:getServiceReference, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::Record.java_class]).call(vertx.j_del,Java::IoVertxExtDiscovery::Record.new(::Vertx::Util::Utils.to_json_object(record))),::VertxServiceDiscovery::ServiceReference)
+      elsif vertx.class.method_defined?(:j_del) && record.class == Hash && consumerConfiguration.class == Hash && !block_given?
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtDiscovery::DiscoveryService.java_method(:getServiceReference, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::Record.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(vertx.j_del,Java::IoVertxExtDiscovery::Record.new(::Vertx::Util::Utils.to_json_object(record)),::Vertx::Util::Utils.to_json_object(consumerConfiguration)),::VertxServiceDiscovery::ServiceReference)
       end
-      raise ArgumentError, "Invalid arguments when calling get_service_reference(vertx,record)"
+      raise ArgumentError, "Invalid arguments when calling get_service_reference(vertx,record,consumerConfiguration)"
     end
     #  Closes the discovery service
     # @return [void]

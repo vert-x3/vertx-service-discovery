@@ -17,6 +17,7 @@
 package io.vertx.ext.discovery.spi;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.ServiceReference;
 
@@ -49,10 +50,11 @@ public interface ServiceType {
    * Gets the `service` for the given record. The record's type must match the current type. From the
    * returned {@link ServiceReference}, the consumer can start using the service and release it.
    *
-   * @param vertx  the vert.x instance
-   * @param record the record
+   * @param vertx         the vert.x instance
+   * @param record        the record
+   * @param configuration some optional configuration, maybe be {@code null} or empty
    * @return the retrieved {@link ServiceReference}
    */
-  ServiceReference get(Vertx vertx, Record record);
+  ServiceReference get(Vertx vertx, Record record, JsonObject configuration);
 
 }

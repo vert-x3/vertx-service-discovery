@@ -16,7 +16,7 @@ module VertxServiceDiscovery
     # @return [Object]
     def get
       if !block_given?
-        return ::Vertx::Util::Utils.from_object(@j_del.java_method(:get, []).call())
+        return ::Vertx::Util::Utils.from_object(@j_del.java_method(:getClient, []).call())
       end
       raise ArgumentError, "Invalid arguments when calling get()"
     end

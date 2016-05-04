@@ -18,7 +18,10 @@ package io.vertx.ext.discovery.types;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.discovery.*;
+import io.vertx.ext.discovery.DiscoveryOptions;
+import io.vertx.ext.discovery.DiscoveryService;
+import io.vertx.ext.discovery.Record;
+import io.vertx.ext.discovery.ServiceReference;
 import io.vertx.ext.discovery.impl.DiscoveryImpl;
 import io.vertx.ext.service.HelloService;
 import io.vertx.ext.service.HelloServiceImpl;
@@ -43,6 +46,8 @@ public class ServiceProxiesTest {
 
   private Vertx vertx;
   private DiscoveryService discovery;
+
+  private JsonObject name = new JsonObject().put("name", "vert.x");
 
   @Before
   public void setUp() {
@@ -79,7 +84,7 @@ public class ServiceProxiesTest {
     ServiceReference service = DiscoveryService.getServiceReference(vertx, found.get());
     HelloService hello = service.get();
     AtomicReference<String> result = new AtomicReference<>();
-    hello.hello("vert.x", ar -> {
+    hello.hello(name, ar -> {
       result.set(ar.result());
     });
     await().untilAtomic(result, not(nullValue()));
@@ -98,7 +103,7 @@ public class ServiceProxiesTest {
     await().until(() -> record.getRegistration() != null);
 
     AtomicReference<HelloService> found = new AtomicReference<>();
-    EventBusService.get(vertx, discovery, HelloService.class, ar -> {
+    EventBusService.getProxy(vertx, discovery, HelloService.class, ar -> {
       found.set(ar.result());
     });
     await().until(() -> found.get() != null);
@@ -106,7 +111,7 @@ public class ServiceProxiesTest {
 
     HelloService hello = found.get();
     AtomicReference<String> result = new AtomicReference<>();
-    hello.hello("vert.x", ar -> {
+    hello.hello(name, ar -> {
       result.set(ar.result());
     });
     await().untilAtomic(result, not(nullValue()));
@@ -115,4 +120,68 @@ public class ServiceProxiesTest {
 
     assertThat(EventBusService.bindings()).isEmpty();
   }
+
+
+  @Test
+  public void testWithGroovyConsumer() {
+    // Step 1 - register the service
+    HelloService svc = new HelloServiceImpl("stuff");
+    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    Record record = EventBusService.createRecord("Hello", "address", HelloService.class);
+
+    discovery.publish(record, (r) -> {
+    });
+    await().until(() -> record.getRegistration() != null);
+
+    // Step 2 - register a consumer that get the result
+    AtomicReference<JsonObject> result = new AtomicReference<>();
+    vertx.eventBus().<JsonObject>consumer("result", message -> {
+      result.set(message.body());
+    });
+
+    // Step 3 - deploy the verticle
+    vertx.deployVerticle("verticles/HelloServiceConsumer.groovy", ar -> {
+      if (ar.failed()) {
+        // Will fail anyway.
+        ar.cause().printStackTrace();
+      }
+    });
+
+    await().until(() -> result.get() != null);
+
+    assertThat(result.get().getString("status")).isEqualTo("ok");
+    assertThat(result.get().getString("message")).isEqualTo("stuff vert.x");
+  }
+
+  @Test
+  public void testWithJavaScriptConsumer() {
+    // Step 1 - register the service
+    HelloService svc = new HelloServiceImpl("stuff");
+    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    Record record = EventBusService.createRecord("Hello", "address", HelloService.class);
+
+    discovery.publish(record, (r) -> {
+    });
+    await().until(() -> record.getRegistration() != null);
+
+    // Step 2 - register a consumer that get the result
+    AtomicReference<JsonObject> result = new AtomicReference<>();
+    vertx.eventBus().<JsonObject>consumer("result", message -> {
+      result.set(message.body());
+    });
+
+    // Step 3 - deploy the verticle
+    vertx.deployVerticle("verticles/HelloServiceConsumer.js", ar -> {
+      if (ar.failed()) {
+        // Will fail anyway.
+        ar.cause().printStackTrace();
+      }
+    });
+
+    await().until(() -> result.get() != null);
+
+    assertThat(result.get().getString("status")).isEqualTo("ok");
+    assertThat(result.get().getString("message")).isEqualTo("stuff vert.x");
+  }
+
 }

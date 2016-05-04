@@ -13,12 +13,12 @@ module TestServices
     def j_del
       @j_del
     end
-    # @param [String] name 
+    # @param [Hash{String => Object}] name 
     # @yield 
     # @return [void]
     def hello(name=nil)
-      if name.class == String && block_given?
-        return @j_del.java_method(:hello, [Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(name,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result : nil) }))
+      if name.class == Hash && block_given?
+        return @j_del.java_method(:hello, [Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(::Vertx::Util::Utils.to_json_object(name),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result : nil) }))
       end
       raise ArgumentError, "Invalid arguments when calling hello(name)"
     end

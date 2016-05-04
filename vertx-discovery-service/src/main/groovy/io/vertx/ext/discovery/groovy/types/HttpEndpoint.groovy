@@ -98,8 +98,8 @@ public class HttpEndpoint {
    * @param filter The filter, optional
    * @param resultHandler the result handler
    */
-  public static void get(Vertx vertx, DiscoveryService discovery, Map<String, Object> filter, Handler<AsyncResult<HttpClient>> resultHandler) {
-    io.vertx.ext.discovery.types.HttpEndpoint.get(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.core.http.HttpClient>>() {
+  public static void getClient(Vertx vertx, DiscoveryService discovery, Map<String, Object> filter, Handler<AsyncResult<HttpClient>> resultHandler) {
+    io.vertx.ext.discovery.types.HttpEndpoint.getClient(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.core.http.HttpClient>>() {
       public void handle(AsyncResult<io.vertx.core.http.HttpClient> ar) {
         if (ar.succeeded()) {
           resultHandler.handle(io.vertx.core.Future.succeededFuture(InternalHelper.safeCreate(ar.result(), io.vertx.groovy.core.http.HttpClient.class)));

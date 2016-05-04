@@ -80,8 +80,8 @@ public class MessageSource {
    * @param filter The filter, optional
    * @param resultHandler the result handler
    */
-  public static <T> void get(Vertx vertx, DiscoveryService discovery, Map<String, Object> filter, Handler<AsyncResult<MessageConsumer<T>>> resultHandler) {
-    io.vertx.ext.discovery.types.MessageSource.get(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.core.eventbus.MessageConsumer<java.lang.Object>>>() {
+  public static <T> void getConsumer(Vertx vertx, DiscoveryService discovery, Map<String, Object> filter, Handler<AsyncResult<MessageConsumer<T>>> resultHandler) {
+    io.vertx.ext.discovery.types.MessageSource.getConsumer(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.core.eventbus.MessageConsumer<java.lang.Object>>>() {
       public void handle(AsyncResult<io.vertx.core.eventbus.MessageConsumer<java.lang.Object>> ar) {
         if (ar.succeeded()) {
           resultHandler.handle(io.vertx.core.Future.succeededFuture(InternalHelper.safeCreate(ar.result(), io.vertx.groovy.core.eventbus.MessageConsumer.class)));

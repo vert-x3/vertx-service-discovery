@@ -89,16 +89,29 @@ public interface DiscoveryService {
   }
 
   /**
-   * Gets a service from the selected record.
+   * Gets a service reference from the given record.
    *
    * @param vertx  the vert.x instance
    * @param record the chosen record
-   * @return the service, that allows retrieving the service object
+   * @return the service reference, that allows retrieving the service object
    */
   static ServiceReference getServiceReference(Vertx vertx, Record record) {
+    return ServiceTypes.get(record).get(vertx, record, new JsonObject());
+  }
+
+  /**
+   * Gets a service reference for the given record.
+   *
+   * @param vertx                 the vert.x instance
+   * @param record                the chosen record
+   * @param consumerConfiguration some additional (optional) configuration to configure the service object created
+   *                              from the service reference.
+   * @return the service reference, that allows retrieving the service object
+   */
+  static ServiceReference getServiceReference(Vertx vertx, Record record, JsonObject consumerConfiguration) {
     Objects.requireNonNull(record);
     Objects.requireNonNull(vertx);
-    return ServiceTypes.get(record).get(vertx, record);
+    return ServiceTypes.get(record).get(vertx, record, consumerConfiguration);
   }
 
   /**

@@ -128,8 +128,8 @@ public interface MessageSource extends ServiceType {
    * @param resultHandler the result handler
    * @param <T>           the class of the message
    */
-  static <T> void get(Vertx vertx, DiscoveryService discovery, JsonObject filter,
-                      Handler<AsyncResult<MessageConsumer<T>>>
+  static <T> void getConsumer(Vertx vertx, DiscoveryService discovery, JsonObject filter,
+                              Handler<AsyncResult<MessageConsumer<T>>>
                           resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {

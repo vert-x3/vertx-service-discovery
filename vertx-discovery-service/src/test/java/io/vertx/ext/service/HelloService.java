@@ -20,6 +20,9 @@ import io.vertx.codegen.annotations.ProxyGen;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
+import io.vertx.serviceproxy.ProxyHelper;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -28,6 +31,7 @@ import io.vertx.core.Handler;
 @VertxGen
 public interface HelloService {
 
-  public void hello(String name, Handler<AsyncResult<String>> resultHandler);
+  void hello(JsonObject name, Handler<AsyncResult<String>> resultHandler);
+
 
 }

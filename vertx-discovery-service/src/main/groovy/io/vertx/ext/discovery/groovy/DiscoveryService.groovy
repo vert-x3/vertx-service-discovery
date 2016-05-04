@@ -87,13 +87,24 @@ public class DiscoveryService {
     return ret;
   }
   /**
-   * Gets a service from the selected record.
+   * Gets a service reference from the given record.
    * @param vertx the vert.x instance
    * @param record the chosen record (see <a href="../../../../../../../cheatsheet/Record.html">Record</a>)
-   * @return the service, that allows retrieving the service object
+   * @return the service reference, that allows retrieving the service object
    */
   public static ServiceReference getServiceReference(Vertx vertx, Map<String, Object> record) {
     def ret = InternalHelper.safeCreate(io.vertx.ext.discovery.DiscoveryService.getServiceReference(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, record != null ? new io.vertx.ext.discovery.Record(new io.vertx.core.json.JsonObject(record)) : null), io.vertx.ext.discovery.groovy.ServiceReference.class);
+    return ret;
+  }
+  /**
+   * Gets a service reference for the given record.
+   * @param vertx the vert.x instance
+   * @param record the chosen record (see <a href="../../../../../../../cheatsheet/Record.html">Record</a>)
+   * @param consumerConfiguration some additional (optional) configuration to configure the service object created from the service reference.
+   * @return the service reference, that allows retrieving the service object
+   */
+  public static ServiceReference getServiceReference(Vertx vertx, Map<String, Object> record, Map<String, Object> consumerConfiguration) {
+    def ret = InternalHelper.safeCreate(io.vertx.ext.discovery.DiscoveryService.getServiceReference(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, record != null ? new io.vertx.ext.discovery.Record(new io.vertx.core.json.JsonObject(record)) : null, consumerConfiguration != null ? new io.vertx.core.json.JsonObject(consumerConfiguration) : null), io.vertx.ext.discovery.groovy.ServiceReference.class);
     return ret;
   }
   /**

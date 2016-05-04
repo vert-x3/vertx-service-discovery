@@ -118,7 +118,7 @@ public interface HttpEndpoint extends ServiceType {
    * @param filter        The filter, optional
    * @param resultHandler the result handler
    */
-  static void get(Vertx vertx, DiscoveryService discovery, JsonObject filter, Handler<AsyncResult<HttpClient>>
+  static void getClient(Vertx vertx, DiscoveryService discovery, JsonObject filter, Handler<AsyncResult<HttpClient>>
       resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {

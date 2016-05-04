@@ -18,6 +18,7 @@ package io.vertx.ext.discovery.types.impl;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.ServiceReference;
 import io.vertx.ext.discovery.types.MessageSource;
@@ -37,7 +38,7 @@ public class MessageSourceImpl implements MessageSource {
   }
 
   @Override
-  public ServiceReference get(Vertx vertx, Record record) {
+  public ServiceReference get(Vertx vertx, Record record, JsonObject config) {
     return new MessageSourceReference(vertx, record);
   }
 

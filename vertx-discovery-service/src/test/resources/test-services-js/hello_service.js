@@ -33,13 +33,13 @@ var HelloService = function(j_val) {
   /**
 
    @public
-   @param name {string} 
+   @param name {Object} 
    @param resultHandler {function} 
    */
   this.hello = function(name, resultHandler) {
     var __args = arguments;
-    if (__args.length === 2 && typeof __args[0] === 'string' && typeof __args[1] === 'function') {
-      j_helloService["hello(java.lang.String,io.vertx.core.Handler)"](name, function(ar) {
+    if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
+      j_helloService["hello(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(name), function(ar) {
       if (ar.succeeded()) {
         resultHandler(ar.result(), null);
       } else {

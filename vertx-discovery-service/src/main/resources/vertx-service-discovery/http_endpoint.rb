@@ -60,11 +60,11 @@ module VertxServiceDiscovery
     # @param [Hash{String => Object}] filter The filter, optional
     # @yield the result handler
     # @return [void]
-    def self.get(vertx=nil,discovery=nil,filter=nil)
+    def self.get_client(vertx=nil,discovery=nil,filter=nil)
       if vertx.class.method_defined?(:j_del) && discovery.class.method_defined?(:j_del) && filter.class == Hash && block_given?
-        return Java::IoVertxExtDiscoveryTypes::HttpEndpoint.java_method(:get, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(vertx.j_del,discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::Vertx::HttpClient) : nil) }))
+        return Java::IoVertxExtDiscoveryTypes::HttpEndpoint.java_method(:getClient, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(vertx.j_del,discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::Vertx::HttpClient) : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling get(vertx,discovery,filter)"
+      raise ArgumentError, "Invalid arguments when calling get_client(vertx,discovery,filter)"
     end
   end
 end

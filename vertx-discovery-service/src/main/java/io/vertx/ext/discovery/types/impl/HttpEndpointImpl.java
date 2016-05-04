@@ -19,6 +19,7 @@ package io.vertx.ext.discovery.types.impl;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.ServiceReference;
 import io.vertx.ext.discovery.spi.ServiceType;
@@ -39,8 +40,8 @@ public class HttpEndpointImpl implements HttpEndpoint {
   }
 
   @Override
-  public ServiceReference get(Vertx vertx, Record record) {
-    return new HttpEndpointReference(vertx, record);
+  public ServiceReference get(Vertx vertx, Record record, JsonObject configuration) {
+    return new HttpEndpointReference(vertx, record, configuration);
   }
 
   /**
@@ -51,10 +52,12 @@ public class HttpEndpointImpl implements HttpEndpoint {
     private final Vertx vertx;
     private final HttpLocation location;
     private final Record record;
+    private final JsonObject config;
     private HttpClient client;
 
-    HttpEndpointReference(Vertx vertx, Record record) {
+    HttpEndpointReference(Vertx vertx, Record record, JsonObject config) {
       this.vertx = vertx;
+      this.config = config;
       this.location = new HttpLocation(record.getLocation());
       this.record = record;
     }
@@ -78,8 +81,13 @@ public class HttpEndpointImpl implements HttpEndpoint {
       if (client != null) {
         return (T) client;
       } else {
-        HttpClientOptions options = new HttpClientOptions().setDefaultPort(location.getPort())
-            .setDefaultHost(location.getHost());
+        HttpClientOptions options;
+        if (config != null) {
+          options = new HttpClientOptions(config);
+        } else {
+          options = new HttpClientOptions();
+        }
+         options.setDefaultPort(location.getPort()).setDefaultHost(location.getHost());
         if (location.isSsl()) {
           options.setSsl(true);
         }

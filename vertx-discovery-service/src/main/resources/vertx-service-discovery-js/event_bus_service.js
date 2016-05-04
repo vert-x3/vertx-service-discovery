@@ -74,20 +74,18 @@ EventBusService.bindings = function() {
 };
 
 /**
- Lookup for a service record and if found, retrieve it and return the service object (used to consume the service).
- This is a convenient method to avoid explicit lookup and then retrieval of the service. A filter based on the
- request interface is used.
 
  @memberof module:vertx-service-discovery-js/event_bus_service
- @param vertx {Vertx} the vert.x instance 
- @param discovery {DiscoveryService} the discovery service 
- @param itf {string} the service interface 
- @param resultHandler {function} the result handler 
+ @param vertx {Vertx} 
+ @param discovery {DiscoveryService} 
+ @param filter {Object} 
+ @param proxyClass {string} 
+ @param resultHandler {function} 
  */
-EventBusService.get = function() {
+EventBusService.getProxy = function() {
   var __args = arguments;
   if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
-    JEventBusService["get(io.vertx.core.Vertx,io.vertx.ext.discovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](__args[0]._jdel, __args[1]._jdel, utils.convParamJsonObject(__args[2]), function(ar) {
+    JEventBusService["getProxy(io.vertx.core.Vertx,io.vertx.ext.discovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](__args[0]._jdel, __args[1]._jdel, utils.convParamJsonObject(__args[2]), function(ar) {
     if (ar.succeeded()) {
       __args[3](utils.convReturnTypeUnknown(ar.result()), null);
     } else {
@@ -95,11 +93,27 @@ EventBusService.get = function() {
     }
   });
   }else if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && typeof __args[2] === 'string' && typeof __args[3] === 'function') {
-    JEventBusService["get(io.vertx.core.Vertx,io.vertx.ext.discovery.DiscoveryService,java.lang.String,io.vertx.core.Handler)"](__args[0]._jdel, __args[1]._jdel, __args[2], function(ar) {
+    JEventBusService["getProxy(io.vertx.core.Vertx,io.vertx.ext.discovery.DiscoveryService,java.lang.String,io.vertx.core.Handler)"](__args[0]._jdel, __args[1]._jdel, __args[2], function(ar) {
     if (ar.succeeded()) {
       __args[3](utils.convReturnTypeUnknown(ar.result()), null);
     } else {
       __args[3](null, ar.cause());
+    }
+  });
+  }else if (__args.length === 5 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && typeof __args[2] === 'string' && typeof __args[3] === 'string' && typeof __args[4] === 'function') {
+    JEventBusService["getProxy(io.vertx.core.Vertx,io.vertx.ext.discovery.DiscoveryService,java.lang.String,java.lang.String,io.vertx.core.Handler)"](__args[0]._jdel, __args[1]._jdel, __args[2], __args[3], function(ar) {
+    if (ar.succeeded()) {
+      __args[4](utils.convReturnTypeUnknown(ar.result()), null);
+    } else {
+      __args[4](null, ar.cause());
+    }
+  });
+  }else if (__args.length === 5 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'string' && typeof __args[4] === 'function') {
+    JEventBusService["getProxy(io.vertx.core.Vertx,io.vertx.ext.discovery.DiscoveryService,io.vertx.core.json.JsonObject,java.lang.String,io.vertx.core.Handler)"](__args[0]._jdel, __args[1]._jdel, utils.convParamJsonObject(__args[2]), __args[3], function(ar) {
+    if (ar.succeeded()) {
+      __args[4](utils.convReturnTypeUnknown(ar.result()), null);
+    } else {
+      __args[4](null, ar.cause());
     }
   });
   } else throw new TypeError('function invoked with invalid arguments');

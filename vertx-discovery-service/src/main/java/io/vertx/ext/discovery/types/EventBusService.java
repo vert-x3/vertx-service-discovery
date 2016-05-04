@@ -131,7 +131,7 @@ public interface EventBusService extends ServiceType {
    * @param resultHandler the result handler
    * @param <T>           the service interface
    */
-  static <T> void get(Vertx vertx, DiscoveryService discovery, JsonObject filter, Handler<AsyncResult<T>>
+  static <T> void getProxy(Vertx vertx, DiscoveryService discovery, JsonObject filter, Handler<AsyncResult<T>>
       resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed()) {
@@ -160,10 +160,34 @@ public interface EventBusService extends ServiceType {
    * @param <T>           the service interface
    */
   @GenIgnore
-  static <T> void get(Vertx vertx, DiscoveryService discovery, Class<T> itf, Handler<AsyncResult<T>>
+  static <T> void getProxy(Vertx vertx, DiscoveryService discovery, Class<T> itf, Handler<AsyncResult<T>>
       resultHandler) {
     JsonObject filter = new JsonObject().put("service.interface", itf.getName());
-    get(vertx, discovery, filter, resultHandler);
+    getProxy(vertx, discovery, filter, resultHandler);
+  }
+
+  static <T> void getProxy(Vertx vertx, DiscoveryService discovery, String serviceInterface, String proxyInterface,
+                           Handler<AsyncResult<T>> resultHandler) {
+    JsonObject filter = new JsonObject().put("service.interface", serviceInterface);
+    getProxy(vertx, discovery, filter, proxyInterface, resultHandler);
+  }
+
+  static <T> void getProxy(Vertx vertx, DiscoveryService discovery, JsonObject filter, String
+      proxyClass, Handler<AsyncResult<T>> resultHandler) {
+    discovery.getRecord(filter, ar -> {
+      if (ar.failed()) {
+        resultHandler.handle(Future.failedFuture(ar.cause()));
+      } else {
+        if (ar.result() == null) {
+          resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
+        } else {
+          ServiceReference service = DiscoveryService.getServiceReference(vertx, ar.result(),
+              new JsonObject().put("client.class", proxyClass));
+          BINDINGS.add(service);
+          resultHandler.handle(Future.succeededFuture(service.get()));
+        }
+      }
+    });
   }
 
   /**
@@ -177,10 +201,10 @@ public interface EventBusService extends ServiceType {
    * @param resultHandler the result handler
    * @param <T>           the service interface
    */
-  static <T> void get(Vertx vertx, DiscoveryService discovery, String itf, Handler<AsyncResult<T>>
+  static <T> void getProxy(Vertx vertx, DiscoveryService discovery, String itf, Handler<AsyncResult<T>>
       resultHandler) {
     JsonObject filter = new JsonObject().put("service.interface", itf);
-    get(vertx, discovery, filter, resultHandler);
+    getProxy(vertx, discovery, filter, resultHandler);
   }
 
   /**

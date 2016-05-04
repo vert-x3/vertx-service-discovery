@@ -36,8 +36,8 @@ public class HelloServiceImpl implements HelloService {
     this("Hello");
   }
 
-  public HelloServiceImpl(String msg) {
-    this.msg = msg;
+  public HelloServiceImpl(String message) {
+    this.msg = message;
   }
 
   public void start(Vertx vertx, String address) {
@@ -49,7 +49,7 @@ public class HelloServiceImpl implements HelloService {
   }
 
   @Override
-  public void hello(String name, Handler<AsyncResult<String>> resultHandler) {
-    resultHandler.handle(Future.succeededFuture(msg + " " + name));
+  public void hello(JsonObject name, Handler<AsyncResult<String>> resultHandler) {
+    resultHandler.handle(Future.succeededFuture(msg + " " + name.getString("name")));
   }
 }

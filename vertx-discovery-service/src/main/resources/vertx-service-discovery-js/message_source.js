@@ -72,10 +72,10 @@ MessageSource.createRecord = function() {
  @param filter {Object} The filter, optional 
  @param resultHandler {function} the result handler 
  */
-MessageSource.get = function(vertx, discovery, filter, resultHandler) {
+MessageSource.getConsumer = function(vertx, discovery, filter, resultHandler) {
   var __args = arguments;
   if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
-    JMessageSource["get(io.vertx.core.Vertx,io.vertx.ext.discovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](vertx._jdel, discovery._jdel, utils.convParamJsonObject(filter), function(ar) {
+    JMessageSource["getConsumer(io.vertx.core.Vertx,io.vertx.ext.discovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](vertx._jdel, discovery._jdel, utils.convParamJsonObject(filter), function(ar) {
     if (ar.succeeded()) {
       resultHandler(utils.convReturnVertxGen(ar.result(), MessageConsumer), null);
     } else {

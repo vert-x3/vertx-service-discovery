@@ -18,6 +18,7 @@ package io.vertx.ext.service.groovy;
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
 import io.vertx.core.json.JsonObject
+import io.vertx.core.json.JsonObject
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 /**
@@ -32,7 +33,7 @@ public class HelloService {
   public Object getDelegate() {
     return delegate;
   }
-  public void hello(String name, Handler<AsyncResult<String>> resultHandler) {
-    delegate.hello(name, resultHandler);
+  public void hello(Map<String, Object> name, Handler<AsyncResult<String>> resultHandler) {
+    delegate.hello(name != null ? new io.vertx.core.json.JsonObject(name) : null, resultHandler);
   }
 }
