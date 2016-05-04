@@ -31,10 +31,17 @@ public class ClassLoaderUtils {
 
     // First try with the current classloader
     Class<T> loaded = tryToLoad(className, CURRENT);
+
+    // If not found, delegate to the given classloader (if set).
     if (loaded == null && classLoader != null) {
-      // If not found, delegate to the given classloader (if set).
       return tryToLoad(className, classLoader);
     }
+
+    // Last attempt, try with the TCCL
+    if (loaded == null  && Thread.currentThread().getContextClassLoader() != null) {
+      return tryToLoad(className, Thread.currentThread().getContextClassLoader());
+    }
+
     return loaded;
   }
 
