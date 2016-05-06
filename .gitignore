@@ -22,3 +22,4 @@ dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
 .yardoc
+vertx-discovery-service/.vertx
