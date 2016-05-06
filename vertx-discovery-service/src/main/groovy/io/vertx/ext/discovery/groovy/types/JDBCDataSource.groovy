@@ -54,8 +54,19 @@ public class JDBCDataSource {
    * @param filter The filter, optional
    * @param resultHandler the result handler
    */
-  public static <T> void get(Vertx vertx, DiscoveryService discovery, Map<String, Object> filter, Handler<AsyncResult<JDBCClient>> resultHandler) {
-    io.vertx.ext.discovery.types.JDBCDataSource.get(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.ext.jdbc.JDBCClient>>() {
+  public static <T> void getJDBCClient(Vertx vertx, DiscoveryService discovery, Map<String, Object> filter, Handler<AsyncResult<JDBCClient>> resultHandler) {
+    io.vertx.ext.discovery.types.JDBCDataSource.getJDBCClient(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.ext.jdbc.JDBCClient>>() {
+      public void handle(AsyncResult<io.vertx.ext.jdbc.JDBCClient> ar) {
+        if (ar.succeeded()) {
+          resultHandler.handle(io.vertx.core.Future.succeededFuture(InternalHelper.safeCreate(ar.result(), io.vertx.groovy.ext.jdbc.JDBCClient.class)));
+        } else {
+          resultHandler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
+        }
+      }
+    } : null);
+  }
+  public static <T> void getJDBCClient(Vertx vertx, DiscoveryService discovery, Map<String, Object> filter, Map<String, Object> consumerConfiguration, Handler<AsyncResult<JDBCClient>> resultHandler) {
+    io.vertx.ext.discovery.types.JDBCDataSource.getJDBCClient(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, consumerConfiguration != null ? new io.vertx.core.json.JsonObject(consumerConfiguration) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.ext.jdbc.JDBCClient>>() {
       public void handle(AsyncResult<io.vertx.ext.jdbc.JDBCClient> ar) {
         if (ar.succeeded()) {
           resultHandler.handle(io.vertx.core.Future.succeededFuture(InternalHelper.safeCreate(ar.result(), io.vertx.groovy.ext.jdbc.JDBCClient.class)));

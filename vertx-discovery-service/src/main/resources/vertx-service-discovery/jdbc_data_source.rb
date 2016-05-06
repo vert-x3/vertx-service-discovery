@@ -33,18 +33,19 @@ module VertxServiceDiscovery
       end
       raise ArgumentError, "Invalid arguments when calling create_record(param_1,param_2,param_3)"
     end
-    #  Convenient method that looks for a JDBC datasource source and provides the configured {::VertxJdbc::JDBCClient}. The
-    #  async result is marked as failed is there are no matching services, or if the lookup fails.
-    # @param [::Vertx::Vertx] vertx The vert.x instance
-    # @param [::VertxServiceDiscovery::DiscoveryService] discovery The discovery service
-    # @param [Hash{String => Object}] filter The filter, optional
-    # @yield the result handler
+    # @param [::Vertx::Vertx] vertx 
+    # @param [::VertxServiceDiscovery::DiscoveryService] discovery 
+    # @param [Hash{String => Object}] filter 
+    # @param [Hash{String => Object}] consumerConfiguration 
+    # @yield 
     # @return [void]
-    def self.get(vertx=nil,discovery=nil,filter=nil)
-      if vertx.class.method_defined?(:j_del) && discovery.class.method_defined?(:j_del) && filter.class == Hash && block_given?
-        return Java::IoVertxExtDiscoveryTypes::JDBCDataSource.java_method(:get, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(vertx.j_del,discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxJdbc::JDBCClient) : nil) }))
+    def self.get_jdbc_client(vertx=nil,discovery=nil,filter=nil,consumerConfiguration=nil)
+      if vertx.class.method_defined?(:j_del) && discovery.class.method_defined?(:j_del) && filter.class == Hash && block_given? && consumerConfiguration == nil
+        return Java::IoVertxExtDiscoveryTypes::JDBCDataSource.java_method(:getJDBCClient, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(vertx.j_del,discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxJdbc::JDBCClient) : nil) }))
+      elsif vertx.class.method_defined?(:j_del) && discovery.class.method_defined?(:j_del) && filter.class == Hash && consumerConfiguration.class == Hash && block_given?
+        return Java::IoVertxExtDiscoveryTypes::JDBCDataSource.java_method(:getJDBCClient, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(vertx.j_del,discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),::Vertx::Util::Utils.to_json_object(consumerConfiguration),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxJdbc::JDBCClient) : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling get(vertx,discovery,filter)"
+      raise ArgumentError, "Invalid arguments when calling get_jdbc_client(vertx,discovery,filter,consumerConfiguration)"
     end
   end
 end

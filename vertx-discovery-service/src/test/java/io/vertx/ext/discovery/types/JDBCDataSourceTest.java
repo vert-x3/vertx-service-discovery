@@ -107,7 +107,7 @@ public class JDBCDataSourceTest {
 
 
     AtomicBoolean success = new AtomicBoolean();
-    JDBCDataSource.get(vertx, discovery, new JsonObject().put("name", "some-hsql-db"), conf,
+    JDBCDataSource.getJDBCClient(vertx, discovery, new JsonObject().put("name", "some-hsql-db"), conf,
         ar -> {
           JDBCClient client = ar.result();
           client.getConnection(conn -> {

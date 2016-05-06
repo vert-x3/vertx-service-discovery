@@ -80,8 +80,8 @@ public interface JDBCDataSource extends DataSource {
    * @param resultHandler the result handler
    * @param <T>           the class of the message
    */
-  static <T> void get(Vertx vertx, DiscoveryService discovery, JsonObject filter,
-                      Handler<AsyncResult<JDBCClient>> resultHandler) {
+  static <T> void getJDBCClient(Vertx vertx, DiscoveryService discovery, JsonObject filter,
+                                Handler<AsyncResult<JDBCClient>> resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
@@ -92,8 +92,8 @@ public interface JDBCDataSource extends DataSource {
   }
 
 
-  static <T> void get(Vertx vertx, DiscoveryService discovery, JsonObject filter, JsonObject consumerConfiguration,
-                      Handler<AsyncResult<JDBCClient>> resultHandler) {
+  static <T> void getJDBCClient(Vertx vertx, DiscoveryService discovery, JsonObject filter, JsonObject consumerConfiguration,
+                                Handler<AsyncResult<JDBCClient>> resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));

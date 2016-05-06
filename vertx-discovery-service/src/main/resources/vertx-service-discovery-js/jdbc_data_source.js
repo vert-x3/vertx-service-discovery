@@ -58,23 +58,30 @@ JDBCDataSource.createRecord = function() {
 };
 
 /**
- Convenient method that looks for a JDBC datasource source and provides the configured {@link JDBCClient}. The
- async result is marked as failed is there are no matching services, or if the lookup fails.
 
  @memberof module:vertx-service-discovery-js/jdbc_data_source
- @param vertx {Vertx} The vert.x instance 
- @param discovery {DiscoveryService} The discovery service 
- @param filter {Object} The filter, optional 
- @param resultHandler {function} the result handler 
+ @param vertx {Vertx} 
+ @param discovery {DiscoveryService} 
+ @param filter {Object} 
+ @param consumerConfiguration {Object} 
+ @param resultHandler {function} 
  */
-JDBCDataSource.get = function(vertx, discovery, filter, resultHandler) {
+JDBCDataSource.getJDBCClient = function() {
   var __args = arguments;
   if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
-    JJDBCDataSource["get(io.vertx.core.Vertx,io.vertx.ext.discovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](vertx._jdel, discovery._jdel, utils.convParamJsonObject(filter), function(ar) {
+    JJDBCDataSource["getJDBCClient(io.vertx.core.Vertx,io.vertx.ext.discovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](__args[0]._jdel, __args[1]._jdel, utils.convParamJsonObject(__args[2]), function(ar) {
     if (ar.succeeded()) {
-      resultHandler(utils.convReturnVertxGen(ar.result(), JDBCClient), null);
+      __args[3](utils.convReturnVertxGen(ar.result(), JDBCClient), null);
     } else {
-      resultHandler(null, ar.cause());
+      __args[3](null, ar.cause());
+    }
+  });
+  }else if (__args.length === 5 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && (typeof __args[2] === 'object' && __args[2] != null) && (typeof __args[3] === 'object' && __args[3] != null) && typeof __args[4] === 'function') {
+    JJDBCDataSource["getJDBCClient(io.vertx.core.Vertx,io.vertx.ext.discovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](__args[0]._jdel, __args[1]._jdel, utils.convParamJsonObject(__args[2]), utils.convParamJsonObject(__args[3]), function(ar) {
+    if (ar.succeeded()) {
+      __args[4](utils.convReturnVertxGen(ar.result(), JDBCClient), null);
+    } else {
+      __args[4](null, ar.cause());
     }
   });
   } else throw new TypeError('function invoked with invalid arguments');
