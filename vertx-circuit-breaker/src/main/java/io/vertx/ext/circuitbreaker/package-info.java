@@ -119,6 +119,45 @@
  * circuit breaker is allowed to execute the dangerous operation. Should the call succeed, the circuit breaker resets
  * and returns to the {@code closed} state, ready for more routine operation. If this trial call fails, however, the circuit
  * breaker returns to the {@code open} state until another timeout elapses.
+ *
+ *
+ * [language, java]
+ * ----
+ * == Using Netflix Hystrix
+ *
+ * https://github.com/Netflix/Hystrix[Hystrix] provides an implementation of the circuit breaker pattern. You can use
+ * Hystrix with Vert.x instead of this circuit breaker or in combination of. This section describes the tricks
+ * to use Hystrix in a vert.x application.
+ *
+ * First you would need to add the Hystrix dependency to your classpath or build descriptor. Refer to the Hystrix
+ * page to details. Them, you need to isolate the "protected" call in a `Command`. Once you have your command, you
+ * can execute it:
+ *
+ * [source, $lang]
+ * \----
+ * {@link examples.hystrix.HystrixExamples#exampleHystrix1()}
+ * \----
+ *
+ * However, the command execution is blocking, so have to call the command execution either in an `executeBlocking`
+ * block or in a worker verticle:
+ *
+ * [source, $lang]
+ * \----
+ * {@link examples.hystrix.HystrixExamples#exampleHystrix2(io.vertx.core.Vertx)}
+ * \----
+ *
+ * If you use the async support of Hystrix, be careful that callbacks are not called in a vert.x thread and you have
+ * to keep a reference on the context before the execution (with {@link io.vertx.core.Vertx#getOrCreateContext()},
+ * and in the callback, switch back to the event loop using
+ * {@link io.vertx.core.Vertx#runOnContext(io.vertx.core.Handler)}. Without this, you are loosing the Vert.x
+ * concurrency model and have to manage the synchronization and ordering yourself:
+ *
+ * [source, $lang]
+ * \----
+ * {@link examples.hystrix.HystrixExamples#exampleHystrix3(io.vertx.core.Vertx)}
+ * \----
+ * ----
+ *
  */
 @ModuleGen(name = "vertx-circuit-breaker", groupPackage = "io.vertx.ext.circuitbreaker")
 @Document(fileName = "index.ad")

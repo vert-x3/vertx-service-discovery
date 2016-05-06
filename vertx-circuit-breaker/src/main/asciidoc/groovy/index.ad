@@ -189,3 +189,5 @@ operation has a chance of succeeding, so it goes into the `half-open` state. In 
 circuit breaker is allowed to execute the dangerous operation. Should the call succeed, the circuit breaker resets
 and returns to the `closed` state, ready for more routine operation. If this trial call fails, however, the circuit
 breaker returns to the `open` state until another timeout elapses.
+
+

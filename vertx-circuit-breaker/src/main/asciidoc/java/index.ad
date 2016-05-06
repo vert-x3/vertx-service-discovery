@@ -179,3 +179,55 @@ operation has a chance of succeeding, so it goes into the `half-open` state. In 
 circuit breaker is allowed to execute the dangerous operation. Should the call succeed, the circuit breaker resets
 and returns to the `closed` state, ready for more routine operation. If this trial call fails, however, the circuit
 breaker returns to the `open` state until another timeout elapses.
+
+
+== Using Netflix Hystrix
+
+https://github.com/Netflix/Hystrix[Hystrix] provides an implementation of the circuit breaker pattern. You can use
+Hystrix with Vert.x instead of this circuit breaker or in combination of. This section describes the tricks
+to use Hystrix in a vert.x application.
+
+First you would need to add the Hystrix dependency to your classpath or build descriptor. Refer to the Hystrix
+page to details. Them, you need to isolate the "protected" call in a `Command`. Once you have your command, you
+can execute it:
+
+[source, java]
+----
+HystrixCommand<String> someCommand = getSomeCommandInstance();
+String result = someCommand.execute();
+----
+
+However, the command execution is blocking, so have to call the command execution either in an `executeBlocking`
+block or in a worker verticle:
+
+[source, java]
+----
+HystrixCommand<String> someCommand = getSomeCommandInstance();
+vertx.<String>executeBlocking(
+future -> future.complete(someCommand.execute()),
+ar -> {
+// back on the event loop
+String result = ar.result();
+}
+);
+----
+
+If you use the async support of Hystrix, be careful that callbacks are not called in a vert.x thread and you have
+to keep a reference on the context before the execution (with `link:../../apidocs/io/vertx/core/Vertx.html#getOrCreateContext--[getOrCreateContext]`,
+and in the callback, switch back to the event loop using
+`link:../../apidocs/io/vertx/core/Vertx.html#runOnContext-io.vertx.core.Handler-[runOnContext]`. Without this, you are loosing the Vert.x
+concurrency model and have to manage the synchronization and ordering yourself:
+
+[source, java]
+----
+vertx.runOnContext(v -> {
+Context context = vertx.getOrCreateContext();
+HystrixCommand<String> command = getSomeCommandInstance();
+command.observe().subscribe(result -> {
+context.runOnContext(v2 -> {
+// Back on context (event loop or worker)
+String r = result;
+});
+});
+});
+----

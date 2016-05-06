@@ -30,6 +30,7 @@
 
   <properties>
     <doc.skip>false</doc.skip>
+    <hystrix.version>1.5.2</hystrix.version>
   </properties>
 
   <dependencies>
@@ -48,6 +49,15 @@
       <artifactId>rest-assured</artifactId>
       <version>2.8.0</version>
       <scope>test</scope>
+    </dependency>
+
+    <!-- For test and example -->
+    <dependency>
+      <groupId>com.netflix.hystrix</groupId>
+      <artifactId>hystrix-core</artifactId>
+      <version>${hystrix.version}</version>
+      <scope>provided</scope>
+      <optional>true</optional>
     </dependency>
   </dependencies>
 

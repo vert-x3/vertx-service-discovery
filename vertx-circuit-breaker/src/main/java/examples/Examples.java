@@ -16,6 +16,7 @@
 
 package examples;
 
+import com.netflix.hystrix.HystrixCommand;
 import io.vertx.core.Vertx;
 import io.vertx.ext.circuitbreaker.CircuitBreaker;
 import io.vertx.ext.circuitbreaker.CircuitBreakerOptions;
