@@ -85,7 +85,7 @@
  * provider. It contains a name, some metadata, a location object (describing where is the service). This record is
  * the only objects shared by the provider (having published it) and the consumer (retrieve it when doing a lookup).
  * 
- * The metadata and even the location format depends on the service type.
+ * The metadata and even the location format depends on the `service type` (see below).
  * 
  * A record is published when the provider is ready to be used, and withdrawn when the service provider is stopping.
  * 
@@ -96,10 +96,12 @@
  * 
  * === Service Consumer
  * 
- * Service consumers search for services in the discovery service. Each lookup retrieves 0..n
- * {@link io.vertx.ext.discovery.Record}. From these records, a consumer can build a
- * {@link io.vertx.ext.discovery.ServiceReference}. This reference let the consumer manages the binding with the
- * provider. It can retrieve the _service object_, or release the service.
+ * Service consumers search for services in the discovery service. Each lookup retrieves `0..n`
+ * {@link io.vertx.ext.discovery.Record}. From these records, a consumer can retrieve a
+ * {@link io.vertx.ext.discovery.ServiceReference}, representing the binding between the consumer and the provider.
+ * This reference allows the consumer to retrieve the _service object_ (to use the service),  and release the service.
+ *
+ * It is important to release service references to cleanup the objects and update the service usages.
  * 
  * === Service object
  * 
@@ -117,21 +119,31 @@
  * 
  * Some service types are provided by the the discovery service, but you can add your own.
  * 
- * === Service event
+ * === Service events
  * 
  * Every time a service provider is published or withdrawn, an event is fired on the event bus. This event contains
  * the record that has been modified.
+ *
+ * In addition, in order to track who is using who, every time a reference is retrieved with
+ * {@link io.vertx.ext.discovery.DiscoveryService#getReference(io.vertx.ext.discovery.Record)} or released with
+ * {@link io.vertx.ext.discovery.ServiceReference#release()}, events are emitted on the event bus to track the
+ * service usages.
+ *
+ * More details on these events below.
  * 
  * === Backend
  * 
- * The discovery service used a distributed structure to store the records. So, all member of the cluster are access
+ * The discovery service used a distributed structure to store the records. So, all members of the cluster have access
  * to all the records. This is the default backend implementation. You can implement your own by implementing the
  * {@link io.vertx.ext.discovery.spi.DiscoveryBackend} SPI.
+ *
+ * Notice that the discovery does not required vert.x clustering. In single-node mode, the map is a local map. IT can
+ * be populated with {@link io.vertx.ext.discovery.spi.DiscoveryBridge}s.
  * 
  * == Creating the discovery service
  * 
- * Publishers and consumers must create their own {@link io.vertx.ext.discovery.DiscoveryService} instance to use the
- * discovery infrastructure:
+ * Publishers and consumers must create their own {@link io.vertx.ext.discovery.DiscoveryService}
+ * instance to use the discovery infrastructure:
  * 
  * [source,$lang]
  * ----
@@ -139,10 +151,10 @@
  * ----
  * 
  * By default, the announce address (the event bus address on which service events are sent is: `vertx.discovery
- * .announce`.
+ * .announce`. You can also configure a name used for the service usage (see section about service usage).
  * 
  * When you don't need the discovery service, don't forget to close it. It closes the different discovery bridge you
- * have configured.
+ * have configured and releases the service references.
  * 
  * == Publishing services
  * 
@@ -152,12 +164,12 @@
  * 2. publish this record
  * 3. keep the published record that is used to un-publish a service or modify it.
  * 
- * To create records, you can either use the {@link io.vertx.ext.discovery.Record} class, or use convenient method
- * from the service type.
+ * To create records, you can either use the {@link io.vertx.ext.discovery.Record} class, or use convenient methods
+ * from the service types.
  * 
  * [source,$lang]
  * ----
- * {@link examples.Examples#example2(io.vertx.core.Vertx, io.vertx.ext.discovery.DiscoveryService)}
+ * {@link examples.Examples##example2(DiscoveryService)}
  * ----
  * 
  * It is important to keep a reference on the returned records, as this record has been extended by a `registration id`.
@@ -168,7 +180,7 @@
  * 
  * [source,$lang]
  * ----
- * {@link examples.Examples#example3(io.vertx.core.Vertx, io.vertx.ext.discovery.DiscoveryService, io.vertx.ext.discovery.Record)}
+ * {@link examples.Examples##example3(DiscoveryService, Record)}
  * ----
  * 
  * == Looking for service
@@ -194,10 +206,10 @@
  * 
  * [source,$lang]
  * ----
- * {@link examples.Examples#example4(io.vertx.core.Vertx, io.vertx.ext.discovery.DiscoveryService)}
+ * {@link examples.Examples##example4(DiscoveryService)}
  * ----
  * 
- * == Using a service
+ * == Retrieving a service reference
  * 
  * Once you have chosen the {@link io.vertx.ext.discovery.Record}, you can retrieve a
  * {@link io.vertx.ext.discovery.ServiceReference} and then the service object:
@@ -208,6 +220,17 @@
  * ----
  * 
  * Don't forget to release the reference once done.
+ *
+ * The service reference represents a binding with the service provider.
+ *
+ * When retrieving a service reference you can pass a {@link io.vertx.core.json.JsonObject} used to configure the
+ * service object. It can contains various data about the service objects. Some service types do not needs additional
+ * configuration, some requires configuration (as data sources):
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.Examples#example51(io.vertx.ext.discovery.DiscoveryService, io.vertx.ext.discovery.Record, io.vertx.core.json.JsonObject)}
+ * ----
  * 
  * == Types of services
  * 
@@ -222,11 +245,100 @@
  * type is the proxies interface (the location is the address).
  * * {@link io.vertx.ext.discovery.types.MessageSource} - for message source (publisher), the service object is a
  * {@link io.vertx.core.eventbus.MessageConsumer} (the location is the address).
+ * * {@link io.vertx.ext.discovery.types.JDBCDataSource} - for JDBC data sources, the service object is a
+ * {@link io.vertx.ext.jdbc.JDBCClient} (the configuration of the client is computed from the location, metadata and
+ * consumer configuration).
+ *
+ * This section gives details about service types and describes how can be used the default service types.
+ *
+ * === Services with no type
+ *
+ * Some records may have no type ({@link io.vertx.ext.discovery.spi.ServiceType#UNKNOWN}). It is not possible to
+ * retrieve a reference for these records, but you can build the connection details from the `location` and
+ * `metadata` of the {@link io.vertx.ext.discovery.Record}.
+ *
+ * Using these services does not fire service usage events.
+ *
+ * [language, java]
+ * ----
+ * === Implementing your own service type
  * 
- * Some records may have no type. It is not possible to retrieve a reference for these records, but you can build the
- * connection details from the `location` object in the record.
- * 
- * You can create your own service type by implementing the {@link io.vertx.ext.discovery.spi.ServiceType} SPI.
+ * You can create your own service type by implementing the {@link io.vertx.ext.discovery.spi.ServiceType} SPI:
+ *
+ * 1. (optional) Create a public interface extending {@link io.vertx.ext.discovery.spi.ServiceType}. This interface is
+ * only used to provide helper methods to ease the usage of your type such as `createRecord` methods, `getX` where `X`
+ * is the type of service object you retrieve and so on. Check {@link io.vertx.ext.discovery.types.HttpEndpoint} or
+ * {@link io.vertx.ext.discovery.types.MessageSource} for examples
+ * 2. Create a class implementing {@link io.vertx.ext.discovery.spi.ServiceType} or the interface you created in the
+ * step 1. The type has a `name`, and a method to create the {@link io.vertx.ext.discovery.ServiceReference} for this
+ * type. The name must match the `type` field of the {@link io.vertx.ext.discovery.Record} associated with your type.
+ * 3. Create a class extending `io.vertx.ext.discovery.types.AbstractServiceReference`. You can parameterized
+ * the class with the type of service object your are going to return. You must implement
+ * `AbstractServiceReference#retrieve()` that create the service object. This
+ * method is only called once. If your service object needs cleanup, also override
+ * `AbstractServiceReference#close()`.
+ * 4. Create a `META-INF/services/io.vertx.ext.discovery.spi.ServiceType` file that is packaged in your jar. In this
+ * file, just indicate the fully qualified name of the class created at step 2.
+ * 5. Creates a jar containing the service type interface (step 1), the implementation (step 2 and 3) and the
+ * service descriptor file (step 4). Put this jar in the classpath of your application. Here you go, your service
+ * type is available.
+ * ----
+ *
+ * === HTTP endpoints
+ *
+ * A HTTP endpoint represents a REST API or a service accessible using HTTP requests. The HTTP endpoint service
+ * objects are {@link io.vertx.core.http.HttpClient} configured with the host, port and ssl.
+ *
+ * ==== Publishing a HTTP endpoint
+ *
+ * To publish a HTTP endpoint, you need a {@link io.vertx.ext.discovery.Record}. You can create the record using
+ * {@link io.vertx.ext.discovery.types.HttpEndpoint#createRecord(java.lang.String, java.lang.String, int, java.lang.String, io.vertx.core.json.JsonObject)}.
+ *
+ * The next snippet illustrates hot to create {@link io.vertx.ext.discovery.Record} from
+ * {@link io.vertx.ext.discovery.types.HttpEndpoint}:
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.HTTPEndpointExamples#example1(io.vertx.ext.discovery.DiscoveryService)}
+ * ----
+ *
+ * When you run your service in a container or on the cloud, it may not knows its public IP and public port, so the
+ * publication must be done by another entity having this info. Generally it's a bridge.
+ *
+ * ==== Consuming a HTTP endpoint
+ *
+ * Once a HTTP endpoint is published, a consumer can retrieve it. The service object is a
+ * {@link io.vertx.core.http.HttpClient} with a port and host configured:
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.HTTPEndpointExamples#example2(io.vertx.ext.discovery.DiscoveryService)}
+ * ----
+ *
+ * You can also use the
+ * {@link io.vertx.ext.discovery.types.HttpEndpoint#getClient(io.vertx.ext.discovery.DiscoveryService, io.vertx.core.json.JsonObject, io.vertx.core.Handler)}
+ * method to combine lookup and service retrieval in one call:
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.HTTPEndpointExamples#example3(io.vertx.ext.discovery.DiscoveryService)}
+ * ----
+ *
+ * In this second version, the service object is released using
+ * {@link io.vertx.ext.discovery.DiscoveryService#releaseServiceObject(io.vertx.ext.discovery.DiscoveryService, java.lang.Object)},
+ * as you don't hold the service reference.
+ *
+ * === Event bus services
+ *
+ * TODO
+ *
+ * === Message source
+ *
+ * TODO
+ *
+ * === JDBC Data source
+ *
+ * TODO
  * 
  * == Listening for service arrivals and departures
  * 

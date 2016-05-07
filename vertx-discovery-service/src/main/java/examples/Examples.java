@@ -25,7 +25,10 @@ import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.ServiceReference;
 import io.vertx.ext.discovery.types.EventBusService;
 import io.vertx.ext.discovery.types.HttpEndpoint;
+import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.groovy.core.eventbus.MessageConsumer;
+
+import java.util.List;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -37,8 +40,10 @@ public class Examples {
     DiscoveryService service = DiscoveryService.create(vertx);
 
     // Customize the configuration
-    DiscoveryService service2 = DiscoveryService.create(vertx, new DiscoveryOptions()
-        .setAnnounceAddress("service-announce"));
+    DiscoveryService service2 = DiscoveryService.create(vertx,
+        new DiscoveryOptions()
+            .setAnnounceAddress("service-announce")
+            .setName("my-name"));
 
     // Do something...
 
@@ -46,7 +51,7 @@ public class Examples {
     service2.close();
   }
 
-  public void example2(Vertx vertx, DiscoveryService service) {
+  public void example2(DiscoveryService service) {
     // Manual record creation
     Record record = new Record()
         .setType(EventBusService.TYPE)
@@ -75,7 +80,7 @@ public class Examples {
     });
   }
 
-  public void example3(Vertx vertx, DiscoveryService service, Record record) {
+  public void example3(DiscoveryService service, Record record) {
 
     service.unpublish(record.getRegistration(), ar -> {
       if (ar.succeeded()) {
@@ -86,7 +91,7 @@ public class Examples {
     });
   }
 
-  public void example4(Vertx vertx, DiscoveryService service) {
+  public void example4(DiscoveryService service) {
     // Get any record
     service.getRecord(null, ar -> {
       if (ar.succeeded()) {
@@ -116,7 +121,8 @@ public class Examples {
     // Get all records matching the filter
     service.getRecords(new JsonObject().put("some-label", "some-value"), ar -> {
       if (ar.succeeded()) {
-        if (! ar.result().isEmpty()) {
+        List<Record> results = ar.result();
+        if (!results.isEmpty()) {
           // we have matching records
         } else {
           // the lookup succeeded, but no matching service
@@ -135,6 +141,19 @@ public class Examples {
     HttpClient client = reference.get();
     // For message source
     MessageConsumer consumer = reference.get();
+
+    // When done with the service
+    reference.release();
+  }
+
+  public void example51(DiscoveryService discovery, Record record, JsonObject conf) {
+    ServiceReference reference = discovery.getReferenceWithConfiguration(record, conf);
+
+    // Then, gets the service object, the returned type depends on the service type:
+    // For http endpoint:
+    JDBCClient client = reference.get();
+
+    // Do something with the client...
 
     // When done with the service
     reference.release();
