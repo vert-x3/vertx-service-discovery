@@ -23,7 +23,7 @@ module VertxServiceDiscovery
     # @return [void]
     def release
       if !block_given?
-        return @j_del.java_method(:release, []).call()
+        return @j_del.java_method(:releaseServiceObject, []).call()
       end
       raise ArgumentError, "Invalid arguments when calling release()"
     end

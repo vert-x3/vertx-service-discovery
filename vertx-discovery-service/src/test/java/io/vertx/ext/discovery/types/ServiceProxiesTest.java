@@ -23,7 +23,6 @@ import io.vertx.ext.discovery.DiscoveryService;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.ServiceReference;
 import io.vertx.ext.discovery.impl.DiscoveryImpl;
-import io.vertx.ext.discovery.impl.ServiceTypes;
 import io.vertx.ext.service.HelloService;
 import io.vertx.ext.service.HelloServiceImpl;
 import io.vertx.serviceproxy.ProxyHelper;
@@ -118,7 +117,7 @@ public class ServiceProxiesTest {
     });
     await().untilAtomic(result, not(nullValue()));
 
-    EventBusService.release(discovery, found.get());
+    DiscoveryService.releaseServiceObject(discovery, found.get());
 
     assertThat(discovery.bindings()).hasSize(0);
   }

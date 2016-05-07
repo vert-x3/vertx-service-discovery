@@ -27,6 +27,7 @@ import io.vertx.ext.discovery.spi.DiscoveryBridge;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -194,4 +195,18 @@ public interface DiscoveryService {
    * @return the set of service references retrieved by this discovery service.
    */
   Set<ServiceReference> bindings();
+
+  /**
+   * Release the service object retrieved using {@code get} methods from the service type interface.
+   * It searches for the reference associated with the given object and release it.
+   *
+   * @param discovery the discovery service
+   * @param svcObject the service object
+   */
+  static void releaseServiceObject(DiscoveryService discovery, Object svcObject) {
+    Objects.requireNonNull(discovery);
+    Objects.requireNonNull(svcObject);
+    Collection<ServiceReference> references = discovery.bindings();
+    references.stream().filter(ref -> svcObject.equals(ref.cached())).forEach(discovery::release);
+  }
 }

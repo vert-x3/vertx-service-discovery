@@ -60,14 +60,5 @@ module VertxServiceDiscovery
       end
       raise ArgumentError, "Invalid arguments when calling get_proxy(param_1,param_2,param_3)"
     end
-    # @param [::VertxServiceDiscovery::DiscoveryService] discovery 
-    # @param [Object] svcObject 
-    # @return [void]
-    def self.release(discovery=nil,svcObject=nil)
-      if discovery.class.method_defined?(:j_del) && (svcObject.class == String  || svcObject.class == Hash || svcObject.class == Array || svcObject.class == NilClass || svcObject.class == TrueClass || svcObject.class == FalseClass || svcObject.class == Fixnum || svcObject.class == Float) && !block_given?
-        return Java::IoVertxExtDiscoveryTypes::EventBusService.java_method(:release, [Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::java.lang.Object.java_class]).call(discovery.j_del,::Vertx::Util::Utils.to_object(svcObject))
-      end
-      raise ArgumentError, "Invalid arguments when calling release(discovery,svcObject)"
-    end
   end
 end

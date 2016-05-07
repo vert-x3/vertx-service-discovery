@@ -110,7 +110,4 @@ public class EventBusService {
       }
     } : null);
   }
-  public static void release(DiscoveryService discovery, Object svcObject) {
-    io.vertx.ext.discovery.types.EventBusService.release(discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, svcObject != null ? InternalHelper.unwrapObject(svcObject) : null);
-  }
 }

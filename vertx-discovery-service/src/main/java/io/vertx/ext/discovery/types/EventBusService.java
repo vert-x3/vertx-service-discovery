@@ -183,9 +183,4 @@ public interface EventBusService extends ServiceType {
     JsonObject filter = new JsonObject().put("service.interface", itf);
     getProxy(discovery, filter, resultHandler);
   }
-
-  static void release(DiscoveryService discovery, Object svcObject) {
-    Collection<ServiceReference> references = discovery.bindings();
-    references.stream().filter(ref -> svcObject.equals(ref.cached())).forEach(discovery::release);
-  }
 }

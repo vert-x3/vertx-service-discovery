@@ -18,11 +18,11 @@ package io.vertx.ext.discovery.groovy;
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
 import io.vertx.core.json.JsonObject
-import java.util.List
-import io.vertx.ext.discovery.DiscoveryOptions
 import io.vertx.groovy.core.Vertx
 import io.vertx.ext.discovery.Record
 import java.util.Set
+import java.util.List
+import io.vertx.ext.discovery.DiscoveryOptions
 import io.vertx.core.json.JsonObject
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
@@ -217,5 +217,14 @@ public class DiscoveryService {
   public Set<ServiceReference> bindings() {
     def ret = (Set)delegate.bindings()?.collect({InternalHelper.safeCreate(it, io.vertx.ext.discovery.groovy.ServiceReference.class)}) as Set;
     return ret;
+  }
+  /**
+   * Release the service object retrieved using <code>get</code> methods from the service type interface.
+   * It searches for the reference associated with the given object and release it.
+   * @param discovery the discovery service
+   * @param svcObject the service object
+   */
+  public static void releaseServiceObject(DiscoveryService discovery, Object svcObject) {
+    io.vertx.ext.discovery.DiscoveryService.releaseServiceObject(discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, svcObject != null ? InternalHelper.unwrapObject(svcObject) : null);
   }
 }

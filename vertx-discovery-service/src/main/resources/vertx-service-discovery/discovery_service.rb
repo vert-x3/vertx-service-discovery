@@ -168,5 +168,16 @@ module VertxServiceDiscovery
       end
       raise ArgumentError, "Invalid arguments when calling bindings()"
     end
+    #  Release the service object retrieved using <code>get</code> methods from the service type interface.
+    #  It searches for the reference associated with the given object and release it.
+    # @param [::VertxServiceDiscovery::DiscoveryService] discovery the discovery service
+    # @param [Object] svcObject the service object
+    # @return [void]
+    def self.release_service_object(discovery=nil,svcObject=nil)
+      if discovery.class.method_defined?(:j_del) && (svcObject.class == String  || svcObject.class == Hash || svcObject.class == Array || svcObject.class == NilClass || svcObject.class == TrueClass || svcObject.class == FalseClass || svcObject.class == Fixnum || svcObject.class == Float) && !block_given?
+        return Java::IoVertxExtDiscovery::DiscoveryService.java_method(:releaseServiceObject, [Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::java.lang.Object.java_class]).call(discovery.j_del,::Vertx::Util::Utils.to_object(svcObject))
+      end
+      raise ArgumentError, "Invalid arguments when calling release_service_object(discovery,svcObject)"
+    end
   end
 end

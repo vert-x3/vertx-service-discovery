@@ -248,5 +248,20 @@ DiscoveryService.create = function() {
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
+/**
+ Release the service object retrieved using <code>get</code> methods from the service type interface.
+ It searches for the reference associated with the given object and release it.
+
+ @memberof module:vertx-service-discovery-js/discovery_service
+ @param discovery {DiscoveryService} the discovery service 
+ @param svcObject {Object} the service object 
+ */
+DiscoveryService.releaseServiceObject = function(discovery, svcObject) {
+  var __args = arguments;
+  if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] !== 'function') {
+    JDiscoveryService["releaseServiceObject(io.vertx.ext.discovery.DiscoveryService,java.lang.Object)"](discovery._jdel, utils.convParamTypeUnknown(svcObject));
+  } else throw new TypeError('function invoked with invalid arguments');
+};
+
 // We export the Constructor function
 module.exports = DiscoveryService;

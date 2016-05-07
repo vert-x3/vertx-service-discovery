@@ -102,18 +102,5 @@ EventBusService.getProxy = function() {
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
-/**
-
- @memberof module:vertx-service-discovery-js/event_bus_service
- @param discovery {DiscoveryService} 
- @param svcObject {Object} 
- */
-EventBusService.release = function(discovery, svcObject) {
-  var __args = arguments;
-  if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] !== 'function') {
-    JEventBusService["release(io.vertx.ext.discovery.DiscoveryService,java.lang.Object)"](discovery._jdel, utils.convParamTypeUnknown(svcObject));
-  } else throw new TypeError('function invoked with invalid arguments');
-};
-
 // We export the Constructor function
 module.exports = EventBusService;
