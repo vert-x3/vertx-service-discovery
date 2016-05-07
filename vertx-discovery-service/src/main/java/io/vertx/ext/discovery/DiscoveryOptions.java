@@ -32,6 +32,7 @@ public class DiscoveryOptions {
 
   private String announceAddress = DEFAULT_ANNOUNCE_ADDRESS;
   private JsonObject backendConfiguration = new JsonObject();
+  private String name = null;
 
   /**
    * Creates a new instance of {@link DiscoveryOptions} using the default values.
@@ -48,6 +49,7 @@ public class DiscoveryOptions {
   public DiscoveryOptions(DiscoveryOptions other) {
     this.announceAddress = other.announceAddress;
     this.backendConfiguration = other.backendConfiguration.copy();
+    this.name = other.name;
   }
 
   /**
@@ -113,5 +115,14 @@ public class DiscoveryOptions {
       this.backendConfiguration = backendConfiguration;
     }
     return this;
+  }
+
+  public DiscoveryOptions setName(String name) {
+    this.name = name;
+    return this;
+  }
+
+  public String getName() {
+    return name;
   }
 }

@@ -33,6 +33,9 @@ public class DiscoveryOptionsConverter {
     if (json.getValue("backendConfiguration") instanceof JsonObject) {
       obj.setBackendConfiguration(((JsonObject)json.getValue("backendConfiguration")).copy());
     }
+    if (json.getValue("name") instanceof String) {
+      obj.setName((String)json.getValue("name"));
+    }
   }
 
   public static void toJson(DiscoveryOptions obj, JsonObject json) {
@@ -41,6 +44,9 @@ public class DiscoveryOptionsConverter {
     }
     if (obj.getBackendConfiguration() != null) {
       json.put("backendConfiguration", obj.getBackendConfiguration());
+    }
+    if (obj.getName() != null) {
+      json.put("name", obj.getName());
     }
   }
 }

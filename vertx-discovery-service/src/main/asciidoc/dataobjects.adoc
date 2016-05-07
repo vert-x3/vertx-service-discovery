@@ -23,6 +23,7 @@ Sets the configuration passed to the link.
  Refer to the backend documentation to get more details on the requirements. The default backend
  does not need any configuration.
 +++
+|[[name]]`name`|`String`|-
 |===
 
 [[HttpLocation]]
