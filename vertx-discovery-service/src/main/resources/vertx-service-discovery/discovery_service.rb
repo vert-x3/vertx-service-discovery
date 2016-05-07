@@ -57,18 +57,33 @@ module VertxServiceDiscovery
       end
       raise ArgumentError, "Invalid arguments when calling create(vertx,options)"
     end
-    #  Gets a service reference for the given record.
-    # @param [::Vertx::Vertx] vertx the vert.x instance
+    #  Gets a service reference from the given record.
     # @param [Hash] record the chosen record
-    # @param [Hash{String => Object}] consumerConfiguration some additional (optional) configuration to configure the service object created from the service reference.
-    # @return [::VertxServiceDiscovery::ServiceReference] the service reference, that allows retrieving the service object
-    def self.get_service_reference(vertx=nil,record=nil,consumerConfiguration=nil)
-      if vertx.class.method_defined?(:j_del) && record.class == Hash && !block_given? && consumerConfiguration == nil
-        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtDiscovery::DiscoveryService.java_method(:getServiceReference, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::Record.java_class]).call(vertx.j_del,Java::IoVertxExtDiscovery::Record.new(::Vertx::Util::Utils.to_json_object(record))),::VertxServiceDiscovery::ServiceReference)
-      elsif vertx.class.method_defined?(:j_del) && record.class == Hash && consumerConfiguration.class == Hash && !block_given?
-        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtDiscovery::DiscoveryService.java_method(:getServiceReference, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::Record.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(vertx.j_del,Java::IoVertxExtDiscovery::Record.new(::Vertx::Util::Utils.to_json_object(record)),::Vertx::Util::Utils.to_json_object(consumerConfiguration)),::VertxServiceDiscovery::ServiceReference)
+    # @return [::VertxServiceDiscovery::ServiceReference] the service reference, that allows retrieving the service object. Once called the service reference is cached, and need to be released.
+    def get_reference(record=nil)
+      if record.class == Hash && !block_given?
+        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:getReference, [Java::IoVertxExtDiscovery::Record.java_class]).call(Java::IoVertxExtDiscovery::Record.new(::Vertx::Util::Utils.to_json_object(record))),::VertxServiceDiscovery::ServiceReference)
       end
-      raise ArgumentError, "Invalid arguments when calling get_service_reference(vertx,record,consumerConfiguration)"
+      raise ArgumentError, "Invalid arguments when calling get_reference(record)"
+    end
+    #  Gets a service reference from the given record, the reference is configured with the given json object.
+    # @param [Hash] record the chosen record
+    # @param [Hash{String => Object}] configuration the configuration
+    # @return [::VertxServiceDiscovery::ServiceReference] the service reference, that allows retrieving the service object. Once called the service reference is cached, and need to be released.
+    def get_reference_with_configuration(record=nil,configuration=nil)
+      if record.class == Hash && configuration.class == Hash && !block_given?
+        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:getReferenceWithConfiguration, [Java::IoVertxExtDiscovery::Record.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(Java::IoVertxExtDiscovery::Record.new(::Vertx::Util::Utils.to_json_object(record)),::Vertx::Util::Utils.to_json_object(configuration)),::VertxServiceDiscovery::ServiceReference)
+      end
+      raise ArgumentError, "Invalid arguments when calling get_reference_with_configuration(record,configuration)"
+    end
+    #  Releases the service reference.
+    # @param [::VertxServiceDiscovery::ServiceReference] reference the reference to release, must not be <code>null</code>
+    # @return [true,false] whether or not the reference has been released.
+    def release?(reference=nil)
+      if reference.class.method_defined?(:j_del) && !block_given?
+        return @j_del.java_method(:release, [Java::IoVertxExtDiscovery::ServiceReference.java_class]).call(reference.j_del)
+      end
+      raise ArgumentError, "Invalid arguments when calling release?(reference)"
     end
     #  Closes the discovery service
     # @return [void]
@@ -144,6 +159,14 @@ module VertxServiceDiscovery
         return @j_del.java_method(:update, [Java::IoVertxExtDiscovery::Record.java_class,Java::IoVertxCore::Handler.java_class]).call(Java::IoVertxExtDiscovery::Record.new(::Vertx::Util::Utils.to_json_object(record)),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result != nil ? JSON.parse(ar.result.toJson.encode) : nil : nil) }))
       end
       raise ArgumentError, "Invalid arguments when calling update(record)"
+    end
+    #  @return the set of service references retrieved by this discovery service.
+    # @return [Set<::VertxServiceDiscovery::ServiceReference>]
+    def bindings
+      if !block_given?
+        return ::Vertx::Util::Utils.to_set(@j_del.java_method(:bindings, []).call()).map! { |elt| ::Vertx::Util::Utils.safe_create(elt,::VertxServiceDiscovery::ServiceReference) }
+      end
+      raise ArgumentError, "Invalid arguments when calling bindings()"
     end
   end
 end

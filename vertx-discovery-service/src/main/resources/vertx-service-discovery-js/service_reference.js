@@ -64,7 +64,22 @@ var ServiceReference = function(j_val) {
   };
 
   /**
+   Gets the service object if already retrieved. It won't try to acquire the service object if not retrieved yet.
+
+   @public
+
+   @return {Object} the object, <code>null</code> if not yet retrieved
+   */
+  this.cached = function() {
+    var __args = arguments;
+    if (__args.length === 0) {
+      return utils.convReturnTypeUnknown(j_serviceReference["cached()"]());
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
    Releases the reference. Once released, the consumer must not use the reference anymore.
+   This method must be idempotent and defensive, as multiple call may happen.
 
    @public
 

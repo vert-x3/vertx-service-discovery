@@ -22,7 +22,6 @@ import io.vertx.ext.discovery.types.DataSource
 import io.vertx.groovy.ext.jdbc.JDBCClient
 import io.vertx.ext.discovery.groovy.DiscoveryService
 import io.vertx.ext.discovery.Record
-import io.vertx.groovy.core.Vertx
 import io.vertx.core.json.JsonObject
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
@@ -42,20 +41,15 @@ public class JDBCDataSource {
     def ret = (Map<String, Object>)InternalHelper.wrapObject(io.vertx.ext.discovery.types.JDBCDataSource.createRecord(name, location != null ? new io.vertx.core.json.JsonObject(location) : null, metadata != null ? new io.vertx.core.json.JsonObject(metadata) : null)?.toJson());
     return ret;
   }
-  public static Map<String, Object> createRecord(String name, String jdbcUrl, Map<String, Object> metadata) {
-    def ret = (Map<String, Object>)InternalHelper.wrapObject(io.vertx.ext.discovery.types.JDBCDataSource.createRecord(name, jdbcUrl, metadata != null ? new io.vertx.core.json.JsonObject(metadata) : null)?.toJson());
-    return ret;
-  }
   /**
    * Convenient method that looks for a JDBC datasource source and provides the configured {@link io.vertx.groovy.ext.jdbc.JDBCClient}. The
    * async result is marked as failed is there are no matching services, or if the lookup fails.
-   * @param vertx The vert.x instance
    * @param discovery The discovery service
    * @param filter The filter, optional
    * @param resultHandler the result handler
    */
-  public static <T> void getJDBCClient(Vertx vertx, DiscoveryService discovery, Map<String, Object> filter, Handler<AsyncResult<JDBCClient>> resultHandler) {
-    io.vertx.ext.discovery.types.JDBCDataSource.getJDBCClient(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.ext.jdbc.JDBCClient>>() {
+  public static void getJDBCClient(DiscoveryService discovery, Map<String, Object> filter, Handler<AsyncResult<JDBCClient>> resultHandler) {
+    io.vertx.ext.discovery.types.JDBCDataSource.getJDBCClient(discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.ext.jdbc.JDBCClient>>() {
       public void handle(AsyncResult<io.vertx.ext.jdbc.JDBCClient> ar) {
         if (ar.succeeded()) {
           resultHandler.handle(io.vertx.core.Future.succeededFuture(InternalHelper.safeCreate(ar.result(), io.vertx.groovy.ext.jdbc.JDBCClient.class)));
@@ -65,8 +59,16 @@ public class JDBCDataSource {
       }
     } : null);
   }
-  public static <T> void getJDBCClient(Vertx vertx, DiscoveryService discovery, Map<String, Object> filter, Map<String, Object> consumerConfiguration, Handler<AsyncResult<JDBCClient>> resultHandler) {
-    io.vertx.ext.discovery.types.JDBCDataSource.getJDBCClient(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, consumerConfiguration != null ? new io.vertx.core.json.JsonObject(consumerConfiguration) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.ext.jdbc.JDBCClient>>() {
+  /**
+   * Convenient method that looks for a JDBC datasource source and provides the configured {@link io.vertx.groovy.ext.jdbc.JDBCClient}. The
+   * async result is marked as failed is there are no matching services, or if the lookup fails.
+   * @param discovery The discovery service
+   * @param filter The filter, optional
+   * @param consumerConfiguration the consumer configuration
+   * @param resultHandler the result handler
+   */
+  public static void getJDBCClient(DiscoveryService discovery, Map<String, Object> filter, Map<String, Object> consumerConfiguration, Handler<AsyncResult<JDBCClient>> resultHandler) {
+    io.vertx.ext.discovery.types.JDBCDataSource.getJDBCClient(discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, consumerConfiguration != null ? new io.vertx.core.json.JsonObject(consumerConfiguration) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.ext.jdbc.JDBCClient>>() {
       public void handle(AsyncResult<io.vertx.ext.jdbc.JDBCClient> ar) {
         if (ar.succeeded()) {
           resultHandler.handle(io.vertx.core.Future.succeededFuture(InternalHelper.safeCreate(ar.result(), io.vertx.groovy.ext.jdbc.JDBCClient.class)));

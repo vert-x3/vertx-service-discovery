@@ -23,11 +23,11 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.impl.DiscoveryImpl;
-import io.vertx.ext.discovery.impl.ServiceTypes;
 import io.vertx.ext.discovery.spi.DiscoveryBridge;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
+import java.util.Set;
 
 /**
  * Discovery service main entry point.
@@ -91,28 +91,29 @@ public interface DiscoveryService {
   /**
    * Gets a service reference from the given record.
    *
-   * @param vertx  the vert.x instance
    * @param record the chosen record
-   * @return the service reference, that allows retrieving the service object
+   * @return the service reference, that allows retrieving the service object. Once called the service reference is
+   * cached, and need to be released.
    */
-  static ServiceReference getServiceReference(Vertx vertx, Record record) {
-    return ServiceTypes.get(record).get(vertx, record, new JsonObject());
-  }
+  ServiceReference getReference(Record record);
 
   /**
-   * Gets a service reference for the given record.
+   * Gets a service reference from the given record, the reference is configured with the given json object.
    *
-   * @param vertx                 the vert.x instance
-   * @param record                the chosen record
-   * @param consumerConfiguration some additional (optional) configuration to configure the service object created
-   *                              from the service reference.
-   * @return the service reference, that allows retrieving the service object
+   * @param record        the chosen record
+   * @param configuration the configuration
+   * @return the service reference, that allows retrieving the service object. Once called the service reference is
+   * cached, and need to be released.
    */
-  static ServiceReference getServiceReference(Vertx vertx, Record record, JsonObject consumerConfiguration) {
-    Objects.requireNonNull(record);
-    Objects.requireNonNull(vertx);
-    return ServiceTypes.get(record).get(vertx, record, consumerConfiguration);
-  }
+  ServiceReference getReferenceWithConfiguration(Record record, JsonObject configuration);
+
+  /**
+   * Releases the service reference.
+   *
+   * @param reference the reference to release, must not be {@code null}
+   * @return whether or not the reference has been released.
+   */
+  boolean release(ServiceReference reference);
 
   /**
    * Registers a discovery bridge. Bridges let you integrate other discovery technologies in this discovery service.
@@ -189,5 +190,8 @@ public interface DiscoveryService {
    */
   void update(Record record, Handler<AsyncResult<Record>> resultHandler);
 
-
+  /**
+   * @return the set of service references retrieved by this discovery service.
+   */
+  Set<ServiceReference> bindings();
 }

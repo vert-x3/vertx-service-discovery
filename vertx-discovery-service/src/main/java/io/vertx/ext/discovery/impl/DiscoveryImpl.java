@@ -23,10 +23,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.discovery.DiscoveryOptions;
-import io.vertx.ext.discovery.DiscoveryService;
-import io.vertx.ext.discovery.Record;
-import io.vertx.ext.discovery.Status;
+import io.vertx.ext.discovery.*;
 import io.vertx.ext.discovery.spi.DiscoveryBackend;
 import io.vertx.ext.discovery.spi.DiscoveryBridge;
 
@@ -44,6 +41,7 @@ public class DiscoveryImpl implements DiscoveryService {
   private final DiscoveryBackend backend;
 
   private final Set<DiscoveryBridge> bridges = new CopyOnWriteArraySet<>();
+  private final Set<ServiceReference> bindings = new CopyOnWriteArraySet<>();
   private final static Logger LOGGER = LoggerFactory.getLogger(DiscoveryImpl.class.getName());
 
 
@@ -86,6 +84,25 @@ public class DiscoveryImpl implements DiscoveryService {
 
 
   @Override
+  public ServiceReference getReference(Record record) {
+    return getReferenceWithConfiguration(record, new JsonObject());
+  }
+
+  @Override
+  public ServiceReference getReferenceWithConfiguration(Record record, JsonObject configuration) {
+    ServiceReference reference = ServiceTypes.get(record).get(vertx, record, configuration);
+    bindings.add(reference);
+    return reference;
+  }
+
+  @Override
+  public boolean release(ServiceReference reference) {
+    boolean removed = bindings.remove(reference);
+    reference.release();
+    return removed;
+  }
+
+  @Override
   public DiscoveryService registerDiscoveryBridge(DiscoveryBridge bridge, JsonObject configuration) {
     JsonObject conf;
     if (configuration == null) {
@@ -121,6 +138,9 @@ public class DiscoveryImpl implements DiscoveryService {
     for (DiscoveryBridge bridge : bridges) {
       bridge.stop(vertx, this);
     }
+
+    bindings.forEach(ServiceReference::release);
+    bindings.clear();
   }
 
   @Override
@@ -200,6 +220,11 @@ public class DiscoveryImpl implements DiscoveryService {
 
     Record announcedRecord = new Record(record);
     vertx.eventBus().publish(announce, announcedRecord.toJson());
+  }
+
+  @Override
+  public Set<ServiceReference> bindings() {
+    return new HashSet<>(bindings);
   }
 }
 

@@ -19,7 +19,7 @@ var HelloService = require("test-services-js/hello_service.js");
 var discovery = DiscoveryService.create(vertx);
 
 discovery.getRecord({"service.interface" : "io.vertx.ext.service.HelloService"}, function(ar, ar_err) {
-    var reference = DiscoveryService.getServiceReference(vertx, ar);
+    var reference = discovery.getReference(ar);
     var svc = reference.get();
     var proxy = new HelloService(svc);
     proxy.hello({"name" : "vert.x"}, function(r, err) {

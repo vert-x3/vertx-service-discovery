@@ -210,8 +210,7 @@ Once you have chosen the `link:../dataobjects.html#Record[Record]`, you can retr
 
 [source,groovy]
 ----
-import io.vertx.ext.discovery.groovy.DiscoveryService
-def reference = DiscoveryService.getServiceReference(vertx, record)
+def reference = discovery.getReference(record)
 
 // Then, gets the service object, the returned type depends on the service type:
 // For http endpoint:
@@ -226,7 +225,7 @@ reference.release()
 
 Don't forget to release the reference once done.
 
-== Type of services
+== Types of services
 
 A said above, the discovery service has the service type concept to manage the heterogeneity of the different
 services.

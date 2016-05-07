@@ -20,7 +20,8 @@ import io.vertx.ext.discovery.groovy.types.EventBusService
 import io.vertx.ext.service.groovy.HelloService
 
 def discovery = DiscoveryService.create(vertx);
-EventBusService.<HelloService> getProxy(vertx, discovery,
+EventBusService.<HelloService> getProxy(
+        discovery,
         io.vertx.ext.service.HelloService.class.getName(), // service interface
         HelloService.class.getName(), // client class
         { ar ->
@@ -42,7 +43,7 @@ EventBusService.<HelloService> getProxy(vertx, discovery,
                         "status" : "ok",
                         "message": result.result()
                 ])
-                EventBusService.release(hello);
+                EventBusService.release(discovery, hello);
               }
             })
           }

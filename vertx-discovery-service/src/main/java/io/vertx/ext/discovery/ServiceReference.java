@@ -48,7 +48,16 @@ public interface ServiceReference {
   <T> T get();
 
   /**
+   * Gets the service object if already retrieved. It won't try to acquire the service object if not retrieved yet.
+   *
+   * @param <T> the type
+   * @return the object, {@code null} if not yet retrieved
+   */
+  <T> T cached();
+
+  /**
    * Releases the reference. Once released, the consumer must not use the reference anymore.
+   * This method must be idempotent and defensive, as multiple call may happen.
    */
   void release();
 

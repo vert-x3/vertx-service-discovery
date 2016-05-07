@@ -39,6 +39,49 @@ var DiscoveryService = function(j_val) {
   var that = this;
 
   /**
+   Gets a service reference from the given record.
+
+   @public
+   @param record {Object} the chosen record 
+   @return {ServiceReference} the service reference, that allows retrieving the service object. Once called the service reference is cached, and need to be released.
+   */
+  this.getReference = function(record) {
+    var __args = arguments;
+    if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
+      return utils.convReturnVertxGen(j_discoveryService["getReference(io.vertx.ext.discovery.Record)"](record != null ? new Record(new JsonObject(JSON.stringify(record))) : null), ServiceReference);
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+   Gets a service reference from the given record, the reference is configured with the given json object.
+
+   @public
+   @param record {Object} the chosen record 
+   @param configuration {Object} the configuration 
+   @return {ServiceReference} the service reference, that allows retrieving the service object. Once called the service reference is cached, and need to be released.
+   */
+  this.getReferenceWithConfiguration = function(record, configuration) {
+    var __args = arguments;
+    if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && (typeof __args[1] === 'object' && __args[1] != null)) {
+      return utils.convReturnVertxGen(j_discoveryService["getReferenceWithConfiguration(io.vertx.ext.discovery.Record,io.vertx.core.json.JsonObject)"](record != null ? new Record(new JsonObject(JSON.stringify(record))) : null, utils.convParamJsonObject(configuration)), ServiceReference);
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+   Releases the service reference.
+
+   @public
+   @param reference {ServiceReference} the reference to release, must not be <code>null</code> 
+   @return {boolean} whether or not the reference has been released.
+   */
+  this.release = function(reference) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
+      return j_discoveryService["release(io.vertx.ext.discovery.ServiceReference)"](reference._jdel);
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
    Closes the discovery service
 
    @public
@@ -168,6 +211,20 @@ var DiscoveryService = function(j_val) {
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
+  /**
+   @return the set of service references retrieved by this discovery service.
+
+   @public
+
+   @return {Array.<ServiceReference>}
+   */
+  this.bindings = function() {
+    var __args = arguments;
+    if (__args.length === 0) {
+      return utils.convReturnListSetVertxGen(j_discoveryService["bindings()"](), ServiceReference);
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
   // If you rely on this property your code is likely to break if we change it / remove it without warning.
@@ -188,24 +245,6 @@ DiscoveryService.create = function() {
     return utils.convReturnVertxGen(JDiscoveryService["create(io.vertx.core.Vertx)"](__args[0]._jdel), DiscoveryService);
   }else if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null)) {
     return utils.convReturnVertxGen(JDiscoveryService["create(io.vertx.core.Vertx,io.vertx.ext.discovery.DiscoveryOptions)"](__args[0]._jdel, __args[1] != null ? new DiscoveryOptions(new JsonObject(JSON.stringify(__args[1]))) : null), DiscoveryService);
-  } else throw new TypeError('function invoked with invalid arguments');
-};
-
-/**
- Gets a service reference for the given record.
-
- @memberof module:vertx-service-discovery-js/discovery_service
- @param vertx {Vertx} the vert.x instance 
- @param record {Object} the chosen record 
- @param consumerConfiguration {Object} some additional (optional) configuration to configure the service object created from the service reference. 
- @return {ServiceReference} the service reference, that allows retrieving the service object
- */
-DiscoveryService.getServiceReference = function() {
-  var __args = arguments;
-  if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null)) {
-    return utils.convReturnVertxGen(JDiscoveryService["getServiceReference(io.vertx.core.Vertx,io.vertx.ext.discovery.Record)"](__args[0]._jdel, __args[1] != null ? new Record(new JsonObject(JSON.stringify(__args[1]))) : null), ServiceReference);
-  }else if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null) && (typeof __args[2] === 'object' && __args[2] != null)) {
-    return utils.convReturnVertxGen(JDiscoveryService["getServiceReference(io.vertx.core.Vertx,io.vertx.ext.discovery.Record,io.vertx.core.json.JsonObject)"](__args[0]._jdel, __args[1] != null ? new Record(new JsonObject(JSON.stringify(__args[1]))) : null, utils.convParamJsonObject(__args[2])), ServiceReference);
   } else throw new TypeError('function invoked with invalid arguments');
 };
 

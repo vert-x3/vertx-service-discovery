@@ -1,6 +1,5 @@
 require 'vertx-jdbc/jdbc_client'
 require 'vertx-service-discovery/discovery_service'
-require 'vertx/vertx'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.ext.discovery.types.JDBCDataSource
 module VertxServiceDiscovery
@@ -16,36 +15,30 @@ module VertxServiceDiscovery
     def j_del
       @j_del
     end
-    # @overload createRecord(name,location,metadata)
-    #   @param [String] name 
-    #   @param [Hash{String => Object}] location 
-    #   @param [Hash{String => Object}] metadata 
-    # @overload createRecord(name,jdbcUrl,metadata)
-    #   @param [String] name 
-    #   @param [String] jdbcUrl 
-    #   @param [Hash{String => Object}] metadata 
+    # @param [String] name 
+    # @param [Hash{String => Object}] location 
+    # @param [Hash{String => Object}] metadata 
     # @return [Hash]
-    def self.create_record(param_1=nil,param_2=nil,param_3=nil)
-      if param_1.class == String && param_2.class == Hash && param_3.class == Hash && !block_given?
-        return Java::IoVertxExtDiscoveryTypes::JDBCDataSource.java_method(:createRecord, [Java::java.lang.String.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(param_1,::Vertx::Util::Utils.to_json_object(param_2),::Vertx::Util::Utils.to_json_object(param_3)) != nil ? JSON.parse(Java::IoVertxExtDiscoveryTypes::JDBCDataSource.java_method(:createRecord, [Java::java.lang.String.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(param_1,::Vertx::Util::Utils.to_json_object(param_2),::Vertx::Util::Utils.to_json_object(param_3)).toJson.encode) : nil
-      elsif param_1.class == String && param_2.class == String && param_3.class == Hash && !block_given?
-        return Java::IoVertxExtDiscoveryTypes::JDBCDataSource.java_method(:createRecord, [Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(param_1,param_2,::Vertx::Util::Utils.to_json_object(param_3)) != nil ? JSON.parse(Java::IoVertxExtDiscoveryTypes::JDBCDataSource.java_method(:createRecord, [Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(param_1,param_2,::Vertx::Util::Utils.to_json_object(param_3)).toJson.encode) : nil
+    def self.create_record(name=nil,location=nil,metadata=nil)
+      if name.class == String && location.class == Hash && metadata.class == Hash && !block_given?
+        return Java::IoVertxExtDiscoveryTypes::JDBCDataSource.java_method(:createRecord, [Java::java.lang.String.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(name,::Vertx::Util::Utils.to_json_object(location),::Vertx::Util::Utils.to_json_object(metadata)) != nil ? JSON.parse(Java::IoVertxExtDiscoveryTypes::JDBCDataSource.java_method(:createRecord, [Java::java.lang.String.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(name,::Vertx::Util::Utils.to_json_object(location),::Vertx::Util::Utils.to_json_object(metadata)).toJson.encode) : nil
       end
-      raise ArgumentError, "Invalid arguments when calling create_record(param_1,param_2,param_3)"
+      raise ArgumentError, "Invalid arguments when calling create_record(name,location,metadata)"
     end
-    # @param [::Vertx::Vertx] vertx 
-    # @param [::VertxServiceDiscovery::DiscoveryService] discovery 
-    # @param [Hash{String => Object}] filter 
-    # @param [Hash{String => Object}] consumerConfiguration 
-    # @yield 
+    #  Convenient method that looks for a JDBC datasource source and provides the configured {::VertxJdbc::JDBCClient}. The
+    #  async result is marked as failed is there are no matching services, or if the lookup fails.
+    # @param [::VertxServiceDiscovery::DiscoveryService] discovery The discovery service
+    # @param [Hash{String => Object}] filter The filter, optional
+    # @param [Hash{String => Object}] consumerConfiguration the consumer configuration
+    # @yield the result handler
     # @return [void]
-    def self.get_jdbc_client(vertx=nil,discovery=nil,filter=nil,consumerConfiguration=nil)
-      if vertx.class.method_defined?(:j_del) && discovery.class.method_defined?(:j_del) && filter.class == Hash && block_given? && consumerConfiguration == nil
-        return Java::IoVertxExtDiscoveryTypes::JDBCDataSource.java_method(:getJDBCClient, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(vertx.j_del,discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxJdbc::JDBCClient) : nil) }))
-      elsif vertx.class.method_defined?(:j_del) && discovery.class.method_defined?(:j_del) && filter.class == Hash && consumerConfiguration.class == Hash && block_given?
-        return Java::IoVertxExtDiscoveryTypes::JDBCDataSource.java_method(:getJDBCClient, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(vertx.j_del,discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),::Vertx::Util::Utils.to_json_object(consumerConfiguration),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxJdbc::JDBCClient) : nil) }))
+    def self.get_jdbc_client(discovery=nil,filter=nil,consumerConfiguration=nil)
+      if discovery.class.method_defined?(:j_del) && filter.class == Hash && block_given? && consumerConfiguration == nil
+        return Java::IoVertxExtDiscoveryTypes::JDBCDataSource.java_method(:getJDBCClient, [Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxJdbc::JDBCClient) : nil) }))
+      elsif discovery.class.method_defined?(:j_del) && filter.class == Hash && consumerConfiguration.class == Hash && block_given?
+        return Java::IoVertxExtDiscoveryTypes::JDBCDataSource.java_method(:getJDBCClient, [Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),::Vertx::Util::Utils.to_json_object(consumerConfiguration),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxJdbc::JDBCClient) : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling get_jdbc_client(vertx,discovery,filter,consumerConfiguration)"
+      raise ArgumentError, "Invalid arguments when calling get_jdbc_client(discovery,filter,consumerConfiguration)"
     end
   end
 end

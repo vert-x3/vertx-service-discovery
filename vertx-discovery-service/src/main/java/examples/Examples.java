@@ -127,8 +127,8 @@ public class Examples {
     });
   }
 
-  public void example5(Vertx vertx, Record record) {
-    ServiceReference reference = DiscoveryService.getServiceReference(vertx, record);
+  public void example5(DiscoveryService discovery, Record record) {
+    ServiceReference reference = discovery.getReference(record);
 
     // Then, gets the service object, the returned type depends on the service type:
     // For http endpoint:

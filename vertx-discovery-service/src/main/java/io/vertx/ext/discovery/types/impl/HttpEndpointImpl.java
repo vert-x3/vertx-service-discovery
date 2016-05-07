@@ -23,8 +23,11 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.ServiceReference;
 import io.vertx.ext.discovery.spi.ServiceType;
+import io.vertx.ext.discovery.types.AbstractServiceReference;
 import io.vertx.ext.discovery.types.HttpEndpoint;
 import io.vertx.ext.discovery.types.HttpLocation;
+
+import java.util.Objects;
 
 /**
  * Implementation of {@link ServiceType} for HTTP endpoint (REST api).
@@ -41,69 +44,53 @@ public class HttpEndpointImpl implements HttpEndpoint {
 
   @Override
   public ServiceReference get(Vertx vertx, Record record, JsonObject configuration) {
+    Objects.requireNonNull(vertx);
+    Objects.requireNonNull(record);
     return new HttpEndpointReference(vertx, record, configuration);
   }
 
   /**
    * {@link ServiceReference} implementation for the HTTP endpoint.
    */
-  private class HttpEndpointReference implements ServiceReference {
+  private class HttpEndpointReference extends AbstractServiceReference<HttpClient> {
 
-    private final Vertx vertx;
     private final HttpLocation location;
-    private final Record record;
     private final JsonObject config;
-    private HttpClient client;
 
     HttpEndpointReference(Vertx vertx, Record record, JsonObject config) {
-      this.vertx = vertx;
+      super(vertx, record);
       this.config = config;
       this.location = new HttpLocation(record.getLocation());
-      this.record = record;
     }
 
-    /**
-     * @return the service record.
-     */
-    @Override
-    public Record record() {
-      return record;
-    }
 
     /**
      * Gets a HTTP client to access the service.
      *
-     * @param <T> {@link HttpClient}
      * @return the HTTP client, configured to access the service
      */
     @Override
-    public synchronized <T> T get() {
-      if (client != null) {
-        return (T) client;
+    public HttpClient retrieve() {
+      HttpClientOptions options;
+      if (config != null) {
+        options = new HttpClientOptions(config);
       } else {
-        HttpClientOptions options;
-        if (config != null) {
-          options = new HttpClientOptions(config);
-        } else {
-          options = new HttpClientOptions();
-        }
-         options.setDefaultPort(location.getPort()).setDefaultHost(location.getHost());
-        if (location.isSsl()) {
-          options.setSsl(true);
-        }
-
-        client = vertx.createHttpClient(options);
-        return (T) client;
+        options = new HttpClientOptions();
       }
+      options.setDefaultPort(location.getPort()).setDefaultHost(location.getHost());
+      if (location.isSsl()) {
+        options.setSsl(true);
+      }
+
+      return vertx.createHttpClient(options);
     }
 
     /**
      * Closes the client.
      */
     @Override
-    public synchronized void release() {
-      client.close();
-      client = null;
+    public void close() {
+      service.close();
     }
   }
 }

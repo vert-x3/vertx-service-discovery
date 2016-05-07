@@ -21,7 +21,6 @@ import io.vertx.core.json.JsonObject
 import io.vertx.ext.discovery.spi.ServiceType
 import io.vertx.ext.discovery.groovy.DiscoveryService
 import io.vertx.ext.discovery.Record
-import io.vertx.groovy.core.Vertx
 import io.vertx.core.json.JsonObject
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
@@ -93,13 +92,12 @@ public class HttpEndpoint {
   /**
    * Convenient method that looks for a HTTP endpoint and provides the configured . The async result
    * is marked as failed is there are no matching services, or if the lookup fails.
-   * @param vertx The vert.x instance
    * @param discovery The discovery service
    * @param filter The filter, optional
    * @param resultHandler the result handler
    */
-  public static void getClient(Vertx vertx, DiscoveryService discovery, Map<String, Object> filter, Handler<AsyncResult<HttpClient>> resultHandler) {
-    io.vertx.ext.discovery.types.HttpEndpoint.getClient(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.core.http.HttpClient>>() {
+  public static void getClient(DiscoveryService discovery, Map<String, Object> filter, Handler<AsyncResult<HttpClient>> resultHandler) {
+    io.vertx.ext.discovery.types.HttpEndpoint.getClient(discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.core.http.HttpClient>>() {
       public void handle(AsyncResult<io.vertx.core.http.HttpClient> ar) {
         if (ar.succeeded()) {
           resultHandler.handle(io.vertx.core.Future.succeededFuture(InternalHelper.safeCreate(ar.result(), io.vertx.groovy.core.http.HttpClient.class)));

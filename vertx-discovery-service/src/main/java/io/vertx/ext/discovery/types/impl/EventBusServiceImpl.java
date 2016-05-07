@@ -21,12 +21,12 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.ServiceReference;
+import io.vertx.ext.discovery.types.AbstractServiceReference;
 import io.vertx.ext.discovery.types.EventBusService;
 import io.vertx.ext.discovery.utils.ClassLoaderUtils;
 import io.vertx.serviceproxy.ProxyHelper;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.util.Objects;
 
 /**
@@ -40,26 +40,23 @@ public class EventBusServiceImpl implements EventBusService {
   }
 
   @Override
-  public ServiceReference get(Vertx vertx, Record record, JsonObject conf) {
-    return new EventBusServiceReference(vertx, record, conf);
+  public ServiceReference get(Vertx vertx, Record record, JsonObject configuration) {
+    Objects.requireNonNull(vertx);
+    Objects.requireNonNull(record);
+    return new EventBusServiceReference(vertx, record, configuration);
   }
 
   /**
    * Implementation of {@link ServiceReference} for event bus service proxies.
    */
-  private class EventBusServiceReference implements ServiceReference {
+  private class EventBusServiceReference extends AbstractServiceReference<Object> {
 
-    private final Record record;
-    private final Vertx vertx;
     private final DeliveryOptions deliveryOptions;
     private final String clientClass;
     private final String serviceInterface;
-    private Object proxy;
-
 
     EventBusServiceReference(Vertx vertx, Record record, JsonObject conf) {
-      this.vertx = vertx;
-      this.record = record;
+      super(vertx, record);
       this.serviceInterface = record.getMetadata().getString("service.interface");
       if (conf != null) {
         this.clientClass = conf.getString("client.class");
@@ -71,60 +68,36 @@ public class EventBusServiceImpl implements EventBusService {
       Objects.requireNonNull(serviceInterface);
     }
 
-    /**
-     * @return the service record.
-     */
-    @Override
-    public Record record() {
-      return record;
-    }
 
     /**
      * Build the service proxy and return it. If already built, it returns the cached one.
      *
-     * @param <T> the service interface
      * @return the proxy
      */
     @Override
-    public synchronized <T> T get() {
-      if (proxy != null) {
-        return (T) proxy;
-      }
-
-      Class<T> itf = ClassLoaderUtils.load(serviceInterface, this.getClass().getClassLoader());
+    public synchronized Object retrieve() {
+      Class itf = ClassLoaderUtils.load(serviceInterface, this.getClass().getClassLoader());
       if (itf == null) {
         throw new IllegalStateException("Cannot load class " + clientClass);
       } else {
-        System.out.println(vertx);
-
         // 1) Create the java proxy
-        Object proxy = ProxyHelper.createProxy(itf, vertx, record.getLocation().getString(Record.ENDPOINT),
+        Object proxy = ProxyHelper.createProxy(itf, vertx, record().getLocation().getString(Record.ENDPOINT),
             deliveryOptions);
 
         // 2) if we have a client class, create an instance with the proxy
         if (clientClass != null) {
           try {
-            System.out.println("Creating an instance of " + clientClass);
             Class client = ClassLoaderUtils.load(clientClass, this.getClass().getClassLoader());
             Constructor constructor = client.getConstructor(Object.class);
-            this.proxy = constructor.newInstance(proxy);
-            System.out.println("Proxy: " + this.proxy);
+            return constructor.newInstance(proxy);
           } catch (Exception e) {
             throw new RuntimeException(e);
           }
         } else {
-          this.proxy = proxy;
+          return proxy;
         }
-        return (T) this.proxy;
       }
-    }
-
-    /**
-     * Invalidates the proxy.
-     */
-    @Override
-    public synchronized void release() {
-      proxy = null;
     }
   }
 }
+

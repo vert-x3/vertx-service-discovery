@@ -19,6 +19,7 @@ package io.vertx.ext.discovery.impl;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.spi.ServiceType;
 
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.ServiceLoader;
 
@@ -30,23 +31,41 @@ import java.util.ServiceLoader;
 public class ServiceTypes {
 
   public static ServiceType get(Record record) {
-    synchronized (ServiceTypes.class) {
-      if (types == null  || ! types.iterator().hasNext())  {
-        types = ServiceLoader.load(ServiceType.class);
-      }
+    load();
 
-      String type = record.getType();
-      Objects.requireNonNull(type);
+    String type = record.getType();
+    Objects.requireNonNull(type);
 
-      for (ServiceType next : types) {
-        if (next.name().equalsIgnoreCase(type)) {
-          return next;
-        }
-      }
-
+    ServiceType found = get(type);
+    if (found != null) {
+      return found;
+    } else {
       throw new IllegalArgumentException("Unsupported service type " + type);
     }
   }
 
+  private static void load() {
+    synchronized (ServiceTypes.class) {
+      if (types == null || !types.iterator().hasNext()) {
+        types = ServiceLoader.load(ServiceType.class);
+      }
+    }
+  }
+
+  public static Iterator<ServiceType> all() {
+    load();
+    return types.iterator();
+  }
+
   private static ServiceLoader<ServiceType> types;
+
+  public static ServiceType get(String type) {
+    load();
+    for (ServiceType next : types) {
+      if (next.name().equalsIgnoreCase(type)) {
+        return next;
+      }
+    }
+    return null;
+  }
 }

@@ -20,9 +20,12 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.ServiceReference;
+import io.vertx.ext.discovery.types.AbstractServiceReference;
 import io.vertx.ext.discovery.types.DataSource;
 import io.vertx.ext.discovery.types.JDBCDataSource;
 import io.vertx.ext.jdbc.JDBCClient;
+
+import java.util.Objects;
 
 /**
  * The implementation of {@link JDBCDataSource}.
@@ -36,57 +39,43 @@ public class JDBCDataSourceImpl implements JDBCDataSource {
   }
 
   @Override
-  public ServiceReference get(Vertx vertx, Record record, JsonObject config) {
-    return new JdbcServiceReference(vertx, record, config);
+  public ServiceReference get(Vertx vertx, Record record, JsonObject configuration) {
+    Objects.requireNonNull(vertx);
+    Objects.requireNonNull(record);
+    return new JdbcServiceReference(vertx, record, configuration);
   }
 
   /**
    * A reference on a JDBC data source. When retrieved it provides a {@link JDBCClient}. The _shared_ aspect of the
    * client depends on the {@code shared} flag put in the record's metadata (non shared by default).
    */
-  private class JdbcServiceReference implements ServiceReference {
-    private final Vertx vertx;
-    private final Record record;
+  private class JdbcServiceReference extends AbstractServiceReference<JDBCClient> {
     private final JsonObject config;
 
-    private JDBCClient client;
-
     JdbcServiceReference(Vertx vertx, Record record, JsonObject config) {
-      this.record = record;
-      this.vertx = vertx;
+      super(vertx, record);
       this.config = config;
     }
 
     @Override
-    public Record record() {
-      return record;
+    public JDBCClient retrieve() {
+      JsonObject result = record().getMetadata().copy();
+      result.mergeIn(record().getLocation());
+
+      if (config != null) {
+        result.mergeIn(config);
+      }
+
+      if (result.getBoolean("shared", false)) {
+        return JDBCClient.createShared(vertx, result);
+      } else {
+        return JDBCClient.createNonShared(vertx, result);
+      }
     }
 
     @Override
-    public synchronized <T> T get() {
-      if (client == null) {
-        JsonObject result = record.getMetadata().copy();
-        result.mergeIn(record.getLocation());
-
-        if (config != null) {
-          result.mergeIn(config);
-        }
-
-        if (result.getBoolean("shared", false)) {
-          client = JDBCClient.createShared(vertx, result);
-        } else {
-          client = JDBCClient.createNonShared(vertx, result);
-        }
-      }
-      return (T) client;
-    }
-
-    @Override
-    public synchronized void release() {
-      if (client != null) {
-        client.close();
-      }
-      client = null;
+    protected void close() {
+      service.close();
     }
   }
 }

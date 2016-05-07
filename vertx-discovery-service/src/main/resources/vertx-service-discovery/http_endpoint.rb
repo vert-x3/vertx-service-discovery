@@ -1,5 +1,4 @@
 require 'vertx-service-discovery/discovery_service'
-require 'vertx/vertx'
 require 'vertx/http_client'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.ext.discovery.types.HttpEndpoint
@@ -55,16 +54,15 @@ module VertxServiceDiscovery
     end
     #  Convenient method that looks for a HTTP endpoint and provides the configured . The async result
     #  is marked as failed is there are no matching services, or if the lookup fails.
-    # @param [::Vertx::Vertx] vertx The vert.x instance
     # @param [::VertxServiceDiscovery::DiscoveryService] discovery The discovery service
     # @param [Hash{String => Object}] filter The filter, optional
     # @yield the result handler
     # @return [void]
-    def self.get_client(vertx=nil,discovery=nil,filter=nil)
-      if vertx.class.method_defined?(:j_del) && discovery.class.method_defined?(:j_del) && filter.class == Hash && block_given?
-        return Java::IoVertxExtDiscoveryTypes::HttpEndpoint.java_method(:getClient, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(vertx.j_del,discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::Vertx::HttpClient) : nil) }))
+    def self.get_client(discovery=nil,filter=nil)
+      if discovery.class.method_defined?(:j_del) && filter.class == Hash && block_given?
+        return Java::IoVertxExtDiscoveryTypes::HttpEndpoint.java_method(:getClient, [Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::Vertx::HttpClient) : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling get_client(vertx,discovery,filter)"
+      raise ArgumentError, "Invalid arguments when calling get_client(discovery,filter)"
     end
   end
 end

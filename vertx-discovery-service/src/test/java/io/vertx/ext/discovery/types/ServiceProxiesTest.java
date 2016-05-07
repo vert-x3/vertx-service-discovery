@@ -23,6 +23,7 @@ import io.vertx.ext.discovery.DiscoveryService;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.ServiceReference;
 import io.vertx.ext.discovery.impl.DiscoveryImpl;
+import io.vertx.ext.discovery.impl.ServiceTypes;
 import io.vertx.ext.service.HelloService;
 import io.vertx.ext.service.HelloServiceImpl;
 import io.vertx.serviceproxy.ProxyHelper;
@@ -81,7 +82,7 @@ public class ServiceProxiesTest {
     await().until(() -> found.get() != null);
     assertThat(found.get().getLocation().getString("endpoint")).isEqualTo("address");
 
-    ServiceReference service = DiscoveryService.getServiceReference(vertx, found.get());
+    ServiceReference service = discovery.getReference(found.get());
     HelloService hello = service.get();
     AtomicReference<String> result = new AtomicReference<>();
     hello.hello(name, ar -> {
@@ -103,11 +104,12 @@ public class ServiceProxiesTest {
     await().until(() -> record.getRegistration() != null);
 
     AtomicReference<HelloService> found = new AtomicReference<>();
-    EventBusService.getProxy(vertx, discovery, HelloService.class, ar -> {
+    EventBusService.getProxy(discovery, HelloService.class, ar -> {
       found.set(ar.result());
     });
     await().until(() -> found.get() != null);
-    assertThat(EventBusService.bindings()).hasSize(1);
+
+    assertThat(discovery.bindings()).hasSize(1);
 
     HelloService hello = found.get();
     AtomicReference<String> result = new AtomicReference<>();
@@ -116,9 +118,9 @@ public class ServiceProxiesTest {
     });
     await().untilAtomic(result, not(nullValue()));
 
-    EventBusService.release(found.get());
+    EventBusService.release(discovery, found.get());
 
-    assertThat(EventBusService.bindings()).isEmpty();
+    assertThat(discovery.bindings()).hasSize(0);
   }
 
 

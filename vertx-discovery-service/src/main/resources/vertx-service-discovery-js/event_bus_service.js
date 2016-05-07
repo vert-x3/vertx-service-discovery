@@ -17,8 +17,6 @@
 /** @module vertx-service-discovery-js/event_bus_service */
 var utils = require('vertx-js/util/utils');
 var DiscoveryService = require('vertx-service-discovery-js/discovery_service');
-var Vertx = require('vertx-js/vertx');
-var ServiceReference = require('vertx-service-discovery-js/service_reference');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
@@ -60,23 +58,8 @@ EventBusService.createRecord = function(name, address, itf, metadata) {
 };
 
 /**
- Retrieves the bindings - for testing purpose only.
 
  @memberof module:vertx-service-discovery-js/event_bus_service
-
- @return {Array.<ServiceReference>} a copy of the bindings.
- */
-EventBusService.bindings = function() {
-  var __args = arguments;
-  if (__args.length === 0) {
-    return utils.convReturnListSetVertxGen(JEventBusService["bindings()"](), ServiceReference);
-  } else throw new TypeError('function invoked with invalid arguments');
-};
-
-/**
-
- @memberof module:vertx-service-discovery-js/event_bus_service
- @param vertx {Vertx} 
  @param discovery {DiscoveryService} 
  @param filter {Object} 
  @param proxyClass {string} 
@@ -84,51 +67,51 @@ EventBusService.bindings = function() {
  */
 EventBusService.getProxy = function() {
   var __args = arguments;
-  if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
-    JEventBusService["getProxy(io.vertx.core.Vertx,io.vertx.ext.discovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](__args[0]._jdel, __args[1]._jdel, utils.convParamJsonObject(__args[2]), function(ar) {
+  if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'function') {
+    JEventBusService["getProxy(io.vertx.ext.discovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](__args[0]._jdel, utils.convParamJsonObject(__args[1]), function(ar) {
+    if (ar.succeeded()) {
+      __args[2](utils.convReturnTypeUnknown(ar.result()), null);
+    } else {
+      __args[2](null, ar.cause());
+    }
+  });
+  }else if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && typeof __args[2] === 'function') {
+    JEventBusService["getProxy(io.vertx.ext.discovery.DiscoveryService,java.lang.String,io.vertx.core.Handler)"](__args[0]._jdel, __args[1], function(ar) {
+    if (ar.succeeded()) {
+      __args[2](utils.convReturnTypeUnknown(ar.result()), null);
+    } else {
+      __args[2](null, ar.cause());
+    }
+  });
+  }else if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && typeof __args[2] === 'string' && typeof __args[3] === 'function') {
+    JEventBusService["getProxy(io.vertx.ext.discovery.DiscoveryService,java.lang.String,java.lang.String,io.vertx.core.Handler)"](__args[0]._jdel, __args[1], __args[2], function(ar) {
     if (ar.succeeded()) {
       __args[3](utils.convReturnTypeUnknown(ar.result()), null);
     } else {
       __args[3](null, ar.cause());
     }
   });
-  }else if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && typeof __args[2] === 'string' && typeof __args[3] === 'function') {
-    JEventBusService["getProxy(io.vertx.core.Vertx,io.vertx.ext.discovery.DiscoveryService,java.lang.String,io.vertx.core.Handler)"](__args[0]._jdel, __args[1]._jdel, __args[2], function(ar) {
+  }else if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'string' && typeof __args[3] === 'function') {
+    JEventBusService["getProxy(io.vertx.ext.discovery.DiscoveryService,io.vertx.core.json.JsonObject,java.lang.String,io.vertx.core.Handler)"](__args[0]._jdel, utils.convParamJsonObject(__args[1]), __args[2], function(ar) {
     if (ar.succeeded()) {
       __args[3](utils.convReturnTypeUnknown(ar.result()), null);
     } else {
       __args[3](null, ar.cause());
-    }
-  });
-  }else if (__args.length === 5 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && typeof __args[2] === 'string' && typeof __args[3] === 'string' && typeof __args[4] === 'function') {
-    JEventBusService["getProxy(io.vertx.core.Vertx,io.vertx.ext.discovery.DiscoveryService,java.lang.String,java.lang.String,io.vertx.core.Handler)"](__args[0]._jdel, __args[1]._jdel, __args[2], __args[3], function(ar) {
-    if (ar.succeeded()) {
-      __args[4](utils.convReturnTypeUnknown(ar.result()), null);
-    } else {
-      __args[4](null, ar.cause());
-    }
-  });
-  }else if (__args.length === 5 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'string' && typeof __args[4] === 'function') {
-    JEventBusService["getProxy(io.vertx.core.Vertx,io.vertx.ext.discovery.DiscoveryService,io.vertx.core.json.JsonObject,java.lang.String,io.vertx.core.Handler)"](__args[0]._jdel, __args[1]._jdel, utils.convParamJsonObject(__args[2]), __args[3], function(ar) {
-    if (ar.succeeded()) {
-      __args[4](utils.convReturnTypeUnknown(ar.result()), null);
-    } else {
-      __args[4](null, ar.cause());
     }
   });
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
 /**
- Convenient method to release a used service object.
 
  @memberof module:vertx-service-discovery-js/event_bus_service
- @param svcObject {Object} the service object 
+ @param discovery {DiscoveryService} 
+ @param svcObject {Object} 
  */
-EventBusService.release = function(svcObject) {
+EventBusService.release = function(discovery, svcObject) {
   var __args = arguments;
-  if (__args.length === 1 && typeof __args[0] !== 'function') {
-    JEventBusService["release(java.lang.Object)"](utils.convParamTypeUnknown(svcObject));
+  if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] !== 'function') {
+    JEventBusService["release(io.vertx.ext.discovery.DiscoveryService,java.lang.Object)"](discovery._jdel, utils.convParamTypeUnknown(svcObject));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 

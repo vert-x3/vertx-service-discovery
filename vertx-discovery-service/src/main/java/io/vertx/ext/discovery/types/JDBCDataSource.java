@@ -20,7 +20,6 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.DiscoveryService;
 import io.vertx.ext.discovery.Record;
@@ -53,53 +52,42 @@ public interface JDBCDataSource extends DataSource {
     return record;
   }
 
-  static Record createRecord(String name, String jdbcUrl, JsonObject metadata) {
-    Objects.requireNonNull(name);
-    Objects.requireNonNull(jdbcUrl);
-
-    Record record = new Record().setName(name)
-        .setType(TYPE)
-        .setLocation(new JsonObject().put(Record.ENDPOINT, jdbcUrl));
-
-    if (metadata != null) {
-      record.setMetadata(metadata);
-    }
-
-    record.setMetadata(new JsonObject().put(DS_TYPE, DEFAULT_TYPE));
-
-    return record;
+  /**
+   * Convenient method that looks for a JDBC datasource source and provides the configured {@link io.vertx.ext.jdbc.JDBCClient}. The
+   * async result is marked as failed is there are no matching services, or if the lookup fails.
+   *
+   * @param discovery     The discovery service
+   * @param filter        The filter, optional
+   * @param resultHandler the result handler
+   */
+  static void getJDBCClient(DiscoveryService discovery, JsonObject filter,
+                            Handler<AsyncResult<JDBCClient>> resultHandler) {
+    discovery.getRecord(filter, ar -> {
+      if (ar.failed() || ar.result() == null) {
+        resultHandler.handle(Future.failedFuture("No matching record"));
+      } else {
+        resultHandler.handle(Future.succeededFuture(discovery.getReference(ar.result()).get()));
+      }
+    });
   }
 
   /**
    * Convenient method that looks for a JDBC datasource source and provides the configured {@link io.vertx.ext.jdbc.JDBCClient}. The
    * async result is marked as failed is there are no matching services, or if the lookup fails.
    *
-   * @param vertx         The vert.x instance
-   * @param discovery     The discovery service
-   * @param filter        The filter, optional
-   * @param resultHandler the result handler
-   * @param <T>           the class of the message
+   * @param discovery             The discovery service
+   * @param filter                The filter, optional
+   * @param consumerConfiguration the consumer configuration
+   * @param resultHandler         the result handler
    */
-  static <T> void getJDBCClient(Vertx vertx, DiscoveryService discovery, JsonObject filter,
-                                Handler<AsyncResult<JDBCClient>> resultHandler) {
+  static void getJDBCClient(DiscoveryService discovery, JsonObject filter, JsonObject consumerConfiguration,
+                            Handler<AsyncResult<JDBCClient>> resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
-        resultHandler.handle(Future.succeededFuture(DiscoveryService.getServiceReference(vertx, ar.result()).get()));
-      }
-    });
-  }
-
-
-  static <T> void getJDBCClient(Vertx vertx, DiscoveryService discovery, JsonObject filter, JsonObject consumerConfiguration,
-                                Handler<AsyncResult<JDBCClient>> resultHandler) {
-    discovery.getRecord(filter, ar -> {
-      if (ar.failed() || ar.result() == null) {
-        resultHandler.handle(Future.failedFuture("No matching record"));
-      } else {
-        resultHandler.handle(Future.succeededFuture(DiscoveryService.getServiceReference(vertx,
-            ar.result(), consumerConfiguration).get()));
+        resultHandler.handle(Future.succeededFuture(
+            discovery.getReferenceWithConfiguration(ar.result(), consumerConfiguration).get()));
       }
     });
   }

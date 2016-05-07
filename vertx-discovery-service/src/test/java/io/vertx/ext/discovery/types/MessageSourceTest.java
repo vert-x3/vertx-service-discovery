@@ -82,7 +82,7 @@ public class MessageSourceTest {
 
     await().until(() -> found.get() != null);
 
-    ServiceReference service = DiscoveryService.getServiceReference(vertx, found.get());
+    ServiceReference service = discovery.getReference(found.get());
     MessageConsumer<Double> consumer = service.get();
 
     List<Double> data = new ArrayList<>();

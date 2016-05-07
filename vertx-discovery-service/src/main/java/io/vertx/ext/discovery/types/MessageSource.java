@@ -135,7 +135,7 @@ public interface MessageSource extends ServiceType {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
-        resultHandler.handle(Future.succeededFuture(DiscoveryService.getServiceReference(vertx, ar.result()).get()));
+        resultHandler.handle(Future.succeededFuture(discovery.getReference(ar.result()).get()));
       }
     });
   }

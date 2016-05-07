@@ -1,6 +1,4 @@
 require 'vertx-service-discovery/discovery_service'
-require 'vertx/vertx'
-require 'vertx-service-discovery/service_reference'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.ext.discovery.types.EventBusService
 module VertxServiceDiscovery
@@ -31,57 +29,45 @@ module VertxServiceDiscovery
       end
       raise ArgumentError, "Invalid arguments when calling create_record(name,address,itf,metadata)"
     end
-    #  Retrieves the bindings - for testing purpose only.
-    # @return [Set<::VertxServiceDiscovery::ServiceReference>] a copy of the bindings.
-    def self.bindings
-      if !block_given?
-        return ::Vertx::Util::Utils.to_set(Java::IoVertxExtDiscoveryTypes::EventBusService.java_method(:bindings, []).call()).map! { |elt| ::Vertx::Util::Utils.safe_create(elt,::VertxServiceDiscovery::ServiceReference) }
-      end
-      raise ArgumentError, "Invalid arguments when calling bindings()"
-    end
-    # @overload getProxy(vertx,discovery,filter,resultHandler)
-    #   @param [::Vertx::Vertx] vertx the vert.x instance
+    # @overload getProxy(discovery,filter,resultHandler)
     #   @param [::VertxServiceDiscovery::DiscoveryService] discovery the discovery service
     #   @param [Hash{String => Object}] filter the filter to select the service
     #   @yield the result handler
-    # @overload getProxy(vertx,discovery,itf,resultHandler)
-    #   @param [::Vertx::Vertx] vertx the vert.x instance
+    # @overload getProxy(discovery,itf,resultHandler)
     #   @param [::VertxServiceDiscovery::DiscoveryService] discovery the discovery service
     #   @param [String] itf the service interface
     #   @yield the result handler
-    # @overload getProxy(vertx,discovery,serviceInterface,proxyInterface,resultHandler)
-    #   @param [::Vertx::Vertx] vertx 
+    # @overload getProxy(discovery,serviceInterface,proxyInterface,resultHandler)
     #   @param [::VertxServiceDiscovery::DiscoveryService] discovery 
     #   @param [String] serviceInterface 
     #   @param [String] proxyInterface 
     #   @yield 
-    # @overload getProxy(vertx,discovery,filter,proxyClass,resultHandler)
-    #   @param [::Vertx::Vertx] vertx 
+    # @overload getProxy(discovery,filter,proxyClass,resultHandler)
     #   @param [::VertxServiceDiscovery::DiscoveryService] discovery 
     #   @param [Hash{String => Object}] filter 
     #   @param [String] proxyClass 
     #   @yield 
     # @return [void]
-    def self.get_proxy(param_1=nil,param_2=nil,param_3=nil,param_4=nil)
-      if param_1.class.method_defined?(:j_del) && param_2.class.method_defined?(:j_del) && param_3.class == Hash && block_given? && param_4 == nil
-        return Java::IoVertxExtDiscoveryTypes::EventBusService.java_method(:getProxy, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,param_2.j_del,::Vertx::Util::Utils.to_json_object(param_3),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.from_object(ar.result) : nil) }))
-      elsif param_1.class.method_defined?(:j_del) && param_2.class.method_defined?(:j_del) && param_3.class == String && block_given? && param_4 == nil
-        return Java::IoVertxExtDiscoveryTypes::EventBusService.java_method(:getProxy, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,param_2.j_del,param_3,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.from_object(ar.result) : nil) }))
-      elsif param_1.class.method_defined?(:j_del) && param_2.class.method_defined?(:j_del) && param_3.class == String && param_4.class == String && block_given?
-        return Java::IoVertxExtDiscoveryTypes::EventBusService.java_method(:getProxy, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,param_2.j_del,param_3,param_4,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.from_object(ar.result) : nil) }))
-      elsif param_1.class.method_defined?(:j_del) && param_2.class.method_defined?(:j_del) && param_3.class == Hash && param_4.class == String && block_given?
-        return Java::IoVertxExtDiscoveryTypes::EventBusService.java_method(:getProxy, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,param_2.j_del,::Vertx::Util::Utils.to_json_object(param_3),param_4,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.from_object(ar.result) : nil) }))
+    def self.get_proxy(param_1=nil,param_2=nil,param_3=nil)
+      if param_1.class.method_defined?(:j_del) && param_2.class == Hash && block_given? && param_3 == nil
+        return Java::IoVertxExtDiscoveryTypes::EventBusService.java_method(:getProxy, [Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,::Vertx::Util::Utils.to_json_object(param_2),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.from_object(ar.result) : nil) }))
+      elsif param_1.class.method_defined?(:j_del) && param_2.class == String && block_given? && param_3 == nil
+        return Java::IoVertxExtDiscoveryTypes::EventBusService.java_method(:getProxy, [Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,param_2,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.from_object(ar.result) : nil) }))
+      elsif param_1.class.method_defined?(:j_del) && param_2.class == String && param_3.class == String && block_given?
+        return Java::IoVertxExtDiscoveryTypes::EventBusService.java_method(:getProxy, [Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,param_2,param_3,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.from_object(ar.result) : nil) }))
+      elsif param_1.class.method_defined?(:j_del) && param_2.class == Hash && param_3.class == String && block_given?
+        return Java::IoVertxExtDiscoveryTypes::EventBusService.java_method(:getProxy, [Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,::Vertx::Util::Utils.to_json_object(param_2),param_3,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.from_object(ar.result) : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling get_proxy(param_1,param_2,param_3,param_4)"
+      raise ArgumentError, "Invalid arguments when calling get_proxy(param_1,param_2,param_3)"
     end
-    #  Convenient method to release a used service object.
-    # @param [Object] svcObject the service object
+    # @param [::VertxServiceDiscovery::DiscoveryService] discovery 
+    # @param [Object] svcObject 
     # @return [void]
-    def self.release(svcObject=nil)
-      if (svcObject.class == String  || svcObject.class == Hash || svcObject.class == Array || svcObject.class == NilClass || svcObject.class == TrueClass || svcObject.class == FalseClass || svcObject.class == Fixnum || svcObject.class == Float) && !block_given?
-        return Java::IoVertxExtDiscoveryTypes::EventBusService.java_method(:release, [Java::java.lang.Object.java_class]).call(::Vertx::Util::Utils.to_object(svcObject))
+    def self.release(discovery=nil,svcObject=nil)
+      if discovery.class.method_defined?(:j_del) && (svcObject.class == String  || svcObject.class == Hash || svcObject.class == Array || svcObject.class == NilClass || svcObject.class == TrueClass || svcObject.class == FalseClass || svcObject.class == Fixnum || svcObject.class == Float) && !block_given?
+        return Java::IoVertxExtDiscoveryTypes::EventBusService.java_method(:release, [Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::java.lang.Object.java_class]).call(discovery.j_del,::Vertx::Util::Utils.to_object(svcObject))
       end
-      raise ArgumentError, "Invalid arguments when calling release(svcObject)"
+      raise ArgumentError, "Invalid arguments when calling release(discovery,svcObject)"
     end
   end
 end

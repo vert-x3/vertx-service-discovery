@@ -21,7 +21,10 @@ import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.ServiceReference;
+import io.vertx.ext.discovery.types.AbstractServiceReference;
 import io.vertx.ext.discovery.types.MessageSource;
+
+import java.util.Objects;
 
 /**
  * Service type for data producer. Providers are publishing data to a specific event bus address.
@@ -38,54 +41,34 @@ public class MessageSourceImpl implements MessageSource {
   }
 
   @Override
-  public ServiceReference get(Vertx vertx, Record record, JsonObject config) {
+  public ServiceReference get(Vertx vertx, Record record, JsonObject configuration) {
+    Objects.requireNonNull(vertx);
+    Objects.requireNonNull(record);
     return new MessageSourceReference(vertx, record);
   }
 
   /**
    * Implementation of {@link ServiceReference} for data producer.
    */
-  private class MessageSourceReference implements ServiceReference {
-
-    private final Record record;
-    private final Vertx vertx;
-    private MessageConsumer consumer;
+  private class MessageSourceReference extends AbstractServiceReference<MessageConsumer> {
 
     MessageSourceReference(Vertx vertx, Record record) {
-      this.vertx = vertx;
-      this.record = record;
+      super(vertx, record);
     }
 
     /**
-     * @return the service record.
-     */
-    @Override
-    public Record record() {
-      return record;
-    }
-
-    /**
-     * Creates the event bus consumer for the service. If already created, reuse the same.
+     * Creates the event bus consumer for the service.
      *
-     * @param <T> the type of the message payload.
      * @return the consumer
      */
     @Override
-    public synchronized <T> T get() {
-      if (consumer != null) {
-        return (T) consumer;
-      }
-      consumer = vertx.eventBus().consumer(record.getLocation().getString(Record.ENDPOINT));
-      return (T) consumer;
+    public MessageConsumer retrieve() {
+      return vertx.eventBus().consumer(record().getLocation().getString(Record.ENDPOINT));
     }
 
-    /**
-     * Releases the consumer.
-     */
     @Override
-    public synchronized void release() {
-      consumer.unregister();
-      consumer = null;
+    protected void close() {
+      service.unregister();
     }
   }
 }

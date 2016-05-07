@@ -204,12 +204,12 @@
  * 
  * [source,$lang]
  * ----
- * {@link examples.Examples#example5(io.vertx.core.Vertx, io.vertx.ext.discovery.Record)}
+ * {@link examples.Examples#example5(io.vertx.ext.discovery.DiscoveryService, io.vertx.ext.discovery.Record)}
  * ----
  * 
  * Don't forget to release the reference once done.
  * 
- * == Type of services
+ * == Types of services
  * 
  * A said above, the discovery service has the service type concept to manage the heterogeneity of the different
  * services.

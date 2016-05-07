@@ -21,9 +21,6 @@ import io.vertx.core.json.JsonObject
 import io.vertx.ext.discovery.spi.ServiceType
 import io.vertx.ext.discovery.groovy.DiscoveryService
 import io.vertx.ext.discovery.Record
-import io.vertx.groovy.core.Vertx
-import java.util.Set
-import io.vertx.ext.discovery.groovy.ServiceReference
 import io.vertx.core.json.JsonObject
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
@@ -55,23 +52,14 @@ public class EventBusService {
     return ret;
   }
   /**
-   * Retrieves the bindings - for testing purpose only.
-   * @return a copy of the bindings.
-   */
-  public static Set<ServiceReference> bindings() {
-    def ret = (Set)io.vertx.ext.discovery.types.EventBusService.bindings()?.collect({InternalHelper.safeCreate(it, io.vertx.ext.discovery.groovy.ServiceReference.class)}) as Set;
-    return ret;
-  }
-  /**
    * Lookup for a service record and if found, retrieve it and return the service object (used to consume the service).
    * This is a convenient method to avoid explicit lookup and then retrieval of the service.
-   * @param vertx the vert.x instance
    * @param discovery the discovery service
    * @param filter the filter to select the service
    * @param resultHandler the result handler
    */
-  public static <T> void getProxy(Vertx vertx, DiscoveryService discovery, Map<String, Object> filter, Handler<AsyncResult<T>> resultHandler) {
-    io.vertx.ext.discovery.types.EventBusService.getProxy(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, resultHandler != null ? new Handler<AsyncResult<java.lang.Object>>() {
+  public static <T> void getProxy(DiscoveryService discovery, Map<String, Object> filter, Handler<AsyncResult<T>> resultHandler) {
+    io.vertx.ext.discovery.types.EventBusService.getProxy(discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, resultHandler != null ? new Handler<AsyncResult<java.lang.Object>>() {
       public void handle(AsyncResult<java.lang.Object> ar) {
         if (ar.succeeded()) {
           resultHandler.handle(io.vertx.core.Future.succeededFuture((Object) InternalHelper.wrapObject(ar.result())));
@@ -81,8 +69,8 @@ public class EventBusService {
       }
     } : null);
   }
-  public static <T> void getProxy(Vertx vertx, DiscoveryService discovery, String serviceInterface, String proxyInterface, Handler<AsyncResult<T>> resultHandler) {
-    io.vertx.ext.discovery.types.EventBusService.getProxy(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, serviceInterface, proxyInterface, resultHandler != null ? new Handler<AsyncResult<java.lang.Object>>() {
+  public static <T> void getProxy(DiscoveryService discovery, String serviceInterface, String proxyInterface, Handler<AsyncResult<T>> resultHandler) {
+    io.vertx.ext.discovery.types.EventBusService.getProxy(discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, serviceInterface, proxyInterface, resultHandler != null ? new Handler<AsyncResult<java.lang.Object>>() {
       public void handle(AsyncResult<java.lang.Object> ar) {
         if (ar.succeeded()) {
           resultHandler.handle(io.vertx.core.Future.succeededFuture((Object) InternalHelper.wrapObject(ar.result())));
@@ -92,8 +80,8 @@ public class EventBusService {
       }
     } : null);
   }
-  public static <T> void getProxy(Vertx vertx, DiscoveryService discovery, Map<String, Object> filter, String proxyClass, Handler<AsyncResult<T>> resultHandler) {
-    io.vertx.ext.discovery.types.EventBusService.getProxy(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, proxyClass, resultHandler != null ? new Handler<AsyncResult<java.lang.Object>>() {
+  public static <T> void getProxy(DiscoveryService discovery, Map<String, Object> filter, String proxyClass, Handler<AsyncResult<T>> resultHandler) {
+    io.vertx.ext.discovery.types.EventBusService.getProxy(discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, proxyClass, resultHandler != null ? new Handler<AsyncResult<java.lang.Object>>() {
       public void handle(AsyncResult<java.lang.Object> ar) {
         if (ar.succeeded()) {
           resultHandler.handle(io.vertx.core.Future.succeededFuture((Object) InternalHelper.wrapObject(ar.result())));
@@ -107,13 +95,12 @@ public class EventBusService {
    * Lookup for a service record and if found, retrieve it and return the service object (used to consume the service).
    * This is a convenient method to avoid explicit lookup and then retrieval of the service. A filter based on the
    * request interface is used.
-   * @param vertx the vert.x instance
    * @param discovery the discovery service
    * @param itf the service interface
    * @param resultHandler the result handler
    */
-  public static <T> void getProxy(Vertx vertx, DiscoveryService discovery, String itf, Handler<AsyncResult<T>> resultHandler) {
-    io.vertx.ext.discovery.types.EventBusService.getProxy(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, itf, resultHandler != null ? new Handler<AsyncResult<java.lang.Object>>() {
+  public static <T> void getProxy(DiscoveryService discovery, String itf, Handler<AsyncResult<T>> resultHandler) {
+    io.vertx.ext.discovery.types.EventBusService.getProxy(discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, itf, resultHandler != null ? new Handler<AsyncResult<java.lang.Object>>() {
       public void handle(AsyncResult<java.lang.Object> ar) {
         if (ar.succeeded()) {
           resultHandler.handle(io.vertx.core.Future.succeededFuture((Object) InternalHelper.wrapObject(ar.result())));
@@ -123,11 +110,7 @@ public class EventBusService {
       }
     } : null);
   }
-  /**
-   * Convenient method to release a used service object.
-   * @param svcObject the service object
-   */
-  public static void release(Object svcObject) {
-    io.vertx.ext.discovery.types.EventBusService.release(svcObject != null ? InternalHelper.unwrapObject(svcObject) : null);
+  public static void release(DiscoveryService discovery, Object svcObject) {
+    io.vertx.ext.discovery.types.EventBusService.release(discovery != null ? (io.vertx.ext.discovery.DiscoveryService)discovery.getDelegate() : null, svcObject != null ? InternalHelper.unwrapObject(svcObject) : null);
   }
 }

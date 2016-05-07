@@ -21,17 +21,14 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.impl.ConcurrentHashSet;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.DiscoveryService;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.ServiceReference;
 import io.vertx.ext.discovery.spi.ServiceType;
 
-import java.util.LinkedHashSet;
+import java.util.Collection;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * {@link ServiceType} for event bus services (service proxies).
@@ -107,31 +104,15 @@ public interface EventBusService extends ServiceType {
   }
 
   /**
-   * Stores the service bindings, i.e. the service that has been acquired by the consumer using this instance of
-   * event bus service type.
-   */
-  Set<ServiceReference> BINDINGS = new ConcurrentHashSet<>();
-
-  /**
-   * Retrieves the bindings - for testing purpose only.
-   *
-   * @return a copy of the bindings.
-   */
-  static Set<ServiceReference> bindings() {
-    return new LinkedHashSet<>(BINDINGS);
-  }
-
-  /**
    * Lookup for a service record and if found, retrieve it and return the service object (used to consume the service).
    * This is a convenient method to avoid explicit lookup and then retrieval of the service.
    *
-   * @param vertx         the vert.x instance
    * @param discovery     the discovery service
    * @param filter        the filter to select the service
    * @param resultHandler the result handler
    * @param <T>           the service interface
    */
-  static <T> void getProxy(Vertx vertx, DiscoveryService discovery, JsonObject filter, Handler<AsyncResult<T>>
+  static <T> void getProxy(DiscoveryService discovery, JsonObject filter, Handler<AsyncResult<T>>
       resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed()) {
@@ -140,8 +121,7 @@ public interface EventBusService extends ServiceType {
         if (ar.result() == null) {
           resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
         } else {
-          ServiceReference service = DiscoveryService.getServiceReference(vertx, ar.result());
-          BINDINGS.add(service);
+          ServiceReference service = discovery.getReference(ar.result());
           resultHandler.handle(Future.succeededFuture(service.get()));
         }
       }
@@ -153,26 +133,25 @@ public interface EventBusService extends ServiceType {
    * This is a convenient method to avoid explicit lookup and then retrieval of the service. A filter based on the
    * request interface is used.
    *
-   * @param vertx         the vert.x instance
    * @param discovery     the discovery service
    * @param itf           the service interface
    * @param resultHandler the result handler
    * @param <T>           the service interface
    */
   @GenIgnore
-  static <T> void getProxy(Vertx vertx, DiscoveryService discovery, Class<T> itf, Handler<AsyncResult<T>>
+  static <T> void getProxy(DiscoveryService discovery, Class<T> itf, Handler<AsyncResult<T>>
       resultHandler) {
     JsonObject filter = new JsonObject().put("service.interface", itf.getName());
-    getProxy(vertx, discovery, filter, resultHandler);
+    getProxy(discovery, filter, resultHandler);
   }
 
-  static <T> void getProxy(Vertx vertx, DiscoveryService discovery, String serviceInterface, String proxyInterface,
+  static <T> void getProxy(DiscoveryService discovery, String serviceInterface, String proxyInterface,
                            Handler<AsyncResult<T>> resultHandler) {
     JsonObject filter = new JsonObject().put("service.interface", serviceInterface);
-    getProxy(vertx, discovery, filter, proxyInterface, resultHandler);
+    getProxy(discovery, filter, proxyInterface, resultHandler);
   }
 
-  static <T> void getProxy(Vertx vertx, DiscoveryService discovery, JsonObject filter, String
+  static <T> void getProxy(DiscoveryService discovery, JsonObject filter, String
       proxyClass, Handler<AsyncResult<T>> resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed()) {
@@ -181,9 +160,8 @@ public interface EventBusService extends ServiceType {
         if (ar.result() == null) {
           resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
         } else {
-          ServiceReference service = DiscoveryService.getServiceReference(vertx, ar.result(),
+          ServiceReference service = discovery.getReferenceWithConfiguration(ar.result(),
               new JsonObject().put("client.class", proxyClass));
-          BINDINGS.add(service);
           resultHandler.handle(Future.succeededFuture(service.get()));
         }
       }
@@ -195,29 +173,19 @@ public interface EventBusService extends ServiceType {
    * This is a convenient method to avoid explicit lookup and then retrieval of the service. A filter based on the
    * request interface is used.
    *
-   * @param vertx         the vert.x instance
    * @param discovery     the discovery service
    * @param itf           the service interface
    * @param resultHandler the result handler
    * @param <T>           the service interface
    */
-  static <T> void getProxy(Vertx vertx, DiscoveryService discovery, String itf, Handler<AsyncResult<T>>
+  static <T> void getProxy(DiscoveryService discovery, String itf, Handler<AsyncResult<T>>
       resultHandler) {
     JsonObject filter = new JsonObject().put("service.interface", itf);
-    getProxy(vertx, discovery, filter, resultHandler);
+    getProxy(discovery, filter, resultHandler);
   }
 
-  /**
-   * Convenient method to release a used service object.
-   *
-   * @param svcObject the service object
-   */
-  static void release(Object svcObject) {
-    for (ServiceReference svc : BINDINGS) {
-      if (svc.get().equals(svcObject)) {
-        BINDINGS.remove(svc);
-        return;
-      }
-    }
+  static void release(DiscoveryService discovery, Object svcObject) {
+    Collection<ServiceReference> references = discovery.bindings();
+    references.stream().filter(ref -> svcObject.equals(ref.cached())).forEach(discovery::release);
   }
 }

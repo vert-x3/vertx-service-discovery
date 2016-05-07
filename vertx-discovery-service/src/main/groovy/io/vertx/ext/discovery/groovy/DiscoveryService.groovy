@@ -22,6 +22,7 @@ import java.util.List
 import io.vertx.ext.discovery.DiscoveryOptions
 import io.vertx.groovy.core.Vertx
 import io.vertx.ext.discovery.Record
+import java.util.Set
 import io.vertx.core.json.JsonObject
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
@@ -88,23 +89,30 @@ public class DiscoveryService {
   }
   /**
    * Gets a service reference from the given record.
-   * @param vertx the vert.x instance
    * @param record the chosen record (see <a href="../../../../../../../cheatsheet/Record.html">Record</a>)
-   * @return the service reference, that allows retrieving the service object
+   * @return the service reference, that allows retrieving the service object. Once called the service reference is cached, and need to be released.
    */
-  public static ServiceReference getServiceReference(Vertx vertx, Map<String, Object> record) {
-    def ret = InternalHelper.safeCreate(io.vertx.ext.discovery.DiscoveryService.getServiceReference(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, record != null ? new io.vertx.ext.discovery.Record(new io.vertx.core.json.JsonObject(record)) : null), io.vertx.ext.discovery.groovy.ServiceReference.class);
+  public ServiceReference getReference(Map<String, Object> record = [:]) {
+    def ret = InternalHelper.safeCreate(delegate.getReference(record != null ? new io.vertx.ext.discovery.Record(new io.vertx.core.json.JsonObject(record)) : null), io.vertx.ext.discovery.groovy.ServiceReference.class);
     return ret;
   }
   /**
-   * Gets a service reference for the given record.
-   * @param vertx the vert.x instance
+   * Gets a service reference from the given record, the reference is configured with the given json object.
    * @param record the chosen record (see <a href="../../../../../../../cheatsheet/Record.html">Record</a>)
-   * @param consumerConfiguration some additional (optional) configuration to configure the service object created from the service reference.
-   * @return the service reference, that allows retrieving the service object
+   * @param configuration the configuration
+   * @return the service reference, that allows retrieving the service object. Once called the service reference is cached, and need to be released.
    */
-  public static ServiceReference getServiceReference(Vertx vertx, Map<String, Object> record, Map<String, Object> consumerConfiguration) {
-    def ret = InternalHelper.safeCreate(io.vertx.ext.discovery.DiscoveryService.getServiceReference(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, record != null ? new io.vertx.ext.discovery.Record(new io.vertx.core.json.JsonObject(record)) : null, consumerConfiguration != null ? new io.vertx.core.json.JsonObject(consumerConfiguration) : null), io.vertx.ext.discovery.groovy.ServiceReference.class);
+  public ServiceReference getReferenceWithConfiguration(Map<String, Object> record = [:], Map<String, Object> configuration) {
+    def ret = InternalHelper.safeCreate(delegate.getReferenceWithConfiguration(record != null ? new io.vertx.ext.discovery.Record(new io.vertx.core.json.JsonObject(record)) : null, configuration != null ? new io.vertx.core.json.JsonObject(configuration) : null), io.vertx.ext.discovery.groovy.ServiceReference.class);
+    return ret;
+  }
+  /**
+   * Releases the service reference.
+   * @param reference the reference to release, must not be <code>null</code>
+   * @return whether or not the reference has been released.
+   */
+  public boolean release(ServiceReference reference) {
+    def ret = delegate.release(reference != null ? (io.vertx.ext.discovery.ServiceReference)reference.getDelegate() : null);
     return ret;
   }
   /**
@@ -201,5 +209,13 @@ public class DiscoveryService {
         }
       }
     } : null);
+  }
+  /**
+   * @return the set of service references retrieved by this discovery service.
+   * @return 
+   */
+  public Set<ServiceReference> bindings() {
+    def ret = (Set)delegate.bindings()?.collect({InternalHelper.safeCreate(it, io.vertx.ext.discovery.groovy.ServiceReference.class)}) as Set;
+    return ret;
   }
 }

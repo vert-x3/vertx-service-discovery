@@ -20,7 +20,6 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.DiscoveryService;
@@ -113,18 +112,17 @@ public interface HttpEndpoint extends ServiceType {
    * Convenient method that looks for a HTTP endpoint and provides the configured {@link HttpClient}. The async result
    * is marked as failed is there are no matching services, or if the lookup fails.
    *
-   * @param vertx         The vert.x instance
    * @param discovery     The discovery service
    * @param filter        The filter, optional
    * @param resultHandler the result handler
    */
-  static void getClient(Vertx vertx, DiscoveryService discovery, JsonObject filter, Handler<AsyncResult<HttpClient>>
+  static void getClient(DiscoveryService discovery, JsonObject filter, Handler<AsyncResult<HttpClient>>
       resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
-        resultHandler.handle(Future.succeededFuture(DiscoveryService.getServiceReference(vertx, ar.result()).get()));
+        resultHandler.handle(Future.succeededFuture(discovery.getReference(ar.result()).get()));
       }
     });
   }
