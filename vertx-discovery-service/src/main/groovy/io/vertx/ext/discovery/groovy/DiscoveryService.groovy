@@ -21,6 +21,7 @@ import io.vertx.core.json.JsonObject
 import io.vertx.groovy.core.Vertx
 import io.vertx.ext.discovery.Record
 import java.util.Set
+import java.util.function.Function
 import java.util.List
 import io.vertx.ext.discovery.DiscoveryOptions
 import io.vertx.core.json.JsonObject
@@ -178,6 +179,60 @@ public class DiscoveryService {
     } : null);
   }
   /**
+   * Lookups for a single record.
+   * <p>
+   * The filter is a  taking a <a href="../../../../../../../cheatsheet/Record.html">Record</a> as argument and returning a boolean. You should see it
+   * as an <code>accept</code> method of a filter. This method return a record passing the filter.
+   * <p>
+   * This method only looks for records with a <code>UP</code> status.
+   * @param filter the filter, must not be <code>null</code>. To return all records, use a function accepting all records
+   * @param resultHandler the result handler called when the lookup has been completed. When there are no matching record, the operation succeed, but the async result has no result.
+   */
+  public void getRecord(java.util.function.Function<Map<String, Object>, Boolean> filter, Handler<AsyncResult<Map<String, Object>>> resultHandler) {
+    delegate.getRecord(filter != null ? new java.util.function.Function<io.vertx.ext.discovery.Record, java.lang.Boolean>(){
+      public java.lang.Boolean apply(io.vertx.ext.discovery.Record arg_) {
+        def ret = filter.apply((Map<String, Object>)InternalHelper.wrapObject(arg_?.toJson()));
+        return ret != null ? ret : null;
+      }
+    } : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.ext.discovery.Record>>() {
+      public void handle(AsyncResult<io.vertx.ext.discovery.Record> ar) {
+        if (ar.succeeded()) {
+          resultHandler.handle(io.vertx.core.Future.succeededFuture((Map<String, Object>)InternalHelper.wrapObject(ar.result()?.toJson())));
+        } else {
+          resultHandler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
+        }
+      }
+    } : null);
+  }
+  /**
+   * Lookups for a single record.
+   * <p>
+   * The filter is a  taking a <a href="../../../../../../../cheatsheet/Record.html">Record</a> as argument and returning a boolean. You should see it
+   * as an <code>accept</code> method of a filter. This method return a record passing the filter.
+   * <p>
+   * Unlike {@link io.vertx.ext.discovery.groovy.DiscoveryService#getRecord}, this method may accept records with a <code>OUT OF SERVICE</code>
+   * status, if the <code>includeOutOfService</code> parameter is set to <code>true</code>.
+   * @param filter the filter, must not be <code>null</code>. To return all records, use a function accepting all records
+   * @param includeOutOfService whether or not the filter accepts <code>OUT OF SERVICE</code> records
+   * @param resultHandler the result handler called when the lookup has been completed. When there are no matching record, the operation succeed, but the async result has no result.
+   */
+  public void getRecord(java.util.function.Function<Map<String, Object>, Boolean> filter, boolean includeOutOfService, Handler<AsyncResult<Map<String, Object>>> resultHandler) {
+    delegate.getRecord(filter != null ? new java.util.function.Function<io.vertx.ext.discovery.Record, java.lang.Boolean>(){
+      public java.lang.Boolean apply(io.vertx.ext.discovery.Record arg_) {
+        def ret = filter.apply((Map<String, Object>)InternalHelper.wrapObject(arg_?.toJson()));
+        return ret != null ? ret : null;
+      }
+    } : null, includeOutOfService, resultHandler != null ? new Handler<AsyncResult<io.vertx.ext.discovery.Record>>() {
+      public void handle(AsyncResult<io.vertx.ext.discovery.Record> ar) {
+        if (ar.succeeded()) {
+          resultHandler.handle(io.vertx.core.Future.succeededFuture((Map<String, Object>)InternalHelper.wrapObject(ar.result()?.toJson())));
+        } else {
+          resultHandler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
+        }
+      }
+    } : null);
+  }
+  /**
    * Lookups for a set of records. Unlike {@link io.vertx.ext.discovery.groovy.DiscoveryService#getRecord}, this method returns all matching
    * records.
    * @param filter the filter - see {@link io.vertx.ext.discovery.groovy.DiscoveryService#getRecord}
@@ -185,6 +240,62 @@ public class DiscoveryService {
    */
   public void getRecords(Map<String, Object> filter, Handler<AsyncResult<List<Map<String, Object>>>> resultHandler) {
     delegate.getRecords(filter != null ? new io.vertx.core.json.JsonObject(filter) : null, resultHandler != null ? new Handler<AsyncResult<java.util.List<io.vertx.ext.discovery.Record>>>() {
+      public void handle(AsyncResult<java.util.List<io.vertx.ext.discovery.Record>> ar) {
+        if (ar.succeeded()) {
+          resultHandler.handle(io.vertx.core.Future.succeededFuture((List)ar.result()?.collect({(Map<String, Object>)InternalHelper.wrapObject(it?.toJson())})));
+        } else {
+          resultHandler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
+        }
+      }
+    } : null);
+  }
+  /**
+   * Lookups for a set of records. Unlike {@link io.vertx.ext.discovery.groovy.DiscoveryService#getRecord}, this method returns all matching
+   * records.
+   * <p>
+   * The filter is a  taking a <a href="../../../../../../../cheatsheet/Record.html">Record</a> as argument and returning a boolean. You should see it
+   * as an <code>accept</code> method of a filter. This method return a record passing the filter.
+   * <p>
+   * This method only looks for records with a <code>UP</code> status.
+   * @param filter the filter, must not be <code>null</code>. To return all records, use a function accepting all records
+   * @param resultHandler handler called when the lookup has been completed. When there are no matching record, the operation succeed, but the async result has an empty list as result.
+   */
+  public void getRecords(java.util.function.Function<Map<String, Object>, Boolean> filter, Handler<AsyncResult<List<Map<String, Object>>>> resultHandler) {
+    delegate.getRecords(filter != null ? new java.util.function.Function<io.vertx.ext.discovery.Record, java.lang.Boolean>(){
+      public java.lang.Boolean apply(io.vertx.ext.discovery.Record arg_) {
+        def ret = filter.apply((Map<String, Object>)InternalHelper.wrapObject(arg_?.toJson()));
+        return ret != null ? ret : null;
+      }
+    } : null, resultHandler != null ? new Handler<AsyncResult<java.util.List<io.vertx.ext.discovery.Record>>>() {
+      public void handle(AsyncResult<java.util.List<io.vertx.ext.discovery.Record>> ar) {
+        if (ar.succeeded()) {
+          resultHandler.handle(io.vertx.core.Future.succeededFuture((List)ar.result()?.collect({(Map<String, Object>)InternalHelper.wrapObject(it?.toJson())})));
+        } else {
+          resultHandler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
+        }
+      }
+    } : null);
+  }
+  /**
+   * Lookups for a set of records. Unlike {@link io.vertx.ext.discovery.groovy.DiscoveryService#getRecord}, this method returns all matching
+   * records.
+   * <p>
+   * The filter is a  taking a <a href="../../../../../../../cheatsheet/Record.html">Record</a> as argument and returning a boolean. You should see it
+   * as an <code>accept</code> method of a filter. This method return a record passing the filter.
+   * <p>
+   * Unlike {@link io.vertx.ext.discovery.groovy.DiscoveryService#getRecords}, this method may accept records with a <code>OUT OF SERVICE</code>
+   * status, if the <code>includeOutOfService</code> parameter is set to <code>true</code>.
+   * @param filter the filter, must not be <code>null</code>. To return all records, use a function accepting all records
+   * @param includeOutOfService whether or not the filter accepts <code>OUT OF SERVICE</code> records
+   * @param resultHandler handler called when the lookup has been completed. When there are no matching record, the operation succeed, but the async result has an empty list as result.
+   */
+  public void getRecords(java.util.function.Function<Map<String, Object>, Boolean> filter, boolean includeOutOfService, Handler<AsyncResult<List<Map<String, Object>>>> resultHandler) {
+    delegate.getRecords(filter != null ? new java.util.function.Function<io.vertx.ext.discovery.Record, java.lang.Boolean>(){
+      public java.lang.Boolean apply(io.vertx.ext.discovery.Record arg_) {
+        def ret = filter.apply((Map<String, Object>)InternalHelper.wrapObject(arg_?.toJson()));
+        return ret != null ? ret : null;
+      }
+    } : null, includeOutOfService, resultHandler != null ? new Handler<AsyncResult<java.util.List<io.vertx.ext.discovery.Record>>>() {
       public void handle(AsyncResult<java.util.List<io.vertx.ext.discovery.Record>> ar) {
         if (ar.succeeded()) {
           resultHandler.handle(io.vertx.core.Future.succeededFuture((List)ar.result()?.collect({(Map<String, Object>)InternalHelper.wrapObject(it?.toJson())})));

@@ -137,34 +137,47 @@ var DiscoveryService = function(j_val) {
   /**
    Lookups for a single record.
    <p>
-   Filters are expressed using a Json object. Each entry of the given filter will be checked against the record.
-   All entry must match exactly the record. The entry can use the special "*" value to denotes a requirement on the
-   key, but not on the value.
+   The filter is a  taking a <a href="../../dataobjects.html#Record">Record</a> as argument and returning a boolean. You should see it
+   as an <code>accept</code> method of a filter. This method return a record passing the filter.
    <p>
-   Let's take some example:
-   <pre>
-     { "name" = "a" } => matches records with name set fo "a"
-     { "color" = "*" } => matches records with "color" set
-     { "color" = "red" } => only matches records with "color" set to "red"
-     { "color" = "red", "name" = "a"} => only matches records with name set to "a", and color set to "red"
-   </pre>
-   <p>
-   If the filter is not set (<code>null</code> or empty), it accepts all records.
-   <p>
-   This method returns the first matching record.
+   Unlike {@link DiscoveryService#getRecord}, this method may accept records with a <code>OUT OF SERVICE</code>
+   status, if the <code>includeOutOfService</code> parameter is set to <code>true</code>.
 
    @public
-   @param filter {Object} the filter. 
-   @param resultHandler {function} handler called when the lookup has been completed. When there are no matching record, the operation succeed, but the async result has no result. 
+   @param filter {todo} the filter, must not be <code>null</code>. To return all records, use a function accepting all records 
+   @param includeOutOfService {boolean} whether or not the filter accepts <code>OUT OF SERVICE</code> records 
+   @param resultHandler {function} the result handler called when the lookup has been completed. When there are no matching record, the operation succeed, but the async result has no result. 
    */
-  this.getRecord = function(filter, resultHandler) {
+  this.getRecord = function() {
     var __args = arguments;
     if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
-      j_discoveryService["getRecord(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(filter), function(ar) {
+      j_discoveryService["getRecord(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(__args[0]), function(ar) {
       if (ar.succeeded()) {
-        resultHandler(utils.convReturnDataObject(ar.result()), null);
+        __args[1](utils.convReturnDataObject(ar.result()), null);
       } else {
-        resultHandler(null, ar.cause());
+        __args[1](null, ar.cause());
+      }
+    });
+    }  else if (__args.length === 2 && typeof __args[0] === 'function' && typeof __args[1] === 'function') {
+      j_discoveryService["getRecord(java.util.function.Function,io.vertx.core.Handler)"](function(jVal) {
+      var jRet = __args[0](utils.convReturnDataObject(jVal));
+      return jRet;
+    }, function(ar) {
+      if (ar.succeeded()) {
+        __args[1](utils.convReturnDataObject(ar.result()), null);
+      } else {
+        __args[1](null, ar.cause());
+      }
+    });
+    }  else if (__args.length === 3 && typeof __args[0] === 'function' && typeof __args[1] ==='boolean' && typeof __args[2] === 'function') {
+      j_discoveryService["getRecord(java.util.function.Function,boolean,io.vertx.core.Handler)"](function(jVal) {
+      var jRet = __args[0](utils.convReturnDataObject(jVal));
+      return jRet;
+    }, __args[1], function(ar) {
+      if (ar.succeeded()) {
+        __args[2](utils.convReturnDataObject(ar.result()), null);
+      } else {
+        __args[2](null, ar.cause());
       }
     });
     } else throw new TypeError('function invoked with invalid arguments');
@@ -173,19 +186,48 @@ var DiscoveryService = function(j_val) {
   /**
    Lookups for a set of records. Unlike {@link DiscoveryService#getRecord}, this method returns all matching
    records.
+   <p>
+   The filter is a  taking a <a href="../../dataobjects.html#Record">Record</a> as argument and returning a boolean. You should see it
+   as an <code>accept</code> method of a filter. This method return a record passing the filter.
+   <p>
+   Unlike {@link DiscoveryService#getRecords}, this method may accept records with a <code>OUT OF SERVICE</code>
+   status, if the <code>includeOutOfService</code> parameter is set to <code>true</code>.
 
    @public
-   @param filter {Object} the filter - see {@link DiscoveryService#getRecord} 
+   @param filter {todo} the filter, must not be <code>null</code>. To return all records, use a function accepting all records 
+   @param includeOutOfService {boolean} whether or not the filter accepts <code>OUT OF SERVICE</code> records 
    @param resultHandler {function} handler called when the lookup has been completed. When there are no matching record, the operation succeed, but the async result has an empty list as result. 
    */
-  this.getRecords = function(filter, resultHandler) {
+  this.getRecords = function() {
     var __args = arguments;
     if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
-      j_discoveryService["getRecords(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(filter), function(ar) {
+      j_discoveryService["getRecords(io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](utils.convParamJsonObject(__args[0]), function(ar) {
       if (ar.succeeded()) {
-        resultHandler(utils.convReturnListSetDataObject(ar.result()), null);
+        __args[1](utils.convReturnListSetDataObject(ar.result()), null);
       } else {
-        resultHandler(null, ar.cause());
+        __args[1](null, ar.cause());
+      }
+    });
+    }  else if (__args.length === 2 && typeof __args[0] === 'function' && typeof __args[1] === 'function') {
+      j_discoveryService["getRecords(java.util.function.Function,io.vertx.core.Handler)"](function(jVal) {
+      var jRet = __args[0](utils.convReturnDataObject(jVal));
+      return jRet;
+    }, function(ar) {
+      if (ar.succeeded()) {
+        __args[1](utils.convReturnListSetDataObject(ar.result()), null);
+      } else {
+        __args[1](null, ar.cause());
+      }
+    });
+    }  else if (__args.length === 3 && typeof __args[0] === 'function' && typeof __args[1] ==='boolean' && typeof __args[2] === 'function') {
+      j_discoveryService["getRecords(java.util.function.Function,boolean,io.vertx.core.Handler)"](function(jVal) {
+      var jRet = __args[0](utils.convReturnDataObject(jVal));
+      return jRet;
+    }, __args[1], function(ar) {
+      if (ar.succeeded()) {
+        __args[2](utils.convReturnListSetDataObject(ar.result()), null);
+      } else {
+        __args[2](null, ar.cause());
       }
     });
     } else throw new TypeError('function invoked with invalid arguments');

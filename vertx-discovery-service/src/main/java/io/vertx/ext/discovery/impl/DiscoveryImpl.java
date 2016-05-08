@@ -30,6 +30,7 @@ import io.vertx.ext.discovery.spi.DiscoveryBridge;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -209,15 +210,26 @@ public class DiscoveryImpl implements DiscoveryService {
   @Override
   public void getRecord(JsonObject filter,
                         Handler<AsyncResult<Record>> resultHandler) {
-    if (filter.getString("status") == null) {
-      filter.put("status", Status.UP.name());
-    }
+    boolean includeOutOfService = filter.getString("status") != null;
+    Function<Record, Boolean> accept = r -> r.match(filter);
+    getRecord(accept, includeOutOfService, resultHandler);
+  }
+
+  @Override
+  public void getRecord(Function<Record, Boolean> filter, Handler<AsyncResult<Record>> resultHandler) {
+    getRecord(filter, false, resultHandler);
+  }
+
+  @Override
+  public void getRecord(Function<Record, Boolean> filter, boolean includeOutOfService, Handler<AsyncResult<Record>>
+      resultHandler) {
     backend.getRecords(list -> {
       if (list.failed()) {
         resultHandler.handle(Future.failedFuture(list.cause()));
       } else {
         Optional<Record> any = list.result().stream()
-            .filter(record -> record.match(filter))
+            .filter(filter::apply)
+            .filter(record -> includeOutOfService || record.getStatus() == Status.UP)
             .findAny();
         if (any.isPresent()) {
           resultHandler.handle(Future.succeededFuture(any.get()));
@@ -230,16 +242,28 @@ public class DiscoveryImpl implements DiscoveryService {
 
   @Override
   public void getRecords(JsonObject filter, Handler<AsyncResult<List<Record>>> resultHandler) {
-    if (filter.getValue("status") == null) {
-      filter.put("status", Status.UP.name());
-    }
+    boolean includeOutOfService = filter.getString("status") != null;
+    Function<Record, Boolean> accept = r -> r.match(filter);
+    getRecords(accept, includeOutOfService, resultHandler);
+  }
+
+  @Override
+  public void getRecords(Function<Record, Boolean> filter, Handler<AsyncResult<List<Record>>> resultHandler) {
+    getRecords(filter, false, resultHandler);
+  }
+
+  @Override
+  public void getRecords(Function<Record, Boolean> filter, boolean includeOutOfService, Handler<AsyncResult<List<Record>>> resultHandler) {
     backend.getRecords(list -> {
       if (list.failed()) {
         resultHandler.handle(Future.failedFuture(list.cause()));
       } else {
-        List<Record> match = list.result().stream()
-            .filter(record -> record.match(filter)).collect(Collectors.toList());
-        resultHandler.handle(Future.succeededFuture(match));
+        resultHandler.handle(Future.succeededFuture(
+            list.result().stream()
+                .filter(filter::apply)
+                .filter(record -> includeOutOfService || record.getStatus() == Status.UP)
+                .collect(Collectors.toList())
+        ));
       }
     });
   }

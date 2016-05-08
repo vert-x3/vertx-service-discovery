@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Discovery service main entry point.
@@ -174,6 +175,37 @@ public interface DiscoveryService {
   void getRecord(JsonObject filter, Handler<AsyncResult<Record>> resultHandler);
 
   /**
+   * Lookups for a single record.
+   * <p>
+   * The filter is a {@link Function} taking a {@link Record} as argument and returning a boolean. You should see it
+   * as an {@code accept} method of a filter. This method return a record passing the filter.
+   * <p>
+   * This method only looks for records with a {@code UP} status.
+   *
+   * @param filter        the filter, must not be {@code null}. To return all records, use a function accepting all records
+   * @param resultHandler the result handler called when the lookup has been completed. When there are no matching
+   *                      record, the operation succeed, but the async result has no result.
+   */
+  void getRecord(Function<Record, Boolean> filter, Handler<AsyncResult<Record>> resultHandler);
+
+  /**
+   * Lookups for a single record.
+   * <p>
+   * The filter is a {@link Function} taking a {@link Record} as argument and returning a boolean. You should see it
+   * as an {@code accept} method of a filter. This method return a record passing the filter.
+   * <p>
+   * Unlike {@link #getRecord(Function, Handler)}, this method may accept records with a {@code OUT OF SERVICE}
+   * status, if the {@code includeOutOfService} parameter is set to {@code true}.
+   *
+   * @param filter              the filter, must not be {@code null}. To return all records, use a function accepting all records
+   * @param includeOutOfService whether or not the filter accepts  {@code OUT OF SERVICE} records
+   * @param resultHandler       the result handler called when the lookup has been completed. When there are no matching
+   *                            record, the operation succeed, but the async result has no result.
+   */
+  void getRecord(Function<Record, Boolean> filter, boolean includeOutOfService, Handler<AsyncResult<Record>>
+      resultHandler);
+
+  /**
    * Lookups for a set of records. Unlike {@link #getRecord(JsonObject, Handler)}, this method returns all matching
    * records.
    *
@@ -182,6 +214,39 @@ public interface DiscoveryService {
    *                      operation succeed, but the async result has an empty list as result.
    */
   void getRecords(JsonObject filter, Handler<AsyncResult<List<Record>>> resultHandler);
+
+  /**
+   * Lookups for a set of records. Unlike {@link #getRecord(Function, Handler)}, this method returns all matching
+   * records.
+   * <p>
+   * The filter is a {@link Function} taking a {@link Record} as argument and returning a boolean. You should see it
+   * as an {@code accept} method of a filter. This method return a record passing the filter.
+   * <p>
+   * This method only looks for records with a {@code UP} status.
+   *
+   * @param filter        the filter, must not be {@code null}. To return all records, use a function accepting all records
+   * @param resultHandler handler called when the lookup has been completed. When there are no matching record, the
+   *                      operation succeed, but the async result has an empty list as result.
+   */
+  void getRecords(Function<Record, Boolean> filter, Handler<AsyncResult<List<Record>>> resultHandler);
+
+  /**
+   * Lookups for a set of records. Unlike {@link #getRecord(Function, Handler)}, this method returns all matching
+   * records.
+   * <p>
+   * The filter is a {@link Function} taking a {@link Record} as argument and returning a boolean. You should see it
+   * as an {@code accept} method of a filter. This method return a record passing the filter.
+   * <p>
+   * Unlike {@link #getRecords(Function, Handler)}, this method may accept records with a {@code OUT OF SERVICE}
+   * status, if the {@code includeOutOfService} parameter is set to {@code true}.
+   *
+   * @param filter              the filter, must not be {@code null}. To return all records, use a function accepting all records
+   * @param includeOutOfService whether or not the filter accepts  {@code OUT OF SERVICE} records
+   * @param resultHandler       handler called when the lookup has been completed. When there are no matching record, the
+   *                            operation succeed, but the async result has an empty list as result.
+   */
+  void getRecords(Function<Record, Boolean> filter, boolean includeOutOfService,
+                  Handler<AsyncResult<List<Record>>> resultHandler);
 
   /**
    * Updates the given record. The record must has been published, and has it's registration id set.

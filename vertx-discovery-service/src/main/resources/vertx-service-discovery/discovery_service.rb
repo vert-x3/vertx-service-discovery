@@ -115,40 +115,60 @@ module VertxServiceDiscovery
     end
     #  Lookups for a single record.
     #  <p>
-    #  Filters are expressed using a Json object. Each entry of the given filter will be checked against the record.
-    #  All entry must match exactly the record. The entry can use the special "*" value to denotes a requirement on the
-    #  key, but not on the value.
+    #  The filter is a  taking a {Hash} as argument and returning a boolean. You should see it
+    #  as an <code>accept</code> method of a filter. This method return a record passing the filter.
     #  <p>
-    #  Let's take some example:
-    #  <pre>
-    #    { "name" = "a" } => matches records with name set fo "a"
-    #    { "color" = "*" } => matches records with "color" set
-    #    { "color" = "red" } => only matches records with "color" set to "red"
-    #    { "color" = "red", "name" = "a"} => only matches records with name set to "a", and color set to "red"
-    #  </pre>
-    #  <p>
-    #  If the filter is not set (<code>null</code> or empty), it accepts all records.
-    #  <p>
-    #  This method returns the first matching record.
-    # @param [Hash{String => Object}] filter the filter.
-    # @yield handler called when the lookup has been completed. When there are no matching record, the operation succeed, but the async result has no result.
+    #  Unlike {::VertxServiceDiscovery::DiscoveryService#get_record}, this method may accept records with a <code>OUT OF SERVICE</code>
+    #  status, if the <code>includeOutOfService</code> parameter is set to <code>true</code>.
+    # @overload getRecord(filter,resultHandler)
+    #   @param [Hash{String => Object}] filter the filter.
+    #   @yield handler called when the lookup has been completed. When there are no matching record, the operation succeed, but the async result has no result.
+    # @overload getRecord(filter,resultHandler)
+    #   @param [Proc] filter the filter, must not be <code>null</code>. To return all records, use a function accepting all records
+    #   @yield the result handler called when the lookup has been completed. When there are no matching record, the operation succeed, but the async result has no result.
+    # @overload getRecord(filter,includeOutOfService,resultHandler)
+    #   @param [Proc] filter the filter, must not be <code>null</code>. To return all records, use a function accepting all records
+    #   @param [true,false] includeOutOfService whether or not the filter accepts <code>OUT OF SERVICE</code> records
+    #   @yield the result handler called when the lookup has been completed. When there are no matching record, the operation succeed, but the async result has no result.
     # @return [void]
-    def get_record(filter=nil)
-      if filter.class == Hash && block_given?
-        return @j_del.java_method(:getRecord, [Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(::Vertx::Util::Utils.to_json_object(filter),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result != nil ? JSON.parse(ar.result.toJson.encode) : nil : nil) }))
+    def get_record(param_1=nil,param_2=nil)
+      if param_1.class == Hash && block_given? && param_2 == nil
+        return @j_del.java_method(:getRecord, [Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(::Vertx::Util::Utils.to_json_object(param_1),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result != nil ? JSON.parse(ar.result.toJson.encode) : nil : nil) }))
+      elsif param_1.class == Proc && block_given? && param_2 == nil
+        return @j_del.java_method(:getRecord, [Java::JavaUtilFunction::Function.java_class,Java::IoVertxCore::Handler.java_class]).call((Proc.new { |event| param_1.call(event != nil ? JSON.parse(event.toJson.encode) : nil) }),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result != nil ? JSON.parse(ar.result.toJson.encode) : nil : nil) }))
+      elsif param_1.class == Proc && (param_2.class == TrueClass || param_2.class == FalseClass) && block_given?
+        return @j_del.java_method(:getRecord, [Java::JavaUtilFunction::Function.java_class,Java::boolean.java_class,Java::IoVertxCore::Handler.java_class]).call((Proc.new { |event| param_1.call(event != nil ? JSON.parse(event.toJson.encode) : nil) }),param_2,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result != nil ? JSON.parse(ar.result.toJson.encode) : nil : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling get_record(filter)"
+      raise ArgumentError, "Invalid arguments when calling get_record(param_1,param_2)"
     end
     #  Lookups for a set of records. Unlike {::VertxServiceDiscovery::DiscoveryService#get_record}, this method returns all matching
     #  records.
-    # @param [Hash{String => Object}] filter the filter - see {::VertxServiceDiscovery::DiscoveryService#get_record}
-    # @yield handler called when the lookup has been completed. When there are no matching record, the operation succeed, but the async result has an empty list as result.
+    #  <p>
+    #  The filter is a  taking a {Hash} as argument and returning a boolean. You should see it
+    #  as an <code>accept</code> method of a filter. This method return a record passing the filter.
+    #  <p>
+    #  Unlike {::VertxServiceDiscovery::DiscoveryService#get_records}, this method may accept records with a <code>OUT OF SERVICE</code>
+    #  status, if the <code>includeOutOfService</code> parameter is set to <code>true</code>.
+    # @overload getRecords(filter,resultHandler)
+    #   @param [Hash{String => Object}] filter the filter - see {::VertxServiceDiscovery::DiscoveryService#get_record}
+    #   @yield handler called when the lookup has been completed. When there are no matching record, the operation succeed, but the async result has an empty list as result.
+    # @overload getRecords(filter,resultHandler)
+    #   @param [Proc] filter the filter, must not be <code>null</code>. To return all records, use a function accepting all records
+    #   @yield handler called when the lookup has been completed. When there are no matching record, the operation succeed, but the async result has an empty list as result.
+    # @overload getRecords(filter,includeOutOfService,resultHandler)
+    #   @param [Proc] filter the filter, must not be <code>null</code>. To return all records, use a function accepting all records
+    #   @param [true,false] includeOutOfService whether or not the filter accepts <code>OUT OF SERVICE</code> records
+    #   @yield handler called when the lookup has been completed. When there are no matching record, the operation succeed, but the async result has an empty list as result.
     # @return [void]
-    def get_records(filter=nil)
-      if filter.class == Hash && block_given?
-        return @j_del.java_method(:getRecords, [Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(::Vertx::Util::Utils.to_json_object(filter),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result.to_a.map { |elt| elt != nil ? JSON.parse(elt.toJson.encode) : nil } : nil) }))
+    def get_records(param_1=nil,param_2=nil)
+      if param_1.class == Hash && block_given? && param_2 == nil
+        return @j_del.java_method(:getRecords, [Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(::Vertx::Util::Utils.to_json_object(param_1),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result.to_a.map { |elt| elt != nil ? JSON.parse(elt.toJson.encode) : nil } : nil) }))
+      elsif param_1.class == Proc && block_given? && param_2 == nil
+        return @j_del.java_method(:getRecords, [Java::JavaUtilFunction::Function.java_class,Java::IoVertxCore::Handler.java_class]).call((Proc.new { |event| param_1.call(event != nil ? JSON.parse(event.toJson.encode) : nil) }),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result.to_a.map { |elt| elt != nil ? JSON.parse(elt.toJson.encode) : nil } : nil) }))
+      elsif param_1.class == Proc && (param_2.class == TrueClass || param_2.class == FalseClass) && block_given?
+        return @j_del.java_method(:getRecords, [Java::JavaUtilFunction::Function.java_class,Java::boolean.java_class,Java::IoVertxCore::Handler.java_class]).call((Proc.new { |event| param_1.call(event != nil ? JSON.parse(event.toJson.encode) : nil) }),param_2,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result.to_a.map { |elt| elt != nil ? JSON.parse(elt.toJson.encode) : nil } : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling get_records(filter)"
+      raise ArgumentError, "Invalid arguments when calling get_records(param_1,param_2)"
     end
     #  Updates the given record. The record must has been published, and has it's registration id set.
     # @param [Hash] record the updated record

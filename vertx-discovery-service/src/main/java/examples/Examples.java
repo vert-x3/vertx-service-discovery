@@ -54,8 +54,8 @@ public class Examples {
   public void example2(DiscoveryService service) {
     // Manual record creation
     Record record = new Record()
-        .setType(EventBusService.TYPE)
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "the-service-address"))
+        .setType("eventbus-service-proxy")
+        .setLocation(new JsonObject().put("endpoint", "the-service-address"))
         .setName("my-service")
         .setMetadata(new JsonObject().put("some-label", "some-value"));
 
@@ -93,7 +93,7 @@ public class Examples {
 
   public void example4(DiscoveryService service) {
     // Get any record
-    service.getRecord(null, ar -> {
+    service.getRecord((JsonObject) null, ar -> {
       if (ar.succeeded()) {
         if (ar.result() != null) {
           // we have a record
@@ -122,8 +122,17 @@ public class Examples {
     service.getRecords(new JsonObject().put("some-label", "some-value"), ar -> {
       if (ar.succeeded()) {
         List<Record> results = ar.result();
-        if (!results.isEmpty()) {
-          // we have matching records
+        // If the list is not empty, we have matching record
+        // Else, the lookup succeeded, but no matching service
+      } else {
+        // lookup failed
+      }
+    });
+
+    service.getRecord(r -> r.getName().equals("some-name"), ar -> {
+      if (ar.succeeded()) {
+        if (ar.result() != null) {
+          // we have a record
         } else {
           // the lookup succeeded, but no matching service
         }
