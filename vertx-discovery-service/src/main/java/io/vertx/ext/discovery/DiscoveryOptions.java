@@ -18,7 +18,6 @@ package io.vertx.ext.discovery;
 
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.discovery.spi.DiscoveryBackend;
 
 /**
  * Options to configure the discovery service.
@@ -29,10 +28,12 @@ import io.vertx.ext.discovery.spi.DiscoveryBackend;
 public class DiscoveryOptions {
 
   public static final String DEFAULT_ANNOUNCE_ADDRESS = "vertx.discovery.announce";
+  public static final String DEFAULT_USAGE_ADDRESS = "vertx.discovery.usage";
 
   private String announceAddress = DEFAULT_ANNOUNCE_ADDRESS;
   private JsonObject backendConfiguration = new JsonObject();
   private String name = null;
+  private String usageAddress = DEFAULT_USAGE_ADDRESS;
 
   /**
    * Creates a new instance of {@link DiscoveryOptions} using the default values.
@@ -50,6 +51,7 @@ public class DiscoveryOptions {
     this.announceAddress = other.announceAddress;
     this.backendConfiguration = other.backendConfiguration.copy();
     this.name = other.name;
+    this.usageAddress = other.usageAddress;
   }
 
   /**
@@ -117,12 +119,42 @@ public class DiscoveryOptions {
     return this;
   }
 
+  /**
+   * Sets the discovery service name used in the service usage events.
+   * If not set, the node id is used.
+   *
+   * @param name the name to use.
+   * @return the current {@link DiscoveryOptions}
+   */
   public DiscoveryOptions setName(String name) {
     this.name = name;
     return this;
   }
 
+  /**
+   * Gets the discovery service name used in servuce usage events. If not set the node id is used.
+   *
+   * @return the name
+   */
   public String getName() {
     return name;
+  }
+
+  /**
+   * @return the event bus address on which are sent the service usage events (bind / release).
+   */
+  public String getUsageAddress() {
+    return usageAddress;
+  }
+
+  /**
+   * Sets the usage address: the event bus address on which are sent the service usage events (bind / release).
+   *
+   * @param usageAddress the address, {@link null} to disable use service usage tracking
+   * @return the current {@link DiscoveryOptions}
+   */
+  public DiscoveryOptions setUsageAddress(String usageAddress) {
+    this.usageAddress = usageAddress;
+    return this;
   }
 }

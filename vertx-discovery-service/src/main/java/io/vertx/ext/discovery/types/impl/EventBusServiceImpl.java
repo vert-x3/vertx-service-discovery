@@ -19,6 +19,7 @@ package io.vertx.ext.discovery.types.impl;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.discovery.DiscoveryService;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.ServiceReference;
 import io.vertx.ext.discovery.types.AbstractServiceReference;
@@ -40,10 +41,11 @@ public class EventBusServiceImpl implements EventBusService {
   }
 
   @Override
-  public ServiceReference get(Vertx vertx, Record record, JsonObject configuration) {
+  public ServiceReference get(Vertx vertx, DiscoveryService discovery, Record record, JsonObject configuration) {
     Objects.requireNonNull(vertx);
     Objects.requireNonNull(record);
-    return new EventBusServiceReference(vertx, record, configuration);
+    Objects.requireNonNull(discovery);
+    return new EventBusServiceReference(vertx, discovery, record, configuration);
   }
 
   /**
@@ -55,8 +57,8 @@ public class EventBusServiceImpl implements EventBusService {
     private final String clientClass;
     private final String serviceInterface;
 
-    EventBusServiceReference(Vertx vertx, Record record, JsonObject conf) {
-      super(vertx, record);
+    EventBusServiceReference(Vertx vertx, DiscoveryService discovery, Record record, JsonObject conf) {
+      super(vertx, discovery, record);
       this.serviceInterface = record.getMetadata().getString("service.interface");
       if (conf != null) {
         this.clientClass = conf.getString("client.class");

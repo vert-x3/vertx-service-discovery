@@ -20,6 +20,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -38,20 +39,33 @@ public class DiscoveryImpl implements DiscoveryService {
 
   private final Vertx vertx;
   private final String announce;
+  private final String usage;
   private final DiscoveryBackend backend;
 
   private final Set<DiscoveryBridge> bridges = new CopyOnWriteArraySet<>();
   private final Set<ServiceReference> bindings = new CopyOnWriteArraySet<>();
   private final static Logger LOGGER = LoggerFactory.getLogger(DiscoveryImpl.class.getName());
+  private final String id;
 
 
   public DiscoveryImpl(Vertx vertx, DiscoveryOptions options) {
     this.vertx = vertx;
     this.announce = options.getAnnounceAddress();
+    this.usage = options.getUsageAddress();
 
     this.backend = getBackend(options.getBackendConfiguration().getString("backend-name", null));
     this.backend.init(vertx, options.getBackendConfiguration());
 
+    this.id = options.getName() != null ? options.getName() : getNodeId(vertx);
+
+  }
+
+  private String getNodeId(Vertx vertx) {
+    if (vertx.isClustered()) {
+      return ((VertxInternal) vertx).getNodeID();
+    } else {
+      return "localhost";
+    }
   }
 
   private DiscoveryBackend getBackend(String maybeName) {
@@ -90,16 +104,38 @@ public class DiscoveryImpl implements DiscoveryService {
 
   @Override
   public ServiceReference getReferenceWithConfiguration(Record record, JsonObject configuration) {
-    ServiceReference reference = ServiceTypes.get(record).get(vertx, record, configuration);
+    ServiceReference reference = ServiceTypes.get(record).get(vertx, this, record, configuration);
     bindings.add(reference);
+    sendBindEvent(reference);
     return reference;
+  }
+
+  private void sendBindEvent(ServiceReference reference) {
+    if (usage == null) {
+      return;
+    }
+    vertx.eventBus().publish(usage, new JsonObject()
+        .put("type", "bind")
+        .put("record", reference.record().toJson())
+        .put("id", id));
   }
 
   @Override
   public boolean release(ServiceReference reference) {
     boolean removed = bindings.remove(reference);
     reference.release();
+    sendUnbindEvent(reference);
     return removed;
+  }
+
+  private void sendUnbindEvent(ServiceReference reference) {
+    if (usage == null) {
+      return;
+    }
+    vertx.eventBus().publish(usage, new JsonObject()
+        .put("type", "release")
+        .put("record", reference.record().toJson())
+        .put("id", id));
   }
 
   @Override
@@ -225,6 +261,18 @@ public class DiscoveryImpl implements DiscoveryService {
   @Override
   public Set<ServiceReference> bindings() {
     return new HashSet<>(bindings);
+  }
+
+  /**
+   * Checks whether the reference is hold by this discovery service. If so, remove it from the list of bindings and
+   * fire the "release" event.
+   *
+   * @param reference the reference
+   */
+  public void unbind(ServiceReference reference) {
+    if (bindings.remove(reference)) {
+      sendUnbindEvent(reference);
+    }
   }
 }
 

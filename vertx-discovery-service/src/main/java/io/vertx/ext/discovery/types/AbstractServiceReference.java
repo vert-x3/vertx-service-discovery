@@ -17,8 +17,10 @@
 package io.vertx.ext.discovery.types;
 
 import io.vertx.core.Vertx;
+import io.vertx.ext.discovery.DiscoveryService;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.ServiceReference;
+import io.vertx.ext.discovery.impl.DiscoveryImpl;
 
 /**
  * A class to simplify the implementation of service reference.
@@ -29,6 +31,8 @@ import io.vertx.ext.discovery.ServiceReference;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 public abstract class AbstractServiceReference<T> implements ServiceReference {
+
+  private final DiscoveryService discovery;
 
   protected T service;
 
@@ -42,8 +46,9 @@ public abstract class AbstractServiceReference<T> implements ServiceReference {
    * @param vertx  the vert.x instance
    * @param record the service record
    */
-  public AbstractServiceReference(Vertx vertx, Record record) {
+  public AbstractServiceReference(Vertx vertx, DiscoveryService discovery, Record record) {
     this.record = record;
+    this.discovery = discovery;
     this.vertx = vertx;
   }
 
@@ -98,6 +103,7 @@ public abstract class AbstractServiceReference<T> implements ServiceReference {
    */
   @Override
   public synchronized void release() {
+    ((DiscoveryImpl) discovery).unbind(this);
     if (service != null) {
       close();
       service = null;

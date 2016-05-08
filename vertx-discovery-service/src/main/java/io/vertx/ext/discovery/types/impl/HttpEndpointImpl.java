@@ -20,6 +20,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.discovery.DiscoveryService;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.ServiceReference;
 import io.vertx.ext.discovery.spi.ServiceType;
@@ -43,10 +44,11 @@ public class HttpEndpointImpl implements HttpEndpoint {
   }
 
   @Override
-  public ServiceReference get(Vertx vertx, Record record, JsonObject configuration) {
+  public ServiceReference get(Vertx vertx, DiscoveryService discovery, Record record, JsonObject configuration) {
     Objects.requireNonNull(vertx);
     Objects.requireNonNull(record);
-    return new HttpEndpointReference(vertx, record, configuration);
+    Objects.requireNonNull(discovery);
+    return new HttpEndpointReference(vertx, discovery, record, configuration);
   }
 
   /**
@@ -57,8 +59,8 @@ public class HttpEndpointImpl implements HttpEndpoint {
     private final HttpLocation location;
     private final JsonObject config;
 
-    HttpEndpointReference(Vertx vertx, Record record, JsonObject config) {
-      super(vertx, record);
+    HttpEndpointReference(Vertx vertx, DiscoveryService discovery, Record record, JsonObject config) {
+      super(vertx, discovery, record);
       this.config = config;
       this.location = new HttpLocation(record.getLocation());
     }

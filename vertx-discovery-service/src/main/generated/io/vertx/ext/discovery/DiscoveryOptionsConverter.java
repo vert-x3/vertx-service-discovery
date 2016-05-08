@@ -36,6 +36,9 @@ public class DiscoveryOptionsConverter {
     if (json.getValue("name") instanceof String) {
       obj.setName((String)json.getValue("name"));
     }
+    if (json.getValue("usageAddress") instanceof String) {
+      obj.setUsageAddress((String)json.getValue("usageAddress"));
+    }
   }
 
   public static void toJson(DiscoveryOptions obj, JsonObject json) {
@@ -47,6 +50,9 @@ public class DiscoveryOptionsConverter {
     }
     if (obj.getName() != null) {
       json.put("name", obj.getName());
+    }
+    if (obj.getUsageAddress() != null) {
+      json.put("usageAddress", obj.getUsageAddress());
     }
   }
 }

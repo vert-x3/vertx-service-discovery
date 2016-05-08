@@ -18,6 +18,7 @@ package io.vertx.ext.discovery.types.impl;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.discovery.DiscoveryService;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.ServiceReference;
 import io.vertx.ext.discovery.types.AbstractServiceReference;
@@ -39,10 +40,11 @@ public class JDBCDataSourceImpl implements JDBCDataSource {
   }
 
   @Override
-  public ServiceReference get(Vertx vertx, Record record, JsonObject configuration) {
+  public ServiceReference get(Vertx vertx, DiscoveryService discovery, Record record, JsonObject configuration) {
     Objects.requireNonNull(vertx);
     Objects.requireNonNull(record);
-    return new JdbcServiceReference(vertx, record, configuration);
+    Objects.requireNonNull(discovery);
+    return new JdbcServiceReference(vertx, discovery, record, configuration);
   }
 
   /**
@@ -52,8 +54,8 @@ public class JDBCDataSourceImpl implements JDBCDataSource {
   private class JdbcServiceReference extends AbstractServiceReference<JDBCClient> {
     private final JsonObject config;
 
-    JdbcServiceReference(Vertx vertx, Record record, JsonObject config) {
-      super(vertx, record);
+    JdbcServiceReference(Vertx vertx, DiscoveryService discovery, Record record, JsonObject config) {
+      super(vertx, discovery, record);
       this.config = config;
     }
 

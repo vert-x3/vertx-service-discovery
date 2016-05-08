@@ -209,6 +209,49 @@ public class DiscoveryImplTest {
   }
 
   @Test
+  public void testServiceUsage() {
+    List<JsonObject> usages = new ArrayList<>();
+
+
+    vertx.eventBus().<JsonObject>consumer(DiscoveryOptions.DEFAULT_USAGE_ADDRESS,
+        msg -> usages.add(msg.body()));
+
+    HelloService svc = new HelloServiceImpl("stuff");
+    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+
+    Record record = new Record()
+        .setName("Hello")
+        .setMetadata(new JsonObject()
+            .put("key", "A")
+            .put("service.interface", HelloService.class.getName()))
+        .setType(EventBusService.TYPE)
+        .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
+    discovery.publish(record, (r) -> {
+    });
+    await().until(() -> record.getRegistration() != null);
+
+    ServiceReference reference = discovery.getReference(record);
+    await().until(() -> usages.size() == 1);
+
+    assertThat(usages.get(0).getJsonObject("record").getJsonObject("location").getString(Record.ENDPOINT))
+        .isEqualToIgnoringCase("address");
+    assertThat(usages.get(0).getString("type")).isEqualTo("bind");
+    assertThat(usages.get(0).getString("id")).isNotNull().isNotEmpty();
+
+    assertThat((HelloService) reference.cached()).isNull();
+    assertThat((HelloService) reference.get()).isNotNull();
+    assertThat((HelloService) reference.cached()).isNotNull();
+
+    reference.release();
+    assertThat(discovery.bindings()).isEmpty();
+    await().until(() -> usages.size() == 2);
+    assertThat(usages.get(1).getJsonObject("record").getJsonObject("location").getString(Record.ENDPOINT))
+        .isEqualToIgnoringCase("address");
+    assertThat(usages.get(1).getString("type")).isEqualTo("release");
+    assertThat(usages.get(1).getString("id")).isNotNull().isNotEmpty();
+  }
+
+  @Test
   public void testBridges() {
     AtomicBoolean closed = new AtomicBoolean();
     AtomicBoolean registered = new AtomicBoolean();

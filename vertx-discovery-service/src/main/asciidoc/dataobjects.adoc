@@ -23,7 +23,15 @@ Sets the configuration passed to the link.
  Refer to the backend documentation to get more details on the requirements. The default backend
  does not need any configuration.
 +++
-|[[name]]`name`|`String`|-
+|[[name]]`name`|`String`|
++++
+Sets the discovery service name used in the service usage events.
+ If not set, the node id is used.
++++
+|[[usageAddress]]`usageAddress`|`String`|
++++
+Sets the usage address: the event bus address on which are sent the service usage events (bind / unbind).
++++
 |===
 
 [[HttpLocation]]
