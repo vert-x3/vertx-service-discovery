@@ -501,7 +501,91 @@ VertxServiceDiscovery::MessageSource.get_consumer(discovery, {
 
 === JDBC Data source
 
-TODO
+Data sources represents databases or data stores. JDBC data sources are a specialization for database accessible
+using a JDBC driver. The client of a JDBC data source service is a `link:../../yardoc/VertxJdbc/JDBCClient.html[JDBCClient]`.
+
+=== Publishing a JDBC service
+
+As for the other service types, publishing a message source is a 2-steps process:
+
+1. create a record, using `link:../../yardoc/VertxServiceDiscovery/JDBCDataSource.html[JDBCDataSource]`
+2. publish the record
+
+[source, ruby]
+----
+require 'vertx-service-discovery/jdbc_data_source'
+record = VertxServiceDiscovery::JDBCDataSource.create_record("some-data-source-service", {
+  'url' => "some jdbc url"
+}, {
+  'some-metadata' => "some-value"
+})
+
+discovery.publish(record) { |ar_err,ar|
+  # ...
+}
+
+----
+
+As JDBC data sources can represent a high variety of databases, and their access is often different, the record is
+rather unstructured. The `location` is a simple JSON object that should provide the fields to access the data
+source (JDBC url, username...). The set of field may depends on the database but also on the connection pool use
+in front.
+
+=== Consuming a JDBC service
+
+As state in the previous section, accessible data source depends on the data source itself. To build the
+`link:../../yardoc/VertxJdbc/JDBCClient.html[JDBCClient]`, are merged: the record location, the metadata and a json object provided by
+the consumer:
+
+[source, ruby]
+----
+# Get the record
+discovery.get_record({
+  'name' => "some-data-source-service"
+}) { |ar_err,ar|
+  if (ar_err == nil && ar != nil)
+    # Retrieve the service reference
+    reference = discovery.get_reference_with_configuration(ar, {
+      'username' => "clement",
+      'password' => "*****"
+    })
+
+    # Retrieve the service object
+    client = reference.get()
+
+    # ...
+
+    # when done
+    reference.release()
+  end
+}
+
+----
+
+You can also use the `link:../../yardoc/VertxJdbc/JDBCClient.html[JDBCClient]` class to to the lookup and retrieval in one call:
+
+[source, ruby]
+----
+require 'vertx-service-discovery/discovery_service'
+require 'vertx-service-discovery/jdbc_data_source'
+VertxServiceDiscovery::JDBCDataSource.get_jdbc_client(discovery, {
+  'name' => "some-data-source-service"
+}, {
+  'username' => "clement",
+  'password' => "*****"
+}) { |ar_err,ar|
+  if (ar_err == nil)
+    client = ar
+
+    # ...
+
+    # Dont' forget to release the service
+    VertxServiceDiscovery::DiscoveryService.release_service_object(discovery, client)
+
+  end
+}
+
+----
 
 == Listening for service arrivals and departures
 

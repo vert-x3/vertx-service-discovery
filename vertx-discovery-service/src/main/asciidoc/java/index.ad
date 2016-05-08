@@ -574,7 +574,81 @@ MessageSource.<JsonObject>getConsumer(discovery, new JsonObject().put("name", "s
 
 === JDBC Data source
 
-TODO
+Data sources represents databases or data stores. JDBC data sources are a specialization for database accessible
+using a JDBC driver. The client of a JDBC data source service is a `link:../../apidocs/io/vertx/ext/jdbc/JDBCClient.html[JDBCClient]`.
+
+=== Publishing a JDBC service
+
+As for the other service types, publishing a message source is a 2-steps process:
+
+1. create a record, using `link:../../apidocs/io/vertx/ext/discovery/types/JDBCDataSource.html[JDBCDataSource]`
+2. publish the record
+
+[source, java]
+----
+Record record = JDBCDataSource.createRecord(
+    "some-data-source-service", // The service name
+    new JsonObject().put("url", "some jdbc url"), // The location
+    new JsonObject().put("some-metadata", "some-value") // Some metadata
+);
+
+discovery.publish(record, ar -> {
+  // ...
+});
+----
+
+As JDBC data sources can represent a high variety of databases, and their access is often different, the record is
+rather unstructured. The `location` is a simple JSON object that should provide the fields to access the data
+source (JDBC url, username...). The set of field may depends on the database but also on the connection pool use
+in front.
+
+=== Consuming a JDBC service
+
+As state in the previous section, accessible data source depends on the data source itself. To build the
+`link:../../apidocs/io/vertx/ext/jdbc/JDBCClient.html[JDBCClient]`, are merged: the record location, the metadata and a json object provided by
+the consumer:
+
+[source, java]
+----
+discovery.getRecord(
+    new JsonObject().put("name", "some-data-source-service"),
+    ar -> {
+      if (ar.succeeded() && ar.result() != null) {
+        // Retrieve the service reference
+        ServiceReference reference = discovery.getReferenceWithConfiguration(
+            ar.result(), // The record
+            new JsonObject().put("username", "clement").put("password", "*****")); // Some additional metadata
+
+        // Retrieve the service object
+        JDBCClient client = reference.get();
+
+        // ...
+
+        // when done
+        reference.release();
+      }
+    });
+----
+
+You can also use the `link:../../apidocs/io/vertx/ext/jdbc/JDBCClient.html[JDBCClient]` class to to the lookup and retrieval in one call:
+
+[source, java]
+----
+JDBCDataSource.<JsonObject>getJDBCClient(discovery,
+    new JsonObject().put("name", "some-data-source-service"),
+    new JsonObject().put("username", "clement").put("password", "*****"), // Some additional metadata
+    ar -> {
+      if (ar.succeeded()) {
+        JDBCClient client = ar.result();
+
+        // ...
+
+        // Dont' forget to release the service
+        DiscoveryService.releaseServiceObject(discovery, client);
+
+      }
+    });
+----
 
 == Listening for service arrivals and departures
 

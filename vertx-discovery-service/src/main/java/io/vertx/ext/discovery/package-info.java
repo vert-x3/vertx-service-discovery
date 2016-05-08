@@ -474,7 +474,43 @@
  *
  * === JDBC Data source
  *
- * TODO
+ * Data sources represents databases or data stores. JDBC data sources are a specialization for database accessible
+ * using a JDBC driver. The client of a JDBC data source service is a {@link io.vertx.ext.jdbc.JDBCClient}.
+ *
+ * === Publishing a JDBC service
+ *
+ * As for the other service types, publishing a message source is a 2-steps process:
+ *
+ * 1. create a record, using {@link io.vertx.ext.discovery.types.JDBCDataSource}
+ * 2. publish the record
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.JDBCDataSourceExamples#example1(io.vertx.ext.discovery.DiscoveryService)}
+ * ----
+ *
+ * As JDBC data sources can represent a high variety of databases, and their access is often different, the record is
+ * rather unstructured. The `location` is a simple JSON object that should provide the fields to access the data
+ * source (JDBC url, username...). The set of field may depends on the database but also on the connection pool use
+ * in front.
+ *
+ * === Consuming a JDBC service
+ *
+ * As state in the previous section, accessible data source depends on the data source itself. To build the
+ * {@link io.vertx.ext.jdbc.JDBCClient}, are merged: the record location, the metadata and a json object provided by
+ * the consumer:
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.JDBCDataSourceExamples#example2(io.vertx.ext.discovery.DiscoveryService)}
+ * ----
+ *
+ * You can also use the {@link io.vertx.ext.jdbc.JDBCClient} class to to the lookup and retrieval in one call:
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.JDBCDataSourceExamples#example3(io.vertx.ext.discovery.DiscoveryService)}
+ * ----
  * 
  * == Listening for service arrivals and departures
  * 
