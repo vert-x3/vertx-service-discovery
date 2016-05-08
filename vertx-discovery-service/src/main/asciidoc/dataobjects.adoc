@@ -30,7 +30,7 @@ Sets the discovery service name used in the service usage events.
 +++
 |[[usageAddress]]`usageAddress`|`String`|
 +++
-Sets the usage address: the event bus address on which are sent the service usage events (bind / unbind).
+Sets the usage address: the event bus address on which are sent the service usage events (bind / release).
 +++
 |===
 

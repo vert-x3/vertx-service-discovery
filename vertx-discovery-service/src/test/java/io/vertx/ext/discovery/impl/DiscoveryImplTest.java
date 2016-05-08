@@ -209,7 +209,7 @@ public class DiscoveryImplTest {
   }
 
   @Test
-  public void testServiceUsage() {
+  public void testServiceUsage() throws InterruptedException {
     List<JsonObject> usages = new ArrayList<>();
 
 
@@ -249,6 +249,12 @@ public class DiscoveryImplTest {
         .isEqualToIgnoringCase("address");
     assertThat(usages.get(1).getString("type")).isEqualTo("release");
     assertThat(usages.get(1).getString("id")).isNotNull().isNotEmpty();
+
+    // Check that even if we release the reference another time the service event is not send a second time.
+    reference.release();
+    assertThat(discovery.bindings()).isEmpty();
+    Thread.sleep(100);
+    assertThat(usages).hasSize(2);
   }
 
   @Test

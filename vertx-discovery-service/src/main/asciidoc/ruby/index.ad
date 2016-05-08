@@ -598,6 +598,26 @@ The received record has a `status` field indicating the new state of the record:
 * `DOWN` : the service is not available anymore, you should not use it anymore
 * `OUT_OF_SERVICE` : the service is not running, you should not use it anymore, but it may come back later.
 
+== Listening for service usage
+
+Every time a service reference is retrieved (`bind`) or released (`release`), an event is published on the _vertx
+.discovery.usage` address. This address is configurable from the `link:../dataobjects.html#DiscoveryOptions[DiscoveryOptions]`.
+
+It lets you listen for service usage and map the service bindings.
+
+The received message is a `link:unavailable[JsonObject]` containing:
+
+* the record in the `record` field
+* the type of event in the `type` field. It's either `bind` or `release`
+* the id of the discovery service in the `id` field
+
+This `id` is configurable from the `link:../dataobjects.html#DiscoveryOptions[DiscoveryOptions]`. By default it's "localhost" on
+single node configuration and the id of the node in clustered mode.
+
+You can disable the service usage support by setting the usage address to `null` with
+`link:../dataobjects.html#DiscoveryOptions#set_usage_address-instance_method[usageAddress]`.
+
+
 == Service discovery bridges
 
 Bridges let import and export services from / to other discovery mechanism such as Docker, Kubernates, Consul...
