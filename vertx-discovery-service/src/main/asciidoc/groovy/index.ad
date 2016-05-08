@@ -377,11 +377,145 @@ as you don't hold the service reference.
 
 === Event bus services
 
-TODO
+Event bus services are service proxies. They implement async-RPC services on top of the event bus. When retrieved
+a service object from an event bus service, you get a service proxy in the right type. You can access helper
+methods from `link:../../groovydoc/io/vertx/ext/discovery/groovy/types/EventBusService.html[EventBusService]`.
+
+Notice that service proxies (service implementations and service interfaces) are developed in Java.
+
+==== Publishing an event bus service
+
+To publish an event bus service, you need to create a `link:../dataobjects.html#Record[Record]`:
+
+[source, groovy]
+----
+import io.vertx.ext.discovery.groovy.types.EventBusService
+def record = EventBusService.createRecord("some-eventbus-service", "address", "examples.MyService", [
+  some-metadata:"some value"
+])
+
+discovery.publish(record, { ar ->
+  // ...
+})
+
+----
+
+
+
+==== Consuming an event bus service
+
+To consume an event bus service you can either retrieve the record and then get the reference, or use the
+`link:../../groovydoc/io/vertx/ext/discovery/groovy/types/EventBusService.html[EventBusService]` interface that combines the two operations in one call.
+
+However, as the service is search by (Java) interface, you need to specify the type of client you expect.
+
+[source, groovy]
+----
+def discovery = DiscoveryService.create(vertx);
+EventBusService.<MyService> getProxy(
+discovery,
+examples.MyService.class.getName(), // service interface
+examples.groovy.MyService.class.getName(), // client class
+{ ar ->
+def svc = ar.result();
+// ...
+EventBusService.release(discovery, hello);
+}
+);
+----
+
+
 
 === Message source
 
-TODO
+A message source is a component sending message on the event bus on a specific address. Message source clients are
+`link:../../groovydoc/io/vertx/groovy/core/eventbus/MessageConsumer.html[MessageConsumer]`.
+
+The _location_ or a message source service is the event bus address on which messages are sent.
+
+==== Publishing a message source
+
+As for the other service types, publishing a message source is a 2-steps process:
+
+1. create a record, using `link:../../groovydoc/io/vertx/ext/discovery/groovy/types/MessageSource.html[MessageSource]`
+2. publish the record
+
+[source, groovy]
+----
+import io.vertx.ext.discovery.groovy.types.MessageSource
+def record = MessageSource.createRecord("some-message-source-service", "some-address")
+
+discovery.publish(record, { ar ->
+  // ...
+})
+
+record = MessageSource.createRecord("some-other-message-source-service", "some-address", "examples.MyData")
+
+----
+
+In the second record, the type of payload is also indicated. This information is optional.
+
+
+
+==== Consuming a message source
+
+On the consumer side, you can retrieve the record and the reference, or use the
+`link:../../groovydoc/io/vertx/ext/discovery/groovy/types/MessageSource.html[MessageSource]` class to retrieve the service is one call.
+
+With the first approach, the code is the following:
+
+[source, groovy]
+----
+// Get the record
+discovery.getRecord([
+  name:"some-message-source-service"
+], { ar ->
+  if (ar.succeeded() && ar.result() != null) {
+    // Retrieve the service reference
+    def reference = discovery.getReference(ar.result())
+    // Retrieve the service object
+    def consumer = reference.get()
+
+    // Attach a message handler on it
+    consumer.handler({ message ->
+      // message handler
+      def payload = message.body()
+    })
+
+    // ...
+    // when done
+    reference.release()
+  }
+})
+
+----
+
+When, using `link:../../groovydoc/io/vertx/ext/discovery/groovy/types/MessageSource.html[MessageSource]`, it becomes:
+
+[source, groovy]
+----
+import io.vertx.ext.discovery.groovy.DiscoveryService
+import io.vertx.ext.discovery.groovy.types.MessageSource
+MessageSource.getConsumer(discovery, [
+  name:"some-message-source-service"
+], { ar ->
+  if (ar.succeeded()) {
+    def consumer = ar.result()
+
+    // Attach a message handler on it
+    consumer.handler({ message ->
+      // message handler
+      def payload = message.body()
+    })
+    // ...
+
+    // Dont' forget to release the service
+    DiscoveryService.releaseServiceObject(discovery, consumer)
+
+  }
+})
+
+----
 
 === JDBC Data source
 

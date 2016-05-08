@@ -1,5 +1,4 @@
 require 'vertx-service-discovery/discovery_service'
-require 'vertx/vertx'
 require 'vertx/message_consumer'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.ext.discovery.types.MessageSource
@@ -34,16 +33,15 @@ module VertxServiceDiscovery
     end
     #  Convenient method that looks for a message source and provides the configured . The
     #  async result is marked as failed is there are no matching services, or if the lookup fails.
-    # @param [::Vertx::Vertx] vertx The vert.x instance
     # @param [::VertxServiceDiscovery::DiscoveryService] discovery The discovery service
     # @param [Hash{String => Object}] filter The filter, optional
     # @yield the result handler
     # @return [void]
-    def self.get_consumer(vertx=nil,discovery=nil,filter=nil)
-      if vertx.class.method_defined?(:j_del) && discovery.class.method_defined?(:j_del) && filter.class == Hash && block_given?
-        return Java::IoVertxExtDiscoveryTypes::MessageSource.java_method(:getConsumer, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(vertx.j_del,discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::Vertx::MessageConsumer) : nil) }))
+    def self.get_consumer(discovery=nil,filter=nil)
+      if discovery.class.method_defined?(:j_del) && filter.class == Hash && block_given?
+        return Java::IoVertxExtDiscoveryTypes::MessageSource.java_method(:getConsumer, [Java::IoVertxExtDiscovery::DiscoveryService.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::Vertx::MessageConsumer) : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling get_consumer(vertx,discovery,filter)"
+      raise ArgumentError, "Invalid arguments when calling get_consumer(discovery,filter)"
     end
   end
 end

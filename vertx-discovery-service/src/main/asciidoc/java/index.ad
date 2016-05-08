@@ -391,11 +391,186 @@ as you don't hold the service reference.
 
 === Event bus services
 
-TODO
+Event bus services are service proxies. They implement async-RPC services on top of the event bus. When retrieved
+a service object from an event bus service, you get a service proxy in the right type. You can access helper
+methods from `link:../../apidocs/io/vertx/ext/discovery/types/EventBusService.html[EventBusService]`.
+
+Notice that service proxies (service implementations and service interfaces) are developed in Java.
+
+==== Publishing an event bus service
+
+To publish an event bus service, you need to create a `link:../../apidocs/io/vertx/ext/discovery/Record.html[Record]`:
+
+[source, java]
+----
+Record record = EventBusService.createRecord(
+    "some-eventbus-service", // The service name
+    "address", // the service address,
+    "examples.MyService", // the service interface as string
+    new JsonObject()
+        .put("some-metadata", "some value")
+);
+
+discovery.publish(record, ar -> {
+  // ...
+});
+----
+
+You can also pass the service interface as class too:
+
+[source, java]
+----
+Record record = EventBusService.createRecord(
+"some-eventbus-service", // The service name
+"address", // the service address,
+MyService.class // the service interface
+);
+
+discovery.publish(record, ar -> {
+// ...
+});
+----
+
+
+==== Consuming an event bus service
+To consume an event bus service you can either retrieve the record and then get the reference, or use the
+`link:../../apidocs/io/vertx/ext/discovery/types/EventBusService.html[EventBusService]` interface that combine the two operations in one call.
+
+When using the reference, you would do somehting like:
+[source, java]
+----
+discovery.getRecord(new JsonObject().put("name", "some-eventbus-service"), ar -> {
+if (ar.succeeded() && ar.result() != null) {
+// Retrieve the service reference
+ServiceReference reference = discovery.getReference(ar.result());
+// Retrieve the service object
+MyService service = reference.get();
+
+// Dont' forget to release the service
+reference.release();
+}
+});
+----
+
+With the `link:../../apidocs/io/vertx/ext/discovery/types/EventBusService.html[EventBusService]` class, you can get the proxy as follows:
+[source, java]
+----
+EventBusService.getProxy(discovery, MyService.class, ar -> {
+if (ar.succeeded()) {
+MyService service = ar.result();
+
+// Dont' forget to release the service
+DiscoveryService.releaseServiceObject(discovery, service);
+}
+});
+----
+
+
+
 
 === Message source
 
-TODO
+A message source is a component sending message on the event bus on a specific address. Message source clients are
+`link:../../apidocs/io/vertx/core/eventbus/MessageConsumer.html[MessageConsumer]`.
+
+The _location_ or a message source service is the event bus address on which messages are sent.
+
+==== Publishing a message source
+
+As for the other service types, publishing a message source is a 2-steps process:
+
+1. create a record, using `link:../../apidocs/io/vertx/ext/discovery/types/MessageSource.html[MessageSource]`
+2. publish the record
+
+[source, java]
+----
+Record record = MessageSource.createRecord(
+    "some-message-source-service", // The service name
+    "some-address" // The event bus address
+);
+
+discovery.publish(record, ar -> {
+  // ...
+});
+
+record = MessageSource.createRecord(
+    "some-other-message-source-service", // The service name
+    "some-address", // The event bus address
+    "examples.MyData" // The payload type
+);
+----
+
+In the second record, the type of payload is also indicated. This information is optional.
+
+In java, you can use `link:../../apidocs/java/lang/Class.html[Class]` parameters:
+
+[source, java]
+----
+Record record1 = MessageSource.createRecord(
+"some-message-source-service", // The service name
+"some-address", // The event bus address
+JsonObject.class // The message payload type
+);
+
+Record record2 = MessageSource.createRecord(
+"some-other-message-source-service", // The service name
+"some-address", // The event bus address
+JsonObject.class, // The message payload type
+new JsonObject().put("some-metadata", "some value")
+);
+----
+
+
+==== Consuming a message source
+
+On the consumer side, you can retrieve the record and the reference, or use the
+`link:../../apidocs/io/vertx/ext/discovery/types/MessageSource.html[MessageSource]` class to retrieve the service is one call.
+
+With the first approach, the code is the following:
+
+[source, java]
+----
+discovery.getRecord(new JsonObject().put("name", "some-message-source-service"), ar -> {
+  if (ar.succeeded() && ar.result() != null) {
+    // Retrieve the service reference
+    ServiceReference reference = discovery.getReference(ar.result());
+    // Retrieve the service object
+    MessageConsumer<JsonObject> consumer = reference.get();
+
+    // Attach a message handler on it
+    consumer.handler(message -> {
+      // message handler
+      JsonObject payload = message.body();
+    });
+
+    // ...
+    // when done
+    reference.release();
+  }
+});
+----
+
+When, using `link:../../apidocs/io/vertx/ext/discovery/types/MessageSource.html[MessageSource]`, it becomes:
+
+[source, java]
+----
+MessageSource.<JsonObject>getConsumer(discovery, new JsonObject().put("name", "some-message-source-service"), ar -> {
+  if (ar.succeeded()) {
+    MessageConsumer<JsonObject> consumer = ar.result();
+
+    // Attach a message handler on it
+    consumer.handler(message -> {
+      // message handler
+      JsonObject payload = message.body();
+    });
+    // ...
+
+    // Dont' forget to release the service
+    DiscoveryService.releaseServiceObject(discovery, consumer);
+
+  }
+});
+----
 
 === JDBC Data source
 

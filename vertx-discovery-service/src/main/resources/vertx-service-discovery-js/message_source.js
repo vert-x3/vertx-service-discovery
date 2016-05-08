@@ -17,7 +17,6 @@
 /** @module vertx-service-discovery-js/message_source */
 var utils = require('vertx-js/util/utils');
 var DiscoveryService = require('vertx-service-discovery-js/discovery_service');
-var Vertx = require('vertx-js/vertx');
 var MessageConsumer = require('vertx-js/message_consumer');
 
 var io = Packages.io;
@@ -67,15 +66,14 @@ MessageSource.createRecord = function() {
  async result is marked as failed is there are no matching services, or if the lookup fails.
 
  @memberof module:vertx-service-discovery-js/message_source
- @param vertx {Vertx} The vert.x instance 
  @param discovery {DiscoveryService} The discovery service 
  @param filter {Object} The filter, optional 
  @param resultHandler {function} the result handler 
  */
-MessageSource.getConsumer = function(vertx, discovery, filter, resultHandler) {
+MessageSource.getConsumer = function(discovery, filter, resultHandler) {
   var __args = arguments;
-  if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
-    JMessageSource["getConsumer(io.vertx.core.Vertx,io.vertx.ext.discovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](vertx._jdel, discovery._jdel, utils.convParamJsonObject(filter), function(ar) {
+  if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'function') {
+    JMessageSource["getConsumer(io.vertx.ext.discovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](discovery._jdel, utils.convParamJsonObject(filter), function(ar) {
     if (ar.succeeded()) {
       resultHandler(utils.convReturnVertxGen(ar.result(), MessageConsumer), null);
     } else {

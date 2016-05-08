@@ -377,11 +377,146 @@ as you don't hold the service reference.
 
 === Event bus services
 
-TODO
+Event bus services are service proxies. They implement async-RPC services on top of the event bus. When retrieved
+a service object from an event bus service, you get a service proxy in the right type. You can access helper
+methods from `link:../../jsdoc/event_bus_service-EventBusService.html[EventBusService]`.
+
+Notice that service proxies (service implementations and service interfaces) are developed in Java.
+
+==== Publishing an event bus service
+
+To publish an event bus service, you need to create a `link:../dataobjects.html#Record[Record]`:
+
+[source, js]
+----
+var EventBusService = require("vertx-service-discovery-js/event_bus_service");
+var record = EventBusService.createRecord("some-eventbus-service", "address", "examples.MyService", {
+  "some-metadata" : "some value"
+});
+
+discovery.publish(record, function (ar, ar_err) {
+  // ...
+});
+
+----
+
+
+
+==== Consuming an event bus service
+
+
+To consume an event bus service, you need to retrieve the record and get the reference as usual. However, as the
+lookup is made using the java interface (and not the javascript structure) you would need to wrap the service
+object into the javascript object:
+
+[source, javascript]
+----
+var MyService = require("examples-js/my_service.js");
+var discovery = DiscoveryService.create(vertx);
+
+discovery.getRecord({"service.interface" : "examples.MyService"},
+function(ar, ar_err) {
+var reference = discovery.getReference(ar);
+var svc = reference.get();
+var proxy = new MyService(svc);
+proxy.hello({"name" : "vert.x"}, function(r, err) {
+// ...
+reference.release(); // release the service
+});
+});
+----
+
 
 === Message source
 
-TODO
+A message source is a component sending message on the event bus on a specific address. Message source clients are
+`link:../../jsdoc/message_consumer-MessageConsumer.html[MessageConsumer]`.
+
+The _location_ or a message source service is the event bus address on which messages are sent.
+
+==== Publishing a message source
+
+As for the other service types, publishing a message source is a 2-steps process:
+
+1. create a record, using `link:../../jsdoc/message_source-MessageSource.html[MessageSource]`
+2. publish the record
+
+[source, js]
+----
+var MessageSource = require("vertx-service-discovery-js/message_source");
+var record = MessageSource.createRecord("some-message-source-service", "some-address");
+
+discovery.publish(record, function (ar, ar_err) {
+  // ...
+});
+
+record = MessageSource.createRecord("some-other-message-source-service", "some-address", "examples.MyData");
+
+----
+
+In the second record, the type of payload is also indicated. This information is optional.
+
+
+
+==== Consuming a message source
+
+On the consumer side, you can retrieve the record and the reference, or use the
+`link:../../jsdoc/message_source-MessageSource.html[MessageSource]` class to retrieve the service is one call.
+
+With the first approach, the code is the following:
+
+[source, js]
+----
+// Get the record
+discovery.getRecord({
+  "name" : "some-message-source-service"
+}, function (ar, ar_err) {
+  if (ar_err == null && ar !== null) {
+    // Retrieve the service reference
+    var reference = discovery.getReference(ar);
+    // Retrieve the service object
+    var consumer = reference.get();
+
+    // Attach a message handler on it
+    consumer.handler(function (message) {
+      // message handler
+      var payload = message.body();
+    });
+
+    // ...
+    // when done
+    reference.release();
+  }
+});
+
+----
+
+When, using `link:../../jsdoc/message_source-MessageSource.html[MessageSource]`, it becomes:
+
+[source, js]
+----
+var DiscoveryService = require("vertx-service-discovery-js/discovery_service");
+var MessageSource = require("vertx-service-discovery-js/message_source");
+MessageSource.getConsumer(discovery, {
+  "name" : "some-message-source-service"
+}, function (ar, ar_err) {
+  if (ar_err == null) {
+    var consumer = ar;
+
+    // Attach a message handler on it
+    consumer.handler(function (message) {
+      // message handler
+      var payload = message.body();
+    });
+    // ...
+
+    // Dont' forget to release the service
+    DiscoveryService.releaseServiceObject(discovery, consumer);
+
+  }
+});
+
+----
 
 === JDBC Data source
 

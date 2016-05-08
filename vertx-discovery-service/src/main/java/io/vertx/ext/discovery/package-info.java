@@ -330,11 +330,147 @@
  *
  * === Event bus services
  *
- * TODO
+ * Event bus services are service proxies. They implement async-RPC services on top of the event bus. When retrieved
+ * a service object from an event bus service, you get a service proxy in the right type. You can access helper
+ * methods from {@link io.vertx.ext.discovery.types.EventBusService}.
  *
+ * Notice that service proxies (service implementations and service interfaces) are developed in Java.
+ *
+ * ==== Publishing an event bus service
+ *
+ * To publish an event bus service, you need to create a {@link io.vertx.ext.discovery.Record}:
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.EventBusServiceExamples#example1(io.vertx.ext.discovery.DiscoveryService)}
+ * ----
+ *
+ * [language, java]
+ * ----
+ * You can also pass the service interface as class too:
+ *
+ * [source, java]
+ * \----
+ * {@link examples.limited.EventBusServiceJavaExamples#example1(io.vertx.ext.discovery.DiscoveryService)}
+ * \----
+ * ----
+ *
+ * ==== Consuming an event bus service
+ * [language, java]
+ * ----
+ * To consume an event bus service you can either retrieve the record and then get the reference, or use the
+ * {@link io.vertx.ext.discovery.types.EventBusService} interface that combine the two operations in one call.
+ *
+ * When using the reference, you would do somehting like:
+ * [source, java]
+ * \----
+ * {@link examples.EventBusServiceExamples#example2(io.vertx.ext.discovery.DiscoveryService)}
+ * \----
+ *
+ * With the {@link io.vertx.ext.discovery.types.EventBusService} class, you can get the proxy as follows:
+ * [source, java]
+ * \----
+ * {@link examples.EventBusServiceExamples#example3(io.vertx.ext.discovery.DiscoveryService)}
+ * \----
+ * ----
+ * [language, groovy]
+ * ----
+ * To consume an event bus service you can either retrieve the record and then get the reference, or use the
+ * {@link io.vertx.ext.discovery.types.EventBusService} interface that combines the two operations in one call.
+ *
+ * However, as the service is search by (Java) interface, you need to specify the type of client you expect.
+ *
+ * [source, groovy]
+ * \----
+ * def discovery = DiscoveryService.create(vertx);
+ * EventBusService.<MyService> getProxy(
+ *   discovery,
+ *   examples.MyService.class.getName(), // service interface
+ *   examples.groovy.MyService.class.getName(), // client class
+ *   { ar ->
+ *      def svc = ar.result();
+ *      // ...
+ *      EventBusService.release(discovery, hello);
+ *   }
+ * );
+ * \----
+ * ----
+ * [language, js]
+ * ----
+ * To consume an event bus service, you need to retrieve the record and get the reference as usual. However, as the
+ * lookup is made using the java interface (and not the javascript structure) you would need to wrap the service
+ * object into the javascript object:
+ *
+ * [source, javascript]
+ * \----
+ * var MyService = require("examples-js/my_service.js");
+ * var discovery = DiscoveryService.create(vertx);
+ *
+ * discovery.getRecord({"service.interface" : "examples.MyService"},
+ *  function(ar, ar_err) {
+ *    var reference = discovery.getReference(ar);
+ *    var svc = reference.get();
+ *    var proxy = new MyService(svc);
+ *    proxy.hello({"name" : "vert.x"}, function(r, err) {
+ *        // ...
+ *        reference.release(); // release the service
+ *    });
+ * });
+ * \----
+ * ----
+ * [language, ruby]
+ * ----
+ * TODO
+ * ----
  * === Message source
  *
- * TODO
+ * A message source is a component sending message on the event bus on a specific address. Message source clients are
+ * {@link io.vertx.core.eventbus.MessageConsumer}.
+ *
+ * The _location_ or a message source service is the event bus address on which messages are sent.
+ *
+ * ==== Publishing a message source
+ *
+ * As for the other service types, publishing a message source is a 2-steps process:
+ *
+ * 1. create a record, using {@link io.vertx.ext.discovery.types.MessageSource}
+ * 2. publish the record
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.MessageSourceExamples#example1(io.vertx.ext.discovery.DiscoveryService)}
+ * ----
+ *
+ * In the second record, the type of payload is also indicated. This information is optional.
+ *
+ * [language, java]
+ * ----
+ * In java, you can use {@link java.lang.Class} parameters:
+ *
+ * [source, $lang]
+ * \----
+ * {@link examples.limited.MessageSourceExamples#example1(io.vertx.ext.discovery.DiscoveryService)}
+ * \----
+ * ----
+ *
+ * ==== Consuming a message source
+ *
+ * On the consumer side, you can retrieve the record and the reference, or use the
+ * {@link io.vertx.ext.discovery.types.MessageSource} class to retrieve the service is one call.
+ *
+ * With the first approach, the code is the following:
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.MessageSourceExamples#example2(io.vertx.ext.discovery.DiscoveryService)}
+ * ----
+ *
+ * When, using {@link io.vertx.ext.discovery.types.MessageSource}, it becomes:
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.MessageSourceExamples#example3(io.vertx.ext.discovery.DiscoveryService)}
+ * ----
  *
  * === JDBC Data source
  *

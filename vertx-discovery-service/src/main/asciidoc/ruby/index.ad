@@ -377,11 +377,127 @@ as you don't hold the service reference.
 
 === Event bus services
 
+Event bus services are service proxies. They implement async-RPC services on top of the event bus. When retrieved
+a service object from an event bus service, you get a service proxy in the right type. You can access helper
+methods from `link:../../yardoc/VertxServiceDiscovery/EventBusService.html[EventBusService]`.
+
+Notice that service proxies (service implementations and service interfaces) are developed in Java.
+
+==== Publishing an event bus service
+
+To publish an event bus service, you need to create a `link:../dataobjects.html#Record[Record]`:
+
+[source, ruby]
+----
+require 'vertx-service-discovery/event_bus_service'
+record = VertxServiceDiscovery::EventBusService.create_record("some-eventbus-service", "address", "examples.MyService", {
+  'some-metadata' => "some value"
+})
+
+discovery.publish(record) { |ar_err,ar|
+  # ...
+}
+
+----
+
+
+
+==== Consuming an event bus service
+
+
+
 TODO
 
 === Message source
 
-TODO
+A message source is a component sending message on the event bus on a specific address. Message source clients are
+`link:../../yardoc/Vertx/MessageConsumer.html[MessageConsumer]`.
+
+The _location_ or a message source service is the event bus address on which messages are sent.
+
+==== Publishing a message source
+
+As for the other service types, publishing a message source is a 2-steps process:
+
+1. create a record, using `link:../../yardoc/VertxServiceDiscovery/MessageSource.html[MessageSource]`
+2. publish the record
+
+[source, ruby]
+----
+require 'vertx-service-discovery/message_source'
+record = VertxServiceDiscovery::MessageSource.create_record("some-message-source-service", "some-address")
+
+discovery.publish(record) { |ar_err,ar|
+  # ...
+}
+
+record = VertxServiceDiscovery::MessageSource.create_record("some-other-message-source-service", "some-address", "examples.MyData")
+
+----
+
+In the second record, the type of payload is also indicated. This information is optional.
+
+
+
+==== Consuming a message source
+
+On the consumer side, you can retrieve the record and the reference, or use the
+`link:../../yardoc/VertxServiceDiscovery/MessageSource.html[MessageSource]` class to retrieve the service is one call.
+
+With the first approach, the code is the following:
+
+[source, ruby]
+----
+# Get the record
+discovery.get_record({
+  'name' => "some-message-source-service"
+}) { |ar_err,ar|
+  if (ar_err == nil && ar != nil)
+    # Retrieve the service reference
+    reference = discovery.get_reference(ar)
+    # Retrieve the service object
+    consumer = reference.get()
+
+    # Attach a message handler on it
+    consumer.handler() { |message|
+      # message handler
+      payload = message.body()
+    }
+
+    # ...
+    # when done
+    reference.release()
+  end
+}
+
+----
+
+When, using `link:../../yardoc/VertxServiceDiscovery/MessageSource.html[MessageSource]`, it becomes:
+
+[source, ruby]
+----
+require 'vertx-service-discovery/discovery_service'
+require 'vertx-service-discovery/message_source'
+VertxServiceDiscovery::MessageSource.get_consumer(discovery, {
+  'name' => "some-message-source-service"
+}) { |ar_err,ar|
+  if (ar_err == nil)
+    consumer = ar
+
+    # Attach a message handler on it
+    consumer.handler() { |message|
+      # message handler
+      payload = message.body()
+    }
+    # ...
+
+    # Dont' forget to release the service
+    VertxServiceDiscovery::DiscoveryService.release_service_object(discovery, consumer)
+
+  end
+}
+
+----
 
 === JDBC Data source
 

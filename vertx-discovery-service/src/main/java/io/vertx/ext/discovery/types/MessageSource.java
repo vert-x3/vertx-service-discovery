@@ -21,7 +21,6 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.DiscoveryService;
@@ -122,15 +121,14 @@ public interface MessageSource extends ServiceType {
    * Convenient method that looks for a message source and provides the configured {@link MessageConsumer}. The
    * async result is marked as failed is there are no matching services, or if the lookup fails.
    *
-   * @param vertx         The vert.x instance
    * @param discovery     The discovery service
    * @param filter        The filter, optional
    * @param resultHandler the result handler
    * @param <T>           the class of the message
    */
-  static <T> void getConsumer(Vertx vertx, DiscoveryService discovery, JsonObject filter,
+  static <T> void getConsumer(DiscoveryService discovery, JsonObject filter,
                               Handler<AsyncResult<MessageConsumer<T>>>
-                          resultHandler) {
+                                  resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
