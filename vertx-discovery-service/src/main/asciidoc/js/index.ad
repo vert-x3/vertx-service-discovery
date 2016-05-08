@@ -168,7 +168,39 @@ from the service types.
 
 [source,js]
 ----
-{@link examples.Examples##example2(DiscoveryService)}
+var HttpEndpoint = require("vertx-service-discovery-js/http_endpoint");
+// Manual record creation
+var record = {
+  "type" : "eventbus-service-proxy",
+  "location" : {
+    "endpoint" : "the-service-address"
+  },
+  "name" : "my-service",
+  "metadata" : {
+    "some-label" : "some-value"
+  }
+};
+
+service.publish(record, function (ar, ar_err) {
+  if (ar_err == null) {
+    // publication succeeded
+    var publishedRecord = ar;
+  } else {
+    // publication failed
+  }
+});
+
+// Record creation from a type
+record = HttpEndpoint.createRecord("some-rest-api", "localhost", 8080, "/api");
+service.publish(record, function (ar, ar_err) {
+  if (ar_err == null) {
+    // publication succeeded
+    var publishedRecord = ar;
+  } else {
+    // publication failed
+  }
+});
+
 ----
 
 It is important to keep a reference on the returned records, as this record has been extended by a `registration id`.
@@ -179,7 +211,15 @@ To withdraw (un-publish) a record, use:
 
 [source,js]
 ----
-{@link examples.Examples##example3(DiscoveryService, Record)}
+
+service.unpublish(record.registration, function (ar, ar_err) {
+  if (ar_err == null) {
+    // Ok
+  } else {
+    // cannot un-publish the service, may have already been removed, or the record is not published
+  }
+});
+
 ----
 
 == Looking for service
@@ -205,7 +245,61 @@ Here are some examples:
 
 [source,js]
 ----
-{@link examples.Examples##example4(DiscoveryService)}
+// Get any record
+service.getRecord(null, function (ar, ar_err) {
+  if (ar_err == null) {
+    if (ar !== null) {
+      // we have a record
+    } else {
+      // the lookup succeeded, but no matching service
+    }
+  } else {
+    // lookup failed
+  }
+});
+
+// Get a record by name
+service.getRecord({
+  "name" : "some-service"
+}, function (ar, ar_err) {
+  if (ar_err == null) {
+    if (ar !== null) {
+      // we have a record
+    } else {
+      // the lookup succeeded, but no matching service
+    }
+  } else {
+    // lookup failed
+  }
+});
+
+// Get all records matching the filter
+service.getRecords({
+  "some-label" : "some-value"
+}, function (ar, ar_err) {
+  if (ar_err == null) {
+    var results = ar;
+    // If the list is not empty, we have matching record
+    // Else, the lookup succeeded, but no matching service
+  } else {
+    // lookup failed
+  }
+});
+
+service.getRecord(function (r) {
+  r.name == "some-name";
+}, function (ar, ar_err) {
+  if (ar_err == null) {
+    if (ar !== null) {
+      // we have a record
+    } else {
+      // the lookup succeeded, but no matching service
+    }
+  } else {
+    // lookup failed
+  }
+});
+
 ----
 
 == Retrieving a service reference

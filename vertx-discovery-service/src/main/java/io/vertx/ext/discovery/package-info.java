@@ -169,7 +169,7 @@
  * 
  * [source,$lang]
  * ----
- * {@link examples.Examples##example2(DiscoveryService)}
+ * {@link examples.Examples#example2(DiscoveryService)}
  * ----
  * 
  * It is important to keep a reference on the returned records, as this record has been extended by a `registration id`.
@@ -180,7 +180,7 @@
  * 
  * [source,$lang]
  * ----
- * {@link examples.Examples##example3(DiscoveryService, Record)}
+ * {@link examples.Examples#example3(DiscoveryService, Record)}
  * ----
  * 
  * == Looking for service
@@ -206,7 +206,7 @@
  * 
  * [source,$lang]
  * ----
- * {@link examples.Examples##example4(DiscoveryService)}
+ * {@link examples.Examples#example4(DiscoveryService)}
  * ----
  * 
  * == Retrieving a service reference
@@ -390,7 +390,7 @@
  *   { ar ->
  *      def svc = ar.result();
  *      // ...
- *      EventBusService.release(discovery, hello);
+ *     DiscoveryService.releaseServiceObject(discovery, svc);
  *   }
  * );
  * \----
