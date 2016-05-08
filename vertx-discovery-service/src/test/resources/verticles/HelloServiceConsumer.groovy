@@ -43,7 +43,7 @@ EventBusService.<HelloService> getProxy(
                         "status" : "ok",
                         "message": result.result()
                 ])
-                EventBusService.release(discovery, hello);
+                DiscoveryService.releaseServiceObject(discovery, hello);
               }
             })
           }
