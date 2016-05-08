@@ -94,5 +94,8 @@ public class MessageSourceTest {
     int size = data.size();
     Thread.sleep(200);
     assertThat(data.size()).isEqualTo(size);
+
+    // Just there to be sure we can call it twice
+    service.release();
   }
 }

@@ -23,6 +23,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.*;
 import io.vertx.ext.discovery.spi.DiscoveryBridge;
+import io.vertx.ext.discovery.types.EventBusService;
 import io.vertx.ext.discovery.types.HttpEndpoint;
 import io.vertx.ext.service.HelloService;
 import io.vertx.ext.service.HelloServiceImpl;
@@ -61,6 +62,8 @@ public class DiscoveryImplTest {
     AtomicBoolean completed = new AtomicBoolean();
     vertx.close((v) -> completed.set(true));
     await().untilAtomic(completed, is(true));
+
+    assertThat(discovery.bindings()).isEmpty();
   }
 
   @Test
@@ -69,7 +72,9 @@ public class DiscoveryImplTest {
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
     Record record = new Record()
         .setName("Hello")
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
+        .setType(EventBusService.TYPE)
+        .setLocation(new JsonObject().put(Record.ENDPOINT, "address"))
+        .setMetadata(new JsonObject().put("service.interface", HelloService.class.getName()));
 
     discovery.publish(record, (r) -> {
     });
@@ -82,6 +87,19 @@ public class DiscoveryImplTest {
 
     await().until(() -> found.get() != null);
     assertThat(found.get().getLocation().getString("endpoint")).isEqualTo("address");
+
+    ServiceReference reference = discovery.getReference(found.get());
+    assertThat(reference).isNotNull();
+    HelloService service = reference.get();
+    assertThat(service).isNotNull();
+    AtomicReference<String> result = new AtomicReference<>();
+    service.hello(new JsonObject().put("name", "foo"), ar -> {
+      result.set(ar.result());
+    });
+    await().until(() -> result.get() != null);
+    assertThat(result.get()).isEqualToIgnoringCase("stuff foo");
+
+    assertThat(discovery.bindings()).hasSize(1);
 
     AtomicBoolean done = new AtomicBoolean();
     discovery.unpublish(record.getRegistration(), v -> {
@@ -234,6 +252,12 @@ public class DiscoveryImplTest {
     discovery.close();
 
     await().untilAtomic(closed, is(true));
+  }
+
+  @Test
+  public void testName() {
+    DiscoveryOptions options = new DiscoveryOptions().setName("my-name");
+    assertThat(options.getName()).isEqualToIgnoringCase("my-name");
   }
 
 }

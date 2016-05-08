@@ -75,6 +75,8 @@ public class HttpEndpointTest {
     AtomicBoolean completed = new AtomicBoolean();
     vertx.close((v) -> completed.set(true));
     await().untilAtomic(completed, is(true));
+
+    assertThat(discovery.bindings()).isEmpty();
   }
 
 

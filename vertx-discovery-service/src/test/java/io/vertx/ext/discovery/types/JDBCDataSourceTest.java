@@ -57,6 +57,8 @@ public class JDBCDataSourceTest {
     AtomicBoolean completed = new AtomicBoolean();
     vertx.close((v) -> completed.set(true));
     await().untilAtomic(completed, is(true));
+
+    assertThat(discovery.bindings()).isEmpty();
   }
 
   @Test
@@ -91,6 +93,8 @@ public class JDBCDataSourceTest {
 
     await().untilAtomic(success, is(true));
     service.release();
+    // Just there to be sure we can call it twice
+    service.release();
   }
 
   @Test
@@ -99,7 +103,6 @@ public class JDBCDataSourceTest {
     JDBCDataSource.getJDBCClient(discovery,
         new JsonObject().put("name", "some-hsql-db"),
         ar -> {
-          System.out.println("Here : " + ar.result());
           expected.set(ar.cause());
         });
 

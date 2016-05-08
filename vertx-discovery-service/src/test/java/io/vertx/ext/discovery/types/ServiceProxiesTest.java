@@ -185,4 +185,33 @@ public class ServiceProxiesTest {
     assertThat(result.get().getString("message")).isEqualTo("stuff vert.x");
   }
 
+  @Test
+  public void testSeveralCallsToRelease() {
+    HelloService svc = new HelloServiceImpl("stuff");
+    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    Record record = EventBusService.createRecord("Hello", "address", HelloService.class);
+
+    discovery.publish(record, (r) -> {
+    });
+    await().until(() -> record.getRegistration() != null);
+
+    AtomicReference<Record> found = new AtomicReference<>();
+    discovery.getRecord(new JsonObject().put("name", "Hello"), ar -> {
+      found.set(ar.result());
+    });
+
+    await().until(() -> found.get() != null);
+
+    ServiceReference service = discovery.getReference(found.get());
+    HelloService hello = service.get();
+    AtomicReference<String> result = new AtomicReference<>();
+    hello.hello(name, ar -> {
+      result.set(ar.result());
+    });
+    await().untilAtomic(result, not(nullValue()));
+
+    service.release();
+    service.release();
+  }
+
 }
