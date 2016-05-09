@@ -148,7 +148,7 @@ public class DiscoveryImpl implements DiscoveryService {
       conf = configuration;
     }
     vertx.<Void>executeBlocking(
-        future -> {
+        future ->
           bridge.start(vertx, this, conf, (ar) -> {
             if (ar.failed()) {
               future.fail(ar.cause());
@@ -156,8 +156,7 @@ public class DiscoveryImpl implements DiscoveryService {
               bridges.add(bridge);
               future.complete();
             }
-          });
-        },
+          }),
         ar -> {
           if (ar.failed()) {
             LOGGER.error("Cannot start the discovery bridge " + bridge, ar.cause());

@@ -182,7 +182,7 @@ public class DockerLinksDiscoveryBridge implements DiscoveryBridge {
             .put("port", url.getPort())
             .put("host", url.getHost())
             .put("proto", url.getScheme());
-        record.setType(HttpEndpoint.UNKNOWN);
+        record.setType(type);
         record.setLocation(location);
     }
 

@@ -92,7 +92,7 @@ public class MessageSourceTest {
     await().until(() -> ! data.isEmpty());
     service.release();
     int size = data.size();
-    Thread.sleep(200);
+    Thread.sleep(500);
     assertThat(data.size()).isEqualTo(size);
 
     // Just there to be sure we can call it twice

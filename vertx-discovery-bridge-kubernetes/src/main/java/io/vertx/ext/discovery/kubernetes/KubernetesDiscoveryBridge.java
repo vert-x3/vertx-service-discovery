@@ -183,14 +183,14 @@ public class KubernetesDiscoveryBridge implements Watcher<Service>, DiscoveryBri
         manageHttpService(record, service, labels);
         break;
       default:
-        manageUnknownService(record, service);
+        manageUnknownService(record, service, type);
         break;
     }
 
     return record;
   }
 
-  private static void manageUnknownService(Record record, Service service) {
+  private static void manageUnknownService(Record record, Service service, String type) {
     List<ServicePort> ports = service.getSpec().getPorts();
     if (ports != null && !ports.isEmpty()) {
       if (ports.size() > 1) {
@@ -207,7 +207,7 @@ public class KubernetesDiscoveryBridge implements Watcher<Service>, DiscoveryBri
       location.put("protocol", port.getProtocol());
       location.put("host", service.getSpec().getClusterIP());
 
-      record.setLocation(location).setType(ServiceType.UNKNOWN);
+      record.setLocation(location).setType(type);
     } else {
       throw new IllegalStateException("Cannot extract the location from the service " + service.getMetadata()
           .getName() + " - no port");
