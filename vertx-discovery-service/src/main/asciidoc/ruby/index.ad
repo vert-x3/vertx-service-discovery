@@ -227,11 +227,14 @@ service.unpublish(record['registration']) { |ar_err,ar|
 On the consumer side, the first thing to do is to lookup for records. You can search for a single record or all
 the matching ones. In the first case, the first matching record is returned.
 
-Consumer can pass a filter to select the service. This filter is a JSON object. Each entry of the given filter
-are checked against the record. All entry must match exactly the record. The entry can use the special `*` value
-to denotes a requirement on the key, but not on the value.
+Consumer can pass a filter to select the service. There are two ways to describe the filter:
 
-Let's take some example:
+1. A function taking a `link:../dataobjects.html#Record[Record]` as parameter and returning a boolean
+2. This filter is a JSON object. Each entry of the given filter are checked against the record. All entry must
+match exactly the record. The entry can use the special `*` value to denotes a requirement on the key, but not on
+the value.
+
+Let's take some example of JSON filter:
 ----
 { "name" = "a" } => matches records with name set fo "a"
 { "color" = "*" } => matches records with "color" set
@@ -239,13 +242,28 @@ Let's take some example:
 { "color" = "red", "name" = "a"} => only matches records with name set to "a", and color set to "red"
 ----
 
-If the filter is not set (`null` or empty), it accepts all records.
+If the JSON filter is not set (`null` or empty), it accepts all records. When using functions, to accept all
+records, you must return true regardless the record.
 
 Here are some examples:
 
 [source,ruby]
 ----
 # Get any record
+service.get_record(lambda { |r|
+  true
+}) { |ar_err,ar|
+  if (ar_err == nil)
+    if (ar != nil)
+      # we have a record
+    else
+      # the lookup succeeded, but no matching service
+    end
+  else
+    # lookup failed
+  end
+}
+
 service.get_record(nil) { |ar_err,ar|
   if (ar_err == nil)
     if (ar != nil)
@@ -258,7 +276,22 @@ service.get_record(nil) { |ar_err,ar|
   end
 }
 
+
 # Get a record by name
+service.get_record(lambda { |r|
+  r['name'].==("some-name")
+}) { |ar_err,ar|
+  if (ar_err == nil)
+    if (ar != nil)
+      # we have a record
+    else
+      # the lookup succeeded, but no matching service
+    end
+  else
+    # lookup failed
+  end
+}
+
 service.get_record({
   'name' => "some-service"
 }) { |ar_err,ar|
@@ -274,6 +307,19 @@ service.get_record({
 }
 
 # Get all records matching the filter
+service.get_records(lambda { |r|
+  "some-value".==(r['metadata']['some-label'])
+}) { |ar_err,ar|
+  if (ar_err == nil)
+    results = ar
+    # If the list is not empty, we have matching record
+    # Else, the lookup succeeded, but no matching service
+  else
+    # lookup failed
+  end
+}
+
+
 service.get_records({
   'some-label' => "some-value"
 }) { |ar_err,ar|
@@ -286,21 +332,18 @@ service.get_records({
   end
 }
 
-service.get_record(lambda { |r|
-  r['name'].==("some-name")
-}) { |ar_err,ar|
-  if (ar_err == nil)
-    if (ar != nil)
-      # we have a record
-    else
-      # the lookup succeeded, but no matching service
-    end
-  else
-    # lookup failed
-  end
-}
+
 
 ----
+
+You can retrieve a single record or all matching record with
+`link:../../yardoc/VertxServiceDiscovery/DiscoveryService.html#get_records-instance_method[getRecords]`.
+By default, record lookup does includes only records with a `status` set to `UP`. This can be overridden:
+
+* when using JSON filter, just set `status` to the value you want (or `*` to accept all status)
+* when using function, set the `includeOutOfService` parameter to `true` in
+`link:../../yardoc/VertxServiceDiscovery/DiscoveryService.html#get_records-instance_method[getRecords]`
+.
 
 == Retrieving a service reference
 

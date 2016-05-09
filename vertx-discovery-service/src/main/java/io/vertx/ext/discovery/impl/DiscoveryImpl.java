@@ -182,11 +182,16 @@ public class DiscoveryImpl implements DiscoveryService {
 
   @Override
   public void publish(Record record, Handler<AsyncResult<Record>> resultHandler) {
-    backend.store(record.setStatus(Status.UP), resultHandler);
+    Status status = record.getStatus() != null
+        && record.getStatus() != Status.UNKNOWN
+        && record.getStatus() != Status.DOWN
+        ? record.getStatus() : Status.UP;
+
+    backend.store(record.setStatus(status), resultHandler);
     Record announcedRecord = new Record(record);
     announcedRecord
         .setRegistration(null)
-        .setStatus(Status.UP);
+        .setStatus(status);
     vertx.eventBus().publish(announce, announcedRecord.toJson());
   }
 
@@ -210,8 +215,15 @@ public class DiscoveryImpl implements DiscoveryService {
   @Override
   public void getRecord(JsonObject filter,
                         Handler<AsyncResult<Record>> resultHandler) {
-    boolean includeOutOfService = filter.getString("status") != null;
-    Function<Record, Boolean> accept = r -> r.match(filter);
+    boolean includeOutOfService = false;
+    Function<Record, Boolean> accept;
+    if (filter == null) {
+      accept = r -> true;
+    } else {
+      includeOutOfService = filter.getString("status") != null;
+      accept = r -> r.match(filter);
+    }
+
     getRecord(accept, includeOutOfService, resultHandler);
   }
 
@@ -223,6 +235,7 @@ public class DiscoveryImpl implements DiscoveryService {
   @Override
   public void getRecord(Function<Record, Boolean> filter, boolean includeOutOfService, Handler<AsyncResult<Record>>
       resultHandler) {
+    Objects.requireNonNull(filter);
     backend.getRecords(list -> {
       if (list.failed()) {
         resultHandler.handle(Future.failedFuture(list.cause()));
@@ -242,8 +255,15 @@ public class DiscoveryImpl implements DiscoveryService {
 
   @Override
   public void getRecords(JsonObject filter, Handler<AsyncResult<List<Record>>> resultHandler) {
-    boolean includeOutOfService = filter.getString("status") != null;
-    Function<Record, Boolean> accept = r -> r.match(filter);
+    boolean includeOutOfService = false;
+    Function<Record, Boolean> accept;
+    if (filter == null) {
+      accept = r -> true;
+    } else {
+      includeOutOfService = filter.getString("status") != null;
+      accept = r -> r.match(filter);
+    }
+
     getRecords(accept, includeOutOfService, resultHandler);
   }
 
@@ -254,6 +274,7 @@ public class DiscoveryImpl implements DiscoveryService {
 
   @Override
   public void getRecords(Function<Record, Boolean> filter, boolean includeOutOfService, Handler<AsyncResult<List<Record>>> resultHandler) {
+    Objects.requireNonNull(filter);
     backend.getRecords(list -> {
       if (list.failed()) {
         resultHandler.handle(Future.failedFuture(list.cause()));

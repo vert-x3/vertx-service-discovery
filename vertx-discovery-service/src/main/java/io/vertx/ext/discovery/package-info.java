@@ -188,11 +188,14 @@
  * On the consumer side, the first thing to do is to lookup for records. You can search for a single record or all
  * the matching ones. In the first case, the first matching record is returned.
  * 
- * Consumer can pass a filter to select the service. This filter is a JSON object. Each entry of the given filter
- * are checked against the record. All entry must match exactly the record. The entry can use the special `*` value
- * to denotes a requirement on the key, but not on the value.
+ * Consumer can pass a filter to select the service. There are two ways to describe the filter:
+ *
+ * 1. A function taking a {@link io.vertx.ext.discovery.Record} as parameter and returning a boolean
+ * 2. This filter is a JSON object. Each entry of the given filter are checked against the record. All entry must
+ * match exactly the record. The entry can use the special `*` value to denotes a requirement on the key, but not on
+ * the value.
  * 
- * Let's take some example:
+ * Let's take some example of JSON filter:
  * ----
  * { "name" = "a" } => matches records with name set fo "a"
  * { "color" = "*" } => matches records with "color" set
@@ -200,7 +203,8 @@
  * { "color" = "red", "name" = "a"} => only matches records with name set to "a", and color set to "red"
  * ----
  * 
- * If the filter is not set ({@code null} or empty), it accepts all records.
+ * If the JSON filter is not set ({@code null} or empty), it accepts all records. When using functions, to accept all
+ * records, you must return true regardless the record.
  * 
  * Here are some examples:
  * 
@@ -208,6 +212,15 @@
  * ----
  * {@link examples.Examples#example4(DiscoveryService)}
  * ----
+ *
+ * You can retrieve a single record or all matching record with
+ * {@link io.vertx.ext.discovery.DiscoveryService#getRecords(io.vertx.core.json.JsonObject, io.vertx.core.Handler)}.
+ * By default, record lookup does includes only records with a `status` set to `UP`. This can be overridden:
+ *
+ * * when using JSON filter, just set `status` to the value you want (or `*` to accept all status)
+ * * when using function, set the `includeOutOfService` parameter to `true` in
+ * {@link io.vertx.ext.discovery.DiscoveryService#getRecords(java.util.function.Function, boolean, io.vertx.core.Handler)}
+ * .
  * 
  * == Retrieving a service reference
  * 

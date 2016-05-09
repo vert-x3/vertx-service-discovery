@@ -23,7 +23,6 @@ import io.vertx.ext.discovery.DiscoveryOptions;
 import io.vertx.ext.discovery.DiscoveryService;
 import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.ServiceReference;
-import io.vertx.ext.discovery.types.EventBusService;
 import io.vertx.ext.discovery.types.HttpEndpoint;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.groovy.core.eventbus.MessageConsumer;
@@ -93,6 +92,18 @@ public class Examples {
 
   public void example4(DiscoveryService service) {
     // Get any record
+    service.getRecord(r -> true, ar -> {
+      if (ar.succeeded()) {
+        if (ar.result() != null) {
+          // we have a record
+        } else {
+          // the lookup succeeded, but no matching service
+        }
+      } else {
+        // lookup failed
+      }
+    });
+
     service.getRecord((JsonObject) null, ar -> {
       if (ar.succeeded()) {
         if (ar.result() != null) {
@@ -105,7 +116,20 @@ public class Examples {
       }
     });
 
+
     // Get a record by name
+    service.getRecord(r -> r.getName().equals("some-name"), ar -> {
+      if (ar.succeeded()) {
+        if (ar.result() != null) {
+          // we have a record
+        } else {
+          // the lookup succeeded, but no matching service
+        }
+      } else {
+        // lookup failed
+      }
+    });
+
     service.getRecord(new JsonObject().put("name", "some-service"), ar -> {
       if (ar.succeeded()) {
         if (ar.result() != null) {
@@ -119,6 +143,17 @@ public class Examples {
     });
 
     // Get all records matching the filter
+    service.getRecords(r -> "some-value".equals(r.getMetadata().getString("some-label")), ar -> {
+      if (ar.succeeded()) {
+        List<Record> results = ar.result();
+        // If the list is not empty, we have matching record
+        // Else, the lookup succeeded, but no matching service
+      } else {
+        // lookup failed
+      }
+    });
+
+
     service.getRecords(new JsonObject().put("some-label", "some-value"), ar -> {
       if (ar.succeeded()) {
         List<Record> results = ar.result();
@@ -129,17 +164,7 @@ public class Examples {
       }
     });
 
-    service.getRecord(r -> r.getName().equals("some-name"), ar -> {
-      if (ar.succeeded()) {
-        if (ar.result() != null) {
-          // we have a record
-        } else {
-          // the lookup succeeded, but no matching service
-        }
-      } else {
-        // lookup failed
-      }
-    });
+
   }
 
   public void example5(DiscoveryService discovery, Record record) {
