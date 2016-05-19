@@ -16,10 +16,7 @@
 
 package io.vertx.ext.discovery.consul;
 
-import io.vertx.core.CompositeFuture;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonArray;
@@ -31,18 +28,17 @@ import io.vertx.ext.discovery.Record;
 import io.vertx.ext.discovery.impl.ServiceTypes;
 import io.vertx.ext.discovery.spi.DiscoveryBridge;
 import io.vertx.ext.discovery.spi.ServiceType;
+import io.vertx.ext.discovery.types.HttpLocation;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * A discovery bridge importing services from Consul.
+ *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 public class ConsulDiscoveryBridge implements DiscoveryBridge {
-
-  // TODO periodic scan
-  // TODO maintenance
-
 
   private DiscoveryService discovery;
   private HttpClient client;
@@ -51,6 +47,7 @@ public class ConsulDiscoveryBridge implements DiscoveryBridge {
 
   private final List<ImportedConsulService> imports = new ArrayList<>();
   private String dc;
+  private long scanTask = -1;
 
   @Override
   public void start(Vertx vertx, DiscoveryService discovery, JsonObject configuration, Future<Void> completion) {
@@ -67,17 +64,30 @@ public class ConsulDiscoveryBridge implements DiscoveryBridge {
     client = vertx.createHttpClient(options);
 
     Future<Void> imports = Future.future();
-    Future<Void> exports = Future.future();
 
     retrieveServicesFromConsul(imports);
 
-    CompositeFuture.all(imports, exports).setHandler(ar -> {
+    imports.setHandler(ar -> {
       if (ar.succeeded()) {
+        Integer period = configuration.getInteger("scan-period", 2000);
+        if (period != 0) {
+          scanTask = vertx.setPeriodic(period, l -> {
+            Future<Void> future = Future.future();
+            future.setHandler(ar2 -> {
+              if (ar2.failed()) {
+                LOGGER.warn("Consul importation has failed", ar.cause());
+              }
+            });
+            retrieveServicesFromConsul(future);
+          });
+        }
+
         completion.complete();
       } else {
         completion.fail(ar.cause());
       }
     });
+
   }
 
 
@@ -102,11 +112,9 @@ public class ConsulDiscoveryBridge implements DiscoveryBridge {
     client.get(path)
         .exceptionHandler(error)
         .handler(response -> {
-          System.out.println(response.statusMessage());
           response
               .exceptionHandler(error)
               .bodyHandler(buffer -> {
-                System.out.println(buffer);
                 retrieveIndividualServices(buffer.toJsonObject(), completed);
               });
         })
@@ -114,25 +122,27 @@ public class ConsulDiscoveryBridge implements DiscoveryBridge {
   }
 
   private void retrieveIndividualServices(JsonObject jsonObject, Future<Void> completed) {
+    List<String> ids = new ArrayList<>();
 
     List<Future> futures = new ArrayList<>();
     jsonObject.fieldNames().stream().forEach(name -> {
-      System.out.println(name);
-      Future future = Future.future();
+      Future<Void> future = Future.future();
       Handler<Throwable> error = getErrorHandler(future);
       String path = "/v1/catalog/service/" + name;
       if (dc != null) {
         path += "?dc=" + dc;
       }
 
+
       client.get(path)
           .exceptionHandler(error)
           .handler(response -> {
-            System.out.println(response.statusMessage());
             response.exceptionHandler(error)
                 .bodyHandler(buffer -> {
-                  System.out.println(buffer);
-                  importService(buffer.toJsonObject(), future);
+                  String id = importService(buffer.toJsonArray(), future);
+                  if (id != null) {
+                    ids.add(id);
+                  }
                 });
           })
           .end();
@@ -141,68 +151,110 @@ public class ConsulDiscoveryBridge implements DiscoveryBridge {
     });
 
     CompositeFuture.all(futures).setHandler(ar -> {
+      if (ar.failed()) {
+        LOGGER.error("Fail to retrieve the services from consul", ar.cause());
+      } else {
+        List<ImportedConsulService> toRemove = new ArrayList<>();
+        imports.stream().filter(svc -> !ids.contains(svc.id())).forEach(svc -> {
+          toRemove.add(svc);
+          svc.unregister(discovery, null);
+        });
+        imports.removeAll(toRemove);
+      }
+
       if (ar.succeeded()) {
-        completed.succeeded();
+        completed.complete();
       } else {
         completed.fail(ar.cause());
       }
     });
   }
 
-  private void importService(JsonObject jsonObject, Future<Void> future) {
-    String address = jsonObject.getString("Address");
-    String name = jsonObject.getString("ServiceName");
-    JsonArray tags = jsonObject.getJsonArray("ServiceTags");
-    if (tags == null) {
-      tags = new JsonArray();
-    }
-    String path = jsonObject.getString("ServiceAddress");
-    int port = jsonObject.getInteger("ServicePort");
+  private String importService(JsonArray array, Future<Void> future) {
+    if (array.isEmpty()) {
+      Future.failedFuture("no service with the given name");
+      return null;
+    } else {
+      JsonObject jsonObject = array.getJsonObject(0);
+      String address = jsonObject.getString("Address");
+      String name = jsonObject.getString("ServiceName");
+      String id = jsonObject.getString("ServiceID");
 
-    JsonObject metadata = jsonObject.copy();
-    System.out.println(tags);
-    tags.stream().forEach(tag -> metadata.put((String) tag, true));
-
-    Record record = new Record()
-        .setName(name)
-        .setMetadata(metadata);
-
-    // To determine the record type, check if we have a tag with a "type" name
-    record.setType(ServiceType.UNKNOWN);
-    ServiceTypes.all().forEachRemaining(type -> {
-      if (metadata.getBoolean(type.name(), false)) {
-        record.setType(type.name());
+      JsonArray tags = jsonObject.getJsonArray("ServiceTags");
+      if (tags == null) {
+        tags = new JsonArray();
       }
-    });
+      String path = jsonObject.getString("ServiceAddress");
+      int port = jsonObject.getInteger("ServicePort");
 
-    JsonObject location = new JsonObject();
-    location.put("host", address);
-    location.put("port", port);
-    if (path != null) {
-      location.put("path", path);
-    }
+      JsonObject metadata = jsonObject.copy();
+      tags.stream().forEach(tag -> metadata.put((String) tag, true));
 
-    // Manage HTTP endpoint
-    if (record.getType().equals("http-endpoint")) {
+      Record record = new Record()
+          .setName(name)
+          .setMetadata(metadata);
+
+      // To determine the record type, check if we have a tag with a "type" name
+      record.setType(ServiceType.UNKNOWN);
+      ServiceTypes.all().forEachRemaining(type -> {
+        if (metadata.getBoolean(type.name(), false)) {
+          record.setType(type.name());
+        }
+      });
+
+      JsonObject location = new JsonObject();
+      location.put("host", address);
+      location.put("port", port);
       if (path != null) {
-        location.put("root", path);
+        location.put("path", path);
       }
-      if (metadata.getBoolean("ssl", false)) {
-        location.put("ssl", true);
+
+      // Manage HTTP endpoint
+      if (record.getType().equals("http-endpoint")) {
+        if (path != null) {
+          location.put("root", path);
+        }
+        if (metadata.getBoolean("ssl", false)) {
+          location.put("ssl", true);
+        }
+        location = new HttpLocation(location).toJson();
       }
+
+      record.setLocation(location);
+
+      // the id must be unique, so check if the service has already being imported
+      ImportedConsulService imported = getImportedServiceById(id);
+      if (imported != null) {
+        future.complete();
+      } else {
+        LOGGER.info("Importing service " + record.getName() + " from consul");
+        imports.add(new ImportedConsulService(name, id, record).register(discovery, future));
+      }
+
+      return id;
     }
 
-    LOGGER.info("Importing service " + record.getName() + " from consul");
-    imports.add(new ImportedConsulService(name, record).register(discovery, future));
+  }
 
+  private ImportedConsulService getImportedServiceById(String id) {
+    for (ImportedConsulService svc : imports) {
+      if (svc.id().equals(id)) {
+        return svc;
+      }
+    }
+    return null;
   }
 
   @Override
   public void stop(Vertx vertx, DiscoveryService discovery, Future<Void> future) {
+    if (scanTask != -1) {
+      vertx.cancelTimer(scanTask);
+    }
     // Remove all the services that has been imported
     List<Future> list = new ArrayList<>();
     imports.stream().forEach(imported -> {
-      imported.unregister(discovery, ar -> {
+      Future<Void> fut = Future.future();
+      fut.setHandler(ar -> {
         LOGGER.info("Unregistering " + imported.name());
         if (ar.succeeded()) {
           list.add(Future.succeededFuture());
@@ -210,6 +262,7 @@ public class ConsulDiscoveryBridge implements DiscoveryBridge {
           list.add(Future.failedFuture(ar.cause()));
         }
       });
+      imported.unregister(discovery, fut);
     });
 
     CompositeFuture.all(list).setHandler(ar -> {

@@ -16,30 +16,53 @@
 
 package io.vertx.ext.discovery.consul;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.ext.discovery.DiscoveryService;
 import io.vertx.ext.discovery.Record;
 
+import java.util.Objects;
+
 /**
+ * Structure holding a service imported from Consul and published in the Vert.x discovery service.
+ *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 public class ImportedConsulService {
 
-
   private final String name;
   private final Record record;
+  private final String id;
 
-  public ImportedConsulService(String name, Record record) {
+  /**
+   * Creates a new instance of {@link ImportedConsulService}.
+   *
+   * @param name   the service name
+   * @param id     the service id, may be the name
+   * @param record the record (not yet registered)
+   */
+  public ImportedConsulService(String name, String id, Record record) {
+    Objects.requireNonNull(name);
+    Objects.requireNonNull(id);
+    Objects.requireNonNull(record);
     this.name = name;
     this.record = record;
+    this.id = id;
   }
 
+  /**
+   * @return the name
+   */
   public String name() {
     return name;
   }
 
+  /**
+   * Registers the service and completes the given future when done.
+   *
+   * @param discovery  the discovery service
+   * @param completion the completion future
+   * @return the current {@link ImportedConsulService}
+   */
   public ImportedConsulService register(DiscoveryService discovery, Future<Void> completion) {
     discovery.publish(record, ar -> {
       if (ar.succeeded()) {
@@ -52,13 +75,33 @@ public class ImportedConsulService {
     return this;
   }
 
-  public void unregister(DiscoveryService discovery, Handler<AsyncResult<Void>> resultHandler) {
-    discovery.unpublish(record.getRegistration(), ar -> {
-      if (ar.succeeded()) {
-        record.setRegistration(null);
+  /**
+   * Unregisters the service and completes the given future when done, if not {@code null}
+   *
+   * @param discovery  the discovery service
+   * @param completion the completion future
+   */
+  public void unregister(DiscoveryService discovery, Future<Void> completion) {
+    if (record.getRegistration() != null) {
+      discovery.unpublish(record.getRegistration(), ar -> {
+        if (ar.succeeded()) {
+          record.setRegistration(null);
+        }
+        if (completion != null) {
+          completion.complete();
+        }
+      });
+    } else {
+      if (completion != null) {
+        completion.fail("Record not published");
       }
-      resultHandler.handle(ar);
-    });
+    }
   }
 
+  /**
+   * @return the id
+   */
+  public String id() {
+    return id;
+  }
 }

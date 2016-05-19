@@ -22,6 +22,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.DiscoveryService;
 import io.vertx.ext.discovery.Record;
+import io.vertx.ext.discovery.types.HttpEndpoint;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
 
 /**
- * Test against a mock Consul server
+ * Test against a mock Consul server.
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
@@ -51,12 +52,12 @@ public class ConsulDiscoveryBridgeTest {
 
   @Before
   public void setUp() {
+    services.clear();
     vertx = Vertx.vertx();
 
     AtomicBoolean done = new AtomicBoolean();
     server = vertx.createHttpServer()
         .requestHandler(request -> {
-          System.out.println(request.path());
           if (request.path().equals("/v1/catalog/services")) {
             JsonObject result = new JsonObject();
             services.stream().forEach(object -> {
@@ -65,8 +66,7 @@ public class ConsulDiscoveryBridgeTest {
             request.response().end(result.encodePrettily());
           } else if (request.path().startsWith("/v1/catalog/service/")) {
             String service = request.path().substring("/v1/catalog/service/".length());
-            System.out.println("getting details about " + service);
-            JsonObject value = find(service);
+            JsonArray value = find(service);
             if (value != null) {
               request.response().end(value.encodePrettily());
             } else {
@@ -99,7 +99,7 @@ public class ConsulDiscoveryBridgeTest {
   }
 
   @Test
-  public void test() throws InterruptedException {
+  public void testBasicImport() throws InterruptedException {
     services.add(new JsonObject("  {\n" +
         "    \"Node\": \"foobar\",\n" +
         "    \"Address\": \"10.1.10.12\",\n" +
@@ -120,10 +120,117 @@ public class ConsulDiscoveryBridgeTest {
     assertThat(list).hasSize(1);
   }
 
-  private JsonObject find(String service) {
+  @Test
+  public void testHttpImport() throws InterruptedException {
+    services.add(new JsonObject("{\n" +
+        "  \"Node\" : \"node1\",\n" +
+        "  \"Address\" : \"172.17.0.2\",\n" +
+        "  \"ServiceID\" : \"web\",\n" +
+        "  \"ServiceName\" : \"web\",\n" +
+        "  \"ServiceTags\" : [ \"rails\", \"http-endpoint\" ],\n" +
+        "  \"ServiceAddress\" : \"\",\n" +
+        "  \"ServicePort\" : 80\n" +
+        "}"));
+
+    discovery = DiscoveryService.create(vertx)
+        .registerDiscoveryBridge(new ConsulDiscoveryBridge(),
+            new JsonObject().put("host", "localhost").put("port", 5601));
+
+    await().until(() -> getAllRecordsBlocking().size() > 0);
+    List<Record> list = getAllRecordsBlocking();
+
+    assertThat(list).hasSize(1);
+
+    assertThat(list.get(0).getType()).isEqualTo(HttpEndpoint.TYPE);
+    assertThat(list.get(0).getLocation().getString("endpoint")).isEqualTo("http://172.17.0.2:80/");
+  }
+
+  @Test
+  public void testDeparture() throws InterruptedException {
+    services.add(new JsonObject("  {\n" +
+        "    \"Node\": \"foobar\",\n" +
+        "    \"Address\": \"10.1.10.12\",\n" +
+        "    \"ServiceID\": \"redis\",\n" +
+        "    \"ServiceName\": \"redis\",\n" +
+        "    \"ServiceTags\": null,\n" +
+        "    \"ServiceAddress\": \"\",\n" +
+        "    \"ServicePort\": 8000\n" +
+        "  }"));
+
+    vertx.runOnContext(v -> {
+      discovery = DiscoveryService.create(vertx)
+          .registerDiscoveryBridge(new ConsulDiscoveryBridge(),
+              new JsonObject().put("host", "localhost").put("port", 5601).put("scan-period", 100));
+    });
+
+    await().until(() -> getAllRecordsBlocking().size() > 0);
+    List<Record> list = getAllRecordsBlocking();
+
+    assertThat(list).hasSize(1);
+
+    list.clear();
+    services.clear();
+
+    await().until(() -> getAllRecordsBlocking().size() == 0);
+
+    assertThat(getAllRecordsBlocking()).isEmpty();
+  }
+
+  @Test
+  public void testArrivalFollowedByADeparture() throws InterruptedException {
+    JsonObject service = new JsonObject("{\n" +
+        "  \"Node\" : \"node1\",\n" +
+        "  \"Address\" : \"172.17.0.2\",\n" +
+        "  \"ServiceID\" : \"web\",\n" +
+        "  \"ServiceName\" : \"web\",\n" +
+        "  \"ServiceTags\" : [ \"rails\", \"http-endpoint\" ],\n" +
+        "  \"ServiceAddress\" : \"\",\n" +
+        "  \"ServicePort\" : 80\n" +
+        "}");
+
+    services.add(new JsonObject("  {\n" +
+        "    \"Node\": \"foobar\",\n" +
+        "    \"Address\": \"10.1.10.12\",\n" +
+        "    \"ServiceID\": \"redis\",\n" +
+        "    \"ServiceName\": \"redis\",\n" +
+        "    \"ServiceTags\": null,\n" +
+        "    \"ServiceAddress\": \"\",\n" +
+        "    \"ServicePort\": 8000\n" +
+        "  }"));
+
+    vertx.runOnContext(v -> {
+      discovery = DiscoveryService.create(vertx)
+          .registerDiscoveryBridge(new ConsulDiscoveryBridge(),
+              new JsonObject().put("host", "localhost").put("port", 5601).put("scan-period", 100));
+    });
+
+    await().until(() -> getAllRecordsBlocking().size() > 0);
+    List<Record> list = getAllRecordsBlocking();
+
+    assertThat(list).hasSize(1);
+
+    services.add(service);
+
+    await().until(() -> getAllRecordsBlocking().size() == 2);
+
+    services.remove(service);
+
+    await().until(() -> getAllRecordsBlocking().size() == 1);
+  }
+
+  private void grace() {
+    try {
+      Thread.sleep(500);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
+  }
+
+
+  private JsonArray find(String service) {
     for (JsonObject json : services) {
       if (json.getString("ServiceName").equalsIgnoreCase(service)) {
-        return json;
+        return new JsonArray().add(json);
       }
     }
     return null;
