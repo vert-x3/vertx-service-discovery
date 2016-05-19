@@ -16,9 +16,8 @@
 
 package io.vertx.ext.discovery.docker;
 
-import io.vertx.core.AsyncResult;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -59,15 +58,16 @@ public class DockerLinksDiscoveryBridge implements DiscoveryBridge {
   private final static Logger LOGGER = LoggerFactory.getLogger(DockerLinksDiscoveryBridge.class);
 
   @Override
-  public void start(Vertx vertx, DiscoveryService discovery, JsonObject configuration, Handler<AsyncResult<Void>> completionHandler) {
+  public void start(Vertx vertx, DiscoveryService discovery, JsonObject configuration,
+                    Future<Void> completion) {
     this.discovery = discovery;
 
     synchronized (this) {
-      lookup(completionHandler);
+      lookup(completion);
     }
   }
 
-  private void lookup(Handler<AsyncResult<Void>> completionHandler) {
+  private void lookup(Future<Void> completion) {
     Map<String, String> variables = getVariables();
 
     // Find names
@@ -97,16 +97,16 @@ public class DockerLinksDiscoveryBridge implements DiscoveryBridge {
           }
         });
       } catch (URISyntaxException e) {
-        if (completionHandler != null) {
-          completionHandler.handle(Future.failedFuture(e));
+        if (completion != null) {
+          completion.fail(e);
         } else {
           throw new IllegalStateException("Cannot extract service record from variables for " + link, e);
         }
       }
     }
 
-    if (completionHandler != null) {
-      completionHandler.handle(Future.succeededFuture());
+    if (completion != null) {
+      completion.complete();
     }
   }
 
@@ -137,11 +137,22 @@ public class DockerLinksDiscoveryBridge implements DiscoveryBridge {
   }
 
   @Override
-  public void stop(Vertx vertx, DiscoveryService discovery) {
+  public void stop(Vertx vertx, DiscoveryService discovery, Future<Void> completion) {
+    List<Future> list = new ArrayList<>();
     for (Record record : records) {
       discovery.unpublish(record.getRegistration(), v -> {
+        list.add(v.succeeded() ? Future.succeededFuture() : Future.failedFuture(v.cause()));
       });
     }
+
+    CompositeFuture.all(list).setHandler(ar -> {
+          if (ar.succeeded()) {
+            completion.succeeded();
+          } else {
+            completion.fail(ar.cause());
+          }
+        }
+    );
   }
 
   private Record createRecord(String name, Map<String, String> variables) throws URISyntaxException {

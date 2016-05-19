@@ -20,15 +20,14 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.*;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.discovery.spi.DiscoveryBridge;
 import io.vertx.ext.discovery.DiscoveryService;
 import io.vertx.ext.discovery.Record;
+import io.vertx.ext.discovery.spi.DiscoveryBridge;
 import io.vertx.ext.discovery.spi.ServiceType;
 import io.vertx.ext.discovery.types.HttpEndpoint;
 import io.vertx.ext.discovery.types.HttpLocation;
@@ -65,7 +64,7 @@ public class KubernetesDiscoveryBridge implements Watcher<Service>, DiscoveryBri
 
   @Override
   public void start(Vertx vertx, DiscoveryService discovery, JsonObject configuration,
-                    Handler<AsyncResult<Void>> completionHandler) {
+                    Future<Void> completion) {
     this.discovery = discovery;
 
     JsonObject conf;
@@ -120,8 +119,10 @@ public class KubernetesDiscoveryBridge implements Watcher<Service>, DiscoveryBri
           if (ar.succeeded()) {
             this.client = ar.result();
             LOGGER.info("Kubernetes client instantiated");
+            completion.complete();
           } else {
             LOGGER.error("Error while interacting with kubernetes", ar.cause());
+            completion.fail(ar.cause());
           }
         }
     );
@@ -241,7 +242,7 @@ public class KubernetesDiscoveryBridge implements Watcher<Service>, DiscoveryBri
 
 
   @Override
-  public void stop(Vertx vertx, DiscoveryService discovery) {
+  public void stop(Vertx vertx, DiscoveryService discovery, Future<Void> future) {
     synchronized (this) {
       if (watcher != null) {
         watcher.close();
@@ -253,6 +254,8 @@ public class KubernetesDiscoveryBridge implements Watcher<Service>, DiscoveryBri
         client = null;
       }
     }
+
+    future.complete();
   }
 
   private static boolean isTrue(Map<String, String> labels, String key) {

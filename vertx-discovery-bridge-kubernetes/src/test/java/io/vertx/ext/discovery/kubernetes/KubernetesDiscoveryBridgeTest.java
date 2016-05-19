@@ -18,6 +18,7 @@ package io.vertx.ext.discovery.kubernetes;
 
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.client.Watcher;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.DiscoveryService;
@@ -148,7 +149,9 @@ public class KubernetesDiscoveryBridgeTest {
     });
     DiscoveryService discovery = DiscoveryService.create(vertx);
     KubernetesDiscoveryBridge bridge = new KubernetesDiscoveryBridge();
-    bridge.start(vertx, discovery, new JsonObject().put("token", "a token"), ar -> {
+    Future<Void> future = Future.future();
+    bridge.start(vertx, discovery, new JsonObject().put("token", "a token"), future);
+    future.setHandler(ar -> {
 
     });
     bridge.eventReceived(Watcher.Action.ADDED, getHttpService());
@@ -161,7 +164,7 @@ public class KubernetesDiscoveryBridgeTest {
     await().until(() -> record.get() != null);
     assertThat(record.get().getStatus()).isEqualTo(Status.DOWN);
 
-    bridge.stop(vertx, discovery);
+    bridge.stop(vertx, discovery, Future.future());
 
   }
 

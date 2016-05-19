@@ -16,7 +16,10 @@
 
 package io.vertx.ext.discovery.consul;
 
-import io.vertx.core.*;
+import io.vertx.core.CompositeFuture;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonArray;
@@ -50,7 +53,7 @@ public class ConsulDiscoveryBridge implements DiscoveryBridge {
   private String dc;
 
   @Override
-  public void start(Vertx vertx, DiscoveryService discovery, JsonObject configuration, Handler<AsyncResult<Void>> completionHandler) {
+  public void start(Vertx vertx, DiscoveryService discovery, JsonObject configuration, Future<Void> completion) {
     this.discovery = discovery;
 
     HttpClientOptions options = new HttpClientOptions(configuration);
@@ -70,9 +73,9 @@ public class ConsulDiscoveryBridge implements DiscoveryBridge {
 
     CompositeFuture.all(imports, exports).setHandler(ar -> {
       if (ar.succeeded()) {
-        completionHandler.handle(Future.succeededFuture());
+        completion.complete();
       } else {
-        completionHandler.handle(Future.failedFuture(ar.cause()));
+        completion.fail(ar.cause());
       }
     });
   }
@@ -189,18 +192,32 @@ public class ConsulDiscoveryBridge implements DiscoveryBridge {
       }
     }
 
-    LOGGER.info("Importing service " + record.getName() + "from consul");
+    LOGGER.info("Importing service " + record.getName() + " from consul");
     imports.add(new ImportedConsulService(name, record).register(discovery, future));
 
   }
 
   @Override
-  public void stop(Vertx vertx, DiscoveryService discovery) {
+  public void stop(Vertx vertx, DiscoveryService discovery, Future<Void> future) {
     // Remove all the services that has been imported
+    List<Future> list = new ArrayList<>();
     imports.stream().forEach(imported -> {
       imported.unregister(discovery, ar -> {
         LOGGER.info("Unregistering " + imported.name());
+        if (ar.succeeded()) {
+          list.add(Future.succeededFuture());
+        } else {
+          list.add(Future.failedFuture(ar.cause()));
+        }
       });
+    });
+
+    CompositeFuture.all(list).setHandler(ar -> {
+      if (ar.succeeded()) {
+        future.complete();
+      } else {
+        future.fail(ar.cause());
+      }
     });
   }
 }

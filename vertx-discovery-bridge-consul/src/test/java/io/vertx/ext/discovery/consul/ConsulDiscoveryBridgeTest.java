@@ -21,15 +21,18 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.DiscoveryService;
+import io.vertx.ext.discovery.Record;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jayway.awaitility.Awaitility.await;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
 
 /**
@@ -107,11 +110,14 @@ public class ConsulDiscoveryBridgeTest {
         "    \"ServicePort\": 8000\n" +
         "  }"));
 
-    DiscoveryService.create(vertx)
+    discovery = DiscoveryService.create(vertx)
         .registerDiscoveryBridge(new ConsulDiscoveryBridge(),
             new JsonObject().put("host", "localhost").put("port", 5601));
 
-    Thread.sleep(5000);
+    await().until(() -> getAllRecordsBlocking().size() > 0);
+    List<Record> list = getAllRecordsBlocking();
+
+    assertThat(list).hasSize(1);
   }
 
   private JsonObject find(String service) {
@@ -121,6 +127,23 @@ public class ConsulDiscoveryBridgeTest {
       }
     }
     return null;
+  }
+
+  private List<Record> getAllRecordsBlocking() {
+    CountDownLatch latch = new CountDownLatch(1);
+    List<Record> list = new ArrayList<>();
+
+    discovery.getRecords((JsonObject) null, ar -> {
+      list.addAll(ar.result());
+      latch.countDown();
+    });
+
+    try {
+      latch.await();
+    } catch (InterruptedException e) {
+      // Ignore it.
+    }
+    return list;
   }
 
 

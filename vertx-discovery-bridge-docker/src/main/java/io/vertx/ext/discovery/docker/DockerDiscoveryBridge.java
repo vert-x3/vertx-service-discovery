@@ -20,16 +20,14 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.discovery.spi.DiscoveryBridge;
 import io.vertx.ext.discovery.DiscoveryService;
 import io.vertx.ext.discovery.Record;
+import io.vertx.ext.discovery.spi.DiscoveryBridge;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -60,13 +58,13 @@ public class DockerDiscoveryBridge implements DiscoveryBridge {
   /**
    * Starts the bridge.
    *
-   * @param vertx             the vert.x instance
-   * @param discovery         the discovery service
-   * @param configuration     the bridge configuration if any
-   * @param completionHandler handler called when the bridge has been initialized
+   * @param vertx         the vert.x instance
+   * @param discovery     the discovery service
+   * @param configuration the bridge configuration if any
+   * @param completion        future to assign with completion status
    */
   @Override
-  public void start(Vertx vertx, DiscoveryService discovery, JsonObject configuration, Handler<AsyncResult<Void>> completionHandler) {
+  public void start(Vertx vertx, DiscoveryService discovery, JsonObject configuration, Future<Void> completion) {
     this.discovery = discovery;
     this.vertx = vertx;
     DockerClientConfig.DockerClientConfigBuilder builder =
@@ -114,7 +112,7 @@ public class DockerDiscoveryBridge implements DiscoveryBridge {
       try {
         this.host = InetAddress.getLocalHost().getHostAddress();
       } catch (UnknownHostException e) {
-        completionHandler.handle(Future.failedFuture(e));
+        completion.fail(e);
       }
     } else {
       this.host = config.getDockerHost().getHost();
@@ -127,10 +125,10 @@ public class DockerDiscoveryBridge implements DiscoveryBridge {
         scan(null);
       });
     }
-    scan(completionHandler);
+    scan(completion);
   }
 
-  synchronized void scan(Handler<AsyncResult<Void>> completion) {
+  synchronized void scan(Future<Void> completion) {
     vertx.<List<Container>>executeBlocking(
         future -> {
           try {
@@ -141,7 +139,11 @@ public class DockerDiscoveryBridge implements DiscoveryBridge {
         },
         ar -> {
           if (ar.failed()) {
-            completion.handle(Future.failedFuture(ar.cause()));
+            if (completion != null) {
+              completion.fail(ar.cause());
+            } else {
+              LOGGER.error("Fail to import services from docker", ar.cause());
+            }
             return;
           }
           started = true;
@@ -171,7 +173,7 @@ public class DockerDiscoveryBridge implements DiscoveryBridge {
           }
 
           if (completion != null) {
-            completion.handle(Future.succeededFuture());
+            completion.complete();
           }
         }
     );
@@ -232,15 +234,17 @@ public class DockerDiscoveryBridge implements DiscoveryBridge {
    *
    * @param vertx     the vert.x instance
    * @param discovery the discovery service
+   * @param future    completion future
    */
   @Override
-  public void stop(Vertx vertx, DiscoveryService discovery) {
+  public void stop(Vertx vertx, DiscoveryService discovery, Future<Void> future) {
     vertx.cancelTimer(timer);
     try {
       started = false;
       client.close();
+      future.complete();
     } catch (IOException e) {
-      throw new RuntimeException("Exception caught while closing the docker client", e);
+      future.fail("Exception caught while closing the docker client : " + e.getMessage());
     }
   }
 
