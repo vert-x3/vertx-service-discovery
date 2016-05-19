@@ -584,7 +584,7 @@
  * Notice than in a cluster, only one member needs to register the bridge as the records are accessible by all members.
  */
 @ModuleGen(name = "vertx-service-discovery", groupPackage = "io.vertx.ext.discovery")
-@Document(fileName = "index.ad")
+@Document(fileName = "index.adoc")
 package io.vertx.ext.discovery;
 
 import io.vertx.codegen.annotations.ModuleGen;

@@ -75,7 +75,7 @@
  * services and add the new ones and removes the deleted ones.
  */
 @ModuleGen(name = "vertx-service-discovery-kubernetes", groupPackage = "io.vertx.ext.discovery.kubernetes")
-@Document(fileName = "index.ad")
+@Document(fileName = "index.adoc")
 package io.vertx.ext.discovery.kubernetes;
 
 import io.vertx.codegen.annotations.ModuleGen;

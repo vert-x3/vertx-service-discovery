@@ -61,7 +61,7 @@
  *
  */
 @ModuleGen(name = "vertx-discovery-backend-redis", groupPackage = "io.vertx.ext.discovery.backend")
-@Document(fileName = "index.ad")
+@Document(fileName = "index.adoc")
 package io.vertx.ext.discovery.backend;
 
 import io.vertx.codegen.annotations.ModuleGen;

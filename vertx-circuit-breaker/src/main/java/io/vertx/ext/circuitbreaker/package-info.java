@@ -160,7 +160,7 @@
  *
  */
 @ModuleGen(name = "vertx-circuit-breaker", groupPackage = "io.vertx.ext.circuitbreaker")
-@Document(fileName = "index.ad")
+@Document(fileName = "index.adoc")
 package io.vertx.ext.circuitbreaker;
 
 import io.vertx.codegen.annotations.ModuleGen;
