@@ -17,6 +17,7 @@
 package io.vertx.ext.discovery.spi;
 
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -38,17 +39,19 @@ public interface DiscoveryBridge {
    * @param vertx             the vertx instance
    * @param discovery         the discovery service
    * @param configuration     the bridge configuration if any
-   * @param completionHandler handler called when the bridge has been initialized
+   * @param future            a future on which the bridge must report the completion of the starting
+   *                          process
    */
   void start(Vertx vertx, DiscoveryService discovery, JsonObject configuration,
-             Handler<AsyncResult<Void>> completionHandler);
+             Future<Void> future);
 
   /**
    * Stops the bridge.
    *
    * @param vertx     the vertx instance
    * @param discovery the discovery service
+   * @param future    the future on which the bridge must report the completion of the stopping process
    */
-  void stop(Vertx vertx, DiscoveryService discovery);
+  void stop(Vertx vertx, DiscoveryService discovery, Future<Void> future);
 
 }

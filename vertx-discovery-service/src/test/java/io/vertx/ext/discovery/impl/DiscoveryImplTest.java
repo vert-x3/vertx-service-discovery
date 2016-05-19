@@ -16,9 +16,7 @@
 
 package io.vertx.ext.discovery.impl;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.discovery.*;
@@ -93,18 +91,14 @@ public class DiscoveryImplTest {
     HelloService service = reference.get();
     assertThat(service).isNotNull();
     AtomicReference<String> result = new AtomicReference<>();
-    service.hello(new JsonObject().put("name", "foo"), ar -> {
-      result.set(ar.result());
-    });
+    service.hello(new JsonObject().put("name", "foo"), ar -> result.set(ar.result()));
     await().until(() -> result.get() != null);
     assertThat(result.get()).isEqualToIgnoringCase("stuff foo");
 
     assertThat(discovery.bindings()).hasSize(1);
 
     AtomicBoolean done = new AtomicBoolean();
-    discovery.unpublish(record.getRegistration(), v -> {
-      done.set(v.succeeded());
-    });
+    discovery.unpublish(record.getRegistration(), v -> done.set(v.succeeded()));
 
     await().untilAtomic(done, is(true));
 
@@ -263,20 +257,21 @@ public class DiscoveryImplTest {
     AtomicBoolean registered = new AtomicBoolean();
     DiscoveryBridge bridge = new DiscoveryBridge() {
       @Override
-      public void start(Vertx vertx, DiscoveryService discovery, JsonObject configuration, Handler<AsyncResult<Void>> completionHandler) {
+      public void start(Vertx vertx, DiscoveryService discovery, JsonObject configuration, Future<Void> future) {
         Record rec1 = HttpEndpoint.createRecord("static-record-1", "acme.org");
         Record rec2 = HttpEndpoint.createRecord("static-record-2", "example.com");
         discovery.publish(rec1, ar -> {
           discovery.publish(rec2, ar2 -> {
-            completionHandler.handle(Future.succeededFuture());
             registered.set(true);
+            future.complete();
           });
         });
       }
 
       @Override
-      public void stop(Vertx vertx, DiscoveryService discovery) {
+      public void stop(Vertx vertx, DiscoveryService discovery, Future<Void> future) {
         closed.set(true);
+        future.complete();
       }
     };
 

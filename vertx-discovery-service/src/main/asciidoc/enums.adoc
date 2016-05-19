@@ -22,7 +22,7 @@ The service has been withdrawn, it is not accessible anymore.
 +++
 |[[OUT_OF_SERVICE]]`OUT_OF_SERVICE`|
 +++
-The service is still published, but not accessible (maintenance).
+The service is still published, but not accessible (maintenance, temporary downtime).
 +++
 |[[UNKNOWN]]`UNKNOWN`|
 +++

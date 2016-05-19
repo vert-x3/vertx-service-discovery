@@ -568,14 +568,18 @@
  * The second parameter can provide an optional configuration for the bridge.
  *
  * When the bridge is registered the
- * {@link io.vertx.ext.discovery.spi.DiscoveryBridge#start(io.vertx.core.Vertx, io.vertx.ext.discovery.DiscoveryService, io.vertx.core.json.JsonObject, io.vertx.core.Handler)}
+ *
+ * {@link io.vertx.ext.discovery.spi.DiscoveryBridge#start)}
  * method is called. It lets you configure the bridge. When the bridge is configured, ready and has imported /
- * exported the initial services, it must calls the given {@link io.vertx.core.Handler}. Notice that, as bridge may
- * block, the `start` method is called in a `worker` thread.
+ * exported the initial services, it must complete the given {@link io.vertx.core.Future}. If the bridge starts
+ * method is blocking, it must uses an
+ * {@link io.vertx.core.Vertx#executeBlocking(io.vertx.core.Handler, boolean, io.vertx.core.Handler)} construct, and
+ * complete the given future object.
  *
  * When the discovery service is stopped, the bridge is stopped. The
- * {@link io.vertx.ext.discovery.spi.DiscoveryBridge#stop(io.vertx.core.Vertx, io.vertx.ext.discovery.DiscoveryService)}
- * method is called that provides the opportunity to cleanup resources, removed imported / exported services...
+ * {@link io.vertx.ext.discovery.spi.DiscoveryBridge#stop}
+ * method is called that provides the opportunity to cleanup resources, removed imported / exported services... This
+ * method must complete the given {@link io.vertx.core.Future} to notify the caller of the completion.
  * 
  * Notice than in a cluster, only one member needs to register the bridge as the records are accessible by all members.
  */

@@ -806,13 +806,17 @@ register it using
 The second parameter can provide an optional configuration for the bridge.
 
 When the bridge is registered the
-`link:../../apidocs/io/vertx/ext/discovery/spi/DiscoveryBridge.html#start-io.vertx.core.Vertx-io.vertx.ext.discovery.DiscoveryService-io.vertx.core.json.JsonObject-io.vertx.core.Handler-[start]`
+
+{@link io.vertx.ext.discovery.spi.DiscoveryBridge#start)}
 method is called. It lets you configure the bridge. When the bridge is configured, ready and has imported /
-exported the initial services, it must calls the given `link:../../apidocs/io/vertx/core/Handler.html[Handler]`. Notice that, as bridge may
-block, the `start` method is called in a `worker` thread.
+exported the initial services, it must complete the given `link:../../apidocs/io/vertx/core/Future.html[Future]`. If the bridge starts
+method is blocking, it must uses an
+`link:../../apidocs/io/vertx/core/Vertx.html#executeBlocking-io.vertx.core.Handler-boolean-io.vertx.core.Handler-[executeBlocking]` construct, and
+complete the given future object.
 
 When the discovery service is stopped, the bridge is stopped. The
-`link:../../apidocs/io/vertx/ext/discovery/spi/DiscoveryBridge.html#stop-io.vertx.core.Vertx-io.vertx.ext.discovery.DiscoveryService-[stop]`
-method is called that provides the opportunity to cleanup resources, removed imported / exported services...
+`link:../../apidocs/io/vertx/ext/discovery/spi/DiscoveryBridge.html#stop-io.vertx.core.Vertx-io.vertx.ext.discovery.DiscoveryService-io.vertx.core.Future-[stop]`
+method is called that provides the opportunity to cleanup resources, removed imported / exported services... This
+method must complete the given `link:../../apidocs/io/vertx/core/Future.html[Future]` to notify the caller of the completion.
 
 Notice than in a cluster, only one member needs to register the bridge as the records are accessible by all members.

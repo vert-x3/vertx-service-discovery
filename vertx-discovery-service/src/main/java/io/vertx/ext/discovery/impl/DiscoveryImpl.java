@@ -16,10 +16,7 @@
 
 package io.vertx.ext.discovery.impl;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -147,36 +144,44 @@ public class DiscoveryImpl implements DiscoveryService {
     } else {
       conf = configuration;
     }
-    vertx.<Void>executeBlocking(
-        future ->
-          bridge.start(vertx, this, conf, (ar) -> {
-            if (ar.failed()) {
-              future.fail(ar.cause());
-            } else {
-              bridges.add(bridge);
-              future.complete();
-            }
-          }),
+
+    Future<Void> completed = Future.future();
+    completed.setHandler(
         ar -> {
           if (ar.failed()) {
             LOGGER.error("Cannot start the discovery bridge " + bridge, ar.cause());
           } else {
+            bridges.add(bridge);
             LOGGER.info("Discovery bridge " + bridge + " started");
           }
         }
     );
+
+
+    bridge.start(vertx, this, conf, completed);
     return this;
   }
 
   @Override
   public void close() {
     LOGGER.info("Stopping discovery service");
+    List<Future> futures = new ArrayList<>();
     for (DiscoveryBridge bridge : bridges) {
-      bridge.stop(vertx, this);
+      Future<Void> future = Future.future();
+      bridge.stop(vertx, this, future);
+      futures.add(future);
     }
 
     bindings.forEach(ServiceReference::release);
     bindings.clear();
+
+    CompositeFuture.all(futures).setHandler(ar -> {
+      if (ar.succeeded()) {
+        LOGGER.info("Discovery bridges stopped");
+      } else {
+        LOGGER.warn("Some discovery bridges did not stopped smoothly", ar.cause());
+      }
+    });
   }
 
   @Override
