@@ -47,15 +47,27 @@ public class KubernetesUtils {
    * @return the token
    */
   public static String getTokenFromFile() {
+    InputStream is = null;
     try {
-      String tokenFile = OPENSHIFT_KUBERNETES_TOKEN_FILE;
-      File file = new File(tokenFile);
+      File file = new File(OPENSHIFT_KUBERNETES_TOKEN_FILE);
       byte[] data = new byte[(int) file.length()];
-      InputStream is = new FileInputStream(file);
+      is = new FileInputStream(file);
       is.read(data);
       return new String(data);
     } catch (IOException e) {
       throw new RuntimeException("Could not get token file", e);
+    } finally {
+      closeQuietly(is);
+    }
+  }
+
+  private static void closeQuietly(InputStream is) {
+    if (is != null) {
+      try {
+        is.close();
+      } catch (IOException e) {
+        // Ignore it.
+      }
     }
   }
 }
