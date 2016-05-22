@@ -26,6 +26,9 @@
  * * exception thrown by your code
  * * uncompleted futures (timeout)
  *
+ * Operations guarded by a circuit breaker are intended to by non-blocking and asynchronous in oter to benefits from
+ * the Vert.x execution model.
+ *
  * == Using the vert.x circuit breaker
  *
  * To use the Vert.x Circuit Breaker, add the following dependency to the _dependencies_ section of your build
@@ -63,12 +66,19 @@
  * {@link examples.Examples#example1(io.vertx.core.Vertx)}
  * ----
  *
- * Your code can take a {@link io.vertx.core.Future} as parameter when the completion is asynchronous:
+ * The executed block receives a {@link io.vertx.core.Future} object as parameter, to denote the
+ * success or failure of the operation as well as the result. For example in the following example, the result is the
+ * output of a REST endpoint invocation:
  *
  * [source,$lang]
  * ----
  * {@link examples.Examples#example2(io.vertx.core.Vertx)}
  * ----
+ *
+ * The result of the operation is provided using the:
+ *
+ * * returned {@link io.vertx.core.Future} when calling `execute` methods
+ * * provided {@link io.vertx.core.Future} when calling the `executeAndReport` methods
  *
  * Optionally, you can provide a fallback executed when the circuit is open:
  *
@@ -76,6 +86,11 @@
  * ----
  * {@link examples.Examples#example3(io.vertx.core.Vertx)}
  * ----
+ *
+ * The fallback is called whenever the circuit is open, or if the
+ * {@link io.vertx.ext.circuitbreaker.CircuitBreakerOptions#isFallbackOnFailure()} is enabled. When a fallback is
+ * set, the result is using the output of the fallback function. The fallback function takes as parameter a
+ * {@link java.lang.Throwable} object and returned an object of the expected type.
  *
  * The fallback can also be set on the {@link io.vertx.ext.circuitbreaker.CircuitBreaker} object directly:
  *
@@ -160,7 +175,7 @@
  *
  */
 @ModuleGen(name = "vertx-circuit-breaker", groupPackage = "io.vertx.ext.circuitbreaker")
-@Document(fileName = "index.adoc")
+@Document
 package io.vertx.ext.circuitbreaker;
 
 import io.vertx.codegen.annotations.ModuleGen;

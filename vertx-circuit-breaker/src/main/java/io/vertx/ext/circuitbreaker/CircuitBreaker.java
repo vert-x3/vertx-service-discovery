@@ -24,6 +24,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.ext.circuitbreaker.impl.CircuitBreakerImpl;
 
+import java.util.function.Function;
+
 /**
  * An implementation of the circuit breaker pattern for Vert.x
  *
@@ -91,13 +93,83 @@ public interface CircuitBreaker {
   CircuitBreaker closeHandler(Handler<Void> handler);
 
   /**
-   * Sets a {@link Handler} invoked when the bridge is open to handle the "request".
+   * Executes the given operation with the circuit breaker control. The operation is generally calling an
+   * <em>external</em> system. The operation receives a {@link Future} object as parameter and <strong>must</strong>
+   * call {@link Future#complete(Object)} when the operation has terminated successfully. The operation must also
+   * call {@link Future#fail(Throwable)} in case of failure.
+   * <p>
+   * The operation is not invoked if the circuit breaker is open, and the given fallback is called immediately. The
+   * circuit breaker also monitor the completion of the operation before a configure timeout. The operation is
+   * considered as failed if it does not terminate in time.
+   * <p>
+   * This method returns a {@link Future} object to retrieve the status and result of the operation, with the status
+   * being a success or a failure. If the fallback is called, the returned future is successfully completed with the
+   * value returned from the fallback. If the fallback throws an exception, the returned future is marked as failed.
    *
-   * @param handler the handler, must not be {@code null}
+   * @param operation the operation
+   * @param fallback  the fallback function. It gets an exception as parameter and returns the <em>fallback</em> result
+   * @param <T>       the type of result
+   * @return a future object completed when the operation or its fallback completes
+   */
+  <T> Future<T> executeWithFallback(Handler<Future<T>> operation, Function<Throwable, T> fallback);
+
+  /**
+   * Same as {@link #executeWithFallback(Handler, Function)} but using the circuit breaker default fallback.
+   *
+   * @param operation the operation
+   * @param <T>       the type of result
+   * @return a future object completed when the operation or its fallback completes
+   */
+  <T> Future<T> execute(Handler<Future<T>> operation);
+
+  /**
+   * Same as {@link #executeAndReportWithFallback(Future, Handler, Function)} but using the circuit breaker default
+   * fallback.
+   *
+   * @param resultFuture the future on which the operation result is reported
+   * @param operation the operation
+   * @param <T> the type of result
    * @return the current {@link CircuitBreaker}
    */
   @Fluent
-  CircuitBreaker fallbackHandler(Handler<Void> handler);
+  <T> CircuitBreaker executeAndReport(Future<T> resultFuture, Handler<Future<T>> operation);
+
+  /**
+   * Executes the given operation with the circuit breaker control. The operation is generally calling an
+   * <em>external</em> system. The operation receives a {@link Future} object as parameter and <strong>must</strong>
+   * call {@link Future#complete(Object)} when the operation has terminated successfully. The operation must also
+   * call {@link Future#fail(Throwable)} in case of failure.
+   * <p>
+   * The operation is not invoked if the circuit breaker is open, and the given fallback is called immediately. The
+   * circuit breaker also monitor the completion of the operation before a configure timeout. The operation is
+   * considered as failed if it does not terminate in time.
+   * <p>
+   * Unlike {@link #executeWithFallback(Handler, Function)},  this method does return a {@link Future} object, but
+   * let the caller pass a {@link Future} object on which the result is reported. If the fallback is called, the future
+   * is successfully completed with the value returned by the fallback function. If the fallback throws an exception,
+   * the future is marked as failed.
+   *
+   * @param resultFuture the future on which the operation result is reported
+   * @param operation the operation
+   * @param fallback  the fallback function. It gets an exception as parameter and returns the <em>fallback</em> result
+   * @param <T>       the type of result
+   * @return the current {@link CircuitBreaker}
+   */
+  @Fluent
+  <T> CircuitBreaker executeAndReportWithFallback(Future<T> resultFuture, Handler<Future<T>> operation,
+                                                  Function<Throwable, T> fallback);
+
+  /**
+   * Sets a <em>default</em> {@link Function} invoked when the bridge is open to handle the "request", or on failure
+   * if {@link CircuitBreakerOptions#isFallbackOnFailure()} is enabled.
+   * <p>
+   * The function gets the exception as parameter and returns the <em>fallback</em> result.
+   *
+   * @param handler the handler
+   * @return the current {@link CircuitBreaker}
+   */
+  @Fluent
+  <T> CircuitBreaker fallback(Function<Throwable, T> handler);
 
   /**
    * Resets the circuit breaker state (number of failure set to 0 and state set to closed).
@@ -124,61 +196,6 @@ public interface CircuitBreaker {
    * @return the current number of failures.
    */
   long failureCount();
-
-  /**
-   * Executes the given code with the control of the circuit breaker. The code is blocking. Failures are detected by
-   * catching thrown exceptions or timeout.
-   *
-   * Be aware that the code is called using the caller thread, so it may be the event loop. So, unlike the
-   * {@link Vertx#executeBlocking(Handler, Handler)} method using a <em>worker</em> to execute the code, this method
-   * uses the caller thread.
-   *
-   * @param code the code
-   * @return the current {@link CircuitBreaker}
-   */
-  @Fluent
-  CircuitBreaker executeBlocking(Handler<Void> code);
-
-  /**
-   * Executes the given code with the control of the circuit breaker and use the given fallback is the circuit is open.
-   * The code is blocking. Failures are detected by catching thrown exceptions or timeout.
-   *
-   * Be aware that the code is called using the caller thread, so it may be the event loop. So, unlike the
-   * {@link Vertx#executeBlocking(Handler, Handler)} method using a <em>worker</em> to execute the code, this method
-   * uses the caller thread.
-   *
-   * @param code the code
-   * @return the current {@link CircuitBreaker}
-   */
-  @Fluent
-  CircuitBreaker executeBlockingWithFallback(Handler<Void> code, Handler<Void> fallback);
-
-  /**
-   * Executes the given code with the control of the circuit breaker. The code is non-blocking and reports the
-   * completion (success, result, failure) with the given {@link Future}.
-   *
-   * Be aware that the code is called using the caller thread, so it may be the event loop.
-   *
-   * @param code the code
-   * @return the current {@link CircuitBreaker}
-   */
-  @Fluent
-  <T> CircuitBreaker execute(Handler<Future<T>> code);
-
-  /**
-   * Executes the given code with the control of the circuit breaker. The code is non-blocking and reports the
-   * completion (success, result, failure) with the given {@link Future}.
-   *
-   * Be aware that the code is called using the caller thread, so it may be the event loop.
-   *
-   * If the circuit is open, this method executes the given fallback.
-   *
-   * @param code the code
-   * @return the current {@link CircuitBreaker}
-   */
-  @Fluent
-  <T> CircuitBreaker executeWithFallback(Handler<Future<T>> code,
-                                         Handler<Void> fallback);
 
   /**
    * @return the name of the circuit breaker.

@@ -16,7 +16,7 @@
 
 package examples;
 
-import com.netflix.hystrix.HystrixCommand;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.ext.circuitbreaker.CircuitBreaker;
 import io.vertx.ext.circuitbreaker.CircuitBreakerOptions;
@@ -25,6 +25,9 @@ import io.vertx.ext.circuitbreaker.CircuitBreakerOptions;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 public class Examples {
+
+  //TODO Change method name
+  //TODO update documentation
 
   public void example1(Vertx vertx) {
     CircuitBreaker breaker = CircuitBreaker.create("my-circuit-breaker", vertx,
@@ -35,10 +38,13 @@ public class Examples {
             .setResetTimeout(10000) // time spent in open state before attempting to re-try
     );
 
-    breaker.executeBlocking(v -> {
+    breaker.execute(future -> {
       // some code executing with the breaker
-      // if this code fails, the breker increased the
+      // the code reports failures or success on the given future.
+      // if this future is marked as failed, the breaker increased the
       // number of failures
+    }).setHandler(ar -> {
+      // Get the operation result.
     });
   }
 
@@ -47,15 +53,20 @@ public class Examples {
         new CircuitBreakerOptions().setMaxFailures(5).setTimeout(2000)
     );
 
-    breaker.execute(future -> {
+    breaker.<String>execute(future -> {
       vertx.createHttpClient().getNow(8080, "localhost", "/", response -> {
         if (response.statusCode() != 200) {
           future.fail("HTTP error");
         } else {
-          // Do something with the response
-          future.complete();
+          response
+              .exceptionHandler(future::fail)
+              .bodyHandler(buffer -> {
+                future.complete(buffer.toString());
+              });
         }
       });
+    }).setHandler(ar -> {
+      // Do something with the result
     });
   }
 
@@ -70,20 +81,28 @@ public class Examples {
             if (response.statusCode() != 200) {
               future.fail("HTTP error");
             } else {
-              // Do something with the response
-              future.complete();
+              response
+                  .exceptionHandler(future::fail)
+                  .bodyHandler(buffer -> {
+                    future.complete(buffer.toString());
+                  });
             }
           });
         }, v -> {
           // Executed when the circuit is opened
+          return "Hello";
+        })
+        .setHandler(ar -> {
+          // Do something with the result
         });
   }
 
   public void example4(Vertx vertx) {
     CircuitBreaker breaker = CircuitBreaker.create("my-circuit-breaker", vertx,
         new CircuitBreakerOptions().setMaxFailures(5).setTimeout(2000)
-    ).fallbackHandler(v -> {
+    ).fallback(v -> {
       // Executed when the circuit is opened.
+      return "hello";
     });
 
     breaker.execute(
@@ -92,8 +111,11 @@ public class Examples {
             if (response.statusCode() != 200) {
               future.fail("HTTP error");
             } else {
-              // Do something with the response
-              future.complete();
+              response
+                  .exceptionHandler(future::fail)
+                  .bodyHandler(buffer -> {
+                    future.complete(buffer.toString());
+                  });
             }
           });
         });
@@ -118,6 +140,36 @@ public class Examples {
               future.complete();
             }
           });
+        });
+  }
+
+  public void example6(Vertx vertx) {
+    CircuitBreaker breaker = CircuitBreaker.create("my-circuit-breaker", vertx,
+        new CircuitBreakerOptions().setMaxFailures(5).setTimeout(2000)
+    );
+
+    Future<String> userFuture = Future.future();
+    userFuture.setHandler(ar -> {
+      // Do something with the result
+    });
+
+    breaker.executeAndReportWithFallback(
+        userFuture,
+        future -> {
+          vertx.createHttpClient().getNow(8080, "localhost", "/", response -> {
+            if (response.statusCode() != 200) {
+              future.fail("HTTP error");
+            } else {
+              response
+                  .exceptionHandler(future::fail)
+                  .bodyHandler(buffer -> {
+                    future.complete(buffer.toString());
+                  });
+            }
+          });
+        }, v -> {
+          // Executed when the circuit is opened
+          return "Hello";
         });
   }
 }

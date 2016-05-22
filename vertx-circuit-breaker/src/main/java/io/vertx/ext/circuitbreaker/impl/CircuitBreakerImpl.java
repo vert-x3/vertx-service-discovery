@@ -26,8 +26,8 @@ import io.vertx.ext.circuitbreaker.CircuitBreakerOptions;
 import io.vertx.ext.circuitbreaker.CircuitBreakerState;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 import static io.vertx.ext.circuitbreaker.CircuitBreakerState.*;
 
@@ -39,6 +39,7 @@ public class CircuitBreakerImpl implements CircuitBreaker {
   private static final Handler<Void> NOOP = (v) -> {
     // Nothing...
   };
+
   private final Vertx vertx;
   private final CircuitBreakerOptions options;
   private final String name;
@@ -47,7 +48,7 @@ public class CircuitBreakerImpl implements CircuitBreaker {
   private Handler<Void> openHandler = NOOP;
   private Handler<Void> halfOpenHandler = NOOP;
   private Handler<Void> closeHandler = NOOP;
-  private Handler<Void> fallback = NOOP;
+  private Function fallback = null;
 
   private CircuitBreakerState state = CLOSED;
   private long failures = 0;
@@ -103,7 +104,7 @@ public class CircuitBreakerImpl implements CircuitBreaker {
   }
 
   @Override
-  public CircuitBreaker fallbackHandler(Handler<Void> handler) {
+  public <T> CircuitBreaker fallback(Function<Throwable, T> handler) {
     Objects.requireNonNull(handler);
     fallback = handler;
     return this;
@@ -170,150 +171,122 @@ public class CircuitBreakerImpl implements CircuitBreaker {
     return this;
   }
 
-  @Override
-  public CircuitBreaker executeBlocking(Handler<Void> code) {
-    return executeBlockingWithFallback(code, fallback);
-  }
+  //TODO Change fallback to receive the reason
 
   @Override
-  public CircuitBreaker executeBlockingWithFallback(Handler<Void> code, Handler<Void> fallback) {
+  public <T> CircuitBreaker executeAndReportWithFallback(
+      Future<T> userFuture,
+      Handler<Future<T>> operation,
+      Function<Throwable, T> fallback) {
+
     CircuitBreakerState currentState;
     synchronized (this) {
       currentState = state;
     }
 
-    if (currentState == CLOSED) {
-      executeCode(code);
-    } else if (currentState == OPEN) {
-      fallback.handle(null);
-    } else if (currentState == HALF_OPEN) {
-      if (passed.incrementAndGet() == 1) {
-        try {
-          code.handle(null);
-          reset();
-        } catch (Throwable e) {
-          open();
-          if (options.isFallbackOnFailure()) {
-            fallback.handle(null);
-          }
-          throw e;
-        }
-      } else {
-        fallback.handle(null);
-      }
-    }
-    return this;
-  }
-
-  @Override
-  public <T> CircuitBreaker execute(Handler<Future<T>> code) {
-    return executeWithFallback(code, fallback);
-  }
-
-  @Override
-  public <T> CircuitBreaker executeWithFallback(Handler<Future<T>> code, Handler<Void> fallback) {
-    CircuitBreakerState currentState;
-    synchronized (this) {
-      currentState = state;
-    }
-
-    AtomicBoolean timeoutFailure = new AtomicBoolean();
-    Future<T> future = Future.future();
-    future.setHandler(event -> {
+    // this future object track the completion of the operation
+    // it completes the userFuture when required
+    // This future is marked as failed on operation failures and timeout.
+    Future<T> operationResult = Future.future();
+    operationResult.setHandler(event -> {
       if (event.failed()) {
         incrementFailures();
         if (options.isFallbackOnFailure()) {
-          fallback.handle(null);
+          invokeFallback(event.cause(), userFuture, fallback);
+        } else {
+          userFuture.fail(event.cause());
         }
-      } else if (!timeoutFailure.get()) {
+      } else {
         reset();
+        userFuture.complete(event.result());
       }
+      // Else the operation has been canceled because of a time out.
     });
 
     if (currentState == CLOSED) {
-      executeCode(code, future, timeoutFailure, fallback);
+      executeOperation(operation, operationResult);
     } else if (currentState == OPEN) {
-      fallback.handle(null);
+      // Fallback immediately
+      invokeFallback(new RuntimeException("open circuit"), userFuture, fallback);
     } else if (currentState == HALF_OPEN) {
       if (passed.incrementAndGet() == 1) {
-        future.setHandler(result -> {
-          if (result.failed()) {
+        operationResult.setHandler(event -> {
+          if (event.failed()) {
             open();
             if (options.isFallbackOnFailure()) {
-              fallback.handle(null);
+              invokeFallback(event.cause(), userFuture, fallback);
+            } else {
+              userFuture.fail(event.cause());
             }
-          } else if (!timeoutFailure.get()) {
+          } else {
             reset();
+            userFuture.complete(event.result());
           }
         });
-        executeCode(code, future, timeoutFailure, fallback);
+        // Execute the operation
+        executeOperation(operation, operationResult);
       } else {
         // Not selected, fallback.
-        fallback.handle(null);
+        invokeFallback(new RuntimeException("open circuit"), userFuture, fallback);
       }
     }
     return this;
+  }
+
+  private <T> void invokeFallback(Throwable reason, Future<T> userFuture, Function<Throwable, T> fallback) {
+    if (fallback == null) {
+      // No fallback, mark the user future as failed.
+      userFuture.fail(reason);
+      return;
+    }
+
+    try {
+      T apply = fallback.apply(reason);
+      userFuture.complete(apply);
+    } catch (Exception e) {
+      userFuture.fail(e);
+    }
+  }
+
+  private <T> void executeOperation(Handler<Future<T>> operation, Future<T> operationResult) {
+    // Execute the operation
+    if (options.getTimeout() != -1) {
+      vertx.setTimer(options.getTimeout(), (l) -> {
+        // Check if the operation has not already been completed
+        if (!operationResult.isComplete()) {
+          operationResult.fail("operation timeout");
+        }
+        // Else  Operation has completed
+      });
+    }
+    try {
+      operation.handle(operationResult);
+    } catch (Throwable e) {
+      if (! operationResult.isComplete()) {
+        operationResult.fail(e);
+      }
+    }
+  }
+
+  @Override
+  public <T> Future<T> executeWithFallback(Handler<Future<T>> operation, Function<Throwable, T> fallback) {
+    Future<T> future = Future.future();
+    executeAndReportWithFallback(future, operation, fallback);
+    return future;
+  }
+
+  public <T> Future<T> execute(Handler<Future<T>> operation) {
+    return executeWithFallback(operation, fallback);
+  }
+
+  @Override
+  public <T> CircuitBreaker executeAndReport(Future<T> resultFuture, Handler<Future<T>> operation) {
+    return executeAndReportWithFallback(resultFuture, operation, fallback);
   }
 
   @Override
   public String name() {
     return name;
-  }
-
-  private void executeCode(Handler<Void> code) {
-    AtomicBoolean completed = new AtomicBoolean(false);
-    if (options.getTimeout() != -1) {
-      vertx.setTimer(options.getTimeout(), (l) -> {
-        // check it has completed or failed.
-        if (!completed.get()) {
-          incrementFailures();
-          if (options.isFallbackOnFailure()) {
-            fallback.handle(null);
-          }
-        }
-      });
-    }
-
-    try {
-      code.handle(null);
-    } catch (Throwable e) {
-      incrementFailures();
-      if (options.isFallbackOnFailure()) {
-        fallback.handle(null);
-      }
-      throw e;
-    } finally {
-      completed.set(true);
-    }
-  }
-
-  private <T> void executeCode(Handler<Future<T>> code, Future<T> completionFuture,
-                           AtomicBoolean timeoutFailure, Handler<Void> fallback) {
-    AtomicBoolean completed = new AtomicBoolean(false);
-    if (options.getTimeout() != -1) {
-      vertx.setTimer(options.getTimeout(), (l) -> {
-        // check it has completed or failed.
-        if (!completed.get() || (completionFuture != null && !completionFuture.isComplete())) {
-          timeoutFailure.set(true);
-          incrementFailures();
-          if (options.isFallbackOnFailure()) {
-            fallback.handle(null);
-          }
-        }
-      });
-    }
-
-    try {
-      code.handle(completionFuture);
-    } catch (Throwable e) {
-      incrementFailures();
-      if (options.isFallbackOnFailure()) {
-        fallback.handle(null);
-      }
-      throw e;
-    } finally {
-      completed.set(true);
-    }
   }
 
   private synchronized void incrementFailures() {

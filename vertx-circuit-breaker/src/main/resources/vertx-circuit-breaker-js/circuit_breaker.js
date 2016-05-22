@@ -97,16 +97,122 @@ var CircuitBreaker = function(j_val) {
   };
 
   /**
-   Sets a  invoked when the bridge is open to handle the "request".
+   Executes the given operation with the circuit breaker control. The operation is generally calling an
+   <em>external</em> system. The operation receives a  object as parameter and <strong>must</strong>
+   call  when the operation has terminated successfully. The operation must also
+   call  in case of failure.
+   <p>
+   The operation is not invoked if the circuit breaker is open, and the given fallback is called immediately. The
+   circuit breaker also monitor the completion of the operation before a configure timeout. The operation is
+   considered as failed if it does not terminate in time.
+   <p>
+   This method returns a  object to retrieve the status and result of the operation, with the status
+   being a success or a failure. If the fallback is called, the returned future is successfully completed with the
+   value returned from the fallback. If the fallback throws an exception, the returned future is marked as failed.
 
    @public
-   @param handler {function} the handler, must not be <code>null</code> 
-   @return {CircuitBreaker} the current {@link CircuitBreaker}
+   @param operation {function} the operation 
+   @param fallback {todo} the fallback function. It gets an exception as parameter and returns the <em>fallback</em> result 
+   @return {Future} a future object completed when the operation or its fallback completes
    */
-  this.fallbackHandler = function(handler) {
+  this.executeWithFallback = function(operation, fallback) {
+    var __args = arguments;
+    if (__args.length === 2 && typeof __args[0] === 'function' && typeof __args[1] === 'function') {
+      return utils.convReturnVertxGen(j_circuitBreaker["executeWithFallback(io.vertx.core.Handler,java.util.function.Function)"](function(jVal) {
+      operation(utils.convReturnVertxGen(jVal, Future));
+    }, function(jVal) {
+      var jRet = fallback(utils.convReturnThrowable(jVal));
+      return utils.convParamTypeUnknown(jRet);
+    }), Future);
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+   Same as {@link CircuitBreaker#executeWithFallback} but using the circuit breaker default fallback.
+
+   @public
+   @param operation {function} the operation 
+   @return {Future} a future object completed when the operation or its fallback completes
+   */
+  this.execute = function(operation) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'function') {
-      j_circuitBreaker["fallbackHandler(io.vertx.core.Handler)"](handler);
+      return utils.convReturnVertxGen(j_circuitBreaker["execute(io.vertx.core.Handler)"](function(jVal) {
+      operation(utils.convReturnVertxGen(jVal, Future));
+    }), Future);
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+   Same as {@link CircuitBreaker#executeAndReportWithFallback} but using the circuit breaker default
+   fallback.
+
+   @public
+   @param resultFuture {Future} the future on which the operation result is reported 
+   @param operation {function} the operation 
+   @return {CircuitBreaker} the current {@link CircuitBreaker}
+   */
+  this.executeAndReport = function(resultFuture, operation) {
+    var __args = arguments;
+    if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'function') {
+      j_circuitBreaker["executeAndReport(io.vertx.core.Future,io.vertx.core.Handler)"](resultFuture._jdel, function(jVal) {
+      operation(utils.convReturnVertxGen(jVal, Future));
+    });
+      return that;
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+   Executes the given operation with the circuit breaker control. The operation is generally calling an
+   <em>external</em> system. The operation receives a  object as parameter and <strong>must</strong>
+   call  when the operation has terminated successfully. The operation must also
+   call  in case of failure.
+   <p>
+   The operation is not invoked if the circuit breaker is open, and the given fallback is called immediately. The
+   circuit breaker also monitor the completion of the operation before a configure timeout. The operation is
+   considered as failed if it does not terminate in time.
+   <p>
+   Unlike {@link CircuitBreaker#executeWithFallback},  this method does return a  object, but
+   let the caller pass a  object on which the result is reported. If the fallback is called, the future
+   is successfully completed with the value returned by the fallback function. If the fallback throws an exception,
+   the future is marked as failed.
+
+   @public
+   @param resultFuture {Future} the future on which the operation result is reported 
+   @param operation {function} the operation 
+   @param fallback {todo} the fallback function. It gets an exception as parameter and returns the <em>fallback</em> result 
+   @return {CircuitBreaker} the current {@link CircuitBreaker}
+   */
+  this.executeAndReportWithFallback = function(resultFuture, operation, fallback) {
+    var __args = arguments;
+    if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'function' && typeof __args[2] === 'function') {
+      j_circuitBreaker["executeAndReportWithFallback(io.vertx.core.Future,io.vertx.core.Handler,java.util.function.Function)"](resultFuture._jdel, function(jVal) {
+      operation(utils.convReturnVertxGen(jVal, Future));
+    }, function(jVal) {
+      var jRet = fallback(utils.convReturnThrowable(jVal));
+      return utils.convParamTypeUnknown(jRet);
+    });
+      return that;
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+   Sets a <em>default</em>  invoked when the bridge is open to handle the "request", or on failure
+   if <a href="../../dataobjects.html#CircuitBreakerOptions">CircuitBreakerOptions</a> is enabled.
+   <p>
+   The function gets the exception as parameter and returns the <em>fallback</em> result.
+
+   @public
+   @param handler {todo} the handler 
+   @return {CircuitBreaker} the current {@link CircuitBreaker}
+   */
+  this.fallback = function(handler) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'function') {
+      j_circuitBreaker["fallback(java.util.function.Function)"](function(jVal) {
+      var jRet = handler(utils.convReturnThrowable(jVal));
+      return utils.convParamTypeUnknown(jRet);
+    });
       return that;
     } else throw new TypeError('function invoked with invalid arguments');
   };
@@ -166,90 +272,6 @@ var CircuitBreaker = function(j_val) {
     var __args = arguments;
     if (__args.length === 0) {
       return j_circuitBreaker["failureCount()"]();
-    } else throw new TypeError('function invoked with invalid arguments');
-  };
-
-  /**
-   Executes the given code with the control of the circuit breaker. The code is blocking. Failures are detected by
-   catching thrown exceptions or timeout.
-  
-   Be aware that the code is called using the caller thread, so it may be the event loop. So, unlike the
-    method using a <em>worker</em> to execute the code, this method
-   uses the caller thread.
-
-   @public
-   @param code {function} the code 
-   @return {CircuitBreaker} the current {@link CircuitBreaker}
-   */
-  this.executeBlocking = function(code) {
-    var __args = arguments;
-    if (__args.length === 1 && typeof __args[0] === 'function') {
-      j_circuitBreaker["executeBlocking(io.vertx.core.Handler)"](code);
-      return that;
-    } else throw new TypeError('function invoked with invalid arguments');
-  };
-
-  /**
-   Executes the given code with the control of the circuit breaker and use the given fallback is the circuit is open.
-   The code is blocking. Failures are detected by catching thrown exceptions or timeout.
-  
-   Be aware that the code is called using the caller thread, so it may be the event loop. So, unlike the
-    method using a <em>worker</em> to execute the code, this method
-   uses the caller thread.
-
-   @public
-   @param code {function} the code 
-   @param fallback {function} 
-   @return {CircuitBreaker} the current {@link CircuitBreaker}
-   */
-  this.executeBlockingWithFallback = function(code, fallback) {
-    var __args = arguments;
-    if (__args.length === 2 && typeof __args[0] === 'function' && typeof __args[1] === 'function') {
-      j_circuitBreaker["executeBlockingWithFallback(io.vertx.core.Handler,io.vertx.core.Handler)"](code, fallback);
-      return that;
-    } else throw new TypeError('function invoked with invalid arguments');
-  };
-
-  /**
-   Executes the given code with the control of the circuit breaker. The code is non-blocking and reports the
-   completion (success, result, failure) with the given .
-  
-   Be aware that the code is called using the caller thread, so it may be the event loop.
-
-   @public
-   @param code {function} the code 
-   @return {CircuitBreaker} the current {@link CircuitBreaker}
-   */
-  this.execute = function(code) {
-    var __args = arguments;
-    if (__args.length === 1 && typeof __args[0] === 'function') {
-      j_circuitBreaker["execute(io.vertx.core.Handler)"](function(jVal) {
-      code(utils.convReturnVertxGen(jVal, Future));
-    });
-      return that;
-    } else throw new TypeError('function invoked with invalid arguments');
-  };
-
-  /**
-   Executes the given code with the control of the circuit breaker. The code is non-blocking and reports the
-   completion (success, result, failure) with the given .
-  
-   Be aware that the code is called using the caller thread, so it may be the event loop.
-  
-   If the circuit is open, this method executes the given fallback.
-
-   @public
-   @param code {function} the code 
-   @param fallback {function} 
-   @return {CircuitBreaker} the current {@link CircuitBreaker}
-   */
-  this.executeWithFallback = function(code, fallback) {
-    var __args = arguments;
-    if (__args.length === 2 && typeof __args[0] === 'function' && typeof __args[1] === 'function') {
-      j_circuitBreaker["executeWithFallback(io.vertx.core.Handler,io.vertx.core.Handler)"](function(jVal) {
-      code(utils.convReturnVertxGen(jVal, Future));
-    }, fallback);
-      return that;
     } else throw new TypeError('function invoked with invalid arguments');
   };
 

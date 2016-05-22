@@ -11,6 +11,9 @@ Supported failures are:
 * exception thrown by your code
 * uncompleted futures (timeout)
 
+Operations guarded by a circuit breaker are intended to by non-blocking and asynchronous in oter to benefits from
+the Vert.x execution model.
+
 == Using the vert.x circuit breaker
 
 To use the Vert.x Circuit Breaker, add the following dependency to the _dependencies_ section of your build
@@ -53,15 +56,20 @@ breaker = VertxCircuitBreaker::CircuitBreaker.create("my-circuit-breaker", vertx
   'resetTimeout' => 10000
 })
 
-breaker.execute_blocking() { |v|
+breaker.execute() { |future|
   # some code executing with the breaker
-  # if this code fails, the breker increased the
+  # the code reports failures or success on the given future.
+  # if this future is marked as failed, the breaker increased the
   # number of failures
+}.set_handler() { |ar_err,ar|
+  # Get the operation result.
 }
 
 ----
 
-Your code can take a `link:../../yardoc/Vertx/Future.html[Future]` as parameter when the completion is asynchronous:
+The executed block receives a `link:../../yardoc/Vertx/Future.html[Future]` object as parameter, to denote the
+success or failure of the operation as well as the result. For example in the following example, the result is the
+output of a REST endpoint invocation:
 
 [source,ruby]
 ----
@@ -76,13 +84,21 @@ breaker.execute() { |future|
     if (response.status_code() != 200)
       future.fail("HTTP error")
     else
-      # Do something with the response
-      future.complete()
+      response.exception_handler(&future.method(:fail)).body_handler() { |buffer|
+        future.complete(buffer.to_string())
+      }
     end
   }
+}.set_handler() { |ar_err,ar|
+  # Do something with the result
 }
 
 ----
+
+The result of the operation is provided using the:
+
+* returned `link:../../yardoc/Vertx/Future.html[Future]` when calling `execute` methods
+* provided `link:../../yardoc/Vertx/Future.html[Future]` when calling the `executeAndReport` methods
 
 Optionally, you can provide a fallback executed when the circuit is open:
 
@@ -99,15 +115,24 @@ breaker.execute_with_fallback(lambda { |future|
     if (response.status_code() != 200)
       future.fail("HTTP error")
     else
-      # Do something with the response
-      future.complete()
+      response.exception_handler(&future.method(:fail)).body_handler() { |buffer|
+        future.complete(buffer.to_string())
+      }
     end
   }
-}) { |v|
+}, lambda { |v|
   # Executed when the circuit is opened
+  return "Hello"
+}).set_handler() { |ar_err,ar|
+  # Do something with the result
 }
 
 ----
+
+The fallback is called whenever the circuit is open, or if the
+`link:../dataobjects.html#CircuitBreakerOptions#is_fallback_on_failure-instance_method[isFallbackOnFailure]` is enabled. When a fallback is
+set, the result is using the output of the fallback function. The fallback function takes as parameter a
+`link:unavailable[Throwable]` object and returned an object of the expected type.
 
 The fallback can also be set on the `link:../../yardoc/VertxCircuitBreaker/CircuitBreaker.html[CircuitBreaker]` object directly:
 
@@ -117,17 +142,19 @@ require 'vertx-circuit-breaker/circuit_breaker'
 breaker = VertxCircuitBreaker::CircuitBreaker.create("my-circuit-breaker", vertx, {
   'maxFailures' => 5,
   'timeout' => 2000
-}).fallback_handler() { |v|
+}).fallback(lambda { |v|
   # Executed when the circuit is opened.
-}
+  return "hello"
+})
 
 breaker.execute() { |future|
   vertx.create_http_client().get_now(8080, "localhost", "/") { |response|
     if (response.status_code() != 200)
       future.fail("HTTP error")
     else
-      # Do something with the response
-      future.complete()
+      response.exception_handler(&future.method(:fail)).body_handler() { |buffer|
+        future.complete(buffer.to_string())
+      }
     end
   }
 }

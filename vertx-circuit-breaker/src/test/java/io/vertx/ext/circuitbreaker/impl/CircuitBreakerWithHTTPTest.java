@@ -16,9 +16,9 @@
 
 package io.vertx.ext.circuitbreaker.impl;
 
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.ext.circuitbreaker.CircuitBreaker;
@@ -31,15 +31,14 @@ import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 
 /**
+ * Test the circuit breaker when doing HTTP calls.
+ *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 public class CircuitBreakerWithHTTPTest {
@@ -52,15 +51,15 @@ public class CircuitBreakerWithHTTPTest {
   public void setUp() {
     vertx = Vertx.vertx();
     Router router = Router.router(vertx);
-    router.route(HttpMethod.GET, "/").handler(ctxt -> {
-      ctxt.response().setStatusCode(200).end("hello");
-    });
-    router.route(HttpMethod.GET, "/error").handler(ctxt -> {
-      ctxt.response().setStatusCode(500).end("failed !");
-    });
+    router.route(HttpMethod.GET, "/").handler(ctxt ->
+        ctxt.response().setStatusCode(200).end("hello")
+    );
+    router.route(HttpMethod.GET, "/error").handler(ctxt ->
+        ctxt.response().setStatusCode(500).end("failed !")
+    );
     router.route(HttpMethod.GET, "/long").handler(ctxt -> {
       try {
-        Thread.currentThread().sleep(2000);
+        Thread.sleep(2000);
       } catch (Exception e) {
         // Ignored.
       }
@@ -83,9 +82,7 @@ public class CircuitBreakerWithHTTPTest {
       breaker.close();
     }
     AtomicBoolean completed = new AtomicBoolean();
-    http.close(ar -> {
-      completed.set(true);
-    });
+    http.close(ar -> completed.set(true));
     await().untilAtomic(completed, is(true));
 
     completed.set(false);
@@ -100,16 +97,11 @@ public class CircuitBreakerWithHTTPTest {
     breaker = CircuitBreaker.create("test", vertx, new CircuitBreakerOptions());
     assertThat(breaker.state()).isEqualTo(CircuitBreakerState.CLOSED);
 
-    AtomicReference<HttpClientResponse> reference = new AtomicReference<>();
-    breaker.executeBlocking(v -> {
-      client.getNow(8080, "localhost", "/", reference::set);
-    });
+    Future<String> result = Future.future();
+    breaker.executeAndReport(result, v -> client.getNow(8080, "localhost", "/",
+        response -> response.bodyHandler(buffer -> v.complete(buffer.toString()))));
 
-    await().untilAtomic(reference, is(not(nullValue())));
-
-    assertThat(reference.get()).isNotNull();
-    assertThat(reference.get().statusCode()).isEqualTo(200);
-
+    await().until(() -> result.result() != null);
     assertThat(breaker.state()).isEqualTo(CircuitBreakerState.CLOSED);
   }
 
@@ -121,37 +113,34 @@ public class CircuitBreakerWithHTTPTest {
 
     AtomicInteger count = new AtomicInteger();
 
-
     for (int i = 0; i < options.getMaxFailures(); i++) {
-      breaker.execute(future -> {
+      Future<String> userFuture = Future.future();
+      breaker.executeAndReport(userFuture, future ->
+          client.getNow(8080, "localhost", "/error", response -> {
+            if (response.statusCode() != 200) {
+              future.fail("http error");
+            } else {
+              future.complete();
+            }
+            count.incrementAndGet();
+          })
+      );
+    }
+
+    await().untilAtomic(count, is(options.getMaxFailures()));
+    assertThat(breaker.state()).isEqualTo(CircuitBreakerState.OPEN);
+
+    Future<String> userFuture = Future.future();
+    breaker.executeAndReportWithFallback(userFuture, future ->
         client.getNow(8080, "localhost", "/error", response -> {
           if (response.statusCode() != 200) {
             future.fail("http error");
           } else {
             future.complete();
           }
-          count.incrementAndGet();
-        });
-      });
-    }
+        }), v -> "fallback");
 
-    await().untilAtomic(count, is(options.getMaxFailures()));
-    assertThat(breaker.state()).isEqualTo(CircuitBreakerState.OPEN);
-
-    AtomicBoolean spy = new AtomicBoolean();
-    breaker.executeWithFallback(future -> {
-      client.getNow(8080, "localhost", "/error", response -> {
-        if (response.statusCode() != 200) {
-          future.fail("http error");
-        } else {
-          future.complete();
-        }
-      });
-    }, v -> {
-      spy.set(true);
-    });
-
-    await().untilAtomic(spy, is(true));
+    await().until(() -> userFuture.result().equals("fallback"));
     assertThat(breaker.state()).isEqualTo(CircuitBreakerState.OPEN);
 
   }
@@ -164,30 +153,25 @@ public class CircuitBreakerWithHTTPTest {
 
     AtomicInteger count = new AtomicInteger();
 
-
     for (int i = 0; i < options.getMaxFailures(); i++) {
-      breaker.execute(future -> {
-        client.getNow(8080, "localhost", "/long", response -> {
-          count.incrementAndGet();
-          future.complete();
-        });
-      });
+      breaker.execute(future ->
+          client.getNow(8080, "localhost", "/long", response -> {
+            count.incrementAndGet();
+            future.complete();
+          }));
     }
 
     await().untilAtomic(count, is(options.getMaxFailures()));
     assertThat(breaker.state()).isEqualTo(CircuitBreakerState.OPEN);
 
-    AtomicBoolean spy = new AtomicBoolean();
-    breaker.executeWithFallback(future -> {
+    Future<String> result = Future.future();
+    breaker.executeAndReportWithFallback(result, future ->
       client.getNow(8080, "localhost", "/long", response -> {
         System.out.println("Got response");
         future.complete();
-      });
-    }, v -> {
-      spy.set(true);
-    });
+      }), v -> "fallback");
 
-    await().untilAtomic(spy, is(true));
+    await().until(() -> result.result().equals("fallback"));
     assertThat(breaker.state()).isEqualTo(CircuitBreakerState.OPEN);
   }
 

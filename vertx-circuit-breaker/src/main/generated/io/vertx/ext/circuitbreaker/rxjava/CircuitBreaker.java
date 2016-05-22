@@ -23,6 +23,7 @@ import io.vertx.rxjava.core.Vertx;
 import io.vertx.ext.circuitbreaker.CircuitBreakerOptions;
 import io.vertx.core.Handler;
 import io.vertx.rxjava.core.Future;
+import java.util.function.Function;
 
 /**
  * An implementation of the circuit breaker pattern for Vert.x
@@ -120,14 +121,112 @@ public class CircuitBreaker {
   }
 
   /**
-   * Sets a  invoked when the bridge is open to handle the "request".
-   * @param handler the handler, must not be <code>null</code>
+   * Executes the given operation with the circuit breaker control. The operation is generally calling an
+   * <em>external</em> system. The operation receives a  object as parameter and <strong>must</strong>
+   * call  when the operation has terminated successfully. The operation must also
+   * call  in case of failure.
+   * <p>
+   * The operation is not invoked if the circuit breaker is open, and the given fallback is called immediately. The
+   * circuit breaker also monitor the completion of the operation before a configure timeout. The operation is
+   * considered as failed if it does not terminate in time.
+   * <p>
+   * This method returns a  object to retrieve the status and result of the operation, with the status
+   * being a success or a failure. If the fallback is called, the returned future is successfully completed with the
+   * value returned from the fallback. If the fallback throws an exception, the returned future is marked as failed.
+   * @param operation the operation
+   * @param fallback the fallback function. It gets an exception as parameter and returns the <em>fallback</em> result
+   * @return a future object completed when the operation or its fallback completes
+   */
+  public <T> Future<T> executeWithFallback(Handler<Future<T>> operation, Function<Throwable,T> fallback) { 
+    Future<T> ret = Future.newInstance(delegate.executeWithFallback(new Handler<io.vertx.core.Future<T>>() {
+      public void handle(io.vertx.core.Future<T> event) {
+        operation.handle(Future.newInstance(event));
+      }
+    }, new java.util.function.Function<java.lang.Throwable,T>() {
+      public T apply(java.lang.Throwable arg) {
+        T ret = fallback.apply(arg);
+        return ret;
+      }
+    }));
+    return ret;
+  }
+
+  /**
+   * Same as {@link io.vertx.ext.circuitbreaker.rxjava.CircuitBreaker#executeWithFallback} but using the circuit breaker default fallback.
+   * @param operation the operation
+   * @return a future object completed when the operation or its fallback completes
+   */
+  public <T> Future<T> execute(Handler<Future<T>> operation) { 
+    Future<T> ret = Future.newInstance(delegate.execute(new Handler<io.vertx.core.Future<T>>() {
+      public void handle(io.vertx.core.Future<T> event) {
+        operation.handle(Future.newInstance(event));
+      }
+    }));
+    return ret;
+  }
+
+  /**
+   * Same as {@link io.vertx.ext.circuitbreaker.rxjava.CircuitBreaker#executeAndReportWithFallback} but using the circuit breaker default
+   * fallback.
+   * @param resultFuture the future on which the operation result is reported
+   * @param operation the operation
    * @return the current {@link io.vertx.ext.circuitbreaker.rxjava.CircuitBreaker}
    */
-  public CircuitBreaker fallbackHandler(Handler<Void> handler) { 
-    delegate.fallbackHandler(new Handler<java.lang.Void>() {
-      public void handle(java.lang.Void event) {
-        handler.handle(event);
+  public <T> CircuitBreaker executeAndReport(Future<T> resultFuture, Handler<Future<T>> operation) { 
+    delegate.executeAndReport((io.vertx.core.Future<T>)resultFuture.getDelegate(), new Handler<io.vertx.core.Future<T>>() {
+      public void handle(io.vertx.core.Future<T> event) {
+        operation.handle(Future.newInstance(event));
+      }
+    });
+    return this;
+  }
+
+  /**
+   * Executes the given operation with the circuit breaker control. The operation is generally calling an
+   * <em>external</em> system. The operation receives a  object as parameter and <strong>must</strong>
+   * call  when the operation has terminated successfully. The operation must also
+   * call  in case of failure.
+   * <p>
+   * The operation is not invoked if the circuit breaker is open, and the given fallback is called immediately. The
+   * circuit breaker also monitor the completion of the operation before a configure timeout. The operation is
+   * considered as failed if it does not terminate in time.
+   * <p>
+   * Unlike {@link io.vertx.ext.circuitbreaker.rxjava.CircuitBreaker#executeWithFallback},  this method does return a  object, but
+   * let the caller pass a  object on which the result is reported. If the fallback is called, the future
+   * is successfully completed with the value returned by the fallback function. If the fallback throws an exception,
+   * the future is marked as failed.
+   * @param resultFuture the future on which the operation result is reported
+   * @param operation the operation
+   * @param fallback the fallback function. It gets an exception as parameter and returns the <em>fallback</em> result
+   * @return the current {@link io.vertx.ext.circuitbreaker.rxjava.CircuitBreaker}
+   */
+  public <T> CircuitBreaker executeAndReportWithFallback(Future<T> resultFuture, Handler<Future<T>> operation, Function<Throwable,T> fallback) { 
+    delegate.executeAndReportWithFallback((io.vertx.core.Future<T>)resultFuture.getDelegate(), new Handler<io.vertx.core.Future<T>>() {
+      public void handle(io.vertx.core.Future<T> event) {
+        operation.handle(Future.newInstance(event));
+      }
+    }, new java.util.function.Function<java.lang.Throwable,T>() {
+      public T apply(java.lang.Throwable arg) {
+        T ret = fallback.apply(arg);
+        return ret;
+      }
+    });
+    return this;
+  }
+
+  /**
+   * Sets a <em>default</em>  invoked when the bridge is open to handle the "request", or on failure
+   * if {@link io.vertx.ext.circuitbreaker.CircuitBreakerOptions} is enabled.
+   * <p>
+   * The function gets the exception as parameter and returns the <em>fallback</em> result.
+   * @param handler the handler
+   * @return the current {@link io.vertx.ext.circuitbreaker.rxjava.CircuitBreaker}
+   */
+  public <T> CircuitBreaker fallback(Function<Throwable,T> handler) { 
+    delegate.fallback(new java.util.function.Function<java.lang.Throwable,T>() {
+      public T apply(java.lang.Throwable arg) {
+        T ret = handler.apply(arg);
+        return ret;
       }
     });
     return this;
@@ -167,90 +266,6 @@ public class CircuitBreaker {
   public long failureCount() { 
     long ret = delegate.failureCount();
     return ret;
-  }
-
-  /**
-   * Executes the given code with the control of the circuit breaker. The code is blocking. Failures are detected by
-   * catching thrown exceptions or timeout.
-   *
-   * Be aware that the code is called using the caller thread, so it may be the event loop. So, unlike the
-   *  method using a <em>worker</em> to execute the code, this method
-   * uses the caller thread.
-   * @param code the code
-   * @return the current {@link io.vertx.ext.circuitbreaker.rxjava.CircuitBreaker}
-   */
-  public CircuitBreaker executeBlocking(Handler<Void> code) { 
-    delegate.executeBlocking(new Handler<java.lang.Void>() {
-      public void handle(java.lang.Void event) {
-        code.handle(event);
-      }
-    });
-    return this;
-  }
-
-  /**
-   * Executes the given code with the control of the circuit breaker and use the given fallback is the circuit is open.
-   * The code is blocking. Failures are detected by catching thrown exceptions or timeout.
-   *
-   * Be aware that the code is called using the caller thread, so it may be the event loop. So, unlike the
-   *  method using a <em>worker</em> to execute the code, this method
-   * uses the caller thread.
-   * @param code the code
-   * @param fallback 
-   * @return the current {@link io.vertx.ext.circuitbreaker.rxjava.CircuitBreaker}
-   */
-  public CircuitBreaker executeBlockingWithFallback(Handler<Void> code, Handler<Void> fallback) { 
-    delegate.executeBlockingWithFallback(new Handler<java.lang.Void>() {
-      public void handle(java.lang.Void event) {
-        code.handle(event);
-      }
-    }, new Handler<java.lang.Void>() {
-      public void handle(java.lang.Void event) {
-        fallback.handle(event);
-      }
-    });
-    return this;
-  }
-
-  /**
-   * Executes the given code with the control of the circuit breaker. The code is non-blocking and reports the
-   * completion (success, result, failure) with the given .
-   *
-   * Be aware that the code is called using the caller thread, so it may be the event loop.
-   * @param code the code
-   * @return the current {@link io.vertx.ext.circuitbreaker.rxjava.CircuitBreaker}
-   */
-  public <T> CircuitBreaker execute(Handler<Future<T>> code) { 
-    delegate.execute(new Handler<io.vertx.core.Future<T>>() {
-      public void handle(io.vertx.core.Future<T> event) {
-        code.handle(Future.newInstance(event));
-      }
-    });
-    return this;
-  }
-
-  /**
-   * Executes the given code with the control of the circuit breaker. The code is non-blocking and reports the
-   * completion (success, result, failure) with the given .
-   *
-   * Be aware that the code is called using the caller thread, so it may be the event loop.
-   *
-   * If the circuit is open, this method executes the given fallback.
-   * @param code the code
-   * @param fallback 
-   * @return the current {@link io.vertx.ext.circuitbreaker.rxjava.CircuitBreaker}
-   */
-  public <T> CircuitBreaker executeWithFallback(Handler<Future<T>> code, Handler<Void> fallback) { 
-    delegate.executeWithFallback(new Handler<io.vertx.core.Future<T>>() {
-      public void handle(io.vertx.core.Future<T> event) {
-        code.handle(Future.newInstance(event));
-      }
-    }, new Handler<java.lang.Void>() {
-      public void handle(java.lang.Void event) {
-        fallback.handle(event);
-      }
-    });
-    return this;
   }
 
   /**
