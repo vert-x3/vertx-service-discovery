@@ -1,22 +1,10 @@
-# vertx-microservice-toolbox
+# Vert.x Discovery Service
 
-A set of Vert.x component to build your reactive microservice applications.
+The `vertx-discovery-service` provides a discovery infrastructure to register and discover the services exposed by your
+microservice applications. It can be message sources (entities publishing message on the event bus), REST endpoints,
+service proxies, or anything you want as you can add your own type.
 
-## Circuit Breaker
-
-The `vertx-circuit-breaker` is an implementation of the circuit breaker pattern for Vert.x. It keeps track of the number of failures and _open the circuit_ when a threshold is reached. Optionally, a fallback is executed.
-
-Supported failures are:
-
-* failures reported by your code in a `Future`
-* exception thrown by your code
-* uncompleted futures (timeout)
-
-## Discovery service
-
-The `vertx-discovery-service` provides a discovery infrastructure to register and discover the services exposed by your microservice applications. It can be message sources (entities publishing message on the event bus), REST endpoints, service proxies, or anything you want as you can add your own type.
-
-The discovery service can be extended using bridges to import services from Docker, Kubernates, Consul...
+The discovery service can be extended using bridges to import services from Docker, Kubernetes, Consul...
 
 ## Kubernetes Discovery Bridge
 
@@ -27,6 +15,13 @@ discovery service.
 
 The `vertx-discovery-bridge-docker` is a discovery bridge importing the services from Docker container in the Vert.x 
 discovery service.
+
+Another bridge (`vertx-discovery-bridge-docker-links`) analyzes the docker links (environment variable) to import the
+ _linked_ services in the discovery infrastructure.
+
+## Consul Discovery Bridge (experimental)
+
+The `vertx-discovery-bridge-consul` is a discovery bridge importing the services from a _consul.io_ agent.
 
 ## Discovery Backend - Redis
 

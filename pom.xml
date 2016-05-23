@@ -26,7 +26,7 @@
     <version>20</version>
   </parent>
 
-  <artifactId>vertx-microservice-toolbox</artifactId>
+  <artifactId>vertx-discovery-service-project</artifactId>
   <version>3.3.0-SNAPSHOT</version>
 
   <packaging>pom</packaging>
@@ -34,14 +34,12 @@
   <properties>
     <stack.version>3.3.0-SNAPSHOT</stack.version>
     <asciidoc.dir>${project.basedir}/src/main/asciidoc</asciidoc.dir>
-
     <doc.skip>true</doc.skip>
   </properties>
 
 
   <modules>
     <module>vertx-discovery-service</module>
-    <module>vertx-circuit-breaker</module>
     <module>vertx-discovery-bridge-kubernetes</module>
     <module>vertx-discovery-bridge-docker</module>
     <module>vertx-discovery-bridge-docker-links</module>
