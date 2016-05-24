@@ -66,7 +66,7 @@
  * * scan period using the `scan-period` property. The time is set in ms, and is 2000 ms by default
  *
  */
-@Document
+@Document(fileName = "index.adoc")
 package io.vertx.ext.discovery.consul;
 
 import io.vertx.docgen.Document;
