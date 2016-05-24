@@ -58,7 +58,7 @@
  * The bridge does not need any further configuration.
  *
  */
-@Document
+@Document(fileName = "index.adoc")
 package io.vertx.ext.discovery.docker;
 
 import io.vertx.docgen.Document;
