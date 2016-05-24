@@ -137,7 +137,7 @@
  * to all the records. This is the default backend implementation. You can implement your own by implementing the
  * {@link io.vertx.ext.discovery.spi.DiscoveryBackend} SPI.
  *
- * Notice that the discovery does not required vert.x clustering. In single-node mode, the map is a local map. IT can
+ * Notice that the discovery does not required vert.x clustering. In single-node mode, the map is a local map. It can
  * be populated with {@link io.vertx.ext.discovery.spi.DiscoveryBridge}s.
  * 
  * == Creating the discovery service

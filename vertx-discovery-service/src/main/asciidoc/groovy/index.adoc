@@ -122,8 +122,8 @@ The discovery service used a distributed structure to store the records. So, all
 to all the records. This is the default backend implementation. You can implement your own by implementing the
 `DiscoveryBackend` SPI.
 
-Notice that the discovery does not required vert.x clustering. In single-node mode, the map is a local map. IT can
-be populated with `DiscoveryBridge`s.
+Notice that the discovery does not required vert.x clustering. In single-node mode, the map is a local map. It can
+be populated with `link:../../groovydoc/io/vertx/ext/discovery/groovy/spi/DiscoveryBridge.html[DiscoveryBridge]`s.
 
 == Creating the discovery service
 
@@ -778,7 +778,7 @@ You can disable the service usage support by setting the usage address to `null`
 Bridges let import and export services from / to other discovery mechanism such as Docker, Kubernates, Consul...
 Each bridge decides how the services are imported and exported. It does not have to be bi-directional.
 
-You can provide your own bridge by implementing the `DiscoveryBridge` interface and
+You can provide your own bridge by implementing the `link:../../groovydoc/io/vertx/ext/discovery/groovy/spi/DiscoveryBridge.html[DiscoveryBridge]` interface and
 register it using
 `link:../../groovydoc/io/vertx/ext/discovery/groovy/DiscoveryService.html#registerDiscoveryBridge(io.vertx.ext.discovery.spi.DiscoveryBridge,%20io.vertx.core.json.JsonObject)[registerDiscoveryBridge]`.
 
@@ -794,7 +794,7 @@ method is blocking, it must uses an
 complete the given future object.
 
 When the discovery service is stopped, the bridge is stopped. The
-`stop`
+`link:../../groovydoc/io/vertx/ext/discovery/groovy/spi/DiscoveryBridge.html#stop(io.vertx.core.Vertx,%20io.vertx.ext.discovery.DiscoveryService,%20io.vertx.core.Future)[stop]`
 method is called that provides the opportunity to cleanup resources, removed imported / exported services... This
 method must complete the given `link:../../groovydoc/io/vertx/groovy/core/Future.html[Future]` to notify the caller of the completion.
 
