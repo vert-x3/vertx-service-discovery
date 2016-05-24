@@ -16,6 +16,7 @@
 
 package io.vertx.ext.discovery.spi;
 
+import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -31,6 +32,7 @@ import io.vertx.ext.discovery.Record;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
+@VertxGen
 public interface DiscoveryBridge {
 
   /**

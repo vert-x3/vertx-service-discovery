@@ -18,6 +18,7 @@ package io.vertx.ext.discovery.rxjava;
 
 import java.util.Map;
 import rx.Observable;
+import io.vertx.ext.discovery.rxjava.spi.DiscoveryBridge;
 import io.vertx.rxjava.core.Vertx;
 import io.vertx.ext.discovery.Record;
 import java.util.Set;
@@ -126,6 +127,17 @@ public class DiscoveryService {
    */
   public boolean release(ServiceReference reference) { 
     boolean ret = delegate.release((io.vertx.ext.discovery.ServiceReference)reference.getDelegate());
+    return ret;
+  }
+
+  /**
+   * Registers a discovery bridge. Bridges let you integrate other discovery technologies in this discovery service.
+   * @param bridge the bridge
+   * @param configuration the optional configuration
+   * @return the current {@link io.vertx.ext.discovery.rxjava.DiscoveryService}
+   */
+  public DiscoveryService registerDiscoveryBridge(DiscoveryBridge bridge, JsonObject configuration) { 
+    DiscoveryService ret = DiscoveryService.newInstance(delegate.registerDiscoveryBridge((io.vertx.ext.discovery.spi.DiscoveryBridge)bridge.getDelegate(), configuration));
     return ret;
   }
 

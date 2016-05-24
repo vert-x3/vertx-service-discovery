@@ -18,6 +18,7 @@ package io.vertx.ext.discovery.groovy;
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
 import io.vertx.core.json.JsonObject
+import io.vertx.ext.discovery.groovy.spi.DiscoveryBridge
 import io.vertx.groovy.core.Vertx
 import io.vertx.ext.discovery.Record
 import java.util.Set
@@ -114,6 +115,16 @@ public class DiscoveryService {
    */
   public boolean release(ServiceReference reference) {
     def ret = delegate.release(reference != null ? (io.vertx.ext.discovery.ServiceReference)reference.getDelegate() : null);
+    return ret;
+  }
+  /**
+   * Registers a discovery bridge. Bridges let you integrate other discovery technologies in this discovery service.
+   * @param bridge the bridge
+   * @param configuration the optional configuration
+   * @return the current {@link io.vertx.ext.discovery.groovy.DiscoveryService}
+   */
+  public DiscoveryService registerDiscoveryBridge(DiscoveryBridge bridge, Map<String, Object> configuration) {
+    def ret = InternalHelper.safeCreate(delegate.registerDiscoveryBridge(bridge != null ? (io.vertx.ext.discovery.spi.DiscoveryBridge)bridge.getDelegate() : null, configuration != null ? new io.vertx.core.json.JsonObject(configuration) : null), io.vertx.ext.discovery.groovy.DiscoveryService.class);
     return ret;
   }
   /**

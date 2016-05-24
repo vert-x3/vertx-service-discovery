@@ -1,3 +1,4 @@
+require 'vertx-service-discovery/discovery_bridge'
 require 'vertx/vertx'
 require 'vertx-service-discovery/service_reference'
 require 'vertx/util/utils.rb'
@@ -84,6 +85,16 @@ module VertxServiceDiscovery
         return @j_del.java_method(:release, [Java::IoVertxExtDiscovery::ServiceReference.java_class]).call(reference.j_del)
       end
       raise ArgumentError, "Invalid arguments when calling release?(reference)"
+    end
+    #  Registers a discovery bridge. Bridges let you integrate other discovery technologies in this discovery service.
+    # @param [::VertxServiceDiscovery::DiscoveryBridge] bridge the bridge
+    # @param [Hash{String => Object}] configuration the optional configuration
+    # @return [::VertxServiceDiscovery::DiscoveryService] the current {::VertxServiceDiscovery::DiscoveryService}
+    def register_discovery_bridge(bridge=nil,configuration=nil)
+      if bridge.class.method_defined?(:j_del) && configuration.class == Hash && !block_given?
+        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:registerDiscoveryBridge, [Java::IoVertxExtDiscoverySpi::DiscoveryBridge.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(bridge.j_del,::Vertx::Util::Utils.to_json_object(configuration)),::VertxServiceDiscovery::DiscoveryService)
+      end
+      raise ArgumentError, "Invalid arguments when calling register_discovery_bridge(bridge,configuration)"
     end
     #  Closes the discovery service
     # @return [void]

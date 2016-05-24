@@ -16,6 +16,7 @@
 
 /** @module vertx-service-discovery-js/discovery_service */
 var utils = require('vertx-js/util/utils');
+var DiscoveryBridge = require('vertx-service-discovery-js/discovery_bridge');
 var Vertx = require('vertx-js/vertx');
 var ServiceReference = require('vertx-service-discovery-js/service_reference');
 
@@ -78,6 +79,21 @@ var DiscoveryService = function(j_val) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
       return j_discoveryService["release(io.vertx.ext.discovery.ServiceReference)"](reference._jdel);
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+   Registers a discovery bridge. Bridges let you integrate other discovery technologies in this discovery service.
+
+   @public
+   @param bridge {DiscoveryBridge} the bridge 
+   @param configuration {Object} the optional configuration 
+   @return {DiscoveryService} the current {@link DiscoveryService}
+   */
+  this.registerDiscoveryBridge = function(bridge, configuration) {
+    var __args = arguments;
+    if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null)) {
+      return utils.convReturnVertxGen(j_discoveryService["registerDiscoveryBridge(io.vertx.ext.discovery.spi.DiscoveryBridge,io.vertx.core.json.JsonObject)"](bridge._jdel, utils.convParamJsonObject(configuration)), DiscoveryService);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 

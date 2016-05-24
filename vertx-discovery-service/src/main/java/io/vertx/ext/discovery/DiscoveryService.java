@@ -124,7 +124,6 @@ public interface DiscoveryService {
    * @param configuration the optional configuration
    * @return the current {@link DiscoveryService}
    */
-  @GenIgnore
   DiscoveryService registerDiscoveryBridge(DiscoveryBridge bridge, JsonObject configuration);
 
   /**
