@@ -32,26 +32,23 @@ import static com.hazelcast.config.properties.PropertyTypeConverter.STRING;
 /**
  * Discovery SPI implementation of Hazelcast to support Kubernetes-based discovery. This implementation
  * is very close to the "official" hazelcast plugin, when remove some limitations such as the Kubernetes
- * master url, and does not rely on DNS (but on service lookup), and is vert.x centric.
+ * master url, and does not rely on DNS (but on service lookup), and is <strong>specific</strong> to vert.x.
  * <p>
  * It works as follows:
  * <p>
  * * when the discovery strategy is instantiated, it resolved the known nodes
- * * known nodes are found by doing a Kubernetes query: it looks for all endpoints (~pods) attached to
- * a specific service (`vertx-eventbus` by default).
- * * To be retrieved, each pod needs to be associated with the service, so must be
- * <strong>selected</strong> by the service.
- * <p>
- * Th service must a <strong>headless</strong> service. It is a recommended to use a label-based
- * selector such as <code></code>vertx-cluster:true</code>.
+ * * known nodes are found by doing a Kubernetes query: it looks for all endpoints (~services) with a specific label
+ * (`vertx-cluster`=`true`). The query is made on the label name and label value.
  * <p>
  * By default it uses the port 5701 to connected. If the endpoints defines the
  * <code>hazelcast-service-port</code>, the indicated value is used.
  * <p>
  * Can be configured:
  * <p>
- * * "namespace" : the kubernetes namespace / project, "default" by default
- * * "service-name" : the name of the service, "vertx-eventbus" by default.
+ * * "namespace" : the kubernetes namespace / project, by default it tries to read the
+ * {@code OPENSHIFT_BUILD_NAMESPACE} environment variable. If not defined, it uses "default"
+ * * "service-label-name" : the name of the label to look for, "vertx-cluster" by default.
+ * * "service-label-name" : the name of the label to look for, "true" by default.
  * * "kubernetes-master" : the url of the Kubernetes master, by default it builds the url from the
  * {@code KUBERNETES_SERVICE_HOST} and {@code KUBERNETES_SERVICE_PORT}.
  * * "kubernetes-token" : the bearer token to use to connect to Kubernetes, it uses the content of the
@@ -66,7 +63,9 @@ public class HazelcastKubernetesDiscoveryStrategyFactory implements DiscoveryStr
 
   private static final Collection<PropertyDefinition> PROPERTY_DEFINITIONS;
 
-  static final PropertyDefinition SERVICE_NAME = property("service-name", STRING);
+  static final PropertyDefinition SERVICE_LABEL_NAME = property("service-label-name", STRING);
+
+  static final PropertyDefinition SERVICE_LABEL_VALUE = property("service-label-value", STRING);
 
   static final PropertyDefinition NAMESPACE = property("namespace", STRING);
 
@@ -76,7 +75,8 @@ public class HazelcastKubernetesDiscoveryStrategyFactory implements DiscoveryStr
 
   static {
     List<PropertyDefinition> propertyDefinitions = new ArrayList<>();
-    propertyDefinitions.add(SERVICE_NAME);
+    propertyDefinitions.add(SERVICE_LABEL_NAME);
+    propertyDefinitions.add(SERVICE_LABEL_VALUE);
     propertyDefinitions.add(NAMESPACE);
     propertyDefinitions.add(KUBERNETES_MASTER);
     propertyDefinitions.add(KUBERNETES_TOKEN);

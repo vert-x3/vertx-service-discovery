@@ -25,6 +25,7 @@ import com.hazelcast.spi.discovery.SimpleDiscoveryNode;
 import io.fabric8.kubernetes.api.model.EndpointAddress;
 import io.fabric8.kubernetes.api.model.EndpointSubset;
 import io.fabric8.kubernetes.api.model.Endpoints;
+import io.fabric8.kubernetes.api.model.EndpointsList;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -41,26 +42,23 @@ import java.util.stream.Collectors;
 /**
  * Discovery SPI implementation of Hazelcast to support Kubernetes-based discovery. This implementation
  * is very close to the "official" hazelcast plugin, when remove some limitations such as the Kubernetes
- * master url, and does not rely on DNS (but on service lookup), and is vert.x centric.
+ * master url, and does not rely on DNS (but on service lookup), and is <strong>specific</strong> to vert.x.
  * <p>
  * It works as follows:
  * <p>
  * * when the discovery strategy is instantiated, it resolved the known nodes
- * * known nodes are found by doing a Kubernetes query: it looks for all endpoints (~pods) attached to
- * a specific service (`vertx-eventbus` by default).
- * * To be retrieved, each pod needs to be associated with the service, so must be
- * <strong>selected</strong> by the service.
- * <p>
- * Th service must a <strong>headless</strong> service. It is a recommended to use a label-based
- * selector such as <code></code>vertx-cluster:true</code>.
+ * * known nodes are found by doing a Kubernetes query: it looks for all endpoints (~services) with a specific label
+ * (`vertx-cluster`=`true`). The query is made on the label name and label value.
  * <p>
  * By default it uses the port 5701 to connected. If the endpoints defines the
  * <code>hazelcast-service-port</code>, the indicated value is used.
  * <p>
  * Can be configured:
  * <p>
- * * "namespace" : the kubernetes namespace / project, "default" by default
- * * "service-name" : the name of the service, "vertx-eventbus" by default.
+ * * "namespace" : the kubernetes namespace / project, by default it tries to read the
+ * {@code OPENSHIFT_BUILD_NAMESPACE} environment variable. If not defined, it uses "default"
+ * * "service-label-name" : the name of the label to look for, "vertx-cluster" by default.
+ * * "service-label-name" : the name of the label to look for, "true" by default.
  * * "kubernetes-master" : the url of the Kubernetes master, by default it builds the url from the
  * {@code KUBERNETES_SERVICE_HOST} and {@code KUBERNETES_SERVICE_PORT}.
  * * "kubernetes-token" : the bearer token to use to connect to Kubernetes, it uses the content of the
@@ -77,7 +75,9 @@ class HazelcastKubernetesDiscoveryStrategy extends AbstractDiscoveryStrategy {
   private static final String HAZELCAST_SERVICE_PORT = "hazelcast-service-port";
 
   private final String namespace;
-  private final String service;
+  private final String label;
+  private final String labelValue;
+
   private final DefaultKubernetesClient client;
 
   /**
@@ -91,18 +91,23 @@ class HazelcastKubernetesDiscoveryStrategy extends AbstractDiscoveryStrategy {
     super(logger, configuration);
 
     this.namespace = getOrDefault(KUBERNETES_SYSTEM_PREFIX,
-        HazelcastKubernetesDiscoveryStrategyFactory.NAMESPACE, "default");
+        HazelcastKubernetesDiscoveryStrategyFactory.NAMESPACE, getNamespaceOrDefault());
 
     String master = getOrDefault(KUBERNETES_SYSTEM_PREFIX,
         HazelcastKubernetesDiscoveryStrategyFactory.KUBERNETES_MASTER,
         KubernetesUtils.getDefaultKubernetesMasterUrl());
 
-    this.service = getOrDefault(KUBERNETES_SYSTEM_PREFIX,
-        HazelcastKubernetesDiscoveryStrategyFactory.SERVICE_NAME,
-        "vertx-eventbus");
+    this.label = getOrDefault(KUBERNETES_SYSTEM_PREFIX,
+        HazelcastKubernetesDiscoveryStrategyFactory.SERVICE_LABEL_NAME,
+        "vertx-cluster");
+
+    this.labelValue = getOrDefault(KUBERNETES_SYSTEM_PREFIX,
+        HazelcastKubernetesDiscoveryStrategyFactory.SERVICE_LABEL_VALUE,
+        "true");
 
     String token = getOrDefault(KUBERNETES_SYSTEM_PREFIX,
         HazelcastKubernetesDiscoveryStrategyFactory.KUBERNETES_TOKEN, null);
+
     if (token == null) {
       token = KubernetesUtils.getTokenFromFile();
     }
@@ -115,39 +120,50 @@ class HazelcastKubernetesDiscoveryStrategy extends AbstractDiscoveryStrategy {
     client = new DefaultKubernetesClient(config);
   }
 
+  private String getNamespaceOrDefault() {
+    String namespace = System.getenv("OPENSHIFT_BUILD_NAMESPACE");
+    return namespace == null ? "default" : namespace;
+  }
+
   /**
    * Just starts the Kubernetes discovery.
    */
   @Override
   public void start() {
     getLogger().info("Starting the Kubernetes-based discovery");
+    getLogger().info("Looking for nodes from namespace " + namespace + " with label '" + label + "' set to '" +
+        labelValue + "'.");
   }
 
   /**
-   * Discovers the nodes. It queries all endpoints (pods) associated with the specified service name
-   * in the specified namespace.
+   * Discovers the nodes. It queries all endpoints (services) with a label `label` set to `labelValue`. By default,
+   * it's `vertx-cluster=true`.
    *
    * @return the list of discovery nodes
    */
   @Override
   public Iterable<DiscoveryNode> discoverNodes() {
-    Endpoints endpoints = client.endpoints().inNamespace(namespace).withName(service).get();
-    if (endpoints == null) {
-      getLogger().info("No endpoints for service " + service + " in namespace " + namespace);
+    EndpointsList list = client.endpoints().inNamespace(namespace).withLabel(label, labelValue).list();
+
+    if (list == null || list.getItems() == null || list.getItems().isEmpty()) {
+      getLogger().info("No endpoints for service " + " in namespace " + namespace + " with label: `vertx-cluster=true`");
       return Collections.emptyList();
     }
 
     List<DiscoveryNode> nodes = new ArrayList<>();
-    for (EndpointSubset endpointSubset : endpoints.getSubsets()) {
-      for (EndpointAddress endpointAddress : endpointSubset.getAddresses()) {
-        Map<String, Object> properties = endpointAddress.getAdditionalProperties();
+    List<Endpoints> endpointList = list.getItems();
+    for (Endpoints endpoints : endpointList) {
+      for (EndpointSubset endpointSubset : endpoints.getSubsets()) {
+        for (EndpointAddress endpointAddress : endpointSubset.getAddresses()) {
+          Map<String, Object> properties = endpointAddress.getAdditionalProperties();
 
-        String ip = endpointAddress.getIp();
-        InetAddress inetAddress = extractAddress(ip);
-        int port = getServicePort(properties);
+          String ip = endpointAddress.getIp();
+          InetAddress inetAddress = extractAddress(ip);
+          int port = getServicePort(properties);
 
-        Address address = new Address(inetAddress, port);
-        nodes.add(new SimpleDiscoveryNode(address, properties));
+          Address address = new Address(inetAddress, port);
+          nodes.add(new SimpleDiscoveryNode(address, properties));
+        }
       }
     }
 
