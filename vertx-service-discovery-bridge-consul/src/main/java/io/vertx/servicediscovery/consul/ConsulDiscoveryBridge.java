@@ -23,10 +23,10 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.servicediscovery.DiscoveryService;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.impl.ServiceTypes;
 import io.vertx.servicediscovery.spi.DiscoveryBridge;
+import io.vertx.servicediscovery.spi.ServiceDiscovery;
 import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.HttpLocation;
 
@@ -40,7 +40,7 @@ import java.util.List;
  */
 public class ConsulDiscoveryBridge implements DiscoveryBridge {
 
-  private DiscoveryService discovery;
+  private ServiceDiscovery discovery;
   private HttpClient client;
 
   private final static Logger LOGGER = LoggerFactory.getLogger(ConsulDiscoveryBridge.class);
@@ -50,7 +50,7 @@ public class ConsulDiscoveryBridge implements DiscoveryBridge {
   private long scanTask = -1;
 
   @Override
-  public void start(Vertx vertx, DiscoveryService discovery, JsonObject configuration, Future<Void> completion) {
+  public void start(Vertx vertx, ServiceDiscovery discovery, JsonObject configuration, Future<Void> completion) {
     this.discovery = discovery;
 
     HttpClientOptions options = new HttpClientOptions(configuration);
@@ -246,7 +246,7 @@ public class ConsulDiscoveryBridge implements DiscoveryBridge {
   }
 
   @Override
-  public void stop(Vertx vertx, DiscoveryService discovery, Future<Void> future) {
+  public void stop(Vertx vertx, ServiceDiscovery discovery, Future<Void> future) {
     if (scanTask != -1) {
       vertx.cancelTimer(scanTask);
     }

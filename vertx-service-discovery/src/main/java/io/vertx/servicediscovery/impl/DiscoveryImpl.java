@@ -28,6 +28,7 @@ import io.vertx.servicediscovery.spi.DiscoveryBridge;
 import io.vertx.servicediscovery.DiscoveryOptions;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceReference;
+import io.vertx.servicediscovery.spi.ServiceDiscovery;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -37,7 +38,7 @@ import java.util.stream.Collectors;
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class DiscoveryImpl implements DiscoveryService {
+public class DiscoveryImpl implements DiscoveryService, ServiceDiscovery {
 
   private final Vertx vertx;
   private final String announce;

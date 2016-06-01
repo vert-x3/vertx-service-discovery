@@ -26,6 +26,7 @@ import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.Status;
 import io.vertx.servicediscovery.impl.DiscoveryImpl;
 import io.vertx.servicediscovery.spi.DiscoveryBridge;
+import io.vertx.servicediscovery.spi.ServiceDiscovery;
 import io.vertx.servicediscovery.types.EventBusService;
 import io.vertx.servicediscovery.types.HttpEndpoint;
 import io.vertx.ext.service.HelloService;
@@ -262,7 +263,7 @@ public class DiscoveryImplTest {
     AtomicBoolean registered = new AtomicBoolean();
     DiscoveryBridge bridge = new DiscoveryBridge() {
       @Override
-      public void start(Vertx vertx, DiscoveryService discovery, JsonObject configuration, Future<Void> future) {
+      public void start(Vertx vertx, ServiceDiscovery discovery, JsonObject configuration, Future<Void> future) {
         Record rec1 = HttpEndpoint.createRecord("static-record-1", "acme.org");
         Record rec2 = HttpEndpoint.createRecord("static-record-2", "example.com");
         discovery.publish(rec1, ar -> {
@@ -274,7 +275,7 @@ public class DiscoveryImplTest {
       }
 
       @Override
-      public void stop(Vertx vertx, DiscoveryService discovery, Future<Void> future) {
+      public void stop(Vertx vertx, ServiceDiscovery discovery, Future<Void> future) {
         closed.set(true);
         future.complete();
       }

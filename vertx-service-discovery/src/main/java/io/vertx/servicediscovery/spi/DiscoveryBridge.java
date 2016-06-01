@@ -20,7 +20,6 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.DiscoveryService;
 import io.vertx.servicediscovery.Record;
 
 /**
@@ -35,23 +34,20 @@ public interface DiscoveryBridge {
 
   /**
    * Starts the bridge.
-   *
    * @param vertx             the vertx instance
-   * @param discovery         the discovery service
+   * @param discovery         the service discovery
    * @param configuration     the bridge configuration if any
    * @param future            a future on which the bridge must report the completion of the starting
-   *                          process
    */
-  void start(Vertx vertx, DiscoveryService discovery, JsonObject configuration,
+  void start(Vertx vertx, ServiceDiscovery discovery, JsonObject configuration,
              Future<Void> future);
 
   /**
    * Stops the bridge.
-   *
    * @param vertx     the vertx instance
-   * @param discovery the discovery service
+   * @param discovery the service discovery
    * @param future    the future on which the bridge must report the completion of the stopping process
    */
-  void stop(Vertx vertx, DiscoveryService discovery, Future<Void> future);
+  void stop(Vertx vertx, ServiceDiscovery discovery, Future<Void> future);
 
 }

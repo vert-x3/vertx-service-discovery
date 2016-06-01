@@ -25,9 +25,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.servicediscovery.DiscoveryService;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.spi.DiscoveryBridge;
+import io.vertx.servicediscovery.spi.ServiceDiscovery;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -49,7 +49,7 @@ public class DockerDiscoveryBridge implements DiscoveryBridge {
   private DockerClient client;
 
   private List<DockerService> services = new ArrayList<>();
-  private DiscoveryService discovery;
+  private ServiceDiscovery discovery;
   private Vertx vertx;
   private String host;
 
@@ -57,14 +57,13 @@ public class DockerDiscoveryBridge implements DiscoveryBridge {
 
   /**
    * Starts the bridge.
-   *
    * @param vertx         the vert.x instance
    * @param discovery     the discovery service
    * @param configuration the bridge configuration if any
    * @param completion        future to assign with completion status
    */
   @Override
-  public void start(Vertx vertx, DiscoveryService discovery, JsonObject configuration, Future<Void> completion) {
+  public void start(Vertx vertx, ServiceDiscovery discovery, JsonObject configuration, Future<Void> completion) {
     this.discovery = discovery;
     this.vertx = vertx;
     DockerClientConfig.DockerClientConfigBuilder builder =
@@ -231,13 +230,12 @@ public class DockerDiscoveryBridge implements DiscoveryBridge {
 
   /**
    * Stops the bridge.
-   *
    * @param vertx     the vert.x instance
    * @param discovery the discovery service
    * @param future    completion future
    */
   @Override
-  public void stop(Vertx vertx, DiscoveryService discovery, Future<Void> future) {
+  public void stop(Vertx vertx, ServiceDiscovery discovery, Future<Void> future) {
     vertx.cancelTimer(timer);
     try {
       started = false;

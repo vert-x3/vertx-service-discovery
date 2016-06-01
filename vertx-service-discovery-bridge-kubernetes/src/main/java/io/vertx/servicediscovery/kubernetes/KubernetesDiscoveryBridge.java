@@ -25,9 +25,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.servicediscovery.DiscoveryService;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.spi.DiscoveryBridge;
+import io.vertx.servicediscovery.spi.ServiceDiscovery;
 import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.HttpEndpoint;
 import io.vertx.servicediscovery.types.HttpLocation;
@@ -57,13 +57,13 @@ public class KubernetesDiscoveryBridge implements Watcher<Service>, DiscoveryBri
   private final static Logger LOGGER = LoggerFactory.getLogger(KubernetesDiscoveryBridge.class.getName());
 
   private KubernetesClient client;
-  private DiscoveryService discovery;
+  private ServiceDiscovery discovery;
   private String namespace;
   private List<Record> records = new CopyOnWriteArrayList<>();
   private Watch watcher;
 
   @Override
-  public void start(Vertx vertx, DiscoveryService discovery, JsonObject configuration,
+  public void start(Vertx vertx, ServiceDiscovery discovery, JsonObject configuration,
                     Future<Void> completion) {
     this.discovery = discovery;
 
@@ -242,7 +242,7 @@ public class KubernetesDiscoveryBridge implements Watcher<Service>, DiscoveryBri
 
 
   @Override
-  public void stop(Vertx vertx, DiscoveryService discovery, Future<Void> future) {
+  public void stop(Vertx vertx, ServiceDiscovery discovery, Future<Void> future) {
     synchronized (this) {
       if (watcher != null) {
         watcher.close();

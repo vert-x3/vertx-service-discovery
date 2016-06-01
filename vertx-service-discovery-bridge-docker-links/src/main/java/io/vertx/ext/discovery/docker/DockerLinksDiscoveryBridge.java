@@ -22,9 +22,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.servicediscovery.DiscoveryService;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.spi.DiscoveryBridge;
+import io.vertx.servicediscovery.spi.ServiceDiscovery;
 import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.HttpEndpoint;
 import io.vertx.servicediscovery.types.HttpLocation;
@@ -48,7 +48,7 @@ public class DockerLinksDiscoveryBridge implements DiscoveryBridge {
   /**
    * The discovery service. Immutable once set.
    */
-  private DiscoveryService discovery;
+  private ServiceDiscovery discovery;
 
   /**
    * The list of records that are imported. Content staled once initialized.
@@ -58,7 +58,7 @@ public class DockerLinksDiscoveryBridge implements DiscoveryBridge {
   private final static Logger LOGGER = LoggerFactory.getLogger(DockerLinksDiscoveryBridge.class);
 
   @Override
-  public void start(Vertx vertx, DiscoveryService discovery, JsonObject configuration,
+  public void start(Vertx vertx, ServiceDiscovery discovery, JsonObject configuration,
                     Future<Void> completion) {
     this.discovery = discovery;
 
@@ -137,7 +137,7 @@ public class DockerLinksDiscoveryBridge implements DiscoveryBridge {
   }
 
   @Override
-  public void stop(Vertx vertx, DiscoveryService discovery, Future<Void> completion) {
+  public void stop(Vertx vertx, ServiceDiscovery discovery, Future<Void> completion) {
     List<Future> list = new ArrayList<>();
     for (Record record : records) {
       discovery.unpublish(record.getRegistration(), v -> {
