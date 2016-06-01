@@ -18,9 +18,9 @@ package io.vertx.ext.discovery.backend;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.servicediscovery.Record;
-import io.vertx.ext.servicediscovery.Status;
-import io.vertx.ext.servicediscovery.backend.RedisBackend;
+import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.Status;
+import io.vertx.servicediscovery.backend.RedisBackend;
 import org.junit.*;
 import redis.embedded.RedisServer;
 

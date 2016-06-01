@@ -20,8 +20,8 @@ var DiscoveryService = require('vertx-service-discovery-js/discovery_service');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JEventBusService = io.vertx.ext.servicediscovery.types.EventBusService;
-var Record = io.vertx.ext.servicediscovery.Record;
+var JEventBusService = io.vertx.servicediscovery.types.EventBusService;
+var Record = io.vertx.servicediscovery.Record;
 
 /**
 
@@ -68,7 +68,7 @@ EventBusService.createRecord = function(name, address, itf, metadata) {
 EventBusService.getProxy = function() {
   var __args = arguments;
   if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'function') {
-    JEventBusService["getProxy(io.vertx.ext.servicediscovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](__args[0]._jdel, utils.convParamJsonObject(__args[1]), function(ar) {
+    JEventBusService["getProxy(io.vertx.servicediscovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](__args[0]._jdel, utils.convParamJsonObject(__args[1]), function(ar) {
     if (ar.succeeded()) {
       __args[2](utils.convReturnTypeUnknown(ar.result()), null);
     } else {
@@ -76,7 +76,7 @@ EventBusService.getProxy = function() {
     }
   });
   }else if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && typeof __args[2] === 'function') {
-    JEventBusService["getProxy(io.vertx.ext.servicediscovery.DiscoveryService,java.lang.String,io.vertx.core.Handler)"](__args[0]._jdel, __args[1], function(ar) {
+    JEventBusService["getProxy(io.vertx.servicediscovery.DiscoveryService,java.lang.String,io.vertx.core.Handler)"](__args[0]._jdel, __args[1], function(ar) {
     if (ar.succeeded()) {
       __args[2](utils.convReturnTypeUnknown(ar.result()), null);
     } else {
@@ -84,7 +84,7 @@ EventBusService.getProxy = function() {
     }
   });
   }else if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'string' && typeof __args[2] === 'string' && typeof __args[3] === 'function') {
-    JEventBusService["getProxy(io.vertx.ext.servicediscovery.DiscoveryService,java.lang.String,java.lang.String,io.vertx.core.Handler)"](__args[0]._jdel, __args[1], __args[2], function(ar) {
+    JEventBusService["getProxy(io.vertx.servicediscovery.DiscoveryService,java.lang.String,java.lang.String,io.vertx.core.Handler)"](__args[0]._jdel, __args[1], __args[2], function(ar) {
     if (ar.succeeded()) {
       __args[3](utils.convReturnTypeUnknown(ar.result()), null);
     } else {
@@ -92,7 +92,7 @@ EventBusService.getProxy = function() {
     }
   });
   }else if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'string' && typeof __args[3] === 'function') {
-    JEventBusService["getProxy(io.vertx.ext.servicediscovery.DiscoveryService,io.vertx.core.json.JsonObject,java.lang.String,io.vertx.core.Handler)"](__args[0]._jdel, utils.convParamJsonObject(__args[1]), __args[2], function(ar) {
+    JEventBusService["getProxy(io.vertx.servicediscovery.DiscoveryService,io.vertx.core.json.JsonObject,java.lang.String,io.vertx.core.Handler)"](__args[0]._jdel, utils.convParamJsonObject(__args[1]), __args[2], function(ar) {
     if (ar.succeeded()) {
       __args[3](utils.convReturnTypeUnknown(ar.result()), null);
     } else {

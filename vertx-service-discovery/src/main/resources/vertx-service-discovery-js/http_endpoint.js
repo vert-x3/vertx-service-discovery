@@ -21,8 +21,8 @@ var HttpClient = require('vertx-js/http_client');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JHttpEndpoint = io.vertx.ext.servicediscovery.types.HttpEndpoint;
-var Record = io.vertx.ext.servicediscovery.Record;
+var JHttpEndpoint = io.vertx.servicediscovery.types.HttpEndpoint;
+var Record = io.vertx.servicediscovery.Record;
 
 /**
 
@@ -77,7 +77,7 @@ HttpEndpoint.createRecord = function() {
 HttpEndpoint.getClient = function(discovery, filter, resultHandler) {
   var __args = arguments;
   if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'function') {
-    JHttpEndpoint["getClient(io.vertx.ext.servicediscovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](discovery._jdel, utils.convParamJsonObject(filter), function(ar) {
+    JHttpEndpoint["getClient(io.vertx.servicediscovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](discovery._jdel, utils.convParamJsonObject(filter), function(ar) {
     if (ar.succeeded()) {
       resultHandler(utils.convReturnVertxGen(ar.result(), HttpClient), null);
     } else {

@@ -18,8 +18,8 @@ package io.vertx.ext.discovery.impl;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
-import io.vertx.ext.servicediscovery.DiscoveryOptions;
-import io.vertx.ext.servicediscovery.impl.DiscoveryImpl;
+import io.vertx.servicediscovery.DiscoveryOptions;
+import io.vertx.servicediscovery.impl.DiscoveryImpl;
 import org.junit.Before;
 
 import static com.jayway.awaitility.Awaitility.await;

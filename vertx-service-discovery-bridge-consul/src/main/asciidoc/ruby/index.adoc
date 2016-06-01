@@ -42,7 +42,7 @@ Then, when creating the discovery service registers this bridge as follows:
 [source, ruby]
 ----
 require 'vertx-service-discovery/discovery_service'
-VertxServiceDiscovery::DiscoveryService.create(vertx).register_discovery_bridge(Java::IoVertxExtServicediscoveryConsul::ConsulDiscoveryBridge.new(), {
+VertxServiceDiscovery::DiscoveryService.create(vertx).register_discovery_bridge(Java::IoVertxServicediscoveryConsul::ConsulDiscoveryBridge.new(), {
   'host' => "localhost",
   'port' => 8500,
   'scan-period' => 2000

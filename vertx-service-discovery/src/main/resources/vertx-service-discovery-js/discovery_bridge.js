@@ -22,7 +22,7 @@ var Future = require('vertx-js/future');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JDiscoveryBridge = io.vertx.ext.servicediscovery.spi.DiscoveryBridge;
+var JDiscoveryBridge = io.vertx.servicediscovery.spi.DiscoveryBridge;
 
 /**
  Discovery bridge allows integrate other discovery technologies with the Vert.x discovery service. It maps entries
@@ -45,7 +45,7 @@ var DiscoveryBridge = function(j_val) {
   this.start = function(vertx, discovery, configuration, future) {
     var __args = arguments;
     if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'object' && __args[3]._jdel) {
-      j_discoveryBridge["start(io.vertx.core.Vertx,io.vertx.ext.servicediscovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.Future)"](vertx._jdel, discovery._jdel, utils.convParamJsonObject(configuration), future._jdel);
+      j_discoveryBridge["start(io.vertx.core.Vertx,io.vertx.servicediscovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.Future)"](vertx._jdel, discovery._jdel, utils.convParamJsonObject(configuration), future._jdel);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -60,7 +60,7 @@ var DiscoveryBridge = function(j_val) {
   this.stop = function(vertx, discovery, future) {
     var __args = arguments;
     if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && typeof __args[2] === 'object' && __args[2]._jdel) {
-      j_discoveryBridge["stop(io.vertx.core.Vertx,io.vertx.ext.servicediscovery.DiscoveryService,io.vertx.core.Future)"](vertx._jdel, discovery._jdel, future._jdel);
+      j_discoveryBridge["stop(io.vertx.core.Vertx,io.vertx.servicediscovery.DiscoveryService,io.vertx.core.Future)"](vertx._jdel, discovery._jdel, future._jdel);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 

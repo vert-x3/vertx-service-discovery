@@ -787,7 +787,7 @@ The second parameter can provide an optional configuration for the bridge.
 
 When the bridge is registered the
 
-{@link io.vertx.ext.servicediscovery.spi.DiscoveryBridge#start)}
+{@link io.vertx.servicediscovery.spi.DiscoveryBridge#start)}
 method is called. It lets you configure the bridge. When the bridge is configured, ready and has imported /
 exported the initial services, it must complete the given `link:../../jsdoc/future-Future.html[Future]`. If the bridge starts
 method is blocking, it must uses an
