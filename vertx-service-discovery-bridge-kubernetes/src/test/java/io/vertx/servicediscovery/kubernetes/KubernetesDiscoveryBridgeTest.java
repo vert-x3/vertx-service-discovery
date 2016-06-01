@@ -24,6 +24,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.DiscoveryService;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.Status;
+import io.vertx.servicediscovery.spi.ServiceDiscovery;
 import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.HttpEndpoint;
 import org.junit.Test;
@@ -147,7 +148,7 @@ public class KubernetesDiscoveryBridgeTest {
     vertx.eventBus().consumer("vertx.discovery.announce", message -> {
       record.set(new Record((JsonObject) message.body()));
     });
-    DiscoveryService discovery = DiscoveryService.create(vertx);
+    ServiceDiscovery discovery = (ServiceDiscovery) DiscoveryService.create(vertx);
     KubernetesDiscoveryBridge bridge = new KubernetesDiscoveryBridge();
     Future<Void> future = Future.future();
     bridge.start(vertx, discovery, new JsonObject().put("token", "a token"), future);
