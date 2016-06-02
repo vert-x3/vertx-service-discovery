@@ -16,21 +16,21 @@
 
 package io.vertx.groovy.servicediscovery.spi;
 import groovy.transform.CompileStatic
+import io.vertx.lang.groovy.InternalHelper
+import io.vertx.core.json.JsonObject
 import io.vertx.groovy.core.Vertx
+import io.vertx.core.json.JsonObject
 import io.vertx.groovy.core.Future
-import io.vertx.servicediscovery.spi.ServiceImporter
-
 /**
- * Service Discovery bridge allows integrate other discovery technologies with the Vert.x service discovery. It maps
+ * The service importer allows integrate other discovery technologies with the Vert.x service discovery. It maps
  * entries from another technology to a  and maps  to a publication in this other
- * technology. Each bridge can decide which services needs to be imported and exported. It can also implement only on
- * way.
+ * technology. The importer is one side of a service discovery bridge.
 */
 @CompileStatic
-public class ServiceDiscoveryBridge {
-  private final def ServiceImporter delegate;
-  public ServiceDiscoveryBridge(Object delegate) {
-    this.delegate = (ServiceImporter) delegate;
+public class ServiceImporter {
+  private final def io.vertx.servicediscovery.spi.ServiceImporter delegate;
+  public ServiceImporter(Object delegate) {
+    this.delegate = (io.vertx.servicediscovery.spi.ServiceImporter) delegate;
   }
   public Object getDelegate() {
     return delegate;

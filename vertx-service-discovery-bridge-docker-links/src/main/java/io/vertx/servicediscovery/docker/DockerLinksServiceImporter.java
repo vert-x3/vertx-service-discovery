@@ -23,7 +23,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.servicediscovery.Record;
-import io.vertx.servicediscovery.spi.ServiceDiscoveryBridge;
+import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServicePublisher;
 import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.HttpEndpoint;
@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class DockerLinksServiceDiscoveryBridge implements ServiceDiscoveryBridge {
+public class DockerLinksServiceImporter implements ServiceImporter {
   /**
    * The service discovery instance. Immutable once set.
    */
@@ -55,7 +55,7 @@ public class DockerLinksServiceDiscoveryBridge implements ServiceDiscoveryBridge
    */
   private List<Record> records = new ArrayList<>();
 
-  private final static Logger LOGGER = LoggerFactory.getLogger(DockerLinksServiceDiscoveryBridge.class);
+  private final static Logger LOGGER = LoggerFactory.getLogger(DockerLinksServiceImporter.class);
 
   @Override
   public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration,

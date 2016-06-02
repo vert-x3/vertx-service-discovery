@@ -49,7 +49,7 @@ public class DockerBridgeTest {
 
   private Vertx vertx;
   private ServiceDiscovery discovery;
-  private DockerServiceDiscoveryBridge bridge;
+  private DockerServiceImporter bridge;
   private DockerClient client;
 
   @Before
@@ -64,7 +64,7 @@ public class DockerBridgeTest {
 
     vertx = Vertx.vertx();
     discovery = ServiceDiscovery.create(vertx);
-    bridge = new DockerServiceDiscoveryBridge();
+    bridge = new DockerServiceImporter();
     discovery.registerDiscoveryBridge(bridge,
         new JsonObject().put("scan-period", -1));
 

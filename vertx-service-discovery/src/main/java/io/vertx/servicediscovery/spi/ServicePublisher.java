@@ -6,6 +6,8 @@ import io.vertx.core.Handler;
 import io.vertx.servicediscovery.Record;
 
 /**
+ * The publisher is used by the importer to publish or unpublish records.
+ *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
 @VertxGen

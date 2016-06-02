@@ -41,7 +41,7 @@ import static org.hamcrest.core.Is.is;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class ConsulServiceDiscoveryBridgeTest {
+public class ConsulServiceImporterTest {
 
 
   private Vertx vertx;
@@ -106,7 +106,7 @@ public class ConsulServiceDiscoveryBridgeTest {
         "  }"));
 
     discovery = ServiceDiscovery.create(vertx)
-        .registerDiscoveryBridge(new ConsulServiceDiscoveryBridge(),
+        .registerDiscoveryBridge(new ConsulServiceImporter(),
             new JsonObject().put("host", "localhost").put("port", 5601));
 
     await().until(() -> getAllRecordsBlocking().size() > 0);
@@ -128,7 +128,7 @@ public class ConsulServiceDiscoveryBridgeTest {
         "}"));
 
     discovery = ServiceDiscovery.create(vertx)
-        .registerDiscoveryBridge(new ConsulServiceDiscoveryBridge(),
+        .registerDiscoveryBridge(new ConsulServiceImporter(),
             new JsonObject().put("host", "localhost").put("port", 5601));
 
     await().until(() -> getAllRecordsBlocking().size() > 0);
@@ -154,7 +154,7 @@ public class ConsulServiceDiscoveryBridgeTest {
 
     vertx.runOnContext(v ->
         discovery = ServiceDiscovery.create(vertx)
-            .registerDiscoveryBridge(new ConsulServiceDiscoveryBridge(),
+            .registerDiscoveryBridge(new ConsulServiceImporter(),
                 new JsonObject().put("host", "localhost").put("port", 5601).put("scan-period", 100)));
 
     await().until(() -> getAllRecordsBlocking().size() > 0);
@@ -194,7 +194,7 @@ public class ConsulServiceDiscoveryBridgeTest {
 
     vertx.runOnContext(v ->
         discovery = ServiceDiscovery.create(vertx)
-            .registerDiscoveryBridge(new ConsulServiceDiscoveryBridge(),
+            .registerDiscoveryBridge(new ConsulServiceImporter(),
                 new JsonObject().put("host", "localhost").put("port", 5601).put("scan-period", 100)));
 
     await().until(() -> getAllRecordsBlocking().size() > 0);

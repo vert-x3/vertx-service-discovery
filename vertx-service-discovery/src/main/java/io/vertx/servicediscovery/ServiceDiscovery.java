@@ -22,7 +22,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.impl.DiscoveryImpl;
-import io.vertx.servicediscovery.spi.ServiceDiscoveryBridge;
+import io.vertx.servicediscovery.spi.ServiceImporter;
 
 import java.util.Collection;
 import java.util.List;
@@ -124,7 +124,7 @@ public interface ServiceDiscovery {
    * @param configuration the optional configuration
    * @return the current {@link ServiceDiscovery}
    */
-  ServiceDiscovery registerDiscoveryBridge(ServiceDiscoveryBridge bridge, JsonObject configuration);
+  ServiceDiscovery registerDiscoveryBridge(ServiceImporter bridge, JsonObject configuration);
 
   /**
    * Closes the service discovery

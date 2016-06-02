@@ -22,7 +22,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.*;
 import io.vertx.servicediscovery.service.HelloService;
 import io.vertx.servicediscovery.service.HelloServiceImpl;
-import io.vertx.servicediscovery.spi.ServiceDiscoveryBridge;
+import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServicePublisher;
 import io.vertx.servicediscovery.types.EventBusService;
 import io.vertx.servicediscovery.types.HttpEndpoint;
@@ -257,7 +257,7 @@ public class DiscoveryImplTest {
   public void testBridges() {
     AtomicBoolean closed = new AtomicBoolean();
     AtomicBoolean registered = new AtomicBoolean();
-    ServiceDiscoveryBridge bridge = new ServiceDiscoveryBridge() {
+    ServiceImporter bridge = new ServiceImporter() {
       @Override
       public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Future<Void> future) {
         Record rec1 = HttpEndpoint.createRecord("static-record-1", "acme.org");

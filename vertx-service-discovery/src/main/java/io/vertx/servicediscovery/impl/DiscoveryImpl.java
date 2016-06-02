@@ -23,7 +23,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.servicediscovery.*;
 import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend;
-import io.vertx.servicediscovery.spi.ServiceDiscoveryBridge;
+import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServicePublisher;
 
 import java.util.*;
@@ -41,7 +41,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
   private final String usage;
   private final ServiceDiscoveryBackend backend;
 
-  private final Set<ServiceDiscoveryBridge> bridges = new CopyOnWriteArraySet<>();
+  private final Set<ServiceImporter> bridges = new CopyOnWriteArraySet<>();
   private final Set<ServiceReference> bindings = new CopyOnWriteArraySet<>();
   private final static Logger LOGGER = LoggerFactory.getLogger(DiscoveryImpl.class.getName());
   private final String id;
@@ -138,7 +138,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
   }
 
   @Override
-  public ServiceDiscovery registerDiscoveryBridge(ServiceDiscoveryBridge bridge, JsonObject configuration) {
+  public ServiceDiscovery registerDiscoveryBridge(ServiceImporter bridge, JsonObject configuration) {
     JsonObject conf;
     if (configuration == null) {
       conf = new JsonObject();
@@ -167,7 +167,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
   public void close() {
     LOGGER.info("Stopping service discovery");
     List<Future> futures = new ArrayList<>();
-    for (ServiceDiscoveryBridge bridge : bridges) {
+    for (ServiceImporter bridge : bridges) {
       Future<Void> future = Future.future();
       bridge.stop(vertx, this, future);
       futures.add(future);

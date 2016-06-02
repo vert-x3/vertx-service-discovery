@@ -26,7 +26,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.servicediscovery.Record;
-import io.vertx.servicediscovery.spi.ServiceDiscoveryBridge;
+import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServicePublisher;
 import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.HttpEndpoint;
@@ -52,9 +52,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class KubernetesServiceDiscoveryBridge implements Watcher<Service>, ServiceDiscoveryBridge {
+public class KubernetesServiceImporter implements Watcher<Service>, ServiceImporter {
 
-  private final static Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceDiscoveryBridge.class.getName());
+  private final static Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceImporter.class.getName());
 
   private KubernetesClient client;
   private ServicePublisher publisher;
@@ -97,7 +97,7 @@ public class KubernetesServiceDiscoveryBridge implements Watcher<Service>, Servi
           try {
             kubernetesClient = new DefaultKubernetesClient(config);
             ServiceList list = kubernetesClient.services().inNamespace(namespace).list();
-            synchronized (KubernetesServiceDiscoveryBridge.this) {
+            synchronized (KubernetesServiceImporter.this) {
               watcher = kubernetesClient.services().inNamespace(namespace)
                   .watch(this);
               for (Service service : list.getItems()) {

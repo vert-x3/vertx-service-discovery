@@ -23,6 +23,7 @@ var JServicePublisher = io.vertx.servicediscovery.spi.ServicePublisher;
 var Record = io.vertx.servicediscovery.Record;
 
 /**
+ The publisher is used by the importer to publish or unpublish records.
 
  @class
 */

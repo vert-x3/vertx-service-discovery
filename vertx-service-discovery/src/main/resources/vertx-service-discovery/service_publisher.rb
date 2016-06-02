@@ -1,7 +1,7 @@
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.servicediscovery.spi.ServicePublisher
 module VertxServiceDiscovery
-  #  @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
+  #  The publisher is used by the importer to publish or unpublish records.
   class ServicePublisher
     # @private
     # @param j_del [::VertxServiceDiscovery::ServicePublisher] the java delegate

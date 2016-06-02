@@ -23,7 +23,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 
 /**
- * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
+ * The publisher is used by the importer to publish or unpublish records.
  *
  * <p/>
  * NOTE: This class has been automatically generated from the {@link io.vertx.servicediscovery.spi.ServicePublisher original} non RX-ified interface using Vert.x codegen.

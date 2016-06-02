@@ -22,7 +22,7 @@ import io.vertx.servicediscovery.Record
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 /**
- * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
+ * The publisher is used by the importer to publish or unpublish records.
 */
 @CompileStatic
 public class ServicePublisher {

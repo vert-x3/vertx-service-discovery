@@ -23,20 +23,19 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.rxjava.core.Future;
 
 /**
- * Service Discovery bridge allows integrate other discovery technologies with the Vert.x service discovery. It maps
+ * The service importer allows integrate other discovery technologies with the Vert.x service discovery. It maps
  * entries from another technology to a  and maps  to a publication in this other
- * technology. Each bridge can decide which services needs to be imported and exported. It can also implement only on
- * way.
+ * technology. The importer is one side of a service discovery bridge.
  *
  * <p/>
- * NOTE: This class has been automatically generated from the {@link io.vertx.servicediscovery.spi.ServiceDiscoveryBridge original} non RX-ified interface using Vert.x codegen.
+ * NOTE: This class has been automatically generated from the {@link io.vertx.servicediscovery.spi.ServiceImporter original} non RX-ified interface using Vert.x codegen.
  */
 
-public class ServiceDiscoveryBridge {
+public class ServiceImporter {
 
-  final io.vertx.servicediscovery.spi.ServiceDiscoveryBridge delegate;
+  final io.vertx.servicediscovery.spi.ServiceImporter delegate;
 
-  public ServiceDiscoveryBridge(io.vertx.servicediscovery.spi.ServiceDiscoveryBridge delegate) {
+  public ServiceImporter(io.vertx.servicediscovery.spi.ServiceImporter delegate) {
     this.delegate = delegate;
   }
 
@@ -66,7 +65,7 @@ public class ServiceDiscoveryBridge {
   }
 
 
-  public static ServiceDiscoveryBridge newInstance(io.vertx.servicediscovery.spi.ServiceDiscoveryBridge arg) {
-    return arg != null ? new ServiceDiscoveryBridge(arg) : null;
+  public static ServiceImporter newInstance(io.vertx.servicediscovery.spi.ServiceImporter arg) {
+    return arg != null ? new ServiceImporter(arg) : null;
   }
 }

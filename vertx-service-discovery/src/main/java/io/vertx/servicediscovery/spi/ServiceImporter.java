@@ -23,15 +23,14 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
 
 /**
- * Service Discovery bridge allows integrate other discovery technologies with the Vert.x service discovery. It maps
+ * The service importer allows integrate other discovery technologies with the Vert.x service discovery. It maps
  * entries from another technology to a {@link Record} and maps {@link Record} to a publication in this other
- * technology. Each bridge can decide which services needs to be imported and exported. It can also implement only on
- * way.
+ * technology. The importer is one side of a service discovery bridge.
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @VertxGen
-public interface ServiceDiscoveryBridge {
+public interface ServiceImporter {
 
   /**
    * Starts the bridge.

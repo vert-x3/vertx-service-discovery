@@ -41,7 +41,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class KubernetesServiceDiscoveryBridgeTest {
+public class KubernetesServiceImporterTest {
 
   @Test
   public void testRecordCreation() {
@@ -60,7 +60,7 @@ public class KubernetesServiceDiscoveryBridgeTest {
     when(service.getMetadata()).thenReturn(metadata);
     when(service.getSpec()).thenReturn(spec);
 
-    Record record = KubernetesServiceDiscoveryBridge.createRecord(service);
+    Record record = KubernetesServiceImporter.createRecord(service);
     assertThat(record).isNotNull();
     assertThat(record.getName()).isEqualTo("my-service");
     assertThat(record.getMetadata().getString("kubernetes.name")).isEqualTo("my-service");
@@ -74,7 +74,7 @@ public class KubernetesServiceDiscoveryBridgeTest {
   public void testHttpRecordCreation() {
     Service service = getHttpService();
 
-    Record record = KubernetesServiceDiscoveryBridge.createRecord(service);
+    Record record = KubernetesServiceImporter.createRecord(service);
     assertThat(record).isNotNull();
     assertThat(record.getName()).isEqualTo("my-service");
     assertThat(record.getMetadata().getString("kubernetes.name")).isEqualTo("my-service");
@@ -129,7 +129,7 @@ public class KubernetesServiceDiscoveryBridgeTest {
     when(service.getMetadata()).thenReturn(metadata);
     when(service.getSpec()).thenReturn(spec);
 
-    Record record = KubernetesServiceDiscoveryBridge.createRecord(service);
+    Record record = KubernetesServiceImporter.createRecord(service);
     assertThat(record).isNotNull();
     assertThat(record.getName()).isEqualTo("my-service");
     assertThat(record.getMetadata().getString("kubernetes.name")).isEqualTo("my-service");
@@ -147,7 +147,7 @@ public class KubernetesServiceDiscoveryBridgeTest {
     vertx.eventBus().consumer("vertx.discovery.announce", message ->
         record.set(new Record((JsonObject) message.body())));
     ServicePublisher discovery = (ServicePublisher) ServiceDiscovery.create(vertx);
-    KubernetesServiceDiscoveryBridge bridge = new KubernetesServiceDiscoveryBridge();
+    KubernetesServiceImporter bridge = new KubernetesServiceImporter();
     Future<Void> future = Future.future();
     bridge.start(vertx, discovery, new JsonObject().put("token", "a token"), future);
     future.setHandler(ar -> {

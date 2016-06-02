@@ -22,9 +22,9 @@ import io.vertx.rxjava.core.Vertx;
 import java.util.Set;
 import io.vertx.servicediscovery.Record;
 import java.util.function.Function;
+import io.vertx.rxjava.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 import java.util.List;
-import io.vertx.rxjava.servicediscovery.spi.ServiceDiscoveryBridge;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -137,8 +137,8 @@ public class ServiceDiscovery {
    * @param configuration the optional configuration
    * @return the current {@link io.vertx.rxjava.servicediscovery.ServiceDiscovery}
    */
-  public ServiceDiscovery registerDiscoveryBridge(ServiceDiscoveryBridge bridge, JsonObject configuration) { 
-    ServiceDiscovery ret = ServiceDiscovery.newInstance(delegate.registerDiscoveryBridge((io.vertx.servicediscovery.spi.ServiceDiscoveryBridge)bridge.getDelegate(), configuration));
+  public ServiceDiscovery registerDiscoveryBridge(ServiceImporter bridge, JsonObject configuration) { 
+    ServiceDiscovery ret = ServiceDiscovery.newInstance(delegate.registerDiscoveryBridge((io.vertx.servicediscovery.spi.ServiceImporter)bridge.getDelegate(), configuration));
     return ret;
   }
 

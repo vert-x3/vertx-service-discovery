@@ -28,7 +28,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.impl.ServiceTypes;
-import io.vertx.servicediscovery.spi.ServiceDiscoveryBridge;
+import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServicePublisher;
 import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.HttpLocation;
@@ -41,12 +41,12 @@ import java.util.List;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class ConsulServiceDiscoveryBridge implements ServiceDiscoveryBridge {
+public class ConsulServiceImporter implements ServiceImporter {
 
   private ServicePublisher publisher;
   private HttpClient client;
 
-  private final static Logger LOGGER = LoggerFactory.getLogger(ConsulServiceDiscoveryBridge.class);
+  private final static Logger LOGGER = LoggerFactory.getLogger(ConsulServiceImporter.class);
 
   private final List<ImportedConsulService> imports = new ArrayList<>();
   private String dc;

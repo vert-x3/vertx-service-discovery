@@ -1,6 +1,6 @@
 require 'vertx-service-discovery/service_reference'
 require 'vertx/vertx'
-require 'vertx-service-discovery/service_discovery_bridge'
+require 'vertx-service-discovery/service_importer'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.servicediscovery.ServiceDiscovery
 module VertxServiceDiscovery
@@ -88,12 +88,12 @@ module VertxServiceDiscovery
     end
     #  Registers a discovery bridge. Bridges let you integrate other discovery technologies in this service
     #  discovery.
-    # @param [::VertxServiceDiscovery::ServiceDiscoveryBridge] bridge the bridge
+    # @param [::VertxServiceDiscovery::ServiceImporter] bridge the bridge
     # @param [Hash{String => Object}] configuration the optional configuration
     # @return [::VertxServiceDiscovery::ServiceDiscovery] the current {::VertxServiceDiscovery::ServiceDiscovery}
     def register_discovery_bridge(bridge=nil,configuration=nil)
       if bridge.class.method_defined?(:j_del) && configuration.class == Hash && !block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:registerDiscoveryBridge, [Java::IoVertxServicediscoverySpi::ServiceDiscoveryBridge.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(bridge.j_del,::Vertx::Util::Utils.to_json_object(configuration)),::VertxServiceDiscovery::ServiceDiscovery)
+        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:registerDiscoveryBridge, [Java::IoVertxServicediscoverySpi::ServiceImporter.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(bridge.j_del,::Vertx::Util::Utils.to_json_object(configuration)),::VertxServiceDiscovery::ServiceDiscovery)
       end
       raise ArgumentError, "Invalid arguments when calling register_discovery_bridge(bridge,configuration)"
     end

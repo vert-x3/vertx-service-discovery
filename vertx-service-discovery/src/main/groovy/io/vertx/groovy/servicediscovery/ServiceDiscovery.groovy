@@ -22,9 +22,9 @@ import io.vertx.groovy.core.Vertx
 import java.util.Set
 import io.vertx.servicediscovery.Record
 import java.util.function.Function
+import io.vertx.groovy.servicediscovery.spi.ServiceImporter
 import io.vertx.servicediscovery.ServiceDiscoveryOptions
 import java.util.List
-import io.vertx.groovy.servicediscovery.spi.ServiceDiscoveryBridge
 import io.vertx.core.json.JsonObject
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
@@ -124,8 +124,8 @@ public class ServiceDiscovery {
    * @param configuration the optional configuration
    * @return the current {@link io.vertx.groovy.servicediscovery.ServiceDiscovery}
    */
-  public ServiceDiscovery registerDiscoveryBridge(ServiceDiscoveryBridge bridge, Map<String, Object> configuration) {
-    def ret = InternalHelper.safeCreate(delegate.registerDiscoveryBridge(bridge != null ? (io.vertx.servicediscovery.spi.ServiceDiscoveryBridge)bridge.getDelegate() : null, configuration != null ? new io.vertx.core.json.JsonObject(configuration) : null), io.vertx.groovy.servicediscovery.ServiceDiscovery.class);
+  public ServiceDiscovery registerDiscoveryBridge(ServiceImporter bridge, Map<String, Object> configuration) {
+    def ret = InternalHelper.safeCreate(delegate.registerDiscoveryBridge(bridge != null ? (io.vertx.servicediscovery.spi.ServiceImporter)bridge.getDelegate() : null, configuration != null ? new io.vertx.core.json.JsonObject(configuration) : null), io.vertx.groovy.servicediscovery.ServiceDiscovery.class);
     return ret;
   }
   /**
