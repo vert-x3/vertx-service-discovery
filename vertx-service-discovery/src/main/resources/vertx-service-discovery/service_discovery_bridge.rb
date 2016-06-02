@@ -1,6 +1,6 @@
 require 'vertx/vertx'
-require 'vertx-service-discovery/service_discovery'
 require 'vertx/future'
+require 'vertx-service-discovery/service_publisher'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.servicediscovery.spi.ServiceDiscoveryBridge
 module VertxServiceDiscovery
@@ -21,26 +21,26 @@ module VertxServiceDiscovery
     end
     #  Starts the bridge.
     # @param [::Vertx::Vertx] vertx the vertx instance
-    # @param [::VertxServiceDiscovery::ServiceDiscovery] discovery the service discovery instance
+    # @param [::VertxServiceDiscovery::ServicePublisher] publisher the service discovery instance
     # @param [Hash{String => Object}] configuration the bridge configuration if any
-    # @param [::Vertx::Future] future a future on which the bridge must report the completion of the starting process
+    # @param [::Vertx::Future] future a future on which the bridge must report the completion of the starting
     # @return [void]
-    def start(vertx=nil,discovery=nil,configuration=nil,future=nil)
-      if vertx.class.method_defined?(:j_del) && discovery.class.method_defined?(:j_del) && configuration.class == Hash && future.class.method_defined?(:j_del) && !block_given?
-        return @j_del.java_method(:start, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Future.java_class]).call(vertx.j_del,discovery.j_del,::Vertx::Util::Utils.to_json_object(configuration),future.j_del)
+    def start(vertx=nil,publisher=nil,configuration=nil,future=nil)
+      if vertx.class.method_defined?(:j_del) && publisher.class.method_defined?(:j_del) && configuration.class == Hash && future.class.method_defined?(:j_del) && !block_given?
+        return @j_del.java_method(:start, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxServicediscoverySpi::ServicePublisher.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Future.java_class]).call(vertx.j_del,publisher.j_del,::Vertx::Util::Utils.to_json_object(configuration),future.j_del)
       end
-      raise ArgumentError, "Invalid arguments when calling start(vertx,discovery,configuration,future)"
+      raise ArgumentError, "Invalid arguments when calling start(vertx,publisher,configuration,future)"
     end
     #  Stops the bridge.
     # @param [::Vertx::Vertx] vertx the vertx instance
-    # @param [::VertxServiceDiscovery::ServiceDiscovery] discovery the service discovery instance
+    # @param [::VertxServiceDiscovery::ServicePublisher] publisher the service discovery instance
     # @param [::Vertx::Future] future the future on which the bridge must report the completion of the stopping process
     # @return [void]
-    def stop(vertx=nil,discovery=nil,future=nil)
-      if vertx.class.method_defined?(:j_del) && discovery.class.method_defined?(:j_del) && future.class.method_defined?(:j_del) && !block_given?
-        return @j_del.java_method(:stop, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCore::Future.java_class]).call(vertx.j_del,discovery.j_del,future.j_del)
+    def stop(vertx=nil,publisher=nil,future=nil)
+      if vertx.class.method_defined?(:j_del) && publisher.class.method_defined?(:j_del) && future.class.method_defined?(:j_del) && !block_given?
+        return @j_del.java_method(:stop, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxServicediscoverySpi::ServicePublisher.java_class,Java::IoVertxCore::Future.java_class]).call(vertx.j_del,publisher.j_del,future.j_del)
       end
-      raise ArgumentError, "Invalid arguments when calling stop(vertx,discovery,future)"
+      raise ArgumentError, "Invalid arguments when calling stop(vertx,publisher,future)"
     end
   end
 end

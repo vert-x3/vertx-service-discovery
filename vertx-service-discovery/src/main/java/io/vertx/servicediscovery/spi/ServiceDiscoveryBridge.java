@@ -21,7 +21,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
-import io.vertx.servicediscovery.ServiceDiscovery;
 
 /**
  * Service Discovery bridge allows integrate other discovery technologies with the Vert.x service discovery. It maps
@@ -36,23 +35,20 @@ public interface ServiceDiscoveryBridge {
 
   /**
    * Starts the bridge.
-   *
-   * @param vertx         the vertx instance
-   * @param discovery     the service discovery instance
+   *  @param vertx         the vertx instance
+   * @param publisher     the service discovery instance
    * @param configuration the bridge configuration if any
    * @param future        a future on which the bridge must report the completion of the starting
-   *                      process
    */
-  void start(Vertx vertx, ServiceDiscovery discovery, JsonObject configuration,
+  void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration,
              Future<Void> future);
 
   /**
    * Stops the bridge.
-   *
-   * @param vertx     the vertx instance
-   * @param discovery the service discovery instance
+   *  @param vertx     the vertx instance
+   * @param publisher the service discovery instance
    * @param future    the future on which the bridge must report the completion of the stopping process
    */
-  void stop(Vertx vertx, ServiceDiscovery discovery, Future<Void> future);
+  void stop(Vertx vertx, ServicePublisher publisher, Future<Void> future);
 
 }

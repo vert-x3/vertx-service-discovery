@@ -17,8 +17,8 @@
 /** @module vertx-service-discovery-js/service_discovery_bridge */
 var utils = require('vertx-js/util/utils');
 var Vertx = require('vertx-js/vertx');
-var ServiceDiscovery = require('vertx-service-discovery-js/service_discovery');
 var Future = require('vertx-js/future');
+var ServicePublisher = require('vertx-service-discovery-js/service_publisher');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
@@ -38,14 +38,14 @@ var ServiceDiscoveryBridge = function(j_val) {
 
    @public
    @param vertx {Vertx} the vertx instance 
-   @param discovery {ServiceDiscovery} the service discovery instance 
+   @param publisher {ServicePublisher} the service discovery instance 
    @param configuration {Object} the bridge configuration if any 
-   @param future {Future} a future on which the bridge must report the completion of the starting process 
+   @param future {Future} a future on which the bridge must report the completion of the starting 
    */
-  this.start = function(vertx, discovery, configuration, future) {
+  this.start = function(vertx, publisher, configuration, future) {
     var __args = arguments;
     if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'object' && __args[3]._jdel) {
-      j_serviceDiscoveryBridge["start(io.vertx.core.Vertx,io.vertx.servicediscovery.ServiceDiscovery,io.vertx.core.json.JsonObject,io.vertx.core.Future)"](vertx._jdel, discovery._jdel, utils.convParamJsonObject(configuration), future._jdel);
+      j_serviceDiscoveryBridge["start(io.vertx.core.Vertx,io.vertx.servicediscovery.spi.ServicePublisher,io.vertx.core.json.JsonObject,io.vertx.core.Future)"](vertx._jdel, publisher._jdel, utils.convParamJsonObject(configuration), future._jdel);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -54,13 +54,13 @@ var ServiceDiscoveryBridge = function(j_val) {
 
    @public
    @param vertx {Vertx} the vertx instance 
-   @param discovery {ServiceDiscovery} the service discovery instance 
+   @param publisher {ServicePublisher} the service discovery instance 
    @param future {Future} the future on which the bridge must report the completion of the stopping process 
    */
-  this.stop = function(vertx, discovery, future) {
+  this.stop = function(vertx, publisher, future) {
     var __args = arguments;
     if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && typeof __args[2] === 'object' && __args[2]._jdel) {
-      j_serviceDiscoveryBridge["stop(io.vertx.core.Vertx,io.vertx.servicediscovery.ServiceDiscovery,io.vertx.core.Future)"](vertx._jdel, discovery._jdel, future._jdel);
+      j_serviceDiscoveryBridge["stop(io.vertx.core.Vertx,io.vertx.servicediscovery.spi.ServicePublisher,io.vertx.core.Future)"](vertx._jdel, publisher._jdel, future._jdel);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 

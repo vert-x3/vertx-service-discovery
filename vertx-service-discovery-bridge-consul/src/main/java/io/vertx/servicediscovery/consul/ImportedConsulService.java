@@ -18,7 +18,7 @@ package io.vertx.servicediscovery.consul;
 
 import io.vertx.core.Future;
 import io.vertx.servicediscovery.Record;
-import io.vertx.servicediscovery.ServiceDiscovery;
+import io.vertx.servicediscovery.spi.ServicePublisher;
 
 import java.util.Objects;
 
@@ -59,12 +59,12 @@ public class ImportedConsulService {
   /**
    * Registers the service and completes the given future when done.
    *
-   * @param discovery  the service discovery instance
+   * @param publisher  the service publisher instance
    * @param completion the completion future
    * @return the current {@link ImportedConsulService}
    */
-  public ImportedConsulService register(ServiceDiscovery discovery, Future<Void> completion) {
-    discovery.publish(record, ar -> {
+  public ImportedConsulService register(ServicePublisher publisher, Future<Void> completion) {
+    publisher.publish(record, ar -> {
       if (ar.succeeded()) {
         record.setRegistration(ar.result().getRegistration());
         completion.complete();
@@ -78,12 +78,12 @@ public class ImportedConsulService {
   /**
    * Unregisters the service and completes the given future when done, if not {@code null}
    *
-   * @param discovery  the service discovery instance
+   * @param publiher  the service publisher instance
    * @param completion the completion future
    */
-  public void unregister(ServiceDiscovery discovery, Future<Void> completion) {
+  public void unregister(ServicePublisher publiher, Future<Void> completion) {
     if (record.getRegistration() != null) {
-      discovery.unpublish(record.getRegistration(), ar -> {
+      publiher.unpublish(record.getRegistration(), ar -> {
         if (ar.succeeded()) {
           record.setRegistration(null);
         }

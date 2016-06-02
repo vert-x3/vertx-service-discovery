@@ -23,6 +23,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
+import io.vertx.servicediscovery.spi.ServicePublisher;
 import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.HttpEndpoint;
 import org.junit.Test;
@@ -145,7 +146,7 @@ public class KubernetesServiceDiscoveryBridgeTest {
     AtomicReference<Record> record = new AtomicReference<>();
     vertx.eventBus().consumer("vertx.discovery.announce", message ->
         record.set(new Record((JsonObject) message.body())));
-    ServiceDiscovery discovery = ServiceDiscovery.create(vertx);
+    ServicePublisher discovery = (ServicePublisher) ServiceDiscovery.create(vertx);
     KubernetesServiceDiscoveryBridge bridge = new KubernetesServiceDiscoveryBridge();
     Future<Void> future = Future.future();
     bridge.start(vertx, discovery, new JsonObject().put("token", "a token"), future);

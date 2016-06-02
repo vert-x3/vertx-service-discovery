@@ -20,7 +20,6 @@ import io.vertx.lang.groovy.InternalHelper
 import io.vertx.core.json.JsonObject
 import io.vertx.groovy.core.Vertx
 import io.vertx.core.json.JsonObject
-import io.vertx.groovy.servicediscovery.ServiceDiscovery
 import io.vertx.groovy.core.Future
 /**
  * Service Discovery bridge allows integrate other discovery technologies with the Vert.x service discovery. It maps
@@ -40,20 +39,20 @@ public class ServiceDiscoveryBridge {
   /**
    * Starts the bridge.
    * @param vertx the vertx instance
-   * @param discovery the service discovery instance
+   * @param publisher the service discovery instance
    * @param configuration the bridge configuration if any
-   * @param future a future on which the bridge must report the completion of the starting process
+   * @param future a future on which the bridge must report the completion of the starting
    */
-  public void start(Vertx vertx, ServiceDiscovery discovery, Map<String, Object> configuration, Future<Void> future) {
-    delegate.start(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.servicediscovery.ServiceDiscovery)discovery.getDelegate() : null, configuration != null ? new io.vertx.core.json.JsonObject(configuration) : null, future != null ? (io.vertx.core.Future<java.lang.Void>)future.getDelegate() : null);
+  public void start(Vertx vertx, ServicePublisher publisher, Map<String, Object> configuration, Future<Void> future) {
+    delegate.start(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, publisher != null ? (io.vertx.servicediscovery.spi.ServicePublisher)publisher.getDelegate() : null, configuration != null ? new io.vertx.core.json.JsonObject(configuration) : null, future != null ? (io.vertx.core.Future<java.lang.Void>)future.getDelegate() : null);
   }
   /**
    * Stops the bridge.
    * @param vertx the vertx instance
-   * @param discovery the service discovery instance
+   * @param publisher the service discovery instance
    * @param future the future on which the bridge must report the completion of the stopping process
    */
-  public void stop(Vertx vertx, ServiceDiscovery discovery, Future<Void> future) {
-    delegate.stop(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, discovery != null ? (io.vertx.servicediscovery.ServiceDiscovery)discovery.getDelegate() : null, future != null ? (io.vertx.core.Future<java.lang.Void>)future.getDelegate() : null);
+  public void stop(Vertx vertx, ServicePublisher publisher, Future<Void> future) {
+    delegate.stop(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, publisher != null ? (io.vertx.servicediscovery.spi.ServicePublisher)publisher.getDelegate() : null, future != null ? (io.vertx.core.Future<java.lang.Void>)future.getDelegate() : null);
   }
 }

@@ -816,7 +816,7 @@ method is blocking, it must uses an
 complete the given future object.
 
 When the service discovery is stopped, the bridge is stopped. The
-`link:../../apidocs/io/vertx/servicediscovery/spi/ServiceDiscoveryBridge.html#stop-io.vertx.core.Vertx-io.vertx.servicediscovery.ServiceDiscovery-io.vertx.core.Future-[stop]`
+`link:../../apidocs/io/vertx/servicediscovery/spi/ServiceDiscoveryBridge.html#stop-io.vertx.core.Vertx-io.vertx.servicediscovery.spi.ServicePublisher-io.vertx.core.Future-[stop]`
 method is called that provides the opportunity to cleanup resources, removed imported / exported services... This
 method must complete the given `link:../../apidocs/io/vertx/core/Future.html[Future]` to notify the caller of the completion.
 

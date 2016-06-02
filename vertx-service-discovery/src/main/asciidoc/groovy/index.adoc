@@ -795,7 +795,7 @@ method is blocking, it must uses an
 complete the given future object.
 
 When the service discovery is stopped, the bridge is stopped. The
-`link:../../groovydoc/io/vertx/groovy/servicediscovery/spi/ServiceDiscoveryBridge.html#stop(io.vertx.core.Vertx,%20io.vertx.servicediscovery.ServiceDiscovery,%20io.vertx.core.Future)[stop]`
+`link:../../groovydoc/io/vertx/groovy/servicediscovery/spi/ServiceDiscoveryBridge.html#stop(io.vertx.core.Vertx,%20io.vertx.servicediscovery.spi.ServicePublisher,%20io.vertx.core.Future)[stop]`
 method is called that provides the opportunity to cleanup resources, removed imported / exported services... This
 method must complete the given `link:../../groovydoc/io/vertx/groovy/core/Future.html[Future]` to notify the caller of the completion.
 

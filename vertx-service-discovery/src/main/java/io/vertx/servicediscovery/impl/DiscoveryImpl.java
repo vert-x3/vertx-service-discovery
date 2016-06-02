@@ -24,6 +24,7 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.servicediscovery.*;
 import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend;
 import io.vertx.servicediscovery.spi.ServiceDiscoveryBridge;
+import io.vertx.servicediscovery.spi.ServicePublisher;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class DiscoveryImpl implements ServiceDiscovery {
+public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
   private final Vertx vertx;
   private final String announce;

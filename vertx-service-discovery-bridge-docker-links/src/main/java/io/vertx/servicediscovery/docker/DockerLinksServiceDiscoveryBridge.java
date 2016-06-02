@@ -23,8 +23,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.servicediscovery.Record;
-import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.spi.ServiceDiscoveryBridge;
+import io.vertx.servicediscovery.spi.ServicePublisher;
 import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.HttpEndpoint;
 import io.vertx.servicediscovery.types.HttpLocation;
@@ -48,7 +48,7 @@ public class DockerLinksServiceDiscoveryBridge implements ServiceDiscoveryBridge
   /**
    * The service discovery instance. Immutable once set.
    */
-  private ServiceDiscovery discovery;
+  private ServicePublisher publisher;
 
   /**
    * The list of records that are imported. Content staled once initialized.
@@ -58,9 +58,9 @@ public class DockerLinksServiceDiscoveryBridge implements ServiceDiscoveryBridge
   private final static Logger LOGGER = LoggerFactory.getLogger(DockerLinksServiceDiscoveryBridge.class);
 
   @Override
-  public void start(Vertx vertx, ServiceDiscovery discovery, JsonObject configuration,
+  public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration,
                     Future<Void> completion) {
-    this.discovery = discovery;
+    this.publisher = publisher;
 
     synchronized (this) {
       lookup(completion);
@@ -87,7 +87,7 @@ public class DockerLinksServiceDiscoveryBridge implements ServiceDiscoveryBridge
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         LOGGER.info("Record created from link " + link + " : " + record);
-        discovery.publish(record, ar -> {
+        publisher.publish(record, ar -> {
           if (ar.succeeded()) {
             records.add(ar.result());
             LOGGER.info("Service imported from Docker link : " + link + " with endpoint set to "
@@ -136,10 +136,10 @@ public class DockerLinksServiceDiscoveryBridge implements ServiceDiscoveryBridge
   }
 
   @Override
-  public void stop(Vertx vertx, ServiceDiscovery discovery, Future<Void> completion) {
+  public void stop(Vertx vertx, ServicePublisher publisher, Future<Void> completion) {
     List<Future> list = new ArrayList<>();
     for (Record record : records) {
-      discovery.unpublish(record.getRegistration(),
+      publisher.unpublish(record.getRegistration(),
           v -> list.add(v.succeeded() ? Future.succeededFuture() : Future.failedFuture(v.cause())));
     }
 

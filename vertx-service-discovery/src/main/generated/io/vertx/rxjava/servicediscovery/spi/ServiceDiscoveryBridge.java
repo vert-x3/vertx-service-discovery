@@ -20,7 +20,6 @@ import java.util.Map;
 import rx.Observable;
 import io.vertx.rxjava.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.rxjava.servicediscovery.ServiceDiscovery;
 import io.vertx.rxjava.core.Future;
 
 /**
@@ -48,22 +47,22 @@ public class ServiceDiscoveryBridge {
   /**
    * Starts the bridge.
    * @param vertx the vertx instance
-   * @param discovery the service discovery instance
+   * @param publisher the service discovery instance
    * @param configuration the bridge configuration if any
-   * @param future a future on which the bridge must report the completion of the starting process
+   * @param future a future on which the bridge must report the completion of the starting
    */
-  public void start(Vertx vertx, ServiceDiscovery discovery, JsonObject configuration, Future<Void> future) { 
-    delegate.start((io.vertx.core.Vertx)vertx.getDelegate(), (io.vertx.servicediscovery.ServiceDiscovery)discovery.getDelegate(), configuration, (io.vertx.core.Future<java.lang.Void>)future.getDelegate());
+  public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Future<Void> future) { 
+    delegate.start((io.vertx.core.Vertx)vertx.getDelegate(), (io.vertx.servicediscovery.spi.ServicePublisher)publisher.getDelegate(), configuration, (io.vertx.core.Future<java.lang.Void>)future.getDelegate());
   }
 
   /**
    * Stops the bridge.
    * @param vertx the vertx instance
-   * @param discovery the service discovery instance
+   * @param publisher the service discovery instance
    * @param future the future on which the bridge must report the completion of the stopping process
    */
-  public void stop(Vertx vertx, ServiceDiscovery discovery, Future<Void> future) { 
-    delegate.stop((io.vertx.core.Vertx)vertx.getDelegate(), (io.vertx.servicediscovery.ServiceDiscovery)discovery.getDelegate(), (io.vertx.core.Future<java.lang.Void>)future.getDelegate());
+  public void stop(Vertx vertx, ServicePublisher publisher, Future<Void> future) { 
+    delegate.stop((io.vertx.core.Vertx)vertx.getDelegate(), (io.vertx.servicediscovery.spi.ServicePublisher)publisher.getDelegate(), (io.vertx.core.Future<java.lang.Void>)future.getDelegate());
   }
 
 

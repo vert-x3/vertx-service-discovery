@@ -27,9 +27,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.servicediscovery.Record;
-import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.impl.ServiceTypes;
 import io.vertx.servicediscovery.spi.ServiceDiscoveryBridge;
+import io.vertx.servicediscovery.spi.ServicePublisher;
 import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.HttpLocation;
 
@@ -43,7 +43,7 @@ import java.util.List;
  */
 public class ConsulServiceDiscoveryBridge implements ServiceDiscoveryBridge {
 
-  private ServiceDiscovery discovery;
+  private ServicePublisher publisher;
   private HttpClient client;
 
   private final static Logger LOGGER = LoggerFactory.getLogger(ConsulServiceDiscoveryBridge.class);
@@ -53,8 +53,8 @@ public class ConsulServiceDiscoveryBridge implements ServiceDiscoveryBridge {
   private long scanTask = -1;
 
   @Override
-  public void start(Vertx vertx, ServiceDiscovery discovery, JsonObject configuration, Future<Void> completion) {
-    this.discovery = discovery;
+  public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Future<Void> completion) {
+    this.publisher = publisher;
 
     HttpClientOptions options = new HttpClientOptions(configuration);
     String host = configuration.getString("host", "localhost");
@@ -160,7 +160,7 @@ public class ConsulServiceDiscoveryBridge implements ServiceDiscoveryBridge {
         List<ImportedConsulService> toRemove = new ArrayList<>();
         imports.stream().filter(svc -> !ids.contains(svc.id())).forEach(svc -> {
           toRemove.add(svc);
-          svc.unregister(discovery, null);
+          svc.unregister(publisher, null);
         });
         imports.removeAll(toRemove);
       }
@@ -231,7 +231,7 @@ public class ConsulServiceDiscoveryBridge implements ServiceDiscoveryBridge {
         future.complete();
       } else {
         LOGGER.info("Importing service " + record.getName() + " from consul");
-        imports.add(new ImportedConsulService(name, id, record).register(discovery, future));
+        imports.add(new ImportedConsulService(name, id, record).register(publisher, future));
       }
 
       return id;
@@ -249,7 +249,7 @@ public class ConsulServiceDiscoveryBridge implements ServiceDiscoveryBridge {
   }
 
   @Override
-  public void stop(Vertx vertx, ServiceDiscovery discovery, Future<Void> future) {
+  public void stop(Vertx vertx, ServicePublisher publisher, Future<Void> future) {
     if (scanTask != -1) {
       vertx.cancelTimer(scanTask);
     }
@@ -265,7 +265,7 @@ public class ConsulServiceDiscoveryBridge implements ServiceDiscoveryBridge {
           list.add(Future.failedFuture(ar.cause()));
         }
       });
-      imported.unregister(discovery, fut);
+      imported.unregister(publisher, fut);
     });
 
     CompositeFuture.all(list).setHandler(ar -> {
