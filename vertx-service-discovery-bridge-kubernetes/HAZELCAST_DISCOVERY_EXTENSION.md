@@ -78,7 +78,7 @@ Then, you need a specific `cluster.xml` with the following content:
       <tcp-ip enabled="false"/>
       <discovery-strategies>
         <discovery-strategy enabled="true"
-                            class="io.vertx.ext.discovery.hazelcast.HazelcastKubernetesDiscoveryStrategy">
+                            class="io.vertx.servicediscovery.hazelcast.HazelcastKubernetesDiscoveryStrategyFactory">
           <properties>
             <property name="namespace">clement-reactive-msa-demo</property>
           </properties>
@@ -117,7 +117,7 @@ Two parts are important regarding the Kubernetes discovery:
 ```
 <discovery-strategies>
     <discovery-strategy enabled="true"
-                        class="io.vertx.ext.discovery.hazelcast.HazelcastKubernetesDiscoveryStrategy">
+                        class="io.vertx.servicediscovery.hazelcast.HazelcastKubernetesDiscoveryStrategyFactory">
       <properties>
         <property name="namespace">your_namespace</property>
       </properties>
