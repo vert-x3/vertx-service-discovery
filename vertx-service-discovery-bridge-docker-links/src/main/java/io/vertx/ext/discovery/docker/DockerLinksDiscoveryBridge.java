@@ -22,12 +22,12 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.servicediscovery.DiscoveryService;
-import io.vertx.servicediscovery.Record;
-import io.vertx.servicediscovery.spi.DiscoveryBridge;
-import io.vertx.servicediscovery.spi.ServiceType;
-import io.vertx.servicediscovery.types.HttpEndpoint;
-import io.vertx.servicediscovery.types.HttpLocation;
+import io.vertx.ext.servicediscovery.DiscoveryService;
+import io.vertx.ext.servicediscovery.Record;
+import io.vertx.ext.servicediscovery.spi.DiscoveryBridge;
+import io.vertx.ext.servicediscovery.spi.ServiceType;
+import io.vertx.ext.servicediscovery.types.HttpEndpoint;
+import io.vertx.ext.servicediscovery.types.HttpLocation;
 
 import java.net.URI;
 import java.net.URISyntaxException;

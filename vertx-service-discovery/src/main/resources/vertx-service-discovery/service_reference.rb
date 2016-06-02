@@ -1,5 +1,5 @@
 require 'vertx/util/utils.rb'
-# Generated from io.vertx.servicediscovery.ServiceReference
+# Generated from io.vertx.ext.servicediscovery.ServiceReference
 module VertxServiceDiscovery
   #  Once a consumer has chosen a service, it builds a {::VertxServiceDiscovery::ServiceReference} managing the binding with the chosen
   #  service provider.

@@ -15,9 +15,9 @@
  */
 package verticles;
 
-import io.vertx.groovy.servicediscovery.DiscoveryService
-import io.vertx.groovy.servicediscovery.types.EventBusService
-import io.vertx.groovy.ext.service.HelloService
+import io.vertx.groovy.ext.servicediscovery.DiscoveryService
+import io.vertx.groovy.ext.servicediscovery.types.EventBusService
+import io.vertx.ext.service.groovy.HelloService
 
 def discovery = DiscoveryService.create(vertx);
 EventBusService.<HelloService> getProxy(

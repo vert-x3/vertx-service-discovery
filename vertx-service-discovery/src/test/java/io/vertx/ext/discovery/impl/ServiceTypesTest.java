@@ -16,9 +16,9 @@
 
 package io.vertx.ext.discovery.impl;
 
-import io.vertx.servicediscovery.Record;
-import io.vertx.servicediscovery.impl.ServiceTypes;
-import io.vertx.servicediscovery.spi.ServiceType;
+import io.vertx.ext.servicediscovery.Record;
+import io.vertx.ext.servicediscovery.impl.ServiceTypes;
+import io.vertx.ext.servicediscovery.spi.ServiceType;
 import org.junit.Test;
 
 /**

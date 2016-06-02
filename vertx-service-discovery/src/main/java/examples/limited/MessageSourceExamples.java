@@ -17,9 +17,9 @@
 package examples.limited;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.DiscoveryService;
-import io.vertx.servicediscovery.Record;
-import io.vertx.servicediscovery.types.MessageSource;
+import io.vertx.ext.servicediscovery.DiscoveryService;
+import io.vertx.ext.servicediscovery.Record;
+import io.vertx.ext.servicediscovery.types.MessageSource;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>

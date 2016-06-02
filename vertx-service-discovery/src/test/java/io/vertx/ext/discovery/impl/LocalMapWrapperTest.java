@@ -18,7 +18,7 @@ package io.vertx.ext.discovery.impl;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.shareddata.LocalMap;
-import io.vertx.servicediscovery.impl.LocalMapWrapper;
+import io.vertx.ext.servicediscovery.impl.LocalMapWrapper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

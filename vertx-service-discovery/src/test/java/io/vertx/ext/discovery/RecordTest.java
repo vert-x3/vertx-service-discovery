@@ -18,11 +18,11 @@ package io.vertx.ext.discovery;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.DiscoveryOptions;
-import io.vertx.servicediscovery.DiscoveryService;
-import io.vertx.servicediscovery.Record;
-import io.vertx.servicediscovery.Status;
-import io.vertx.servicediscovery.impl.DiscoveryImpl;
+import io.vertx.ext.servicediscovery.DiscoveryOptions;
+import io.vertx.ext.servicediscovery.DiscoveryService;
+import io.vertx.ext.servicediscovery.Record;
+import io.vertx.ext.servicediscovery.Status;
+import io.vertx.ext.servicediscovery.impl.DiscoveryImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

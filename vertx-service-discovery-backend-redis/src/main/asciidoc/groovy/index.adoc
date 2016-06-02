@@ -41,7 +41,7 @@ Here is an example:
 
 [source,groovy]
 ----
-import io.vertx.groovy.servicediscovery.DiscoveryService
+import io.vertx.groovy.ext.servicediscovery.DiscoveryService
 DiscoveryService.create(vertx, [
   backendConfiguration:[
     host:"127.0.0.1",

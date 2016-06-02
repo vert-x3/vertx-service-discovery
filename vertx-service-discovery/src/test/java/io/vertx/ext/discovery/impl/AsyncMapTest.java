@@ -17,7 +17,7 @@
 package io.vertx.ext.discovery.impl;
 
 import io.vertx.core.Vertx;
-import io.vertx.servicediscovery.impl.AsyncMap;
+import io.vertx.ext.servicediscovery.impl.AsyncMap;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;

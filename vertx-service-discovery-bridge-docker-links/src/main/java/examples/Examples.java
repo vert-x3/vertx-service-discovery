@@ -18,7 +18,7 @@ package examples;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.DiscoveryService;
+import io.vertx.ext.servicediscovery.DiscoveryService;
 import io.vertx.ext.discovery.docker.DockerLinksDiscoveryBridge;
 
 /**

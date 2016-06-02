@@ -1,6 +1,6 @@
 == Vert.x Discovery Backend - Redis
 
-The discovery service has a plug-able backend using the `link:../../apidocs/io/vertx/servicediscovery/spi/DiscoveryBackend.html[DiscoveryBackend]` SPI.
+The discovery service has a plug-able backend using the `link:../../apidocs/io/vertx/ext/servicediscovery/spi/DiscoveryBackend.html[DiscoveryBackend]` SPI.
 
 This is an implementation of the SPI based
 on Redis.

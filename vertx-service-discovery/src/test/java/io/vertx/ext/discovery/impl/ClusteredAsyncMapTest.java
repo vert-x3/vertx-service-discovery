@@ -18,7 +18,7 @@ package io.vertx.ext.discovery.impl;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
-import io.vertx.servicediscovery.impl.AsyncMap;
+import io.vertx.ext.servicediscovery.impl.AsyncMap;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.Before;
 import org.junit.runner.RunWith;

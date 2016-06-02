@@ -1,1 +1,1 @@
-io.vertx.servicediscovery.hazelcast.HazelcastKubernetesDiscoveryStrategyFactory
+io.vertx.ext.servicediscovery.hazelcast.HazelcastKubernetesDiscoveryStrategyFactory

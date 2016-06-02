@@ -19,7 +19,7 @@ package io.vertx.ext.discovery.impl;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.impl.DefaultDiscoveryBackend;
+import io.vertx.ext.servicediscovery.impl.DefaultDiscoveryBackend;
 import org.junit.Before;
 
 import static com.jayway.awaitility.Awaitility.await;

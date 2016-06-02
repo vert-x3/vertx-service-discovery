@@ -18,8 +18,8 @@ package examples;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.DiscoveryService;
-import io.vertx.servicediscovery.consul.ConsulDiscoveryBridge;
+import io.vertx.ext.servicediscovery.DiscoveryService;
+import io.vertx.ext.servicediscovery.consul.ConsulDiscoveryBridge;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>

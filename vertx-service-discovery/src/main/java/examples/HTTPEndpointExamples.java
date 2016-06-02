@@ -18,10 +18,10 @@ package examples;
 
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.DiscoveryService;
-import io.vertx.servicediscovery.Record;
-import io.vertx.servicediscovery.ServiceReference;
-import io.vertx.servicediscovery.types.HttpEndpoint;
+import io.vertx.ext.servicediscovery.DiscoveryService;
+import io.vertx.ext.servicediscovery.Record;
+import io.vertx.ext.servicediscovery.ServiceReference;
+import io.vertx.ext.servicediscovery.types.HttpEndpoint;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>

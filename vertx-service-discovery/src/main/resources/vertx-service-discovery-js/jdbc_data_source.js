@@ -21,8 +21,8 @@ var JDBCClient = require('vertx-jdbc-js/jdbc_client');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JJDBCDataSource = io.vertx.servicediscovery.types.JDBCDataSource;
-var Record = io.vertx.servicediscovery.Record;
+var JJDBCDataSource = io.vertx.ext.servicediscovery.types.JDBCDataSource;
+var Record = io.vertx.ext.servicediscovery.Record;
 
 /**
 
@@ -67,7 +67,7 @@ JDBCDataSource.createRecord = function(name, location, metadata) {
 JDBCDataSource.getJDBCClient = function() {
   var __args = arguments;
   if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'function') {
-    JJDBCDataSource["getJDBCClient(io.vertx.servicediscovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](__args[0]._jdel, utils.convParamJsonObject(__args[1]), function(ar) {
+    JJDBCDataSource["getJDBCClient(io.vertx.ext.servicediscovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](__args[0]._jdel, utils.convParamJsonObject(__args[1]), function(ar) {
     if (ar.succeeded()) {
       __args[2](utils.convReturnVertxGen(ar.result(), JDBCClient), null);
     } else {
@@ -75,7 +75,7 @@ JDBCDataSource.getJDBCClient = function() {
     }
   });
   }else if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null) && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
-    JJDBCDataSource["getJDBCClient(io.vertx.servicediscovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](__args[0]._jdel, utils.convParamJsonObject(__args[1]), utils.convParamJsonObject(__args[2]), function(ar) {
+    JJDBCDataSource["getJDBCClient(io.vertx.ext.servicediscovery.DiscoveryService,io.vertx.core.json.JsonObject,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](__args[0]._jdel, utils.convParamJsonObject(__args[1]), utils.convParamJsonObject(__args[2]), function(ar) {
     if (ar.succeeded()) {
       __args[3](utils.convReturnVertxGen(ar.result(), JDBCClient), null);
     } else {
