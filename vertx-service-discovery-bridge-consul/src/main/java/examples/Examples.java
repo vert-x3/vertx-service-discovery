@@ -18,8 +18,8 @@ package examples;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.discovery.ServiceDiscovery;
-import io.vertx.ext.discovery.consul.ConsulDiscoveryBridge;
+import io.vertx.servicediscovery.ServiceDiscovery;
+import io.vertx.servicediscovery.consul.ConsulServiceDiscoveryBridge;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -28,7 +28,7 @@ public class Examples {
 
   public void register(Vertx vertx) {
     ServiceDiscovery.create(vertx)
-        .registerDiscoveryBridge(new ConsulDiscoveryBridge(),
+        .registerDiscoveryBridge(new ConsulServiceDiscoveryBridge(),
             new JsonObject()
                 .put("host", "localhost")
                 .put("port", 8500)

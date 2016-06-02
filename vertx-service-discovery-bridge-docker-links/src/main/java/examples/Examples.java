@@ -18,8 +18,8 @@ package examples;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.discovery.ServiceDiscovery;
-import io.vertx.ext.discovery.docker.DockerLinksDiscoveryBridge;
+import io.vertx.servicediscovery.ServiceDiscovery;
+import io.vertx.servicediscovery.docker.DockerLinksServiceDiscoveryBridge;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -28,6 +28,6 @@ public class Examples {
 
   public void register(Vertx vertx) {
     ServiceDiscovery.create(vertx)
-        .registerDiscoveryBridge(new DockerLinksDiscoveryBridge(), new JsonObject());
+        .registerDiscoveryBridge(new DockerLinksServiceDiscoveryBridge(), new JsonObject());
   }
 }

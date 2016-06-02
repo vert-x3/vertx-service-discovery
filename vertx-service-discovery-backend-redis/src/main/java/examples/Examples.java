@@ -18,8 +18,8 @@ package examples;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.discovery.ServiceDiscovery;
-import io.vertx.ext.discovery.ServiceDiscoveryOptions;
+import io.vertx.servicediscovery.ServiceDiscovery;
+import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 
 /**
  * Examples for documentation.

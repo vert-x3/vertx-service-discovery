@@ -1,6 +1,6 @@
 == Vert.x Discovery Backend - Redis
 
-The service discovery has a plug-able backend using the `link:unavailable[DiscoveryBackend]` SPI.
+The service discovery has a plug-able backend using the `link:unavailable[ServiceDiscoveryBackend]` SPI.
 
 This is an implementation of the SPI based
 on Redis.

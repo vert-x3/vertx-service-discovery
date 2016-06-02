@@ -96,7 +96,7 @@ Sets the event bus address on which the service arrivals, departures and modific
 +++
 |[[backendConfiguration]]`backendConfiguration`|`Json object`|
 +++
-Sets the configuration passed to the link.
+Sets the configuration passed to the .
  Refer to the backend documentation to get more details on the requirements. The default backend
  does not need any configuration.
 +++

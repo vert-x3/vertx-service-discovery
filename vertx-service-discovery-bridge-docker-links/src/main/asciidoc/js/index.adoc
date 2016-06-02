@@ -38,7 +38,7 @@ Then, when creating the service discovery, registers this bridge as follows:
 [source, js]
 ----
 var ServiceDiscovery = require("vertx-service-discovery-js/service_discovery");
-ServiceDiscovery.create(vertx).registerDiscoveryBridge(new (Java.type("io.vertx.ext.discovery.docker.DockerLinksDiscoveryBridge"))(), {
+ServiceDiscovery.create(vertx).registerDiscoveryBridge(new (Java.type("io.vertx.servicediscovery.docker.DockerLinksServiceDiscoveryBridge"))(), {
 });
 
 ----

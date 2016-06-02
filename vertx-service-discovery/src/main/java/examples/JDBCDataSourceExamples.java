@@ -17,10 +17,10 @@
 package examples;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.discovery.ServiceDiscovery;
-import io.vertx.ext.discovery.Record;
-import io.vertx.ext.discovery.ServiceReference;
-import io.vertx.ext.discovery.types.JDBCDataSource;
+import io.vertx.servicediscovery.ServiceDiscovery;
+import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceReference;
+import io.vertx.servicediscovery.types.JDBCDataSource;
 import io.vertx.ext.jdbc.JDBCClient;
 
 /**

@@ -16,15 +16,15 @@
 
 /** @module vertx-service-discovery-js/service_discovery */
 var utils = require('vertx-js/util/utils');
-var DiscoveryBridge = require('vertx-service-discovery-js/discovery_bridge');
-var Vertx = require('vertx-js/vertx');
 var ServiceReference = require('vertx-service-discovery-js/service_reference');
+var Vertx = require('vertx-js/vertx');
+var ServiceDiscoveryBridge = require('vertx-service-discovery-js/service_discovery_bridge');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JServiceDiscovery = io.vertx.ext.discovery.ServiceDiscovery;
-var Record = io.vertx.ext.discovery.Record;
-var ServiceDiscoveryOptions = io.vertx.ext.discovery.ServiceDiscoveryOptions;
+var JServiceDiscovery = io.vertx.servicediscovery.ServiceDiscovery;
+var ServiceDiscoveryOptions = io.vertx.servicediscovery.ServiceDiscoveryOptions;
+var Record = io.vertx.servicediscovery.Record;
 
 /**
  Service Discovery main entry point.
@@ -49,7 +49,7 @@ var ServiceDiscovery = function(j_val) {
   this.getReference = function(record) {
     var __args = arguments;
     if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
-      return utils.convReturnVertxGen(j_serviceDiscovery["getReference(io.vertx.ext.discovery.Record)"](record != null ? new Record(new JsonObject(JSON.stringify(record))) : null), ServiceReference);
+      return utils.convReturnVertxGen(j_serviceDiscovery["getReference(io.vertx.servicediscovery.Record)"](record != null ? new Record(new JsonObject(JSON.stringify(record))) : null), ServiceReference);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -64,7 +64,7 @@ var ServiceDiscovery = function(j_val) {
   this.getReferenceWithConfiguration = function(record, configuration) {
     var __args = arguments;
     if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && (typeof __args[1] === 'object' && __args[1] != null)) {
-      return utils.convReturnVertxGen(j_serviceDiscovery["getReferenceWithConfiguration(io.vertx.ext.discovery.Record,io.vertx.core.json.JsonObject)"](record != null ? new Record(new JsonObject(JSON.stringify(record))) : null, utils.convParamJsonObject(configuration)), ServiceReference);
+      return utils.convReturnVertxGen(j_serviceDiscovery["getReferenceWithConfiguration(io.vertx.servicediscovery.Record,io.vertx.core.json.JsonObject)"](record != null ? new Record(new JsonObject(JSON.stringify(record))) : null, utils.convParamJsonObject(configuration)), ServiceReference);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -78,7 +78,7 @@ var ServiceDiscovery = function(j_val) {
   this.release = function(reference) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
-      return j_serviceDiscovery["release(io.vertx.ext.discovery.ServiceReference)"](reference._jdel);
+      return j_serviceDiscovery["release(io.vertx.servicediscovery.ServiceReference)"](reference._jdel);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -87,14 +87,14 @@ var ServiceDiscovery = function(j_val) {
    discovery.
 
    @public
-   @param bridge {DiscoveryBridge} the bridge 
+   @param bridge {ServiceDiscoveryBridge} the bridge 
    @param configuration {Object} the optional configuration 
    @return {ServiceDiscovery} the current {@link ServiceDiscovery}
    */
   this.registerDiscoveryBridge = function(bridge, configuration) {
     var __args = arguments;
     if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null)) {
-      return utils.convReturnVertxGen(j_serviceDiscovery["registerDiscoveryBridge(io.vertx.ext.discovery.spi.DiscoveryBridge,io.vertx.core.json.JsonObject)"](bridge._jdel, utils.convParamJsonObject(configuration)), ServiceDiscovery);
+      return utils.convReturnVertxGen(j_serviceDiscovery["registerDiscoveryBridge(io.vertx.servicediscovery.spi.ServiceDiscoveryBridge,io.vertx.core.json.JsonObject)"](bridge._jdel, utils.convParamJsonObject(configuration)), ServiceDiscovery);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -121,7 +121,7 @@ var ServiceDiscovery = function(j_val) {
   this.publish = function(record, resultHandler) {
     var __args = arguments;
     if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
-      j_serviceDiscovery["publish(io.vertx.ext.discovery.Record,io.vertx.core.Handler)"](record != null ? new Record(new JsonObject(JSON.stringify(record))) : null, function(ar) {
+      j_serviceDiscovery["publish(io.vertx.servicediscovery.Record,io.vertx.core.Handler)"](record != null ? new Record(new JsonObject(JSON.stringify(record))) : null, function(ar) {
       if (ar.succeeded()) {
         resultHandler(utils.convReturnDataObject(ar.result()), null);
       } else {
@@ -260,7 +260,7 @@ var ServiceDiscovery = function(j_val) {
   this.update = function(record, resultHandler) {
     var __args = arguments;
     if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && typeof __args[1] === 'function') {
-      j_serviceDiscovery["update(io.vertx.ext.discovery.Record,io.vertx.core.Handler)"](record != null ? new Record(new JsonObject(JSON.stringify(record))) : null, function(ar) {
+      j_serviceDiscovery["update(io.vertx.servicediscovery.Record,io.vertx.core.Handler)"](record != null ? new Record(new JsonObject(JSON.stringify(record))) : null, function(ar) {
       if (ar.succeeded()) {
         resultHandler(utils.convReturnDataObject(ar.result()), null);
       } else {
@@ -303,7 +303,7 @@ ServiceDiscovery.create = function() {
   if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
     return utils.convReturnVertxGen(JServiceDiscovery["create(io.vertx.core.Vertx)"](__args[0]._jdel), ServiceDiscovery);
   }else if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null)) {
-    return utils.convReturnVertxGen(JServiceDiscovery["create(io.vertx.core.Vertx,io.vertx.ext.discovery.ServiceDiscoveryOptions)"](__args[0]._jdel, __args[1] != null ? new ServiceDiscoveryOptions(new JsonObject(JSON.stringify(__args[1]))) : null), ServiceDiscovery);
+    return utils.convReturnVertxGen(JServiceDiscovery["create(io.vertx.core.Vertx,io.vertx.servicediscovery.ServiceDiscoveryOptions)"](__args[0]._jdel, __args[1] != null ? new ServiceDiscoveryOptions(new JsonObject(JSON.stringify(__args[1]))) : null), ServiceDiscovery);
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
@@ -318,7 +318,7 @@ ServiceDiscovery.create = function() {
 ServiceDiscovery.releaseServiceObject = function(discovery, svcObject) {
   var __args = arguments;
   if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] !== 'function') {
-    JServiceDiscovery["releaseServiceObject(io.vertx.ext.discovery.ServiceDiscovery,java.lang.Object)"](discovery._jdel, utils.convParamTypeUnknown(svcObject));
+    JServiceDiscovery["releaseServiceObject(io.vertx.servicediscovery.ServiceDiscovery,java.lang.Object)"](discovery._jdel, utils.convParamTypeUnknown(svcObject));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 

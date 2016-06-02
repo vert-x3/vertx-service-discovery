@@ -15,14 +15,14 @@
  */
 package verticles;
 
-import io.vertx.ext.discovery.groovy.ServiceDiscovery
-import io.vertx.ext.discovery.groovy.types.EventBusService
-import io.vertx.ext.service.groovy.HelloService
+import io.vertx.groovy.servicediscovery.ServiceDiscovery
+import io.vertx.groovy.servicediscovery.types.EventBusService
+import io.vertx.groovy.servicediscovery.service.HelloService
 
 def discovery = ServiceDiscovery.create(vertx);
 EventBusService.<HelloService> getProxy(
         discovery,
-        io.vertx.ext.service.HelloService.class.getName(), // service interface
+        io.vertx.servicediscovery.service.HelloService.class.getName(), // service interface
         HelloService.class.getName(), // client class
         { ar ->
           if (ar.failed()) {

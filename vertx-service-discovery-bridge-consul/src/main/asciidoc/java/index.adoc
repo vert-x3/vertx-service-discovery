@@ -42,7 +42,7 @@ Then, when creating the service discovery registers this bridge as follows:
 [source, java]
 ----
 ServiceDiscovery.create(vertx)
-    .registerDiscoveryBridge(new ConsulDiscoveryBridge(),
+    .registerDiscoveryBridge(new ConsulServiceDiscoveryBridge(),
         new JsonObject()
             .put("host", "localhost")
             .put("port", 8500)

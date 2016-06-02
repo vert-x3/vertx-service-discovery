@@ -18,7 +18,7 @@ var ServiceDiscovery = require("vertx-service-discovery-js/service_discovery");
 var HelloService = require("test-services-js/hello_service.js");
 var discovery = ServiceDiscovery.create(vertx);
 
-discovery.getRecord({"service.interface" : "io.vertx.ext.service.HelloService"}, function(ar, ar_err) {
+discovery.getRecord({"service.interface" : "io.vertx.servicediscovery.service.HelloService"}, function(ar, ar_err) {
     var reference = discovery.getReference(ar);
     var svc = reference.get();
     var proxy = new HelloService(svc);

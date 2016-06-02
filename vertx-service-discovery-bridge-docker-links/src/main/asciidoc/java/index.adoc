@@ -38,7 +38,7 @@ Then, when creating the service discovery, registers this bridge as follows:
 [source, java]
 ----
 ServiceDiscovery.create(vertx)
-    .registerDiscoveryBridge(new DockerLinksDiscoveryBridge(), new JsonObject());
+    .registerDiscoveryBridge(new DockerLinksServiceDiscoveryBridge(), new JsonObject());
 ----
 
 The bridge does not need any further configuration.

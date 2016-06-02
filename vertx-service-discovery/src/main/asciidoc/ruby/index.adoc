@@ -122,10 +122,10 @@ More details on these events below.
 
 The service discovery uses a distributed structure to store the records. So, all members of the cluster have access
 to all the records. This is the default backend implementation. You can implement your own by implementing the
-`link:unavailable[DiscoveryBackend]` SPI.
+`link:unavailable[ServiceDiscoveryBackend]` SPI.
 
 Notice that the discovery does not require vert.x clustering. In single-node mode, the map is a local map. It can
-be populated with `link:../../yardoc/VertxServiceDiscovery/DiscoveryBridge.html[DiscoveryBridge]`s.
+be populated with `link:../../yardoc/VertxServiceDiscovery/ServiceDiscoveryBridge.html[ServiceDiscoveryBridge]`s.
 
 == Creating a service discovery instance
 
@@ -761,7 +761,7 @@ You can disable the service usage support by setting the usage address to `null`
 Bridges let import and export services from / to other discovery mechanism such as Docker, Kubernates, Consul...
 Each bridge decides how the services are imported and exported. It does not have to be bi-directional.
 
-You can provide your own bridge by implementing the `link:../../yardoc/VertxServiceDiscovery/DiscoveryBridge.html[DiscoveryBridge]` interface and
+You can provide your own bridge by implementing the `link:../../yardoc/VertxServiceDiscovery/ServiceDiscoveryBridge.html[ServiceDiscoveryBridge]` interface and
 register it using
 `link:../../yardoc/VertxServiceDiscovery/ServiceDiscovery.html#register_discovery_bridge-instance_method[registerDiscoveryBridge]`.
 
@@ -769,7 +769,7 @@ The second parameter can provide an optional configuration for the bridge.
 
 When the bridge is registered the
 
-{@link io.vertx.ext.discovery.spi.DiscoveryBridge#start)}
+{@link io.vertx.servicediscovery.spi.ServiceDiscoveryBridge#start)}
 method is called. It lets you configure the bridge. When the bridge is configured, ready and has imported /
 exported the initial services, it must complete the given `link:../../yardoc/Vertx/Future.html[Future]`. If the bridge starts
 method is blocking, it must uses an
@@ -777,7 +777,7 @@ method is blocking, it must uses an
 complete the given future object.
 
 When the service discovery is stopped, the bridge is stopped. The
-`link:../../yardoc/VertxServiceDiscovery/DiscoveryBridge.html#stop-instance_method[stop]`
+`link:../../yardoc/VertxServiceDiscovery/ServiceDiscoveryBridge.html#stop-instance_method[stop]`
 method is called that provides the opportunity to cleanup resources, removed imported / exported services... This
 method must complete the given `link:../../yardoc/Vertx/Future.html[Future]` to notify the caller of the completion.
 

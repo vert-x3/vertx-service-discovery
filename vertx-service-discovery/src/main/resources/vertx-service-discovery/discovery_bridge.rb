@@ -1,8 +1,8 @@
-require 'vertx-service-discovery/service_discovery'
 require 'vertx/vertx'
+require 'vertx-service-discovery/service_discovery'
 require 'vertx/future'
 require 'vertx/util/utils.rb'
-# Generated from io.vertx.ext.discovery.spi.DiscoveryBridge
+# Generated from io.vertx.servicediscovery.spi.DiscoveryBridge
 module VertxServiceDiscovery
   #  Discovery bridge allows integrate other discovery technologies with the Vert.x service discovery. It maps entries
   #  from another technology to a  and maps  to a publication in this other technology.
@@ -26,7 +26,7 @@ module VertxServiceDiscovery
     # @return [void]
     def start(vertx=nil,discovery=nil,configuration=nil,future=nil)
       if vertx.class.method_defined?(:j_del) && discovery.class.method_defined?(:j_del) && configuration.class == Hash && future.class.method_defined?(:j_del) && !block_given?
-        return @j_del.java_method(:start, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Future.java_class]).call(vertx.j_del,discovery.j_del,::Vertx::Util::Utils.to_json_object(configuration),future.j_del)
+        return @j_del.java_method(:start, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Future.java_class]).call(vertx.j_del,discovery.j_del,::Vertx::Util::Utils.to_json_object(configuration),future.j_del)
       end
       raise ArgumentError, "Invalid arguments when calling start(vertx,discovery,configuration,future)"
     end
@@ -37,7 +37,7 @@ module VertxServiceDiscovery
     # @return [void]
     def stop(vertx=nil,discovery=nil,future=nil)
       if vertx.class.method_defined?(:j_del) && discovery.class.method_defined?(:j_del) && future.class.method_defined?(:j_del) && !block_given?
-        return @j_del.java_method(:stop, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxExtDiscovery::ServiceDiscovery.java_class,Java::IoVertxCore::Future.java_class]).call(vertx.j_del,discovery.j_del,future.j_del)
+        return @j_del.java_method(:stop, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCore::Future.java_class]).call(vertx.j_del,discovery.j_del,future.j_del)
       end
       raise ArgumentError, "Invalid arguments when calling stop(vertx,discovery,future)"
     end
