@@ -126,8 +126,9 @@ class HazelcastKubernetesDiscoveryStrategy extends AbstractDiscoveryStrategy {
     if (namespace == null) {
       // oc / docker build
       namespace = System.getenv("OPENSHIFT_BUILD_NAMESPACE");
-    } else {
-      namespace = "default";
+      if (namespace == null) {
+        namespace = "default";
+      }
     }
     return namespace;
   }
