@@ -121,8 +121,15 @@ class HazelcastKubernetesDiscoveryStrategy extends AbstractDiscoveryStrategy {
   }
 
   private String getNamespaceOrDefault() {
-    String namespace = System.getenv("OPENSHIFT_BUILD_NAMESPACE");
-    return namespace == null ? "default" : namespace;
+    // Kubernetes with Fabric8 build
+    String namespace = System.getenv("KUBERNETES_NAMESPACE");
+    if (namespace == null) {
+      // oc / docker build
+      namespace = System.getenv("OPENSHIFT_BUILD_NAMESPACE");
+    } else {
+      namespace = "default";
+    }
+    return namespace;
   }
 
   /**

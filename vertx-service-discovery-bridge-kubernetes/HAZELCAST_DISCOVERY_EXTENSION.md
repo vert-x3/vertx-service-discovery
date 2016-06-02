@@ -131,8 +131,9 @@ This enables the custom discovery and configure it. Configuration is passed as a
 
 Can be configured:
 
-* `namespace` : the kubernetes namespace / project, by default it tries to read the `OPENSHIFT_BUILD_NAMESPACE`
- environment variable. If not defined, it uses `default`
+* `namespace` : the kubernetes namespace / project, by default it tries to read the
+`KUBERNETES_NAMESPACE` and `OPENSHIFT_BUILD_NAMESPACE`
+ environment variables. If none are defined, it uses `default`
 * `service-label-name` : the name of the label to look for, `vertx-cluster` by default.
 * `service-label-name` : the name of the label to look for, `true` by default.
 * `kubernetes-master` : the url of the Kubernetes master, by default it builds the url from the
@@ -141,4 +142,4 @@ Can be configured:
  `/var/run/secrets/kubernetes.io/serviceaccount/token` file by default.
 
 If you use Openshift and follow the service name convention, you just need to configure the `namespace`. Even this
- can be omitted if the `OPENSHIFT_BUILD_NAMESPACE` environment variable is set.
+ can be omitted if the `KUBERNETES_NAMESPACE` or `OPENSHIFT_BUILD_NAMESPACE` environment variables are set.
