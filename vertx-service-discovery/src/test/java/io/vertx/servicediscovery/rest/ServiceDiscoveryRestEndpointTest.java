@@ -49,7 +49,7 @@ import static org.hamcrest.core.Is.is;
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class DiscoveryRestEndpointTest {
+public class ServiceDiscoveryRestEndpointTest {
 
   protected Vertx vertx;
   protected ServiceDiscovery discovery;
@@ -61,7 +61,7 @@ public class DiscoveryRestEndpointTest {
     discovery = new DiscoveryImpl(vertx, new ServiceDiscoveryOptions());
 
     Router router = Router.router(vertx);
-    DiscoveryRestEndpoint.create(router, discovery);
+    ServiceDiscoveryRestEndpoint.create(router, discovery);
 
     AtomicBoolean done = new AtomicBoolean();
     http = vertx.createHttpServer().requestHandler(router::accept).listen(8080, ar -> {

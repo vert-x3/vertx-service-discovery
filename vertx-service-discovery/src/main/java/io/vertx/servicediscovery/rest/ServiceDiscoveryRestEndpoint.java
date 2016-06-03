@@ -34,7 +34,7 @@ import java.util.Objects;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class DiscoveryRestEndpoint {
+public class ServiceDiscoveryRestEndpoint {
 
   public static final String DEFAULT_ROOT = "/discovery";
   private final ServiceDiscovery discovery;
@@ -47,8 +47,8 @@ public class DiscoveryRestEndpoint {
    * @param discovery the service discovery instance
    * @return the created endpoint
    */
-  public static DiscoveryRestEndpoint create(Router router, ServiceDiscovery discovery) {
-    return new DiscoveryRestEndpoint(router, discovery, DEFAULT_ROOT);
+  public static ServiceDiscoveryRestEndpoint create(Router router, ServiceDiscovery discovery) {
+    return new ServiceDiscoveryRestEndpoint(router, discovery, DEFAULT_ROOT);
   }
 
   /**
@@ -59,18 +59,18 @@ public class DiscoveryRestEndpoint {
    * @param root      the endpoint path (root)
    * @return the created endpoint
    */
-  public static DiscoveryRestEndpoint create(Router router, ServiceDiscovery discovery, String root) {
-    return new DiscoveryRestEndpoint(router, discovery, root);
+  public static ServiceDiscoveryRestEndpoint create(Router router, ServiceDiscovery discovery, String root) {
+    return new ServiceDiscoveryRestEndpoint(router, discovery, root);
   }
 
   /**
-   * Creates a new {@link DiscoveryRestEndpoint}.
+   * Creates a new {@link ServiceDiscoveryRestEndpoint}.
    *
    * @param router    the router
    * @param discovery the service discovery instance
    * @param root      the root
    */
-  private DiscoveryRestEndpoint(Router router, ServiceDiscovery discovery, String root) {
+  private ServiceDiscoveryRestEndpoint(Router router, ServiceDiscovery discovery, String root) {
     Objects.requireNonNull(router);
     Objects.requireNonNull(discovery);
     Objects.requireNonNull(root);
