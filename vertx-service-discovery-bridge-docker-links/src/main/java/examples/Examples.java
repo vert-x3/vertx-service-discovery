@@ -28,6 +28,6 @@ public class Examples {
 
   public void register(Vertx vertx) {
     ServiceDiscovery.create(vertx)
-        .registerDiscoveryBridge(new DockerLinksServiceImporter(), new JsonObject());
+        .registerServiceImporter(new DockerLinksServiceImporter(), new JsonObject());
   }
 }

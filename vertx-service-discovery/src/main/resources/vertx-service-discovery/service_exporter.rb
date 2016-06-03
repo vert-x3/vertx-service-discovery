@@ -15,25 +15,41 @@ module VertxServiceDiscovery
     def j_del
       @j_del
     end
+    #  Notify a new record has been published, the record's registration can be used to uniquely
+    #  identify the record
+    # @param [Hash] record the record
     # @return [void]
-    def on_publication
-      if !block_given?
-        return @j_del.java_method(:onPublication, []).call()
+    def on_publish(record=nil)
+      if record.class == Hash && !block_given?
+        return @j_del.java_method(:onPublish, [Java::IoVertxServicediscovery::Record.java_class]).call(Java::IoVertxServicediscovery::Record.new(::Vertx::Util::Utils.to_json_object(record)))
       end
-      raise ArgumentError, "Invalid arguments when calling on_publication()"
+      raise ArgumentError, "Invalid arguments when calling on_publish(record)"
     end
-    # @param [Array<Hash>] records 
+    #  Notify an existing record has been updated, the record's registration can be used to uniquely
+    #  identify the record
+    # @param [Hash] record the record
     # @return [void]
-    def init(records=nil)
-      if records.class == Array && !block_given?
-        return @j_del.java_method(:init, [Java::JavaUtil::List.java_class]).call(records.map { |element| Java::IoVertxServicediscovery::Record.new(::Vertx::Util::Utils.to_json_object(element)) })
+    def on_update(record=nil)
+      if record.class == Hash && !block_given?
+        return @j_del.java_method(:onUpdate, [Java::IoVertxServicediscovery::Record.java_class]).call(Java::IoVertxServicediscovery::Record.new(::Vertx::Util::Utils.to_json_object(record)))
       end
-      raise ArgumentError, "Invalid arguments when calling init(records)"
+      raise ArgumentError, "Invalid arguments when calling on_update(record)"
     end
+    #  Notify an existing record has been removed
+    # @param [String] id the record registration id
+    # @return [void]
+    def on_unpublish(id=nil)
+      if id.class == String && !block_given?
+        return @j_del.java_method(:onUnpublish, [Java::java.lang.String.java_class]).call(id)
+      end
+      raise ArgumentError, "Invalid arguments when calling on_unpublish(id)"
+    end
+    #  Close the exporter
+    # @yield the handle to be notified when exporter is closed
     # @return [void]
     def close
-      if !block_given?
-        return @j_del.java_method(:close, []).call()
+      if block_given?
+        return @j_del.java_method(:close, [Java::IoVertxCore::Handler.java_class]).call(Proc.new { yield })
       end
       raise ArgumentError, "Invalid arguments when calling close()"
     end

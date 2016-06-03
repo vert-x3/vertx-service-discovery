@@ -22,6 +22,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.impl.DiscoveryImpl;
+import io.vertx.servicediscovery.spi.ServiceExporter;
 import io.vertx.servicediscovery.spi.ServiceImporter;
 
 import java.util.Collection;
@@ -117,14 +118,24 @@ public interface ServiceDiscovery {
   boolean release(ServiceReference reference);
 
   /**
-   * Registers a discovery bridge. Bridges let you integrate other discovery technologies in this service
+   * Registers a discovery service importer. Importers let you integrate other discovery technologies in this service
    * discovery.
    *
-   * @param bridge        the bridge
+   * @param importer        the service importer
    * @param configuration the optional configuration
    * @return the current {@link ServiceDiscovery}
    */
-  ServiceDiscovery registerDiscoveryBridge(ServiceImporter bridge, JsonObject configuration);
+  ServiceDiscovery registerServiceImporter(ServiceImporter importer, JsonObject configuration);
+
+  /**
+   * Registers a discovery bridge. Exporters let you integrate other discovery technologies in this service
+   * discovery.
+   *
+   * @param exporter        the service exporter
+   * @param configuration the optional configuration
+   * @return the current {@link ServiceDiscovery}
+   */
+  ServiceDiscovery registerServiceExporter(ServiceExporter exporter, JsonObject configuration);
 
   /**
    * Closes the service discovery

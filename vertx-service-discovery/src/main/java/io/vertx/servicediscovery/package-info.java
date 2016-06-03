@@ -565,7 +565,7 @@
  * 
  * You can provide your own bridge by implementing the {@link io.vertx.servicediscovery.spi.ServiceImporter} interface and
  * register it using
- * {@link io.vertx.servicediscovery.ServiceDiscovery#registerDiscoveryBridge(ServiceImporter, io.vertx.core.json.JsonObject)}.
+ * {@link io.vertx.servicediscovery.ServiceDiscovery#registerServiceImporter(ServiceImporter, io.vertx.core.json.JsonObject)}.
  *
  * The second parameter can provide an optional configuration for the bridge.
  *

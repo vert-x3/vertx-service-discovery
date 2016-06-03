@@ -802,7 +802,7 @@ Each bridge decides how the services are imported and exported. It does not have
 
 You can provide your own bridge by implementing the `link:../../apidocs/io/vertx/servicediscovery/spi/ServiceImporter.html[ServiceImporter]` interface and
 register it using
-`link:../../apidocs/io/vertx/servicediscovery/ServiceDiscovery.html#registerDiscoveryBridge-io.vertx.servicediscovery.spi.ServiceImporter-io.vertx.core.json.JsonObject-[registerDiscoveryBridge]`.
+`link:../../apidocs/io/vertx/servicediscovery/ServiceDiscovery.html#registerServiceImporter-io.vertx.servicediscovery.spi.ServiceImporter-io.vertx.core.json.JsonObject-[registerServiceImporter]`.
 
 The second parameter can provide an optional configuration for the bridge.
 

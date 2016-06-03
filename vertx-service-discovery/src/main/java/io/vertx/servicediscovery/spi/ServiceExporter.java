@@ -1,6 +1,7 @@
 package io.vertx.servicediscovery.spi;
 
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.core.Handler;
 import io.vertx.servicediscovery.Record;
 
 import java.util.List;
@@ -15,10 +16,34 @@ import java.util.List;
 @VertxGen
 public interface ServiceExporter {
 
-  void onPublication();
+  /**
+   * Notify a new record has been published, the record's registration can be used to uniquely
+   * identify the record
+   *
+   * @param record the record
+   */
+  void onPublish(Record record);
 
-  void init(List<Record> records);
+  /**
+   * Notify an existing record has been updated, the record's registration can be used to uniquely
+   * identify the record
+   *
+   * @param record the record
+   */
+  void onUpdate(Record record);
 
-  void close();
+  /**
+   * Notify an existing record has been removed
+   *
+   * @param id the record registration id
+   */
+  void onUnpublish(String id);
+
+  /**
+   * Close the exporter
+   *
+   * @param closeHandler the handle to be notified when exporter is closed
+   */
+  void close(Handler<Void> closeHandler);
 
 }

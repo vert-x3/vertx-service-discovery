@@ -65,7 +65,7 @@ public class DockerBridgeTest {
     vertx = Vertx.vertx();
     discovery = ServiceDiscovery.create(vertx);
     bridge = new DockerServiceImporter();
-    discovery.registerDiscoveryBridge(bridge,
+    discovery.registerServiceImporter(bridge,
         new JsonObject().put("scan-period", -1));
 
     await().until(() -> bridge.started);

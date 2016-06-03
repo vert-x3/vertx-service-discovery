@@ -782,7 +782,7 @@ Each bridge decides how the services are imported and exported. It does not have
 
 You can provide your own bridge by implementing the `link:../../jsdoc/service_importer-ServiceImporter.html[ServiceImporter]` interface and
 register it using
-`link:../../jsdoc/service_discovery-ServiceDiscovery.html#registerDiscoveryBridge[registerDiscoveryBridge]`.
+`link:../../jsdoc/service_discovery-ServiceDiscovery.html#registerServiceImporter[registerServiceImporter]`.
 
 The second parameter can provide an optional configuration for the bridge.
 

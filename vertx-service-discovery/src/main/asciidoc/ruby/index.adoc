@@ -763,7 +763,7 @@ Each bridge decides how the services are imported and exported. It does not have
 
 You can provide your own bridge by implementing the `link:../../yardoc/VertxServiceDiscovery/ServiceImporter.html[ServiceImporter]` interface and
 register it using
-`link:../../yardoc/VertxServiceDiscovery/ServiceDiscovery.html#register_discovery_bridge-instance_method[registerDiscoveryBridge]`.
+`link:../../yardoc/VertxServiceDiscovery/ServiceDiscovery.html#register_service_importer-instance_method[registerServiceImporter]`.
 
 The second parameter can provide an optional configuration for the bridge.
 

@@ -84,7 +84,7 @@ public class DockerLinksServiceImporterTest {
   public void testImport() throws InterruptedException {
     Vertx vertx = Vertx.vertx();
     ServiceDiscovery service = ServiceDiscovery.create(vertx);
-    service.registerDiscoveryBridge(new DockerLinksServiceImporter(), new JsonObject());
+    service.registerServiceImporter(new DockerLinksServiceImporter(), new JsonObject());
 
     List<Record> records = new ArrayList<>();
 

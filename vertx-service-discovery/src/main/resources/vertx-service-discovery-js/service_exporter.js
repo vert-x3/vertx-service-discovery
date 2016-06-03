@@ -32,38 +32,56 @@ var ServiceExporter = function(j_val) {
   var that = this;
 
   /**
+   Notify a new record has been published, the record's registration can be used to uniquely
+   identify the record
 
    @public
-
+   @param record {Object} the record 
    */
-  this.onPublication = function() {
+  this.onPublish = function(record) {
     var __args = arguments;
-    if (__args.length === 0) {
-      j_serviceExporter["onPublication()"]();
+    if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
+      j_serviceExporter["onPublish(io.vertx.servicediscovery.Record)"](record != null ? new Record(new JsonObject(JSON.stringify(record))) : null);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
+   Notify an existing record has been updated, the record's registration can be used to uniquely
+   identify the record
 
    @public
-   @param records {Array.<Object>} 
+   @param record {Object} the record 
    */
-  this.init = function(records) {
+  this.onUpdate = function(record) {
     var __args = arguments;
-    if (__args.length === 1 && typeof __args[0] === 'object' && __args[0] instanceof Array) {
-      j_serviceExporter["init(java.util.List)"](utils.convParamListDataObject(records, function(json) { return new Record(json); }));
+    if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
+      j_serviceExporter["onUpdate(io.vertx.servicediscovery.Record)"](record != null ? new Record(new JsonObject(JSON.stringify(record))) : null);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
+   Notify an existing record has been removed
 
    @public
-
+   @param id {string} the record registration id 
    */
-  this.close = function() {
+  this.onUnpublish = function(id) {
     var __args = arguments;
-    if (__args.length === 0) {
-      j_serviceExporter["close()"]();
+    if (__args.length === 1 && typeof __args[0] === 'string') {
+      j_serviceExporter["onUnpublish(java.lang.String)"](id);
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+   Close the exporter
+
+   @public
+   @param closeHandler {function} the handle to be notified when exporter is closed 
+   */
+  this.close = function(closeHandler) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'function') {
+      j_serviceExporter["close(io.vertx.core.Handler)"](closeHandler);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 

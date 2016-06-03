@@ -23,6 +23,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.servicediscovery.*;
 import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend;
+import io.vertx.servicediscovery.spi.ServiceExporter;
 import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServicePublisher;
 
@@ -41,7 +42,8 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
   private final String usage;
   private final ServiceDiscoveryBackend backend;
 
-  private final Set<ServiceImporter> bridges = new CopyOnWriteArraySet<>();
+  private final Set<ServiceImporter> importers = new CopyOnWriteArraySet<>();
+  private final Set<ServiceExporter> exporters = new CopyOnWriteArraySet<>();
   private final Set<ServiceReference> bindings = new CopyOnWriteArraySet<>();
   private final static Logger LOGGER = LoggerFactory.getLogger(DiscoveryImpl.class.getName());
   private final String id;
@@ -138,7 +140,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
   }
 
   @Override
-  public ServiceDiscovery registerDiscoveryBridge(ServiceImporter bridge, JsonObject configuration) {
+  public ServiceDiscovery registerServiceImporter(ServiceImporter importer, JsonObject configuration) {
     JsonObject conf;
     if (configuration == null) {
       conf = new JsonObject();
@@ -150,16 +152,23 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     completed.setHandler(
         ar -> {
           if (ar.failed()) {
-            LOGGER.error("Cannot start the discovery bridge " + bridge, ar.cause());
+            LOGGER.error("Cannot start the service importer " + importer, ar.cause());
           } else {
-            bridges.add(bridge);
-            LOGGER.info("Discovery bridge " + bridge + " started");
+            importers.add(importer);
+            LOGGER.info("Discovery importer " + importer + " started");
           }
         }
     );
 
 
-    bridge.start(vertx, this, conf, completed);
+    importer.start(vertx, this, conf, completed);
+    return this;
+  }
+
+  @Override
+  public ServiceDiscovery registerServiceExporter(ServiceExporter exporter, JsonObject configuration) {
+    exporters.add(exporter);
+    LOGGER.info("Discovery exporter " + exporter + " started");
     return this;
   }
 
@@ -167,9 +176,14 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
   public void close() {
     LOGGER.info("Stopping service discovery");
     List<Future> futures = new ArrayList<>();
-    for (ServiceImporter bridge : bridges) {
+    for (ServiceImporter importer : importers) {
       Future<Void> future = Future.future();
-      bridge.stop(vertx, this, future);
+      importer.stop(vertx, this, future);
+      futures.add(future);
+    }
+    for (ServiceExporter exporter : exporters) {
+      Future<Void> future = Future.future();
+      exporter.close(future::complete);
       futures.add(future);
     }
 
@@ -193,6 +207,9 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
         ? record.getStatus() : Status.UP;
 
     backend.store(record.setStatus(status), resultHandler);
+    for (ServiceExporter exporter : exporters) {
+      exporter.onPublish(new Record(record));
+    }
     Record announcedRecord = new Record(record);
     announcedRecord
         .setRegistration(null)
@@ -207,6 +224,11 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
         resultHandler.handle(Future.failedFuture(record.cause()));
         return;
       }
+
+      for (ServiceExporter exporter : exporters) {
+        exporter.onUnpublish(id);
+      }
+
       Record announcedRecord = new Record(record.result());
       announcedRecord
           .setRegistration(null)
@@ -303,6 +325,10 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
         resultHandler.handle(Future.succeededFuture(record));
       }
     });
+
+    for (ServiceExporter exporter : exporters) {
+      exporter.onUpdate(record);
+    }
 
     Record announcedRecord = new Record(record);
     vertx.eventBus().publish(announce, announcedRecord.toJson());

@@ -18,8 +18,8 @@ package io.vertx.rxjava.servicediscovery.spi;
 
 import java.util.Map;
 import rx.Observable;
-import java.util.List;
 import io.vertx.servicediscovery.Record;
+import io.vertx.core.Handler;
 
 /**
  * The service exporter allows integrate other discovery technologies with the Vert.x service discovery. It maps
@@ -42,16 +42,42 @@ public class ServiceExporter {
     return delegate;
   }
 
-  public void onPublication() { 
-    delegate.onPublication();
+  /**
+   * Notify a new record has been published, the record's registration can be used to uniquely
+   * identify the record
+   * @param record the record
+   */
+  public void onPublish(Record record) { 
+    delegate.onPublish(record);
   }
 
-  public void init(List<Record> records) { 
-    delegate.init(records);
+  /**
+   * Notify an existing record has been updated, the record's registration can be used to uniquely
+   * identify the record
+   * @param record the record
+   */
+  public void onUpdate(Record record) { 
+    delegate.onUpdate(record);
   }
 
-  public void close() { 
-    delegate.close();
+  /**
+   * Notify an existing record has been removed
+   * @param id the record registration id
+   */
+  public void onUnpublish(String id) { 
+    delegate.onUnpublish(id);
+  }
+
+  /**
+   * Close the exporter
+   * @param closeHandler the handle to be notified when exporter is closed
+   */
+  public void close(Handler<Void> closeHandler) { 
+    delegate.close(new Handler<java.lang.Void>() {
+      public void handle(java.lang.Void event) {
+        closeHandler.handle(event);
+      }
+    });
   }
 
 

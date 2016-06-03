@@ -18,8 +18,8 @@ package io.vertx.groovy.servicediscovery.spi;
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
 import io.vertx.core.json.JsonObject
-import java.util.List
 import io.vertx.servicediscovery.Record
+import io.vertx.core.Handler
 /**
  * The service exporter allows integrate other discovery technologies with the Vert.x service discovery. It maps
  * entries from another technology to a  and maps  to a publication in this other
@@ -34,13 +34,34 @@ public class ServiceExporter {
   public Object getDelegate() {
     return delegate;
   }
-  public void onPublication() {
-    delegate.onPublication();
+  /**
+   * Notify a new record has been published, the record's registration can be used to uniquely
+   * identify the record
+   * @param record the record (see <a href="../../../../../../../cheatsheet/Record.html">Record</a>)
+   */
+  public void onPublish(Map<String, Object> record = [:]) {
+    delegate.onPublish(record != null ? new io.vertx.servicediscovery.Record(new io.vertx.core.json.JsonObject(record)) : null);
   }
-  public void init(List<Map<String, Object>> records) {
-    delegate.init(records != null ? (List)records.collect({new io.vertx.servicediscovery.Record(new io.vertx.core.json.JsonObject(it))}) : null);
+  /**
+   * Notify an existing record has been updated, the record's registration can be used to uniquely
+   * identify the record
+   * @param record the record (see <a href="../../../../../../../cheatsheet/Record.html">Record</a>)
+   */
+  public void onUpdate(Map<String, Object> record = [:]) {
+    delegate.onUpdate(record != null ? new io.vertx.servicediscovery.Record(new io.vertx.core.json.JsonObject(record)) : null);
   }
-  public void close() {
-    delegate.close();
+  /**
+   * Notify an existing record has been removed
+   * @param id the record registration id
+   */
+  public void onUnpublish(String id) {
+    delegate.onUnpublish(id);
+  }
+  /**
+   * Close the exporter
+   * @param closeHandler the handle to be notified when exporter is closed
+   */
+  public void close(Handler<Void> closeHandler) {
+    delegate.close(closeHandler);
   }
 }

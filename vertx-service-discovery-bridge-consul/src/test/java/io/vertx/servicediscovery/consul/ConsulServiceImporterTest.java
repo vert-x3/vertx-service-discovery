@@ -106,7 +106,7 @@ public class ConsulServiceImporterTest {
         "  }"));
 
     discovery = ServiceDiscovery.create(vertx)
-        .registerDiscoveryBridge(new ConsulServiceImporter(),
+        .registerServiceImporter(new ConsulServiceImporter(),
             new JsonObject().put("host", "localhost").put("port", 5601));
 
     await().until(() -> getAllRecordsBlocking().size() > 0);
@@ -128,7 +128,7 @@ public class ConsulServiceImporterTest {
         "}"));
 
     discovery = ServiceDiscovery.create(vertx)
-        .registerDiscoveryBridge(new ConsulServiceImporter(),
+        .registerServiceImporter(new ConsulServiceImporter(),
             new JsonObject().put("host", "localhost").put("port", 5601));
 
     await().until(() -> getAllRecordsBlocking().size() > 0);
@@ -154,7 +154,7 @@ public class ConsulServiceImporterTest {
 
     vertx.runOnContext(v ->
         discovery = ServiceDiscovery.create(vertx)
-            .registerDiscoveryBridge(new ConsulServiceImporter(),
+            .registerServiceImporter(new ConsulServiceImporter(),
                 new JsonObject().put("host", "localhost").put("port", 5601).put("scan-period", 100)));
 
     await().until(() -> getAllRecordsBlocking().size() > 0);
@@ -194,7 +194,7 @@ public class ConsulServiceImporterTest {
 
     vertx.runOnContext(v ->
         discovery = ServiceDiscovery.create(vertx)
-            .registerDiscoveryBridge(new ConsulServiceImporter(),
+            .registerServiceImporter(new ConsulServiceImporter(),
                 new JsonObject().put("host", "localhost").put("port", 5601).put("scan-period", 100)));
 
     await().until(() -> getAllRecordsBlocking().size() > 0);

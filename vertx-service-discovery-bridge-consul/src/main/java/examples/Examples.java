@@ -28,7 +28,7 @@ public class Examples {
 
   public void register(Vertx vertx) {
     ServiceDiscovery.create(vertx)
-        .registerDiscoveryBridge(new ConsulServiceImporter(),
+        .registerServiceImporter(new ConsulServiceImporter(),
             new JsonObject()
                 .put("host", "localhost")
                 .put("port", 8500)
