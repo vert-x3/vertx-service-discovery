@@ -12,6 +12,7 @@ It works as follows:
 * when the discovery strategy is instantiated, it resolved the known nodes
 * known nodes are found by doing a Kubernetes query: it looks for all endpoints (~services) with a specific label
 (`vertx-cluster`=`true`). The query is made on the label name and label value.
+* when discovery by label name and label value fails, the fallback is looking for all endpoints (and nodes) in the defined Kubernetes namespace
 
 By default, it uses the port 5701 to connected. If the endpoints defines the `hazelcast-service-port`, the indicated
 value is used.
@@ -125,7 +126,10 @@ Two parts are important regarding the Kubernetes discovery:
 </discovery-strategies>
 ```
 
-This enables the custom discovery and configure it. Configuration is passed as a set of properties.
+This enables the custom discovery and configure it. Configuration is passed as a set of properties. To check existing namespaces in Kubernetes, use: ` kubectl get namespaces` 
+
+
+
 
 ## Configuration
 
