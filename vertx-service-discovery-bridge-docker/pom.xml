@@ -30,6 +30,7 @@
 
   <properties>
     <doc.skip>true</doc.skip>
+    <jackson.version>2.7.4</jackson.version>
   </properties>
 
   <dependencies>
@@ -73,7 +74,7 @@
     <dependency>
       <groupId>com.github.docker-java</groupId>
       <artifactId>docker-java</artifactId>
-      <version>3.0.0-RC5</version>
+      <version>3.0.0</version>
       <exclusions>
         <exclusion>
           <groupId>org.slf4j</groupId>
@@ -103,12 +104,16 @@
           <groupId>io.netty</groupId>
           <artifactId>netty-handler</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-handler-proxy</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
       <artifactId>jackson-module-jaxb-annotations</artifactId>
-      <version>2.7.4</version>
+      <version>${jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
