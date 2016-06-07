@@ -22,10 +22,7 @@ import com.hazelcast.nio.Address;
 import com.hazelcast.spi.discovery.AbstractDiscoveryStrategy;
 import com.hazelcast.spi.discovery.DiscoveryNode;
 import com.hazelcast.spi.discovery.SimpleDiscoveryNode;
-import io.fabric8.kubernetes.api.model.EndpointAddress;
-import io.fabric8.kubernetes.api.model.EndpointSubset;
-import io.fabric8.kubernetes.api.model.Endpoints;
-import io.fabric8.kubernetes.api.model.EndpointsList;
+import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -33,10 +30,7 @@ import io.vertx.servicediscovery.kubernetes.KubernetesUtils;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -155,7 +149,15 @@ class HazelcastKubernetesDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
     if (list == null || list.getItems() == null || list.getItems().isEmpty()) {
       getLogger().info("No endpoints for service " + " in namespace " + namespace + " with label: `vertx-cluster=true`");
-      return Collections.emptyList();
+      return Optional.
+              ofNullable(client.endpoints().inNamespace(namespace).list()).
+              orElse(new EndpointsList("", Collections.emptyList(),"",new ListMeta())).
+              getItems().
+              stream().
+              map(Endpoints::getSubsets).
+              flatMap(subset -> subset.stream().
+                      flatMap(endpointSubset -> endpointSubset.getAddresses().stream())).
+              map(this::getSimpleDiscoveryNode).collect(Collectors.toList());
     }
 
     List<DiscoveryNode> nodes = new ArrayList<>();
@@ -163,14 +165,7 @@ class HazelcastKubernetesDiscoveryStrategy extends AbstractDiscoveryStrategy {
     for (Endpoints endpoints : endpointList) {
       for (EndpointSubset endpointSubset : endpoints.getSubsets()) {
         for (EndpointAddress endpointAddress : endpointSubset.getAddresses()) {
-          Map<String, Object> properties = endpointAddress.getAdditionalProperties();
-
-          String ip = endpointAddress.getIp();
-          InetAddress inetAddress = extractAddress(ip);
-          int port = getServicePort(properties);
-
-          Address address = new Address(inetAddress, port);
-          nodes.add(new SimpleDiscoveryNode(address, properties));
+          nodes.add(getSimpleDiscoveryNode(endpointAddress));
         }
       }
     }
@@ -178,6 +173,16 @@ class HazelcastKubernetesDiscoveryStrategy extends AbstractDiscoveryStrategy {
     getLogger().info("Resolved nodes: " + nodes.stream().map(DiscoveryNode::getPublicAddress).collect(Collectors.toList()));
 
     return nodes;
+  }
+
+  private SimpleDiscoveryNode getSimpleDiscoveryNode(EndpointAddress endpointAddress) {
+    Map<String, Object> properties = endpointAddress.getAdditionalProperties();
+    String ip = endpointAddress.getIp();
+    InetAddress inetAddress = extractAddress(ip);
+    int port = getServicePort(properties);
+    getLogger().info("Resolved node: " +"port: " + port + " inetAddress: " + inetAddress.toString() + " ip:" + ip + "properties: " + properties);
+    Address address = new Address(inetAddress, port);
+    return new SimpleDiscoveryNode(address, properties);
   }
 
 
