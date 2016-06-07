@@ -22,12 +22,13 @@ import io.vertx.groovy.core.Vertx
 import java.util.Set
 import io.vertx.servicediscovery.Record
 import java.util.function.Function
+import io.vertx.groovy.servicediscovery.spi.ServiceImporter
 import io.vertx.servicediscovery.ServiceDiscoveryOptions
 import java.util.List
-import io.vertx.groovy.servicediscovery.spi.ServiceDiscoveryBridge
 import io.vertx.core.json.JsonObject
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
+import io.vertx.groovy.servicediscovery.spi.ServiceExporter
 /**
  * Service Discovery main entry point.
  * <p>
@@ -118,14 +119,25 @@ public class ServiceDiscovery {
     return ret;
   }
   /**
-   * Registers a discovery bridge. Bridges let you integrate other discovery technologies in this service
+   * Registers a discovery service importer. Importers let you integrate other discovery technologies in this service
    * discovery.
-   * @param bridge the bridge
+   * @param importer the service importer
    * @param configuration the optional configuration
    * @return the current {@link io.vertx.groovy.servicediscovery.ServiceDiscovery}
    */
-  public ServiceDiscovery registerDiscoveryBridge(ServiceDiscoveryBridge bridge, Map<String, Object> configuration) {
-    def ret = InternalHelper.safeCreate(delegate.registerDiscoveryBridge(bridge != null ? (io.vertx.servicediscovery.spi.ServiceDiscoveryBridge)bridge.getDelegate() : null, configuration != null ? new io.vertx.core.json.JsonObject(configuration) : null), io.vertx.groovy.servicediscovery.ServiceDiscovery.class);
+  public ServiceDiscovery registerServiceImporter(ServiceImporter importer, Map<String, Object> configuration) {
+    def ret = InternalHelper.safeCreate(delegate.registerServiceImporter(importer != null ? (io.vertx.servicediscovery.spi.ServiceImporter)importer.getDelegate() : null, configuration != null ? new io.vertx.core.json.JsonObject(configuration) : null), io.vertx.groovy.servicediscovery.ServiceDiscovery.class);
+    return ret;
+  }
+  /**
+   * Registers a discovery bridge. Exporters let you integrate other discovery technologies in this service
+   * discovery.
+   * @param exporter the service exporter
+   * @param configuration the optional configuration
+   * @return the current {@link io.vertx.groovy.servicediscovery.ServiceDiscovery}
+   */
+  public ServiceDiscovery registerServiceExporter(ServiceExporter exporter, Map<String, Object> configuration) {
+    def ret = InternalHelper.safeCreate(delegate.registerServiceExporter(exporter != null ? (io.vertx.servicediscovery.spi.ServiceExporter)exporter.getDelegate() : null, configuration != null ? new io.vertx.core.json.JsonObject(configuration) : null), io.vertx.groovy.servicediscovery.ServiceDiscovery.class);
     return ret;
   }
   /**

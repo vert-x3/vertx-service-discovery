@@ -38,7 +38,7 @@ Then, when creating the service discovery, registers this bridge as follows:
 [source, groovy]
 ----
 import io.vertx.groovy.servicediscovery.ServiceDiscovery
-ServiceDiscovery.create(vertx).registerDiscoveryBridge(new io.vertx.servicediscovery.docker.DockerLinksServiceDiscoveryBridge(), [:])
+ServiceDiscovery.create(vertx).registerServiceImporter(new io.vertx.servicediscovery.docker.DockerLinksServiceImporter(), [:])
 
 ----
 

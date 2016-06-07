@@ -23,6 +23,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
+import io.vertx.servicediscovery.spi.ServicePublisher;
 import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.HttpEndpoint;
 import org.junit.Test;
@@ -40,7 +41,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class KubernetesServiceDiscoveryBridgeTest {
+public class KubernetesServiceImporterTest {
 
   @Test
   public void testRecordCreation() {
@@ -59,7 +60,7 @@ public class KubernetesServiceDiscoveryBridgeTest {
     when(service.getMetadata()).thenReturn(metadata);
     when(service.getSpec()).thenReturn(spec);
 
-    Record record = KubernetesServiceDiscoveryBridge.createRecord(service);
+    Record record = KubernetesServiceImporter.createRecord(service);
     assertThat(record).isNotNull();
     assertThat(record.getName()).isEqualTo("my-service");
     assertThat(record.getMetadata().getString("kubernetes.name")).isEqualTo("my-service");
@@ -73,7 +74,7 @@ public class KubernetesServiceDiscoveryBridgeTest {
   public void testHttpRecordCreation() {
     Service service = getHttpService();
 
-    Record record = KubernetesServiceDiscoveryBridge.createRecord(service);
+    Record record = KubernetesServiceImporter.createRecord(service);
     assertThat(record).isNotNull();
     assertThat(record.getName()).isEqualTo("my-service");
     assertThat(record.getMetadata().getString("kubernetes.name")).isEqualTo("my-service");
@@ -128,7 +129,7 @@ public class KubernetesServiceDiscoveryBridgeTest {
     when(service.getMetadata()).thenReturn(metadata);
     when(service.getSpec()).thenReturn(spec);
 
-    Record record = KubernetesServiceDiscoveryBridge.createRecord(service);
+    Record record = KubernetesServiceImporter.createRecord(service);
     assertThat(record).isNotNull();
     assertThat(record.getName()).isEqualTo("my-service");
     assertThat(record.getMetadata().getString("kubernetes.name")).isEqualTo("my-service");
@@ -145,8 +146,8 @@ public class KubernetesServiceDiscoveryBridgeTest {
     AtomicReference<Record> record = new AtomicReference<>();
     vertx.eventBus().consumer("vertx.discovery.announce", message ->
         record.set(new Record((JsonObject) message.body())));
-    ServiceDiscovery discovery = ServiceDiscovery.create(vertx);
-    KubernetesServiceDiscoveryBridge bridge = new KubernetesServiceDiscoveryBridge();
+    ServicePublisher discovery = (ServicePublisher) ServiceDiscovery.create(vertx);
+    KubernetesServiceImporter bridge = new KubernetesServiceImporter();
     Future<Void> future = Future.future();
     bridge.start(vertx, discovery, new JsonObject().put("token", "a token"), future);
     future.setHandler(ar -> {

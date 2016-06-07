@@ -26,8 +26,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.servicediscovery.Record;
-import io.vertx.servicediscovery.ServiceDiscovery;
-import io.vertx.servicediscovery.spi.ServiceDiscoveryBridge;
+import io.vertx.servicediscovery.spi.ServiceImporter;
+import io.vertx.servicediscovery.spi.ServicePublisher;
 import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.HttpEndpoint;
 import io.vertx.servicediscovery.types.HttpLocation;
@@ -52,20 +52,20 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class KubernetesServiceDiscoveryBridge implements Watcher<Service>, ServiceDiscoveryBridge {
+public class KubernetesServiceImporter implements Watcher<Service>, ServiceImporter {
 
-  private final static Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceDiscoveryBridge.class.getName());
+  private final static Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceImporter.class.getName());
 
   private KubernetesClient client;
-  private ServiceDiscovery discovery;
+  private ServicePublisher publisher;
   private String namespace;
   private List<Record> records = new CopyOnWriteArrayList<>();
   private Watch watcher;
 
   @Override
-  public void start(Vertx vertx, ServiceDiscovery discovery, JsonObject configuration,
+  public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration,
                     Future<Void> completion) {
-    this.discovery = discovery;
+    this.publisher = publisher;
 
     JsonObject conf;
     if (configuration == null) {
@@ -97,7 +97,7 @@ public class KubernetesServiceDiscoveryBridge implements Watcher<Service>, Servi
           try {
             kubernetesClient = new DefaultKubernetesClient(config);
             ServiceList list = kubernetesClient.services().inNamespace(namespace).list();
-            synchronized (KubernetesServiceDiscoveryBridge.this) {
+            synchronized (KubernetesServiceImporter.this) {
               watcher = kubernetesClient.services().inNamespace(namespace)
                   .watch(this);
               for (Service service : list.getItems()) {
@@ -129,7 +129,7 @@ public class KubernetesServiceDiscoveryBridge implements Watcher<Service>, Servi
   }
 
   private void publishRecord(Record record) {
-    discovery.publish(record, ar -> {
+    publisher.publish(record, ar -> {
       if (ar.succeeded()) {
         LOGGER.info("Kubernetes service published in the vert.x service registry: "
             + record.toJson());
@@ -242,7 +242,7 @@ public class KubernetesServiceDiscoveryBridge implements Watcher<Service>, Servi
 
 
   @Override
-  public void stop(Vertx vertx, ServiceDiscovery discovery, Future<Void> future) {
+  public void stop(Vertx vertx, ServicePublisher publisher, Future<Void> future) {
     synchronized (this) {
       if (watcher != null) {
         watcher.close();
@@ -293,7 +293,7 @@ public class KubernetesServiceDiscoveryBridge implements Watcher<Service>, Servi
   }
 
   private void unpublishRecord(Record record) {
-    discovery.unpublish(record.getRegistration(), ar -> {
+    publisher.unpublish(record.getRegistration(), ar -> {
       if (ar.failed()) {
         LOGGER.error("Cannot unregister kubernetes service", ar.cause());
       } else {

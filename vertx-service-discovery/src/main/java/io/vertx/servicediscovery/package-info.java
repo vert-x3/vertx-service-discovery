@@ -140,7 +140,7 @@
  * {@link io.vertx.servicediscovery.spi.ServiceDiscoveryBackend} SPI.
  *
  * Notice that the discovery does not require vert.x clustering. In single-node mode, the map is a local map. It can
- * be populated with {@link io.vertx.servicediscovery.spi.ServiceDiscoveryBridge}s.
+ * be populated with {@link io.vertx.servicediscovery.spi.ServiceImporter}s.
  * 
  * == Creating a service discovery instance
  * 
@@ -563,15 +563,15 @@
  * Bridges let import and export services from / to other discovery mechanism such as Docker, Kubernates, Consul...
  * Each bridge decides how the services are imported and exported. It does not have to be bi-directional.
  * 
- * You can provide your own bridge by implementing the {@link io.vertx.servicediscovery.spi.ServiceDiscoveryBridge} interface and
+ * You can provide your own bridge by implementing the {@link io.vertx.servicediscovery.spi.ServiceImporter} interface and
  * register it using
- * {@link io.vertx.servicediscovery.ServiceDiscovery#registerDiscoveryBridge(ServiceDiscoveryBridge, io.vertx.core.json.JsonObject)}.
+ * {@link io.vertx.servicediscovery.ServiceDiscovery#registerServiceImporter(ServiceImporter, io.vertx.core.json.JsonObject)}.
  *
  * The second parameter can provide an optional configuration for the bridge.
  *
  * When the bridge is registered the
  *
- * {@link io.vertx.servicediscovery.spi.ServiceDiscoveryBridge#start)}
+ * {@link io.vertx.servicediscovery.spi.ServiceImporter#start)}
  * method is called. It lets you configure the bridge. When the bridge is configured, ready and has imported /
  * exported the initial services, it must complete the given {@link io.vertx.core.Future}. If the bridge starts
  * method is blocking, it must uses an
@@ -579,7 +579,7 @@
  * complete the given future object.
  *
  * When the service discovery is stopped, the bridge is stopped. The
- * {@link io.vertx.servicediscovery.spi.ServiceDiscoveryBridge#stop}
+ * {@link io.vertx.servicediscovery.spi.ServiceImporter#stop}
  * method is called that provides the opportunity to cleanup resources, removed imported / exported services... This
  * method must complete the given {@link io.vertx.core.Future} to notify the caller of the completion.
  * 
@@ -591,4 +591,4 @@ package io.vertx.servicediscovery;
 
 import io.vertx.codegen.annotations.ModuleGen;
 import io.vertx.docgen.Document;
-import io.vertx.servicediscovery.spi.ServiceDiscoveryBridge;
+import io.vertx.servicediscovery.spi.ServiceImporter;

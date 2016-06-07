@@ -21,38 +21,33 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
-import io.vertx.servicediscovery.ServiceDiscovery;
 
 /**
- * Service Discovery bridge allows integrate other discovery technologies with the Vert.x service discovery. It maps
+ * The service importer allows integrate other discovery technologies with the Vert.x service discovery. It maps
  * entries from another technology to a {@link Record} and maps {@link Record} to a publication in this other
- * technology. Each bridge can decide which services needs to be imported and exported. It can also implement only on
- * way.
+ * technology. The importer is one side of a service discovery bridge.
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @VertxGen
-public interface ServiceDiscoveryBridge {
+public interface ServiceImporter {
 
   /**
    * Starts the bridge.
-   *
-   * @param vertx         the vertx instance
-   * @param discovery     the service discovery instance
+   *  @param vertx         the vertx instance
+   * @param publisher     the service discovery instance
    * @param configuration the bridge configuration if any
    * @param future        a future on which the bridge must report the completion of the starting
-   *                      process
    */
-  void start(Vertx vertx, ServiceDiscovery discovery, JsonObject configuration,
+  void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration,
              Future<Void> future);
 
   /**
    * Stops the bridge.
-   *
-   * @param vertx     the vertx instance
-   * @param discovery the service discovery instance
+   *  @param vertx     the vertx instance
+   * @param publisher the service discovery instance
    * @param future    the future on which the bridge must report the completion of the stopping process
    */
-  void stop(Vertx vertx, ServiceDiscovery discovery, Future<Void> future);
+  void stop(Vertx vertx, ServicePublisher publisher, Future<Void> future);
 
 }

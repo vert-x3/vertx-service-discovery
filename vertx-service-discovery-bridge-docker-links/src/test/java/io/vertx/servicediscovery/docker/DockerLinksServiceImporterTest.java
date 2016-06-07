@@ -37,7 +37,7 @@ import static org.assertj.core.api.Fail.fail;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class DockerLinksServiceDiscoveryBridgeTest {
+public class DockerLinksServiceImporterTest {
 
   private static Properties properties;
 
@@ -84,7 +84,7 @@ public class DockerLinksServiceDiscoveryBridgeTest {
   public void testImport() throws InterruptedException {
     Vertx vertx = Vertx.vertx();
     ServiceDiscovery service = ServiceDiscovery.create(vertx);
-    service.registerDiscoveryBridge(new DockerLinksServiceDiscoveryBridge(), new JsonObject());
+    service.registerServiceImporter(new DockerLinksServiceImporter(), new JsonObject());
 
     List<Record> records = new ArrayList<>();
 

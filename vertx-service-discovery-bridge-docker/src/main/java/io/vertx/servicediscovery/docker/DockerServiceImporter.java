@@ -26,8 +26,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.servicediscovery.Record;
-import io.vertx.servicediscovery.ServiceDiscovery;
-import io.vertx.servicediscovery.spi.ServiceDiscoveryBridge;
+import io.vertx.servicediscovery.spi.ServiceImporter;
+import io.vertx.servicediscovery.spi.ServicePublisher;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -41,15 +41,15 @@ import java.util.List;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class DockerServiceDiscoveryBridge implements ServiceDiscoveryBridge {
+public class DockerServiceImporter implements ServiceImporter {
 
-  private final static Logger LOGGER = LoggerFactory.getLogger(DockerServiceDiscoveryBridge.class);
+  private final static Logger LOGGER = LoggerFactory.getLogger(DockerServiceImporter.class);
 
   private long timer;
   private DockerClient client;
 
   private List<DockerService> services = new ArrayList<>();
-  private ServiceDiscovery discovery;
+  private ServicePublisher publisher;
   private Vertx vertx;
   private String host;
 
@@ -57,15 +57,14 @@ public class DockerServiceDiscoveryBridge implements ServiceDiscoveryBridge {
 
   /**
    * Starts the bridge.
-   *
-   * @param vertx         the vert.x instance
-   * @param discovery     the service discovery instance
+   *  @param vertx         the vert.x instance
+   * @param publisher     the service discovery instance
    * @param configuration the bridge configuration if any
    * @param completion        future to assign with completion status
    */
   @Override
-  public void start(Vertx vertx, ServiceDiscovery discovery, JsonObject configuration, Future<Void> completion) {
-    this.discovery = discovery;
+  public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Future<Void> completion) {
+    this.publisher = publisher;
     this.vertx = vertx;
     DockerClientConfig.DockerClientConfigBuilder builder =
         DockerClientConfig.createDefaultConfigBuilder();
@@ -181,7 +180,7 @@ public class DockerServiceDiscoveryBridge implements ServiceDiscoveryBridge {
 
   private void publish(DockerService service) {
     for (Record record : service.records()) {
-      discovery.publish(record, ar -> {
+      publisher.publish(record, ar -> {
         if (ar.succeeded()) {
           record.setRegistration(ar.result().getRegistration());
           LOGGER.info("Service from container " + service.id() + " on location "
@@ -196,7 +195,7 @@ public class DockerServiceDiscoveryBridge implements ServiceDiscoveryBridge {
 
   private void unpublish(DockerService service) {
     for (Record record : service.records()) {
-      discovery.unpublish(record.getRegistration(), ar -> {
+      publisher.unpublish(record.getRegistration(), ar -> {
         LOGGER.info("Service from container " + service.id()
             + " on location " + record.getLocation() + " has been unpublished");
       });
@@ -231,13 +230,12 @@ public class DockerServiceDiscoveryBridge implements ServiceDiscoveryBridge {
 
   /**
    * Stops the bridge.
-   *
-   * @param vertx     the vert.x instance
-   * @param discovery the service discovery instance
+   *  @param vertx     the vert.x instance
+   * @param publisher the service discovery instance
    * @param future    completion future
    */
   @Override
-  public void stop(Vertx vertx, ServiceDiscovery discovery, Future<Void> future) {
+  public void stop(Vertx vertx, ServicePublisher publisher, Future<Void> future) {
     vertx.cancelTimer(timer);
     try {
       started = false;

@@ -17,12 +17,15 @@
 package io.vertx.servicediscovery.impl;
 
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.*;
 import io.vertx.servicediscovery.service.HelloService;
 import io.vertx.servicediscovery.service.HelloServiceImpl;
-import io.vertx.servicediscovery.spi.ServiceDiscoveryBridge;
+import io.vertx.servicediscovery.spi.ServiceExporter;
+import io.vertx.servicediscovery.spi.ServiceImporter;
+import io.vertx.servicediscovery.spi.ServicePublisher;
 import io.vertx.servicediscovery.types.EventBusService;
 import io.vertx.servicediscovery.types.HttpEndpoint;
 import io.vertx.serviceproxy.ProxyHelper;
@@ -32,13 +35,18 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
+
+import static org.junit.Assert.*;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -256,26 +264,26 @@ public class DiscoveryImplTest {
   public void testBridges() {
     AtomicBoolean closed = new AtomicBoolean();
     AtomicBoolean registered = new AtomicBoolean();
-    ServiceDiscoveryBridge bridge = new ServiceDiscoveryBridge() {
+    ServiceImporter bridge = new ServiceImporter() {
       @Override
-      public void start(Vertx vertx, ServiceDiscovery discovery, JsonObject configuration, Future<Void> future) {
+      public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Future<Void> future) {
         Record rec1 = HttpEndpoint.createRecord("static-record-1", "acme.org");
         Record rec2 = HttpEndpoint.createRecord("static-record-2", "example.com");
-        discovery.publish(rec1,
-            ar -> discovery.publish(rec2, ar2 -> {
+        publisher.publish(rec1,
+            ar -> publisher.publish(rec2, ar2 -> {
               registered.set(true);
               future.complete();
             }));
       }
 
       @Override
-      public void stop(Vertx vertx, ServiceDiscovery discovery, Future<Void> future) {
+      public void stop(Vertx vertx, ServicePublisher publisher, Future<Void> future) {
         closed.set(true);
         future.complete();
       }
     };
 
-    discovery.registerDiscoveryBridge(bridge, null);
+    discovery.registerServiceImporter(bridge, null);
 
     await().untilAtomic(registered, is(true));
 
@@ -304,4 +312,73 @@ public class DiscoveryImplTest {
     assertThat(options.getName()).isEqualToIgnoringCase("my-name");
   }
 
+  private static class TestServiceExporter implements ServiceExporter {
+
+    private Map<String, Record> state = new HashMap<>();
+    private boolean closed;
+
+    @Override
+    public void onPublish(Record record) {
+      state.put(record.getRegistration(), new Record(record));
+    }
+
+    @Override
+    public void onUpdate(Record record) {
+      state.put(record.getRegistration(), new Record(record));
+    }
+
+    @Override
+    public void onUnpublish(String id) {
+      state.remove(id);
+    }
+
+    @Override
+    public void close(Handler<Void> closeHandler) {
+      closed = true;
+    }
+  }
+
+  @Test
+  public void testExporter() {
+    HelloService svc = new HelloServiceImpl("stuff");
+    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    Record record = new Record()
+        .setName("Hello")
+        .setType(EventBusService.TYPE)
+        .setLocation(new JsonObject().put(Record.ENDPOINT, "address"))
+        .setMetadata(new JsonObject().put("foo", "foo_value_1"));
+
+    TestServiceExporter exporter = new TestServiceExporter();
+    discovery.registerServiceExporter(exporter, new JsonObject());
+
+    discovery.publish(record, (r) -> {});
+    await().until(() -> exporter.state.size() > 0);
+    String id = exporter.state.keySet().iterator().next();
+    assertNotNull(id);
+    Record exported = exporter.state.get(id);
+    assertEquals("Hello", exported.getName());
+    assertEquals(EventBusService.TYPE, exported.getType());
+    assertEquals(Status.UP, exported.getStatus());
+    assertEquals(new JsonObject().put(Record.ENDPOINT, "address"), exported.getLocation());
+    assertEquals(new JsonObject().put("foo", "foo_value_1"), exported.getMetadata());
+
+    AtomicBoolean updated = new AtomicBoolean();
+    discovery.update(new Record(record).setMetadata(new JsonObject().put("foo", "foo_value_2")), ar -> updated.set(true));
+    await().until(updated::get);
+    assertNotSame(exporter.state.get(id), exported);
+    exported = exporter.state.get(id);
+    assertEquals("Hello", exported.getName());
+    assertEquals(EventBusService.TYPE, exported.getType());
+    assertEquals(Status.UP, exported.getStatus());
+    assertEquals(new JsonObject().put(Record.ENDPOINT, "address"), exported.getLocation());
+    assertEquals(new JsonObject().put("foo", "foo_value_2"), exported.getMetadata());
+
+    AtomicBoolean removed = new AtomicBoolean();
+    discovery.unpublish(id, ar -> removed.set(true));
+    await().until(removed::get);
+    assertEquals(Collections.emptyMap(), exporter.state);
+
+    discovery.close();
+    assertTrue(exporter.closed);
+  }
 }

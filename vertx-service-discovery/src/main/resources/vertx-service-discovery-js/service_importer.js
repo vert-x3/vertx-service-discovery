@@ -14,7 +14,7 @@
  * under the License.
  */
 
-/** @module vertx-service-discovery-js/service_discovery_bridge */
+/** @module vertx-service-discovery-js/service_importer */
 var utils = require('vertx-js/util/utils');
 var Vertx = require('vertx-js/vertx');
 var Future = require('vertx-js/future');
@@ -22,15 +22,15 @@ var ServicePublisher = require('vertx-service-discovery-js/service_publisher');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JServiceDiscoveryBridge = io.vertx.servicediscovery.spi.ServiceDiscoveryBridge;
+var JServiceImporter = io.vertx.servicediscovery.spi.ServiceImporter;
 
 /**
- Service Discovery bridge allows integrate other discovery technologies with the Vert.x service discovery. It maps
+ The service importer allows integrate other discovery technologies with the Vert.x service discovery. It maps
  @class
 */
-var ServiceDiscoveryBridge = function(j_val) {
+var ServiceImporter = function(j_val) {
 
-  var j_serviceDiscoveryBridge = j_val;
+  var j_serviceImporter = j_val;
   var that = this;
 
   /**
@@ -45,7 +45,7 @@ var ServiceDiscoveryBridge = function(j_val) {
   this.start = function(vertx, publisher, configuration, future) {
     var __args = arguments;
     if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'object' && __args[3]._jdel) {
-      j_serviceDiscoveryBridge["start(io.vertx.core.Vertx,io.vertx.servicediscovery.spi.ServicePublisher,io.vertx.core.json.JsonObject,io.vertx.core.Future)"](vertx._jdel, publisher._jdel, utils.convParamJsonObject(configuration), future._jdel);
+      j_serviceImporter["start(io.vertx.core.Vertx,io.vertx.servicediscovery.spi.ServicePublisher,io.vertx.core.json.JsonObject,io.vertx.core.Future)"](vertx._jdel, publisher._jdel, utils.convParamJsonObject(configuration), future._jdel);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -60,15 +60,15 @@ var ServiceDiscoveryBridge = function(j_val) {
   this.stop = function(vertx, publisher, future) {
     var __args = arguments;
     if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && typeof __args[2] === 'object' && __args[2]._jdel) {
-      j_serviceDiscoveryBridge["stop(io.vertx.core.Vertx,io.vertx.servicediscovery.spi.ServicePublisher,io.vertx.core.Future)"](vertx._jdel, publisher._jdel, future._jdel);
+      j_serviceImporter["stop(io.vertx.core.Vertx,io.vertx.servicediscovery.spi.ServicePublisher,io.vertx.core.Future)"](vertx._jdel, publisher._jdel, future._jdel);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
   // If you rely on this property your code is likely to break if we change it / remove it without warning.
-  this._jdel = j_serviceDiscoveryBridge;
+  this._jdel = j_serviceImporter;
 };
 
 // We export the Constructor function
-module.exports = ServiceDiscoveryBridge;
+module.exports = ServiceImporter;

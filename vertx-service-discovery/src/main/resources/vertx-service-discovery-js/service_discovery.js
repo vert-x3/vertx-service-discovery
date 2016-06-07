@@ -18,7 +18,8 @@
 var utils = require('vertx-js/util/utils');
 var ServiceReference = require('vertx-service-discovery-js/service_reference');
 var Vertx = require('vertx-js/vertx');
-var ServiceDiscoveryBridge = require('vertx-service-discovery-js/service_discovery_bridge');
+var ServiceImporter = require('vertx-service-discovery-js/service_importer');
+var ServiceExporter = require('vertx-service-discovery-js/service_exporter');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
@@ -83,18 +84,34 @@ var ServiceDiscovery = function(j_val) {
   };
 
   /**
-   Registers a discovery bridge. Bridges let you integrate other discovery technologies in this service
+   Registers a discovery service importer. Importers let you integrate other discovery technologies in this service
    discovery.
 
    @public
-   @param bridge {ServiceDiscoveryBridge} the bridge 
+   @param importer {ServiceImporter} the service importer 
    @param configuration {Object} the optional configuration 
    @return {ServiceDiscovery} the current {@link ServiceDiscovery}
    */
-  this.registerDiscoveryBridge = function(bridge, configuration) {
+  this.registerServiceImporter = function(importer, configuration) {
     var __args = arguments;
     if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null)) {
-      return utils.convReturnVertxGen(j_serviceDiscovery["registerDiscoveryBridge(io.vertx.servicediscovery.spi.ServiceDiscoveryBridge,io.vertx.core.json.JsonObject)"](bridge._jdel, utils.convParamJsonObject(configuration)), ServiceDiscovery);
+      return utils.convReturnVertxGen(j_serviceDiscovery["registerServiceImporter(io.vertx.servicediscovery.spi.ServiceImporter,io.vertx.core.json.JsonObject)"](importer._jdel, utils.convParamJsonObject(configuration)), ServiceDiscovery);
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+   Registers a discovery bridge. Exporters let you integrate other discovery technologies in this service
+   discovery.
+
+   @public
+   @param exporter {ServiceExporter} the service exporter 
+   @param configuration {Object} the optional configuration 
+   @return {ServiceDiscovery} the current {@link ServiceDiscovery}
+   */
+  this.registerServiceExporter = function(exporter, configuration) {
+    var __args = arguments;
+    if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null)) {
+      return utils.convReturnVertxGen(j_serviceDiscovery["registerServiceExporter(io.vertx.servicediscovery.spi.ServiceExporter,io.vertx.core.json.JsonObject)"](exporter._jdel, utils.convParamJsonObject(configuration)), ServiceDiscovery);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 

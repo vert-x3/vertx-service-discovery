@@ -1,6 +1,7 @@
 require 'vertx-service-discovery/service_reference'
 require 'vertx/vertx'
-require 'vertx-service-discovery/service_discovery_bridge'
+require 'vertx-service-discovery/service_importer'
+require 'vertx-service-discovery/service_exporter'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.servicediscovery.ServiceDiscovery
 module VertxServiceDiscovery
@@ -86,16 +87,27 @@ module VertxServiceDiscovery
       end
       raise ArgumentError, "Invalid arguments when calling release?(reference)"
     end
-    #  Registers a discovery bridge. Bridges let you integrate other discovery technologies in this service
+    #  Registers a discovery service importer. Importers let you integrate other discovery technologies in this service
     #  discovery.
-    # @param [::VertxServiceDiscovery::ServiceDiscoveryBridge] bridge the bridge
+    # @param [::VertxServiceDiscovery::ServiceImporter] importer the service importer
     # @param [Hash{String => Object}] configuration the optional configuration
     # @return [::VertxServiceDiscovery::ServiceDiscovery] the current {::VertxServiceDiscovery::ServiceDiscovery}
-    def register_discovery_bridge(bridge=nil,configuration=nil)
-      if bridge.class.method_defined?(:j_del) && configuration.class == Hash && !block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:registerDiscoveryBridge, [Java::IoVertxServicediscoverySpi::ServiceDiscoveryBridge.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(bridge.j_del,::Vertx::Util::Utils.to_json_object(configuration)),::VertxServiceDiscovery::ServiceDiscovery)
+    def register_service_importer(importer=nil,configuration=nil)
+      if importer.class.method_defined?(:j_del) && configuration.class == Hash && !block_given?
+        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:registerServiceImporter, [Java::IoVertxServicediscoverySpi::ServiceImporter.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(importer.j_del,::Vertx::Util::Utils.to_json_object(configuration)),::VertxServiceDiscovery::ServiceDiscovery)
       end
-      raise ArgumentError, "Invalid arguments when calling register_discovery_bridge(bridge,configuration)"
+      raise ArgumentError, "Invalid arguments when calling register_service_importer(importer,configuration)"
+    end
+    #  Registers a discovery bridge. Exporters let you integrate other discovery technologies in this service
+    #  discovery.
+    # @param [::VertxServiceDiscovery::ServiceExporter] exporter the service exporter
+    # @param [Hash{String => Object}] configuration the optional configuration
+    # @return [::VertxServiceDiscovery::ServiceDiscovery] the current {::VertxServiceDiscovery::ServiceDiscovery}
+    def register_service_exporter(exporter=nil,configuration=nil)
+      if exporter.class.method_defined?(:j_del) && configuration.class == Hash && !block_given?
+        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:registerServiceExporter, [Java::IoVertxServicediscoverySpi::ServiceExporter.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(exporter.j_del,::Vertx::Util::Utils.to_json_object(configuration)),::VertxServiceDiscovery::ServiceDiscovery)
+      end
+      raise ArgumentError, "Invalid arguments when calling register_service_exporter(exporter,configuration)"
     end
     #  Closes the service discovery
     # @return [void]

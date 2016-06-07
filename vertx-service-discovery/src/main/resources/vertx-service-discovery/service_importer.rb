@@ -2,20 +2,19 @@ require 'vertx/vertx'
 require 'vertx/future'
 require 'vertx-service-discovery/service_publisher'
 require 'vertx/util/utils.rb'
-# Generated from io.vertx.servicediscovery.spi.ServiceDiscoveryBridge
+# Generated from io.vertx.servicediscovery.spi.ServiceImporter
 module VertxServiceDiscovery
-  #  Service Discovery bridge allows integrate other discovery technologies with the Vert.x service discovery. It maps
+  #  The service importer allows integrate other discovery technologies with the Vert.x service discovery. It maps
   #  entries from another technology to a  and maps  to a publication in this other
-  #  technology. Each bridge can decide which services needs to be imported and exported. It can also implement only on
-  #  way.
-  class ServiceDiscoveryBridge
+  #  technology. The importer is one side of a service discovery bridge.
+  class ServiceImporter
     # @private
-    # @param j_del [::VertxServiceDiscovery::ServiceDiscoveryBridge] the java delegate
+    # @param j_del [::VertxServiceDiscovery::ServiceImporter] the java delegate
     def initialize(j_del)
       @j_del = j_del
     end
     # @private
-    # @return [::VertxServiceDiscovery::ServiceDiscoveryBridge] the underlying java delegate
+    # @return [::VertxServiceDiscovery::ServiceImporter] the underlying java delegate
     def j_del
       @j_del
     end

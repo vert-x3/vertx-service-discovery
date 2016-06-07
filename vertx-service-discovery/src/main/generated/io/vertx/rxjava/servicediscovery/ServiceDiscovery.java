@@ -22,12 +22,13 @@ import io.vertx.rxjava.core.Vertx;
 import java.util.Set;
 import io.vertx.servicediscovery.Record;
 import java.util.function.Function;
+import io.vertx.rxjava.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 import java.util.List;
-import io.vertx.rxjava.servicediscovery.spi.ServiceDiscoveryBridge;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import io.vertx.rxjava.servicediscovery.spi.ServiceExporter;
 
 /**
  * Service Discovery main entry point.
@@ -131,14 +132,26 @@ public class ServiceDiscovery {
   }
 
   /**
-   * Registers a discovery bridge. Bridges let you integrate other discovery technologies in this service
+   * Registers a discovery service importer. Importers let you integrate other discovery technologies in this service
    * discovery.
-   * @param bridge the bridge
+   * @param importer the service importer
    * @param configuration the optional configuration
    * @return the current {@link io.vertx.rxjava.servicediscovery.ServiceDiscovery}
    */
-  public ServiceDiscovery registerDiscoveryBridge(ServiceDiscoveryBridge bridge, JsonObject configuration) { 
-    ServiceDiscovery ret = ServiceDiscovery.newInstance(delegate.registerDiscoveryBridge((io.vertx.servicediscovery.spi.ServiceDiscoveryBridge)bridge.getDelegate(), configuration));
+  public ServiceDiscovery registerServiceImporter(ServiceImporter importer, JsonObject configuration) { 
+    ServiceDiscovery ret = ServiceDiscovery.newInstance(delegate.registerServiceImporter((io.vertx.servicediscovery.spi.ServiceImporter)importer.getDelegate(), configuration));
+    return ret;
+  }
+
+  /**
+   * Registers a discovery bridge. Exporters let you integrate other discovery technologies in this service
+   * discovery.
+   * @param exporter the service exporter
+   * @param configuration the optional configuration
+   * @return the current {@link io.vertx.rxjava.servicediscovery.ServiceDiscovery}
+   */
+  public ServiceDiscovery registerServiceExporter(ServiceExporter exporter, JsonObject configuration) { 
+    ServiceDiscovery ret = ServiceDiscovery.newInstance(delegate.registerServiceExporter((io.vertx.servicediscovery.spi.ServiceExporter)exporter.getDelegate(), configuration));
     return ret;
   }
 
