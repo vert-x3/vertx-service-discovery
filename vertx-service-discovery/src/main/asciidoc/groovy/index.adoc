@@ -50,7 +50,7 @@ descriptor:
 <dependency>
 <groupId>io.vertx</groupId>
 <artifactId>vertx-service-discovery</artifactId>
-<version>3.3.0-SNAPSHOT</version>
+<version>3.3.0.CR2</version>
 </dependency>
 ----
 
@@ -58,7 +58,7 @@ descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-discovery:3.3.0-SNAPSHOT'
+compile 'io.vertx:vertx-service-discovery:3.3.0.CR2'
 ----
 
 == Overall concepts
@@ -178,7 +178,7 @@ def record = [
   ],
   name:"my-service",
   metadata:[
-    some-label:"some-value"
+    'some-label':"some-value"
   ]
 ]
 
@@ -322,7 +322,7 @@ discovery.getRecords({ r ->
 
 
 discovery.getRecords([
-  some-label:"some-value"
+  'some-label':"some-value"
 ], { ar ->
   if (ar.succeeded()) {
     def results = ar.result()
@@ -441,7 +441,7 @@ discovery.publish(record1, { ar ->
 })
 
 def record2 = HttpEndpoint.createRecord("some-other-name", true, "localhost", 8433, "/api", [
-  some-metadata:"some value"
+  'some-metadata':"some value"
 ])
 
 
@@ -529,7 +529,7 @@ To publish an event bus service, you need to create a `link:../dataobjects.html#
 ----
 import io.vertx.groovy.servicediscovery.types.EventBusService
 def record = EventBusService.createRecord("some-eventbus-service", "address", "examples.MyService", [
-  some-metadata:"some value"
+  'some-metadata':"some value"
 ])
 
 discovery.publish(record, { ar ->
@@ -673,7 +673,7 @@ import io.vertx.groovy.servicediscovery.types.JDBCDataSource
 def record = JDBCDataSource.createRecord("some-data-source-service", [
   url:"some jdbc url"
 ], [
-  some-metadata:"some-value"
+  'some-metadata':"some-value"
 ])
 
 discovery.publish(record, { ar ->

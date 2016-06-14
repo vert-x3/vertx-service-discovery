@@ -78,7 +78,7 @@ public class ServiceDiscovery {
    * @return the created service discovery instance.
    */
   public static ServiceDiscovery create(Vertx vertx, Map<String, Object> options) {
-    def ret = InternalHelper.safeCreate(io.vertx.servicediscovery.ServiceDiscovery.create(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, options != null ? new io.vertx.servicediscovery.ServiceDiscoveryOptions(new io.vertx.core.json.JsonObject(options)) : null), io.vertx.groovy.servicediscovery.ServiceDiscovery.class);
+    def ret = InternalHelper.safeCreate(io.vertx.servicediscovery.ServiceDiscovery.create(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, options != null ? new io.vertx.servicediscovery.ServiceDiscoveryOptions(io.vertx.lang.groovy.InternalHelper.toJsonObject(options)) : null), io.vertx.groovy.servicediscovery.ServiceDiscovery.class);
     return ret;
   }
   /**
@@ -96,7 +96,7 @@ public class ServiceDiscovery {
    * @return the service reference, that allows retrieving the service object. Once called the service reference is cached, and need to be released.
    */
   public ServiceReference getReference(Map<String, Object> record = [:]) {
-    def ret = InternalHelper.safeCreate(delegate.getReference(record != null ? new io.vertx.servicediscovery.Record(new io.vertx.core.json.JsonObject(record)) : null), io.vertx.groovy.servicediscovery.ServiceReference.class);
+    def ret = InternalHelper.safeCreate(delegate.getReference(record != null ? new io.vertx.servicediscovery.Record(io.vertx.lang.groovy.InternalHelper.toJsonObject(record)) : null), io.vertx.groovy.servicediscovery.ServiceReference.class);
     return ret;
   }
   /**
@@ -106,7 +106,7 @@ public class ServiceDiscovery {
    * @return the service reference, that allows retrieving the service object. Once called the service reference is cached, and need to be released.
    */
   public ServiceReference getReferenceWithConfiguration(Map<String, Object> record = [:], Map<String, Object> configuration) {
-    def ret = InternalHelper.safeCreate(delegate.getReferenceWithConfiguration(record != null ? new io.vertx.servicediscovery.Record(new io.vertx.core.json.JsonObject(record)) : null, configuration != null ? new io.vertx.core.json.JsonObject(configuration) : null), io.vertx.groovy.servicediscovery.ServiceReference.class);
+    def ret = InternalHelper.safeCreate(delegate.getReferenceWithConfiguration(record != null ? new io.vertx.servicediscovery.Record(io.vertx.lang.groovy.InternalHelper.toJsonObject(record)) : null, configuration != null ? new io.vertx.core.json.JsonObject(configuration) : null), io.vertx.groovy.servicediscovery.ServiceReference.class);
     return ret;
   }
   /**
@@ -152,7 +152,7 @@ public class ServiceDiscovery {
    * @param resultHandler handler called when the operation has completed (successfully or not). In case of success, the passed record has a registration id required to modify and un-register the service.
    */
   public void publish(Map<String, Object> record = [:], Handler<AsyncResult<Map<String, Object>>> resultHandler) {
-    delegate.publish(record != null ? new io.vertx.servicediscovery.Record(new io.vertx.core.json.JsonObject(record)) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.servicediscovery.Record>>() {
+    delegate.publish(record != null ? new io.vertx.servicediscovery.Record(io.vertx.lang.groovy.InternalHelper.toJsonObject(record)) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.servicediscovery.Record>>() {
       public void handle(AsyncResult<io.vertx.servicediscovery.Record> ar) {
         if (ar.succeeded()) {
           resultHandler.handle(io.vertx.core.Future.succeededFuture((Map<String, Object>)InternalHelper.wrapObject(ar.result()?.toJson())));
@@ -335,7 +335,7 @@ public class ServiceDiscovery {
    * @param resultHandler handler called when the lookup has been completed.
    */
   public void update(Map<String, Object> record = [:], Handler<AsyncResult<Map<String, Object>>> resultHandler) {
-    delegate.update(record != null ? new io.vertx.servicediscovery.Record(new io.vertx.core.json.JsonObject(record)) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.servicediscovery.Record>>() {
+    delegate.update(record != null ? new io.vertx.servicediscovery.Record(io.vertx.lang.groovy.InternalHelper.toJsonObject(record)) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.servicediscovery.Record>>() {
       public void handle(AsyncResult<io.vertx.servicediscovery.Record> ar) {
         if (ar.succeeded()) {
           resultHandler.handle(io.vertx.core.Future.succeededFuture((Map<String, Object>)InternalHelper.wrapObject(ar.result()?.toJson())));

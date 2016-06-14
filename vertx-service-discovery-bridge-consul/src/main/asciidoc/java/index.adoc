@@ -26,7 +26,7 @@ descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-service-discovery-bridge-consul</artifactId>
-  <version>3.3.0-SNAPSHOT</version>
+  <version>3.3.0.CR2</version>
 </dependency>
 ----
 
@@ -34,7 +34,7 @@ descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-discovery-bridge-consul:3.3.0-SNAPSHOT'
+compile 'io.vertx:vertx-service-discovery-bridge-consul:3.3.0.CR2'
 ----
 
 Then, when creating the service discovery registers this bridge as follows:
@@ -42,7 +42,7 @@ Then, when creating the service discovery registers this bridge as follows:
 [source, java]
 ----
 ServiceDiscovery.create(vertx)
-    .registerDiscoveryBridge(new ConsulServiceImporter(),
+    .registerServiceImporter(new ConsulServiceImporter(),
         new JsonObject()
             .put("host", "localhost")
             .put("port", 8500)

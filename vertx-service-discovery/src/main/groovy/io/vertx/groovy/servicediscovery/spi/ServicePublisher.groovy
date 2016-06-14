@@ -39,7 +39,7 @@ public class ServicePublisher {
    * @param resultHandler handler called when the operation has completed (successfully or not). In case of success, the passed record has a registration id required to modify and un-register the service.
    */
   public void publish(Map<String, Object> record = [:], Handler<AsyncResult<Map<String, Object>>> resultHandler) {
-    delegate.publish(record != null ? new io.vertx.servicediscovery.Record(new io.vertx.core.json.JsonObject(record)) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.servicediscovery.Record>>() {
+    delegate.publish(record != null ? new io.vertx.servicediscovery.Record(io.vertx.lang.groovy.InternalHelper.toJsonObject(record)) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.servicediscovery.Record>>() {
       public void handle(AsyncResult<io.vertx.servicediscovery.Record> ar) {
         if (ar.succeeded()) {
           resultHandler.handle(io.vertx.core.Future.succeededFuture((Map<String, Object>)InternalHelper.wrapObject(ar.result()?.toJson())));

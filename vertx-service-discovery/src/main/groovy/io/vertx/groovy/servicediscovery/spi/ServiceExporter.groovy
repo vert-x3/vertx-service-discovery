@@ -40,7 +40,7 @@ public class ServiceExporter {
    * @param record the record (see <a href="../../../../../../../cheatsheet/Record.html">Record</a>)
    */
   public void onPublish(Map<String, Object> record = [:]) {
-    delegate.onPublish(record != null ? new io.vertx.servicediscovery.Record(new io.vertx.core.json.JsonObject(record)) : null);
+    delegate.onPublish(record != null ? new io.vertx.servicediscovery.Record(io.vertx.lang.groovy.InternalHelper.toJsonObject(record)) : null);
   }
   /**
    * Notify an existing record has been updated, the record's registration can be used to uniquely
@@ -48,7 +48,7 @@ public class ServiceExporter {
    * @param record the record (see <a href="../../../../../../../cheatsheet/Record.html">Record</a>)
    */
   public void onUpdate(Map<String, Object> record = [:]) {
-    delegate.onUpdate(record != null ? new io.vertx.servicediscovery.Record(new io.vertx.core.json.JsonObject(record)) : null);
+    delegate.onUpdate(record != null ? new io.vertx.servicediscovery.Record(io.vertx.lang.groovy.InternalHelper.toJsonObject(record)) : null);
   }
   /**
    * Notify an existing record has been removed
