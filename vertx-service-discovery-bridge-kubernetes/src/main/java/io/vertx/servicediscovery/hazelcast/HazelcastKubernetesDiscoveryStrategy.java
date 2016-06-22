@@ -180,11 +180,10 @@ class HazelcastKubernetesDiscoveryStrategy extends AbstractDiscoveryStrategy {
     String ip = endpointAddress.getIp();
     InetAddress inetAddress = extractAddress(ip);
     int port = getServicePort(properties);
-    getLogger().info("Resolved node: " +"port: " + port + " inetAddress: " + inetAddress.toString() + " ip:" + ip + "properties: " + properties);
+    getLogger().info("Resolved node: " +"port: " + port + " inetAddress: " + inetAddress!=null?inetAddress.toString():"" + " ip:" + ip + "properties: " + properties);
     Address address = new Address(inetAddress, port);
     return new SimpleDiscoveryNode(address, properties);
   }
-
 
   @Override
   public void destroy() {
