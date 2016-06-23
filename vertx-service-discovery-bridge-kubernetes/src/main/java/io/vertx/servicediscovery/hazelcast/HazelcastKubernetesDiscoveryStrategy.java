@@ -139,7 +139,7 @@ class HazelcastKubernetesDiscoveryStrategy extends AbstractDiscoveryStrategy {
 
   /**
    * Discovers the nodes. It queries all endpoints (services) with a label `label` set to `labelValue`. By default,
-   * it's `vertx-cluster=true`.
+   * it's `vertx-cluster=true`.  When no endpoints were found, all endpoints in namespace without specific label are queried.
    *
    * @return the list of discovery nodes
    */
@@ -148,31 +148,25 @@ class HazelcastKubernetesDiscoveryStrategy extends AbstractDiscoveryStrategy {
     EndpointsList list = client.endpoints().inNamespace(namespace).withLabel(label, labelValue).list();
 
     if (list == null || list.getItems() == null || list.getItems().isEmpty()) {
-      getLogger().info("No endpoints for service " + " in namespace " + namespace + " with label: `vertx-cluster=true`");
+      getLogger().info("No endpoints for service " + " in namespace " + namespace + " with label: "+label+" or `vertx-cluster=true`, look for endpoints in namespace without specific label");
       return Optional.
               ofNullable(client.endpoints().inNamespace(namespace).list()).
               orElse(new EndpointsList("", Collections.emptyList(),"",new ListMeta())).
               getItems().
               stream().
               map(Endpoints::getSubsets).
-              flatMap(subset -> subset.stream().
-                      flatMap(endpointSubset -> endpointSubset.getAddresses().stream())).
+              flatMap(subset -> subset.stream()).
+              flatMap(endpointSubset -> endpointSubset.getAddresses().stream()).
               map(this::getSimpleDiscoveryNode).collect(Collectors.toList());
     }
 
-    List<DiscoveryNode> nodes = new ArrayList<>();
-    List<Endpoints> endpointList = list.getItems();
-    for (Endpoints endpoints : endpointList) {
-      for (EndpointSubset endpointSubset : endpoints.getSubsets()) {
-        for (EndpointAddress endpointAddress : endpointSubset.getAddresses()) {
-          nodes.add(getSimpleDiscoveryNode(endpointAddress));
-        }
-      }
-    }
+    return list.getItems().
+            stream().
+            map(Endpoints::getSubsets).
+            flatMap(subset -> subset.stream()).
+            flatMap(endpointSubset -> endpointSubset.getAddresses().stream()).
+            map(this::getSimpleDiscoveryNode).collect(Collectors.toList());
 
-    getLogger().info("Resolved nodes: " + nodes.stream().map(DiscoveryNode::getPublicAddress).collect(Collectors.toList()));
-
-    return nodes;
   }
 
   private SimpleDiscoveryNode getSimpleDiscoveryNode(EndpointAddress endpointAddress) {
