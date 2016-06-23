@@ -73,11 +73,7 @@ public class ServiceExporter {
    * @param closeHandler the handle to be notified when exporter is closed
    */
   public void close(Handler<Void> closeHandler) { 
-    delegate.close(new Handler<java.lang.Void>() {
-      public void handle(java.lang.Void event) {
-        closeHandler.handle(event);
-      }
-    });
+    delegate.close(closeHandler);
   }
 
 

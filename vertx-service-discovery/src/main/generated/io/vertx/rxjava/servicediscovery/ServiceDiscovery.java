@@ -188,15 +188,7 @@ public class ServiceDiscovery {
    * @param resultHandler handler called when the operation has completed (successfully or not).
    */
   public void unpublish(String id, Handler<AsyncResult<Void>> resultHandler) { 
-    delegate.unpublish(id, new Handler<AsyncResult<java.lang.Void>>() {
-      public void handle(AsyncResult<java.lang.Void> ar) {
-        if (ar.succeeded()) {
-          resultHandler.handle(io.vertx.core.Future.succeededFuture(ar.result()));
-        } else {
-          resultHandler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
-        }
-      }
-    });
+    delegate.unpublish(id, resultHandler);
   }
 
   /**
