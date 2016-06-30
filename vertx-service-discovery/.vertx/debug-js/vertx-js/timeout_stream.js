@@ -58,7 +58,7 @@ var TimeoutStream = function(j_val) {
     var __args = arguments;
     if (__args.length === 1 && (typeof __args[0] === 'function' || __args[0] == null)) {
       j_timeoutStream["handler(io.vertx.core.Handler)"](handler == null ? null : function(jVal) {
-      handler(jVal);
+      handler(utils.convReturnLong(jVal));
     });
       return that;
     } else throw new TypeError('function invoked with invalid arguments');

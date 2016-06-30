@@ -37,6 +37,39 @@ var HttpConnection = function(j_val) {
   var that = this;
 
   /**
+   @return the current connection window size or <code>-1</code> for HTTP/1.x
+
+   @public
+
+   @return {number}
+   */
+  this.getWindowSize = function() {
+    var __args = arguments;
+    if (__args.length === 0) {
+      return j_httpConnection["getWindowSize()"]();
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+   Update the current connection wide window size to a new size.
+   <p/>
+   Increasing this value, gives better performance when several data streams are multiplexed
+   <p/>
+   This is not implemented for HTTP/1.x.
+
+   @public
+   @param windowSize {number} the new window size 
+   @return {HttpConnection} a reference to this, so the API can be used fluently
+   */
+  this.setWindowSize = function(windowSize) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] ==='number') {
+      j_httpConnection["setWindowSize(int)"](windowSize);
+      return that;
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
    Send a go away frame to the remote endpoint of the connection.
    <p/>
    <ul>
