@@ -161,8 +161,8 @@ var Future = function(j_val) {
   /**
    Compose this future with a provided <code>next</code> future.<p>
   
-   When this future succeeds, the <code>handler</code> will be called with the completed value, this handler
-   should complete the next future.<p>
+   When this (the one on which <code>compose</code> is called) future succeeds, the <code>handler</code> will be called with
+   the completed value, this handler should complete the next future.<p>
   
    If the <code>handler</code> throws an exception, the returned future will be failed with this exception.<p>
   
@@ -171,8 +171,8 @@ var Future = function(j_val) {
 
    @public
    @param handler {function} the handler 
-   @param composed {Future} the composed future 
-   @return {Future} the composed future, used for chaining
+   @param next {Future} the next future 
+   @return {Future} the next future, used for chaining
    */
   this.compose = function() {
     var __args = arguments;
