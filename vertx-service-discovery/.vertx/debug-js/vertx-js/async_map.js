@@ -53,8 +53,8 @@ var AsyncMap = function(j_val) {
   };
 
   /**
-   Like {@link AsyncMap#put} but specifying a timeout. If the value cannot be put within the timeout a
-   failure will be passed to the handler
+   Like {@link AsyncMap#put} but specifying a time to live for the entry. Entry will expire and get evicted after the
+   ttl.
 
    @public
    @param k {Object} the key 
@@ -84,8 +84,8 @@ var AsyncMap = function(j_val) {
   };
 
   /**
-   Link {@link AsyncMap#putIfAbsent} but specifying a timeout. If the value cannot be put within the timeout a
-   failure will be passed to the handler
+   Link {@link AsyncMap#putIfAbsent} but specifying a time to live for the entry. Entry will expire and get evicted
+   after the ttl.
 
    @public
    @param k {Object} the key 

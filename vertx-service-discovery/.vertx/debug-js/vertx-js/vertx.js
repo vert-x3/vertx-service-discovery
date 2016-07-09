@@ -255,7 +255,7 @@ var Vertx = function(j_val) {
     var __args = arguments;
     if (__args.length === 2 && typeof __args[0] ==='number' && typeof __args[1] === 'function') {
       return j_vertx["setTimer(long,io.vertx.core.Handler)"](delay, function(jVal) {
-      handler(jVal);
+      handler(utils.convReturnLong(jVal));
     });
     } else throw new TypeError('function invoked with invalid arguments');
   };
@@ -288,7 +288,7 @@ var Vertx = function(j_val) {
     var __args = arguments;
     if (__args.length === 2 && typeof __args[0] ==='number' && typeof __args[1] === 'function') {
       return j_vertx["setPeriodic(long,io.vertx.core.Handler)"](delay, function(jVal) {
-      handler(jVal);
+      handler(utils.convReturnLong(jVal));
     });
     } else throw new TypeError('function invoked with invalid arguments');
   };

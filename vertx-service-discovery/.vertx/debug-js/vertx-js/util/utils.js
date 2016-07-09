@@ -2,6 +2,7 @@ var JsonObject = Packages.io.vertx.core.json.JsonObject;
 var JsonArray = Packages.io.vertx.core.json.JsonArray;
 var asList = java.util.Arrays.asList;
 var Character = Java.type("java.lang.Character");
+var Long = Java.type("java.lang.Long");
 var LongArrayType = Java.type("java.lang.Long[]");
 var ShortArrayType = Java.type("java.lang.Short[]");
 var ByteArrayType = Java.type("java.lang.Byte[]");
@@ -256,6 +257,8 @@ utils.convParamSetEnum = function(arr, constructor) {
 utils.convReturnTypeUnknown = function(ret) {
   if (ret instanceof JsonObject || ret instanceof JsonArray) {
     return JSON.parse(ret.encode());
+  } else if (ret instanceof Long) {
+    return ret.doubleValue();
   } else {
     return ret;
   }
@@ -272,6 +275,11 @@ utils.convReturnThrowable = function(ret) {
 // Convert a Java JsonObject/JsonArray return to JS JSON
 utils.convReturnJson = function(param) {
   return param != null ? JSON.parse(param.encode()) : null;
+};
+
+// Convert a java.lang.Long return to JS number
+utils.convReturnLong = function(param) {
+  return param != null ? param.doubleValue() : null;
 };
 
 /*
@@ -376,6 +384,23 @@ utils.convReturnListSetEnum = function(jList) {
     while (iter.hasNext()) {
       var elem = iter.next();
       arr[pos++] = elem != null ? elem.toString() : null;
+    }
+    return arr;
+  } else {
+    return null;
+  }
+};
+
+// Convert a list/set containing Long return
+utils.convReturnListSetLong = function(jList) {
+  if (jList) {
+    var arr = [];
+    arr.length = jList.size();
+    var iter = jList.iterator();
+    var pos = 0;
+    while (iter.hasNext()) {
+      var elem = iter.next();
+      arr[pos++] = elem != null ? elem.doubleValue() : null;
     }
     return arr;
   } else {

@@ -44,7 +44,7 @@ var Counter = function(j_val) {
     if (__args.length === 1 && typeof __args[0] === 'function') {
       j_counter["get(io.vertx.core.Handler)"](function(ar) {
       if (ar.succeeded()) {
-        resultHandler(ar.result(), null);
+        resultHandler(utils.convReturnLong(ar.result()), null);
       } else {
         resultHandler(null, ar.cause());
       }
@@ -63,7 +63,7 @@ var Counter = function(j_val) {
     if (__args.length === 1 && typeof __args[0] === 'function') {
       j_counter["incrementAndGet(io.vertx.core.Handler)"](function(ar) {
       if (ar.succeeded()) {
-        resultHandler(ar.result(), null);
+        resultHandler(utils.convReturnLong(ar.result()), null);
       } else {
         resultHandler(null, ar.cause());
       }
@@ -82,7 +82,7 @@ var Counter = function(j_val) {
     if (__args.length === 1 && typeof __args[0] === 'function') {
       j_counter["getAndIncrement(io.vertx.core.Handler)"](function(ar) {
       if (ar.succeeded()) {
-        resultHandler(ar.result(), null);
+        resultHandler(utils.convReturnLong(ar.result()), null);
       } else {
         resultHandler(null, ar.cause());
       }
@@ -101,7 +101,7 @@ var Counter = function(j_val) {
     if (__args.length === 1 && typeof __args[0] === 'function') {
       j_counter["decrementAndGet(io.vertx.core.Handler)"](function(ar) {
       if (ar.succeeded()) {
-        resultHandler(ar.result(), null);
+        resultHandler(utils.convReturnLong(ar.result()), null);
       } else {
         resultHandler(null, ar.cause());
       }
@@ -121,7 +121,7 @@ var Counter = function(j_val) {
     if (__args.length === 2 && typeof __args[0] ==='number' && typeof __args[1] === 'function') {
       j_counter["addAndGet(long,io.vertx.core.Handler)"](value, function(ar) {
       if (ar.succeeded()) {
-        resultHandler(ar.result(), null);
+        resultHandler(utils.convReturnLong(ar.result()), null);
       } else {
         resultHandler(null, ar.cause());
       }
@@ -141,7 +141,7 @@ var Counter = function(j_val) {
     if (__args.length === 2 && typeof __args[0] ==='number' && typeof __args[1] === 'function') {
       j_counter["getAndAdd(long,io.vertx.core.Handler)"](value, function(ar) {
       if (ar.succeeded()) {
-        resultHandler(ar.result(), null);
+        resultHandler(utils.convReturnLong(ar.result()), null);
       } else {
         resultHandler(null, ar.cause());
       }

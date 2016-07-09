@@ -35,6 +35,7 @@ import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -289,4 +290,19 @@ public class RecordTest {
     Assertions.assertThat(matches).hasSize(5);
   }
 
+  @Test
+  public void testReferenceEqualityAndHashcode() {
+    String recordJson =
+            "  {\n" +
+                    "    \"name\": \"theServiceDiscovery\",\n" +
+                    "    \"type\": \"theServiceType\",\n" +
+                    "    \"location\": {},\n" +
+                    "    \"metadata\": {},\n" +
+                    "    \"registration\": \"theUUID\",\n" +
+                    "    \"status\": \"UNKNOWN\"\n" +
+                    "  }";
+    Record record1 = new Record(new JsonObject(recordJson));
+    Record record2 = new Record(new JsonObject(recordJson));
+    Assertions.assertThat(record1).isEqualTo(record2);
+  }
 }

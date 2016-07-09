@@ -242,4 +242,35 @@ public class Record {
             ((String) actual).equalsIgnoreCase(expected.toString()) : actual.equals(expected)));
   }
 
+  /**
+   * @param o the object to compare to this service record
+   * @return {@code true} when equal, {@code false} otherwise
+   */
+  @Override
+  public boolean equals(Object o) {
+    if (o == this) return true;
+    if (!(o instanceof Record)) return false;
+    Record other = (Record) o;
+    return (name == null ? other.name == null : name.equals(other.name)) &&
+            (type == null ? other.type == null : type.equals(other.type)) &&
+            (location == null ? other.location == null : location.equals(other.location)) &&
+            (metadata == null ? other.metadata == null : metadata.equals(other.metadata)) &&
+            (registration == null ? other.registration == null : registration.equals(other.registration)) &&
+            (status == null ? other.status == null : status.equals(other.status));
+  }
+
+  /**
+   * @return the hash code of the service record
+   */
+  @Override
+  public int hashCode() {
+    int result = 17;
+    result = 31 * result + (name == null ? 0 : name.hashCode());
+    result = 31 * result + (type == null ? 0 : type.hashCode());
+    result = 31 * result + (location == null ? 0 : location.hashCode());
+    result = 31 * result + (metadata == null ? 0 : metadata.hashCode());
+    result = 31 * result + (registration == null ? 0 : registration.hashCode());
+    result = 31 * result + (status == null ? 0: status.hashCode());
+    return result;
+  }
 }
