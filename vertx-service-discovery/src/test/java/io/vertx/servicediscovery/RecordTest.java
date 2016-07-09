@@ -304,5 +304,6 @@ public class RecordTest {
     Record record1 = new Record(new JsonObject(recordJson));
     Record record2 = new Record(new JsonObject(recordJson));
     Assertions.assertThat(record1).isEqualTo(record2);
+    Assertions.assertThat(record1.hashCode()).isEqualTo(record2.hashCode());
   }
 }
