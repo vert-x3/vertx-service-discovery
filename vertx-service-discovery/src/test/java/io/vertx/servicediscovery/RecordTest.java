@@ -19,6 +19,7 @@ package io.vertx.servicediscovery;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.impl.DiscoveryImpl;
+import io.vertx.servicediscovery.types.HttpEndpoint;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
@@ -87,6 +88,17 @@ public class RecordTest {
     assertThat(record.match(new JsonObject().put("foo", "bar").put("other", "*"))).isFalse();
     assertThat(record.match(new JsonObject().put("foo", "bar").put("key", 2))).isTrue();
     assertThat(record.match(new JsonObject().put("foo", "*").put("key", 2))).isTrue();
+  }
+
+  @Test
+  public void TestTypeMatch() {
+    Record record = new Record().setName("Name").setType(HttpEndpoint.TYPE);
+
+    assertThat(record.match(new JsonObject().put("name", "Name").put("type", "any"))).isFalse();
+    assertThat(record.match(new JsonObject().put("name", "Name").put("type", HttpEndpoint.TYPE))).isTrue();
+    assertThat(record.match(new JsonObject().put("type", HttpEndpoint.TYPE))).isTrue();
+
+    assertThat(record.match(new JsonObject().put("name", "Name").put("type", "*"))).isTrue();
   }
 
   @Test

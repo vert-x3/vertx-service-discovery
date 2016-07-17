@@ -222,6 +222,9 @@ public class Record {
         case "status":
           match = match(getStatus().name(), filter.getString("status"));
           break;
+        case "type":
+          match = match(getType(), filter.getString("type"));
+          break;
         default:
           // metadata
           match = match(getMetadata().getValue(key), filter.getValue(key));
