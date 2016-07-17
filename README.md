@@ -6,6 +6,8 @@ service proxies, or anything you want as you can add your own type.
 
 The service discovery can be extended using bridges to import services from Docker, Kubernetes, Consul...
 
+You can find the [full documentation](http://vertx.io/docs/#microservices) on the Vert.x website.
+
 ## Kubernetes Discovery Bridge
 
 The `vertx-discovery-bridge-kubernetes` is a discovery bridge importing the services from Kubernetes in the Vert.x service discovery.
