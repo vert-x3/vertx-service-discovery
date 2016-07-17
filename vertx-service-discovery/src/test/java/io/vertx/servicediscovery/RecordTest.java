@@ -37,6 +37,8 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 
 /**
+ * Test the {@link Record} class behavior.
+ *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 public class RecordTest {
@@ -243,14 +245,16 @@ public class RecordTest {
     Assertions.assertThat(matches).hasSize(2);
 
     try {
-      discovery.getRecord((Function<Record, Boolean>) null, ar -> {});
+      discovery.getRecord((Function<Record, Boolean>) null, ar -> {
+      });
       fail("NPE expected");
     } catch (NullPointerException e) {
       // OK
     }
 
     try {
-      discovery.getRecords((Function<Record, Boolean>) null, ar -> {});
+      discovery.getRecords((Function<Record, Boolean>) null, ar -> {
+      });
       fail("NPE expected");
     } catch (NullPointerException e) {
       // OK
@@ -289,4 +293,20 @@ public class RecordTest {
     Assertions.assertThat(matches).hasSize(5);
   }
 
+  @Test
+  public void testReferenceEqualityAndHashcode() {
+    String recordJson =
+        "  {\n" +
+            "    \"name\": \"theServiceDiscovery\",\n" +
+            "    \"type\": \"theServiceType\",\n" +
+            "    \"location\": {},\n" +
+            "    \"metadata\": {},\n" +
+            "    \"registration\": \"theUUID\",\n" +
+            "    \"status\": \"UNKNOWN\"\n" +
+            "  }";
+    Record record1 = new Record(new JsonObject(recordJson));
+    Record record2 = new Record(new JsonObject(recordJson));
+    Assertions.assertThat(record1).isEqualTo(record2);
+    Assertions.assertThat(record1.hashCode()).isEqualTo(record2.hashCode());
+  }
 }
