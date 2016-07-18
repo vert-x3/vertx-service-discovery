@@ -27,7 +27,7 @@ module VertxServiceDiscovery
     # @return [void]
     def start(vertx=nil,publisher=nil,configuration=nil,future=nil)
       if vertx.class.method_defined?(:j_del) && publisher.class.method_defined?(:j_del) && configuration.class == Hash && future.class.method_defined?(:j_del) && !block_given?
-        return @j_del.java_method(:start, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxServicediscoverySpi::ServicePublisher.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Future.java_class]).call(vertx.j_del,publisher.j_del,::Vertx::Util::Utils.to_json_object(configuration),future.j_del)
+        return @j_del.java_method(:init, [Java::IoVertxCore::Vertx.java_class, Java::IoVertxServicediscoverySpi::ServicePublisher.java_class, Java::IoVertxCoreJson::JsonObject.java_class, Java::IoVertxCore::Future.java_class]).call(vertx.j_del, publisher.j_del, ::Vertx::Util::Utils.to_json_object(configuration), future.j_del)
       end
       raise ArgumentError, "Invalid arguments when calling start(vertx,publisher,configuration,future)"
     end

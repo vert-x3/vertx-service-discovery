@@ -34,7 +34,7 @@ var ServiceImporter = function(j_val) {
   var that = this;
 
   /**
-   Starts the bridge.
+   Starts the importer.
 
    @public
    @param vertx {Vertx} the vertx instance 
@@ -50,7 +50,7 @@ var ServiceImporter = function(j_val) {
   };
 
   /**
-   Stops the bridge.
+   Stops the importer.
 
    @public
    @param vertx {Vertx} the vertx instance 
@@ -61,6 +61,19 @@ var ServiceImporter = function(j_val) {
     var __args = arguments;
     if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'object' && __args[1]._jdel && typeof __args[2] === 'object' && __args[2]._jdel) {
       j_serviceImporter["stop(io.vertx.core.Vertx,io.vertx.servicediscovery.spi.ServicePublisher,io.vertx.core.Future)"](vertx._jdel, publisher._jdel, future._jdel);
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+   Close the importer
+
+   @public
+   @param closeHandler {function} the handle to be notified when importer is closed, may be <code>null</code> 
+   */
+  this.close = function(closeHandler) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'function') {
+      j_serviceImporter["close(io.vertx.core.Handler)"](closeHandler);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 

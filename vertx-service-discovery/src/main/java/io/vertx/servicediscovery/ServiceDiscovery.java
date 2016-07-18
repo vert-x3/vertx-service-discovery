@@ -121,21 +121,46 @@ public interface ServiceDiscovery {
    * Registers a discovery service importer. Importers let you integrate other discovery technologies in this service
    * discovery.
    *
-   * @param importer        the service importer
+   * @param importer      the service importer
    * @param configuration the optional configuration
    * @return the current {@link ServiceDiscovery}
    */
   ServiceDiscovery registerServiceImporter(ServiceImporter importer, JsonObject configuration);
 
   /**
+   * Registers a discovery service importer. Importers let you integrate other discovery technologies in this service
+   * discovery.
+   *
+   * @param importer          the service importer
+   * @param configuration     the optional configuration
+   * @param completionHandler handler call when the importer has finished its initialization and
+   *                          initial imports
+   * @return the current {@link ServiceDiscovery}
+   */
+  ServiceDiscovery registerServiceImporter(ServiceImporter importer, JsonObject configuration,
+                                           Handler<AsyncResult<Void>> completionHandler);
+
+  /**
    * Registers a discovery bridge. Exporters let you integrate other discovery technologies in this service
    * discovery.
    *
-   * @param exporter        the service exporter
+   * @param exporter      the service exporter
    * @param configuration the optional configuration
    * @return the current {@link ServiceDiscovery}
    */
   ServiceDiscovery registerServiceExporter(ServiceExporter exporter, JsonObject configuration);
+
+  /**
+   * Registers a discovery bridge. Exporters let you integrate other discovery technologies in this service
+   * discovery.
+   *
+   * @param exporter          the service exporter
+   * @param configuration     the optional configuration
+   * @param completionHandler handler notified when the exporter has been correctly initialized.
+   * @return the current {@link ServiceDiscovery}
+   */
+  ServiceDiscovery registerServiceExporter(ServiceExporter exporter, JsonObject configuration,
+                                           Handler<AsyncResult<Void>> completionHandler);
 
   /**
    * Closes the service discovery

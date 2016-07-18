@@ -144,6 +144,19 @@ public class ServiceDiscovery {
   }
 
   /**
+   * Registers a discovery service importer. Importers let you integrate other discovery technologies in this service
+   * discovery.
+   * @param importer the service importer
+   * @param configuration the optional configuration
+   * @param completionHandler handler call when the importer has finished its initialization and initial imports
+   * @return the current {@link io.vertx.rxjava.servicediscovery.ServiceDiscovery}
+   */
+  public ServiceDiscovery registerServiceImporter(ServiceImporter importer, JsonObject configuration, Handler<AsyncResult<Void>> completionHandler) { 
+    ServiceDiscovery ret = ServiceDiscovery.newInstance(delegate.registerServiceImporter((io.vertx.servicediscovery.spi.ServiceImporter)importer.getDelegate(), configuration, completionHandler));
+    return ret;
+  }
+
+  /**
    * Registers a discovery bridge. Exporters let you integrate other discovery technologies in this service
    * discovery.
    * @param exporter the service exporter
@@ -152,6 +165,19 @@ public class ServiceDiscovery {
    */
   public ServiceDiscovery registerServiceExporter(ServiceExporter exporter, JsonObject configuration) { 
     ServiceDiscovery ret = ServiceDiscovery.newInstance(delegate.registerServiceExporter((io.vertx.servicediscovery.spi.ServiceExporter)exporter.getDelegate(), configuration));
+    return ret;
+  }
+
+  /**
+   * Registers a discovery bridge. Exporters let you integrate other discovery technologies in this service
+   * discovery.
+   * @param exporter the service exporter
+   * @param configuration the optional configuration
+   * @param completionHandler handler notified when the exporter has been correctly initialized.
+   * @return the current {@link io.vertx.rxjava.servicediscovery.ServiceDiscovery}
+   */
+  public ServiceDiscovery registerServiceExporter(ServiceExporter exporter, JsonObject configuration, Handler<AsyncResult<Void>> completionHandler) { 
+    ServiceDiscovery ret = ServiceDiscovery.newInstance(delegate.registerServiceExporter((io.vertx.servicediscovery.spi.ServiceExporter)exporter.getDelegate(), configuration, completionHandler));
     return ret;
   }
 

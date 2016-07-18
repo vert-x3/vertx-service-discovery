@@ -51,9 +51,11 @@ public class ConsulServiceImporter implements ServiceImporter {
   private final List<ImportedConsulService> imports = new ArrayList<>();
   private String dc;
   private long scanTask = -1;
+  private Vertx vertx;
 
   @Override
   public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Future<Void> completion) {
+    this.vertx = vertx;
     this.publisher = publisher;
 
     HttpClientOptions options = new HttpClientOptions(configuration);
@@ -249,13 +251,13 @@ public class ConsulServiceImporter implements ServiceImporter {
   }
 
   @Override
-  public void stop(Vertx vertx, ServicePublisher publisher, Future<Void> future) {
+  public void close(Handler<Void> completionHandler) {
     if (scanTask != -1) {
       vertx.cancelTimer(scanTask);
     }
     // Remove all the services that has been imported
     List<Future> list = new ArrayList<>();
-    imports.stream().forEach(imported -> {
+    imports.forEach(imported -> {
       Future<Void> fut = Future.future();
       fut.setHandler(ar -> {
         LOGGER.info("Unregistering " + imported.name());
@@ -270,9 +272,12 @@ public class ConsulServiceImporter implements ServiceImporter {
 
     CompositeFuture.all(list).setHandler(ar -> {
       if (ar.succeeded()) {
-        future.complete();
+        LOGGER.info("Successfully closed the service importer " + this);
       } else {
-        future.fail(ar.cause());
+        LOGGER.error("A failure has been caught while stopping " + this, ar.cause());
+      }
+      if (completionHandler != null) {
+        completionHandler.handle(null);
       }
     });
   }

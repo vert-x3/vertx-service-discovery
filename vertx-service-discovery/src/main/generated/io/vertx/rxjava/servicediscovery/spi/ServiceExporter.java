@@ -18,8 +18,11 @@ package io.vertx.rxjava.servicediscovery.spi;
 
 import java.util.Map;
 import rx.Observable;
+import io.vertx.rxjava.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
 import io.vertx.core.Handler;
+import io.vertx.rxjava.core.Future;
 
 /**
  * The service exporter allows integrate other discovery technologies with the Vert.x service discovery. It maps
@@ -40,6 +43,17 @@ public class ServiceExporter {
 
   public Object getDelegate() {
     return delegate;
+  }
+
+  /**
+   * Starts the exporter.
+   * @param vertx the vertx instance
+   * @param publisher the service discovery instance
+   * @param configuration the bridge configuration if any
+   * @param future a future on which the bridge must report the completion of the starting
+   */
+  public void init(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Future<Void> future) { 
+    delegate.init((io.vertx.core.Vertx)vertx.getDelegate(), (io.vertx.servicediscovery.spi.ServicePublisher)publisher.getDelegate(), configuration, (io.vertx.core.Future<java.lang.Void>)future.getDelegate());
   }
 
   /**
@@ -70,7 +84,7 @@ public class ServiceExporter {
 
   /**
    * Close the exporter
-   * @param closeHandler the handle to be notified when exporter is closed
+   * @param closeHandler the handle to be notified when exporter is closed, may be <code>null</code>
    */
   public void close(Handler<Void> closeHandler) { 
     delegate.close(closeHandler);

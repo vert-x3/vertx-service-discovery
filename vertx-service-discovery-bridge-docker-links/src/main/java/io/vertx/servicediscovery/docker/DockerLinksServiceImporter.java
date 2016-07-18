@@ -18,6 +18,7 @@ package io.vertx.servicediscovery.docker;
 
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -130,13 +131,13 @@ public class DockerLinksServiceImporter implements ServiceImporter {
   private Map<String, String> getVariables() {
     LinkedHashMap<String, String> vars = new LinkedHashMap<>();
     vars.putAll(System.getenv());
-    System.getProperties().entrySet().stream().forEach(entry ->
+    System.getProperties().entrySet().forEach(entry ->
         vars.put(entry.getKey().toString(), entry.getValue().toString()));
     return vars;
   }
 
   @Override
-  public void stop(Vertx vertx, ServicePublisher publisher, Future<Void> completion) {
+  public void close(Handler<Void> completionHandler) {
     List<Future> list = new ArrayList<>();
     for (Record record : records) {
       publisher.unpublish(record.getRegistration(),
@@ -145,9 +146,12 @@ public class DockerLinksServiceImporter implements ServiceImporter {
 
     CompositeFuture.all(list).setHandler(ar -> {
           if (ar.succeeded()) {
-            completion.succeeded();
+            LOGGER.info("Successfully closed the service importer " + this);
           } else {
-            completion.fail(ar.cause());
+            LOGGER.error("A failure has been caught while stopping " + this, ar.cause());
+          }
+          if (completionHandler != null) {
+            completionHandler.handle(null);
           }
         }
     );
@@ -158,7 +162,7 @@ public class DockerLinksServiceImporter implements ServiceImporter {
         .setName(name);
 
     // Add as metadata all entries
-    variables.entrySet().stream().forEach(entry -> {
+    variables.entrySet().forEach(entry -> {
       if (entry.getKey().startsWith(name + "_")) {
         String label = entry.getKey().substring((name + "_").length());
         record.getMetadata().put(label, entry.getValue());

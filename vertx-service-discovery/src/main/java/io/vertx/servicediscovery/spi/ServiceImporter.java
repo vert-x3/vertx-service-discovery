@@ -18,6 +18,7 @@ package io.vertx.servicediscovery.spi;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
@@ -33,8 +34,9 @@ import io.vertx.servicediscovery.Record;
 public interface ServiceImporter {
 
   /**
-   * Starts the bridge.
-   *  @param vertx         the vertx instance
+   * Starts the importer.
+   *
+   * @param vertx         the vertx instance
    * @param publisher     the service discovery instance
    * @param configuration the bridge configuration if any
    * @param future        a future on which the bridge must report the completion of the starting
@@ -43,11 +45,25 @@ public interface ServiceImporter {
              Future<Void> future);
 
   /**
-   * Stops the bridge.
-   *  @param vertx     the vertx instance
+   * Stops the importer.
+   *
+   * @param vertx     the vertx instance
    * @param publisher the service discovery instance
    * @param future    the future on which the bridge must report the completion of the stopping process
+   * @deprecated use {@link #close(Handler)} instead. This method will be removed in 3.4.0.
    */
-  void stop(Vertx vertx, ServicePublisher publisher, Future<Void> future);
+  @Deprecated
+  default void stop(Vertx vertx, ServicePublisher publisher, Future<Void> future) {
+    close(v -> future.complete(null));
+  }
+
+  /**
+   * Close the importer
+   *
+   * @param closeHandler the handle to be notified when importer is closed, may be {@code null}
+   */
+  default void close(Handler<Void> closeHandler) {
+    closeHandler.handle(null);
+  }
 
 }

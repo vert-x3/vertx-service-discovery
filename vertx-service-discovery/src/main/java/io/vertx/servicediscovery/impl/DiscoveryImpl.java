@@ -140,7 +140,8 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
   }
 
   @Override
-  public ServiceDiscovery registerServiceImporter(ServiceImporter importer, JsonObject configuration) {
+  public ServiceDiscovery registerServiceImporter(ServiceImporter importer, JsonObject configuration,
+                                                  Handler<AsyncResult<Void>> completionHandler) {
     JsonObject conf;
     if (configuration == null) {
       conf = new JsonObject();
@@ -153,22 +154,64 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
         ar -> {
           if (ar.failed()) {
             LOGGER.error("Cannot start the service importer " + importer, ar.cause());
+            if (completionHandler != null) {
+              completionHandler.handle(Future.failedFuture(ar.cause()));
+            }
           } else {
             importers.add(importer);
-            LOGGER.info("Discovery importer " + importer + " started");
+            LOGGER.info("Service importer " + importer + " started");
+
+            if (completionHandler != null) {
+              completionHandler.handle(Future.succeededFuture(null));
+            }
           }
         }
     );
-
 
     importer.start(vertx, this, conf, completed);
     return this;
   }
 
   @Override
+  public ServiceDiscovery registerServiceImporter(ServiceImporter importer, JsonObject configuration) {
+    return registerServiceImporter(importer, configuration, null);
+  }
+
+  @Override
   public ServiceDiscovery registerServiceExporter(ServiceExporter exporter, JsonObject configuration) {
-    exporters.add(exporter);
-    LOGGER.info("Discovery exporter " + exporter + " started");
+    return registerServiceExporter(exporter, configuration, null);
+  }
+
+  @Override
+  public ServiceDiscovery registerServiceExporter(ServiceExporter exporter, JsonObject configuration,
+                                                  Handler<AsyncResult<Void>> completionHandler) {
+    JsonObject conf;
+    if (configuration == null) {
+      conf = new JsonObject();
+    } else {
+      conf = configuration;
+    }
+
+    Future<Void> completed = Future.future();
+    completed.setHandler(
+        ar -> {
+          if (ar.failed()) {
+            LOGGER.error("Cannot start the service importer " + exporter, ar.cause());
+            if (completionHandler != null) {
+              completionHandler.handle(Future.failedFuture(ar.cause()));
+            }
+          } else {
+            exporters.add(exporter);
+            LOGGER.info("Service exporter " + exporter + " started");
+
+            if (completionHandler != null) {
+              completionHandler.handle(Future.succeededFuture(null));
+            }
+          }
+        }
+    );
+
+    exporter.init(vertx, this, conf, completed);
     return this;
   }
 
@@ -178,9 +221,11 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     List<Future> futures = new ArrayList<>();
     for (ServiceImporter importer : importers) {
       Future<Void> future = Future.future();
+      // TODO Change this call to call close, once the stop method has been removed
       importer.stop(vertx, this, future);
       futures.add(future);
     }
+
     for (ServiceExporter exporter : exporters) {
       Future<Void> future = Future.future();
       exporter.close(future::complete);

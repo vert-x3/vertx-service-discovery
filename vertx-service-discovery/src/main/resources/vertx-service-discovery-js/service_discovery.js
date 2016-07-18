@@ -90,12 +90,21 @@ var ServiceDiscovery = function(j_val) {
    @public
    @param importer {ServiceImporter} the service importer 
    @param configuration {Object} the optional configuration 
+   @param completionHandler {function} handler call when the importer has finished its initialization and initial imports 
    @return {ServiceDiscovery} the current {@link ServiceDiscovery}
    */
-  this.registerServiceImporter = function(importer, configuration) {
+  this.registerServiceImporter = function() {
     var __args = arguments;
     if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null)) {
-      return utils.convReturnVertxGen(j_serviceDiscovery["registerServiceImporter(io.vertx.servicediscovery.spi.ServiceImporter,io.vertx.core.json.JsonObject)"](importer._jdel, utils.convParamJsonObject(configuration)), ServiceDiscovery);
+      return utils.convReturnVertxGen(j_serviceDiscovery["registerServiceImporter(io.vertx.servicediscovery.spi.ServiceImporter,io.vertx.core.json.JsonObject)"](__args[0]._jdel, utils.convParamJsonObject(__args[1])), ServiceDiscovery);
+    }  else if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'function') {
+      return utils.convReturnVertxGen(j_serviceDiscovery["registerServiceImporter(io.vertx.servicediscovery.spi.ServiceImporter,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](__args[0]._jdel, utils.convParamJsonObject(__args[1]), function(ar) {
+      if (ar.succeeded()) {
+        __args[2](null, null);
+      } else {
+        __args[2](null, ar.cause());
+      }
+    }), ServiceDiscovery);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -106,12 +115,21 @@ var ServiceDiscovery = function(j_val) {
    @public
    @param exporter {ServiceExporter} the service exporter 
    @param configuration {Object} the optional configuration 
+   @param completionHandler {function} handler notified when the exporter has been correctly initialized. 
    @return {ServiceDiscovery} the current {@link ServiceDiscovery}
    */
-  this.registerServiceExporter = function(exporter, configuration) {
+  this.registerServiceExporter = function() {
     var __args = arguments;
     if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null)) {
-      return utils.convReturnVertxGen(j_serviceDiscovery["registerServiceExporter(io.vertx.servicediscovery.spi.ServiceExporter,io.vertx.core.json.JsonObject)"](exporter._jdel, utils.convParamJsonObject(configuration)), ServiceDiscovery);
+      return utils.convReturnVertxGen(j_serviceDiscovery["registerServiceExporter(io.vertx.servicediscovery.spi.ServiceExporter,io.vertx.core.json.JsonObject)"](__args[0]._jdel, utils.convParamJsonObject(__args[1])), ServiceDiscovery);
+    }  else if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'function') {
+      return utils.convReturnVertxGen(j_serviceDiscovery["registerServiceExporter(io.vertx.servicediscovery.spi.ServiceExporter,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](__args[0]._jdel, utils.convParamJsonObject(__args[1]), function(ar) {
+      if (ar.succeeded()) {
+        __args[2](null, null);
+      } else {
+        __args[2](null, ar.cause());
+      }
+    }), ServiceDiscovery);
     } else throw new TypeError('function invoked with invalid arguments');
   };
 

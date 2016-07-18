@@ -18,8 +18,11 @@ package io.vertx.groovy.servicediscovery.spi;
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
 import io.vertx.core.json.JsonObject
+import io.vertx.groovy.core.Vertx
+import io.vertx.core.json.JsonObject
 import io.vertx.servicediscovery.Record
 import io.vertx.core.Handler
+import io.vertx.groovy.core.Future
 /**
  * The service exporter allows integrate other discovery technologies with the Vert.x service discovery. It maps
  * entries from another technology to a  and maps  to a publication in this other
@@ -33,6 +36,16 @@ public class ServiceExporter {
   }
   public Object getDelegate() {
     return delegate;
+  }
+  /**
+   * Starts the exporter.
+   * @param vertx the vertx instance
+   * @param publisher the service discovery instance
+   * @param configuration the bridge configuration if any
+   * @param future a future on which the bridge must report the completion of the starting
+   */
+  public void init(Vertx vertx, ServicePublisher publisher, Map<String, Object> configuration, Future<Void> future) {
+    delegate.init(vertx != null ? (io.vertx.core.Vertx)vertx.getDelegate() : null, publisher != null ? (io.vertx.servicediscovery.spi.ServicePublisher)publisher.getDelegate() : null, configuration != null ? new io.vertx.core.json.JsonObject(configuration) : null, future != null ? (io.vertx.core.Future<java.lang.Void>)future.getDelegate() : null);
   }
   /**
    * Notify a new record has been published, the record's registration can be used to uniquely
@@ -59,7 +72,7 @@ public class ServiceExporter {
   }
   /**
    * Close the exporter
-   * @param closeHandler the handle to be notified when exporter is closed
+   * @param closeHandler the handle to be notified when exporter is closed, may be <code>null</code>
    */
   public void close(Handler<Void> closeHandler) {
     delegate.close(closeHandler);

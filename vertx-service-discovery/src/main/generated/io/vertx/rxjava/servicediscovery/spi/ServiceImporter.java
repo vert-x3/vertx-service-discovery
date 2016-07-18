@@ -20,6 +20,7 @@ import java.util.Map;
 import rx.Observable;
 import io.vertx.rxjava.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.Handler;
 import io.vertx.rxjava.core.Future;
 
 /**
@@ -44,7 +45,7 @@ public class ServiceImporter {
   }
 
   /**
-   * Starts the bridge.
+   * Starts the importer.
    * @param vertx the vertx instance
    * @param publisher the service discovery instance
    * @param configuration the bridge configuration if any
@@ -55,13 +56,21 @@ public class ServiceImporter {
   }
 
   /**
-   * Stops the bridge.
+   * Stops the importer.
    * @param vertx the vertx instance
    * @param publisher the service discovery instance
    * @param future the future on which the bridge must report the completion of the stopping process
    */
   public void stop(Vertx vertx, ServicePublisher publisher, Future<Void> future) { 
     delegate.stop((io.vertx.core.Vertx)vertx.getDelegate(), (io.vertx.servicediscovery.spi.ServicePublisher)publisher.getDelegate(), (io.vertx.core.Future<java.lang.Void>)future.getDelegate());
+  }
+
+  /**
+   * Close the importer
+   * @param closeHandler the handle to be notified when importer is closed, may be <code>null</code>
+   */
+  public void close(Handler<Void> closeHandler) { 
+    delegate.close(closeHandler);
   }
 
 

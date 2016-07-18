@@ -21,6 +21,7 @@ import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.*;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -242,7 +243,7 @@ public class KubernetesServiceImporter implements Watcher<Service>, ServiceImpor
 
 
   @Override
-  public void stop(Vertx vertx, ServicePublisher publisher, Future<Void> future) {
+  public void close(Handler<Void> completionHandler) {
     synchronized (this) {
       if (watcher != null) {
         watcher.close();
@@ -255,7 +256,9 @@ public class KubernetesServiceImporter implements Watcher<Service>, ServiceImpor
       }
     }
 
-    future.complete();
+    if (completionHandler != null) {
+      completionHandler.handle(null);
+    }
   }
 
   private static boolean isTrue(Map<String, String> labels, String key) {

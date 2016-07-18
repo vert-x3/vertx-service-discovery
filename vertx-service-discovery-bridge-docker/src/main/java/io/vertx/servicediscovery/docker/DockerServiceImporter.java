@@ -21,6 +21,7 @@ import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -57,10 +58,11 @@ public class DockerServiceImporter implements ServiceImporter {
 
   /**
    * Starts the bridge.
-   *  @param vertx         the vert.x instance
+   *
+   * @param vertx         the vert.x instance
    * @param publisher     the service discovery instance
    * @param configuration the bridge configuration if any
-   * @param completion        future to assign with completion status
+   * @param completion    future to assign with completion status
    */
   @Override
   public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Future<Void> completion) {
@@ -228,21 +230,18 @@ public class DockerServiceImporter implements ServiceImporter {
     return true;
   }
 
-  /**
-   * Stops the bridge.
-   *  @param vertx     the vert.x instance
-   * @param publisher the service discovery instance
-   * @param future    completion future
-   */
   @Override
-  public void stop(Vertx vertx, ServicePublisher publisher, Future<Void> future) {
+  public void close(Handler<Void> completionHandler) {
     vertx.cancelTimer(timer);
     try {
       started = false;
       client.close();
-      future.complete();
+      LOGGER.info("Successfully closed the service importer " + this);
     } catch (IOException e) {
-      future.fail("Exception caught while closing the docker client : " + e.getMessage());
+      LOGGER.error("A failure has been caught while stopping " + this, e);
+    }
+    if (completionHandler != null) {
+      completionHandler.handle(null);
     }
   }
 

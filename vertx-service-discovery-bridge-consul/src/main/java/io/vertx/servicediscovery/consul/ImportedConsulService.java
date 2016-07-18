@@ -101,7 +101,7 @@ public class ImportedConsulService {
   /**
    * @return the id
    */
-  public String id() {
+  String id() {
     return id;
   }
 }

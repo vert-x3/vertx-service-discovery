@@ -130,6 +130,18 @@ public class ServiceDiscovery {
     return ret;
   }
   /**
+   * Registers a discovery service importer. Importers let you integrate other discovery technologies in this service
+   * discovery.
+   * @param importer the service importer
+   * @param configuration the optional configuration
+   * @param completionHandler handler call when the importer has finished its initialization and initial imports
+   * @return the current {@link io.vertx.groovy.servicediscovery.ServiceDiscovery}
+   */
+  public ServiceDiscovery registerServiceImporter(ServiceImporter importer, Map<String, Object> configuration, Handler<AsyncResult<Void>> completionHandler) {
+    def ret = InternalHelper.safeCreate(delegate.registerServiceImporter(importer != null ? (io.vertx.servicediscovery.spi.ServiceImporter)importer.getDelegate() : null, configuration != null ? new io.vertx.core.json.JsonObject(configuration) : null, completionHandler), io.vertx.groovy.servicediscovery.ServiceDiscovery.class);
+    return ret;
+  }
+  /**
    * Registers a discovery bridge. Exporters let you integrate other discovery technologies in this service
    * discovery.
    * @param exporter the service exporter
@@ -138,6 +150,18 @@ public class ServiceDiscovery {
    */
   public ServiceDiscovery registerServiceExporter(ServiceExporter exporter, Map<String, Object> configuration) {
     def ret = InternalHelper.safeCreate(delegate.registerServiceExporter(exporter != null ? (io.vertx.servicediscovery.spi.ServiceExporter)exporter.getDelegate() : null, configuration != null ? new io.vertx.core.json.JsonObject(configuration) : null), io.vertx.groovy.servicediscovery.ServiceDiscovery.class);
+    return ret;
+  }
+  /**
+   * Registers a discovery bridge. Exporters let you integrate other discovery technologies in this service
+   * discovery.
+   * @param exporter the service exporter
+   * @param configuration the optional configuration
+   * @param completionHandler handler notified when the exporter has been correctly initialized.
+   * @return the current {@link io.vertx.groovy.servicediscovery.ServiceDiscovery}
+   */
+  public ServiceDiscovery registerServiceExporter(ServiceExporter exporter, Map<String, Object> configuration, Handler<AsyncResult<Void>> completionHandler) {
+    def ret = InternalHelper.safeCreate(delegate.registerServiceExporter(exporter != null ? (io.vertx.servicediscovery.spi.ServiceExporter)exporter.getDelegate() : null, configuration != null ? new io.vertx.core.json.JsonObject(configuration) : null, completionHandler), io.vertx.groovy.servicediscovery.ServiceDiscovery.class);
     return ret;
   }
   /**

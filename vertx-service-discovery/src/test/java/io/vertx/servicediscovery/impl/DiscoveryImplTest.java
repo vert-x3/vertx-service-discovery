@@ -277,9 +277,9 @@ public class DiscoveryImplTest {
       }
 
       @Override
-      public void stop(Vertx vertx, ServicePublisher publisher, Future<Void> future) {
+      public void close(Handler<Void> closeHandler) {
         closed.set(true);
-        future.complete();
+        closeHandler.handle(null);
       }
     };
 
@@ -335,6 +335,11 @@ public class DiscoveryImplTest {
     @Override
     public void close(Handler<Void> closeHandler) {
       closed = true;
+    }
+
+    @Override
+    public void init(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Future<Void> future) {
+      future.complete(null);
     }
   }
 

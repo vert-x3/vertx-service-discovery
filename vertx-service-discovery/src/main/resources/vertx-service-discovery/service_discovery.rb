@@ -91,10 +91,13 @@ module VertxServiceDiscovery
     #  discovery.
     # @param [::VertxServiceDiscovery::ServiceImporter] importer the service importer
     # @param [Hash{String => Object}] configuration the optional configuration
+    # @yield handler call when the importer has finished its initialization and initial imports
     # @return [::VertxServiceDiscovery::ServiceDiscovery] the current {::VertxServiceDiscovery::ServiceDiscovery}
     def register_service_importer(importer=nil,configuration=nil)
       if importer.class.method_defined?(:j_del) && configuration.class == Hash && !block_given?
         return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:registerServiceImporter, [Java::IoVertxServicediscoverySpi::ServiceImporter.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(importer.j_del,::Vertx::Util::Utils.to_json_object(configuration)),::VertxServiceDiscovery::ServiceDiscovery)
+      elsif importer.class.method_defined?(:j_del) && configuration.class == Hash && block_given?
+        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:registerServiceImporter, [Java::IoVertxServicediscoverySpi::ServiceImporter.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(importer.j_del,::Vertx::Util::Utils.to_json_object(configuration),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil) })),::VertxServiceDiscovery::ServiceDiscovery)
       end
       raise ArgumentError, "Invalid arguments when calling register_service_importer(importer,configuration)"
     end
@@ -102,10 +105,13 @@ module VertxServiceDiscovery
     #  discovery.
     # @param [::VertxServiceDiscovery::ServiceExporter] exporter the service exporter
     # @param [Hash{String => Object}] configuration the optional configuration
+    # @yield handler notified when the exporter has been correctly initialized.
     # @return [::VertxServiceDiscovery::ServiceDiscovery] the current {::VertxServiceDiscovery::ServiceDiscovery}
     def register_service_exporter(exporter=nil,configuration=nil)
       if exporter.class.method_defined?(:j_del) && configuration.class == Hash && !block_given?
         return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:registerServiceExporter, [Java::IoVertxServicediscoverySpi::ServiceExporter.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(exporter.j_del,::Vertx::Util::Utils.to_json_object(configuration)),::VertxServiceDiscovery::ServiceDiscovery)
+      elsif exporter.class.method_defined?(:j_del) && configuration.class == Hash && block_given?
+        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:registerServiceExporter, [Java::IoVertxServicediscoverySpi::ServiceExporter.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(exporter.j_del,::Vertx::Util::Utils.to_json_object(configuration),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil) })),::VertxServiceDiscovery::ServiceDiscovery)
       end
       raise ArgumentError, "Invalid arguments when calling register_service_exporter(exporter,configuration)"
     end

@@ -1,3 +1,6 @@
+require 'vertx/vertx'
+require 'vertx/future'
+require 'vertx-service-discovery/service_publisher'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.servicediscovery.spi.ServiceExporter
 module VertxServiceDiscovery
@@ -14,6 +17,18 @@ module VertxServiceDiscovery
     # @return [::VertxServiceDiscovery::ServiceExporter] the underlying java delegate
     def j_del
       @j_del
+    end
+    #  Starts the exporter.
+    # @param [::Vertx::Vertx] vertx the vertx instance
+    # @param [::VertxServiceDiscovery::ServicePublisher] publisher the service discovery instance
+    # @param [Hash{String => Object}] configuration the bridge configuration if any
+    # @param [::Vertx::Future] future a future on which the bridge must report the completion of the starting
+    # @return [void]
+    def init(vertx=nil,publisher=nil,configuration=nil,future=nil)
+      if vertx.class.method_defined?(:j_del) && publisher.class.method_defined?(:j_del) && configuration.class == Hash && future.class.method_defined?(:j_del) && !block_given?
+        return @j_del.java_method(:init, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxServicediscoverySpi::ServicePublisher.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Future.java_class]).call(vertx.j_del,publisher.j_del,::Vertx::Util::Utils.to_json_object(configuration),future.j_del)
+      end
+      raise ArgumentError, "Invalid arguments when calling init(vertx,publisher,configuration,future)"
     end
     #  Notify a new record has been published, the record's registration can be used to uniquely
     #  identify the record
@@ -45,7 +60,7 @@ module VertxServiceDiscovery
       raise ArgumentError, "Invalid arguments when calling on_unpublish(id)"
     end
     #  Close the exporter
-    # @yield the handle to be notified when exporter is closed
+    # @yield the handle to be notified when exporter is closed, may be <code>null</code>
     # @return [void]
     def close
       if block_given?
