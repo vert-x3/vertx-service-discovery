@@ -33,6 +33,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
+ * Default implementation of the service discovery.
+ *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
@@ -47,6 +49,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
   private final Set<ServiceReference> bindings = new CopyOnWriteArraySet<>();
   private final static Logger LOGGER = LoggerFactory.getLogger(DiscoveryImpl.class.getName());
   private final String id;
+  private final ServiceDiscoveryOptions options;
 
 
   public DiscoveryImpl(Vertx vertx, ServiceDiscoveryOptions options) {
@@ -58,7 +61,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     this.backend.init(vertx, options.getBackendConfiguration());
 
     this.id = options.getName() != null ? options.getName() : getNodeId(vertx);
-
+    this.options = options;
   }
 
   private String getNodeId(Vertx vertx) {
@@ -382,6 +385,11 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
   @Override
   public Set<ServiceReference> bindings() {
     return new HashSet<>(bindings);
+  }
+
+  @Override
+  public ServiceDiscoveryOptions options() {
+    return options;
   }
 
   /**

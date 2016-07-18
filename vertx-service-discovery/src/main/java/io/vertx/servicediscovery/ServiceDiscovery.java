@@ -297,6 +297,12 @@ public interface ServiceDiscovery {
   Set<ServiceReference> bindings();
 
   /**
+   * @return the discovery options. Modifying the returned object would not update the discovery service
+   * configuration. This object should be considered as read-only.
+   */
+  ServiceDiscoveryOptions options();
+
+  /**
    * Release the service object retrieved using {@code get} methods from the service type interface.
    * It searches for the reference associated with the given object and release it.
    *

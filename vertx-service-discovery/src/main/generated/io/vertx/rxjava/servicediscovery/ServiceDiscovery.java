@@ -484,6 +484,16 @@ public class ServiceDiscovery {
   }
 
   /**
+   * @return the discovery options. Modifying the returned object would not update the discovery service
+   * configuration. This object should be considered as read-only.
+   * @return 
+   */
+  public ServiceDiscoveryOptions options() { 
+    ServiceDiscoveryOptions ret = delegate.options();
+    return ret;
+  }
+
+  /**
    * Release the service object retrieved using <code>get</code> methods from the service type interface.
    * It searches for the reference associated with the given object and release it.
    * @param discovery the service discovery

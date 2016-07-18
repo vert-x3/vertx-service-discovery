@@ -378,6 +378,15 @@ public class ServiceDiscovery {
     return ret;
   }
   /**
+   * @return the discovery options. Modifying the returned object would not update the discovery service
+   * configuration. This object should be considered as read-only.
+   * @return  (see <a href="../../../../../../cheatsheet/ServiceDiscoveryOptions.html">ServiceDiscoveryOptions</a>)
+   */
+  public Map<String, Object> options() {
+    def ret = (Map<String, Object>)InternalHelper.wrapObject(delegate.options()?.toJson());
+    return ret;
+  }
+  /**
    * Release the service object retrieved using <code>get</code> methods from the service type interface.
    * It searches for the reference associated with the given object and release it.
    * @param discovery the service discovery

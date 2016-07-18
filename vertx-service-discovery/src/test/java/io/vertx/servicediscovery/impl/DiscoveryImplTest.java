@@ -94,6 +94,7 @@ public class DiscoveryImplTest {
 
     await().until(() -> found.get() != null);
     assertThat(found.get().getLocation().getString("endpoint")).isEqualTo("address");
+    assertThat(discovery.options().toJson()).isNotEmpty();
 
     ServiceReference reference = discovery.getReference(found.get());
     assertThat(reference).isNotNull();

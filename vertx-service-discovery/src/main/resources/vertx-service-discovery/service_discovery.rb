@@ -218,6 +218,15 @@ module VertxServiceDiscovery
       end
       raise ArgumentError, "Invalid arguments when calling bindings()"
     end
+    #  @return the discovery options. Modifying the returned object would not update the discovery service
+    #  configuration. This object should be considered as read-only.
+    # @return [Hash]
+    def options
+      if !block_given?
+        return @j_del.java_method(:options, []).call() != nil ? JSON.parse(@j_del.java_method(:options, []).call().toJson.encode) : nil
+      end
+      raise ArgumentError, "Invalid arguments when calling options()"
+    end
     #  Release the service object retrieved using <code>get</code> methods from the service type interface.
     #  It searches for the reference associated with the given object and release it.
     # @param [::VertxServiceDiscovery::ServiceDiscovery] discovery the service discovery

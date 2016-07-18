@@ -319,6 +319,21 @@ var ServiceDiscovery = function(j_val) {
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
+  /**
+   @return the discovery options. Modifying the returned object would not update the discovery service
+   configuration. This object should be considered as read-only.
+
+   @public
+
+   @return {Object}
+   */
+  this.options = function() {
+    var __args = arguments;
+    if (__args.length === 0) {
+      return utils.convReturnDataObject(j_serviceDiscovery["options()"]());
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
   // If you rely on this property your code is likely to break if we change it / remove it without warning.
