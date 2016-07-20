@@ -30,7 +30,7 @@ import java.util.ServiceLoader;
  */
 public class ServiceTypes {
 
-  public static ServiceType get(Record record) {
+  public synchronized static ServiceType get(Record record) {
     load();
 
     String type = record.getType();
@@ -44,22 +44,20 @@ public class ServiceTypes {
     }
   }
 
-  private static void load() {
-    synchronized (ServiceTypes.class) {
-      if (types == null || !types.iterator().hasNext()) {
-        types = ServiceLoader.load(ServiceType.class);
-      }
+  private synchronized static void load() {
+    if (types == null || !types.iterator().hasNext()) {
+      types = ServiceLoader.load(ServiceType.class);
     }
   }
 
-  public static Iterator<ServiceType> all() {
+  public synchronized static Iterator<ServiceType> all() {
     load();
     return types.iterator();
   }
 
   private static ServiceLoader<ServiceType> types;
 
-  public static ServiceType get(String type) {
+  public synchronized static ServiceType get(String type) {
     load();
     for (ServiceType next : types) {
       if (next.name().equalsIgnoreCase(type)) {
