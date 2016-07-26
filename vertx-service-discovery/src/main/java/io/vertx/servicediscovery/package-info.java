@@ -492,9 +492,9 @@
  * Data sources represents databases or data stores. JDBC data sources are a specialization for databases accessible
  * using a JDBC driver. The client of a JDBC data source service is a {@link io.vertx.ext.jdbc.JDBCClient}.
  *
- * === Publishing a JDBC service
+ * ==== Publishing a JDBC service
  *
- * As for the other service types, publishing a message source is a 2-step process:
+ * As for the other service types, publishing a JDBC data source is a 2-step process:
  *
  * 1. create a record, using {@link io.vertx.servicediscovery.types.JDBCDataSource}
  * 2. publish the record
@@ -509,7 +509,7 @@
  * source (JDBC url, username...). The set of fields may depend on the database but also on the connection pool used
  * in front.
  *
- * === Consuming a JDBC service
+ * ==== Consuming a JDBC service
  *
  * As stated in the previous section, how to access a data source depends on the data source itself. To build the
  * {@link io.vertx.ext.jdbc.JDBCClient}, you can merge configuration: the record location, the metadata and a json object provided by
@@ -525,6 +525,44 @@
  * [source, $lang]
  * ----
  * {@link examples.JDBCDataSourceExamples#example3(ServiceDiscovery)}
+ * ----
+ *
+ * === Redis Data source
+ *
+ * Redis data sources are a specialization for Redis persistence accessible.
+ * The client of a Redis data source service is a {@link io.vertx.redis.RedisClient}.
+ *
+ * ==== Publishing a Redis service
+ *
+ * Publishing a Redis data source is a 2-step process:
+ *
+ * 1. create a record, using {@link io.vertx.servicediscovery.types.RedisDataSource}
+ * 2. publish the record
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.RedisDataSourceExamples#example1(ServiceDiscovery)}
+ * ----
+ *
+ * The `location` is a simple JSON object that should provide the fields to access the Redis data
+ * source (url, port...).
+ *
+ * ==== Consuming a Redis service
+ *
+ * As stated in the previous section, how to access a data source depends on the data source itself. To build the
+ * {@link io.vertx.redis.RedisClient}, you can merge configuration: the record location, the metadata and a json object provided by
+ * the consumer:
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.RedisDataSourceExamples#example2(ServiceDiscovery)}
+ * ----
+ *
+ * You can also use the {@link io.vertx.servicediscovery.types.RedisDataSource} class to the lookup and retrieval in one call:
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.RedisDataSourceExamples#example3(ServiceDiscovery)}
  * ----
  *
  * == Listening for service arrivals and departures
