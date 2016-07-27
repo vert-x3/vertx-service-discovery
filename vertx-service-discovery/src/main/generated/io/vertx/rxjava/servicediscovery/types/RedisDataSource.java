@@ -27,7 +27,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 
 /**
- * @author Eric Zhao
+ * Service type for Redis data source.
  *
  * <p/>
  * NOTE: This class has been automatically generated from the {@link io.vertx.servicediscovery.types.RedisDataSource original} non RX-ified interface using Vert.x codegen.
@@ -45,11 +45,25 @@ public class RedisDataSource {
     return delegate;
   }
 
+  /**
+   * Convenient method to create a record for a Redis data source.
+   * @param name the service name
+   * @param location the location of the service (e.g. url, port...)
+   * @param metadata additional metadata
+   * @return the created record
+   */
   public static Record createRecord(String name, JsonObject location, JsonObject metadata) { 
     Record ret = io.vertx.servicediscovery.types.RedisDataSource.createRecord(name, location, metadata);
     return ret;
   }
 
+  /**
+   * Convenient method that looks for a Redis data source and provides the configured {@link io.vertx.rxjava.redis.RedisClient}.
+   * The async result is marked as failed is there are no matching services, or if the lookup fails.
+   * @param discovery The service discovery instance
+   * @param filter The filter, optional
+   * @param resultHandler The result handler
+   */
   public static void getRedisClient(ServiceDiscovery discovery, JsonObject filter, Handler<AsyncResult<RedisClient>> resultHandler) { 
     io.vertx.servicediscovery.types.RedisDataSource.getRedisClient((io.vertx.servicediscovery.ServiceDiscovery)discovery.getDelegate(), filter, new Handler<AsyncResult<io.vertx.redis.RedisClient>>() {
       public void handle(AsyncResult<io.vertx.redis.RedisClient> ar) {
@@ -62,12 +76,27 @@ public class RedisDataSource {
     });
   }
 
+  /**
+   * Convenient method that looks for a Redis data source and provides the configured {@link io.vertx.rxjava.redis.RedisClient}.
+   * The async result is marked as failed is there are no matching services, or if the lookup fails.
+   * @param discovery The service discovery instance
+   * @param filter The filter, optional
+   * @return 
+   */
   public static Observable<RedisClient> getRedisClientObservable(ServiceDiscovery discovery, JsonObject filter) { 
     io.vertx.rx.java.ObservableFuture<RedisClient> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
     getRedisClient(discovery, filter, resultHandler.toHandler());
     return resultHandler;
   }
 
+  /**
+   * Convenient method that looks for a Redis data source and provides the configured {@link io.vertx.rxjava.redis.RedisClient}.
+   * The async result is marked as failed is there are no matching services, or if the lookup fails.
+   * @param discovery The service discovery instance
+   * @param filter The filter, optional
+   * @param consumerConfiguration The additional consumer configuration
+   * @param resultHandler The result handler
+   */
   public static void getRedisClient(ServiceDiscovery discovery, JsonObject filter, JsonObject consumerConfiguration, Handler<AsyncResult<RedisClient>> resultHandler) { 
     io.vertx.servicediscovery.types.RedisDataSource.getRedisClient((io.vertx.servicediscovery.ServiceDiscovery)discovery.getDelegate(), filter, consumerConfiguration, new Handler<AsyncResult<io.vertx.redis.RedisClient>>() {
       public void handle(AsyncResult<io.vertx.redis.RedisClient> ar) {
@@ -80,6 +109,14 @@ public class RedisDataSource {
     });
   }
 
+  /**
+   * Convenient method that looks for a Redis data source and provides the configured {@link io.vertx.rxjava.redis.RedisClient}.
+   * The async result is marked as failed is there are no matching services, or if the lookup fails.
+   * @param discovery The service discovery instance
+   * @param filter The filter, optional
+   * @param consumerConfiguration The additional consumer configuration
+   * @return 
+   */
   public static Observable<RedisClient> getRedisClientObservable(ServiceDiscovery discovery, JsonObject filter, JsonObject consumerConfiguration) { 
     io.vertx.rx.java.ObservableFuture<RedisClient> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
     getRedisClient(discovery, filter, consumerConfiguration, resultHandler.toHandler());

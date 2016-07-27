@@ -31,7 +31,7 @@ import java.util.Objects;
 /**
  * The implementation of {@link RedisDataSource}.
  *
- * @author Eric Zhao
+ * @author <a href="http://www.sczyh30.com">Eric Zhao</a>
  */
 public class RedisDataSourceImpl implements RedisDataSource {
 
@@ -48,6 +48,9 @@ public class RedisDataSourceImpl implements RedisDataSource {
     return new RedisServiceReference(vertx, discovery, record, configuration);
   }
 
+  /**
+   * A {@link ServiceReference} on a Redis data source. When retrieved it provides a {@link RedisClient}.
+   */
   private class RedisServiceReference extends AbstractServiceReference<RedisClient> {
     private final JsonObject config;
 
@@ -56,6 +59,11 @@ public class RedisDataSourceImpl implements RedisDataSource {
       this.config = config;
     }
 
+    /**
+     * Creates a Redis client for the service.
+     *
+     * @return the Redis client, configured to access the service
+     */
     @Override
     protected RedisClient retrieve() {
       JsonObject result = record().getMetadata().copy();

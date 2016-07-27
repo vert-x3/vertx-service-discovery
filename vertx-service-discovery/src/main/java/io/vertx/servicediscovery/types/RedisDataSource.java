@@ -30,7 +30,7 @@ import java.util.Objects;
 /**
  * Service type for Redis data source.
  *
- * @author Eric Zhao
+ * @author <a href="http://www.sczyh30.com">Eric Zhao</a>
  */
 @VertxGen
 public interface RedisDataSource extends DataSource {
@@ -39,6 +39,14 @@ public interface RedisDataSource extends DataSource {
 
   String DEFAULT_TYPE = "redis";
 
+  /**
+   * Convenient method to create a record for a Redis data source.
+   *
+   * @param name     the service name
+   * @param location the location of the service (e.g. url, port...)
+   * @param metadata additional metadata
+   * @return the created record
+   */
   static Record createRecord(String name, JsonObject location, JsonObject metadata) {
     Objects.requireNonNull(name);
     Objects.requireNonNull(location);
@@ -56,6 +64,14 @@ public interface RedisDataSource extends DataSource {
     return record;
   }
 
+  /**
+   * Convenient method that looks for a Redis data source and provides the configured {@link io.vertx.redis.RedisClient}.
+   * The async result is marked as failed is there are no matching services, or if the lookup fails.
+   *
+   * @param discovery     The service discovery instance
+   * @param filter        The filter, optional
+   * @param resultHandler The result handler
+   */
   static void getRedisClient(ServiceDiscovery discovery, JsonObject filter,
                              Handler<AsyncResult<RedisClient>> resultHandler) {
     discovery.getRecord(filter, ar -> {
@@ -67,8 +83,17 @@ public interface RedisDataSource extends DataSource {
     });
   }
 
+  /**
+   * Convenient method that looks for a Redis data source and provides the configured {@link io.vertx.redis.RedisClient}.
+   * The async result is marked as failed is there are no matching services, or if the lookup fails.
+   *
+   * @param discovery             The service discovery instance
+   * @param filter                The filter, optional
+   * @param consumerConfiguration The additional consumer configuration
+   * @param resultHandler         The result handler
+   */
   static void getRedisClient(ServiceDiscovery discovery, JsonObject filter, JsonObject consumerConfiguration,
-                            Handler<AsyncResult<RedisClient>> resultHandler) {
+                             Handler<AsyncResult<RedisClient>> resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));

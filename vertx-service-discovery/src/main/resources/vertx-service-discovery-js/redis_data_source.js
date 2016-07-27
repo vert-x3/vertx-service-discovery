@@ -25,6 +25,7 @@ var JRedisDataSource = io.vertx.servicediscovery.types.RedisDataSource;
 var Record = io.vertx.servicediscovery.Record;
 
 /**
+ Service type for Redis data source.
 
  @class
 */
@@ -40,12 +41,13 @@ var RedisDataSource = function(j_val) {
 };
 
 /**
+ Convenient method to create a record for a Redis data source.
 
  @memberof module:vertx-service-discovery-js/redis_data_source
- @param name {string} 
- @param location {Object} 
- @param metadata {Object} 
- @return {Object}
+ @param name {string} the service name 
+ @param location {Object} the location of the service (e.g. url, port...) 
+ @param metadata {Object} additional metadata 
+ @return {Object} the created record
  */
 RedisDataSource.createRecord = function(name, location, metadata) {
   var __args = arguments;
@@ -55,12 +57,14 @@ RedisDataSource.createRecord = function(name, location, metadata) {
 };
 
 /**
+ Convenient method that looks for a Redis data source and provides the configured {@link RedisClient}.
+ The async result is marked as failed is there are no matching services, or if the lookup fails.
 
  @memberof module:vertx-service-discovery-js/redis_data_source
- @param discovery {ServiceDiscovery} 
- @param filter {Object} 
- @param consumerConfiguration {Object} 
- @param resultHandler {function} 
+ @param discovery {ServiceDiscovery} The service discovery instance 
+ @param filter {Object} The filter, optional 
+ @param consumerConfiguration {Object} The additional consumer configuration 
+ @param resultHandler {function} The result handler 
  */
 RedisDataSource.getRedisClient = function() {
   var __args = arguments;
