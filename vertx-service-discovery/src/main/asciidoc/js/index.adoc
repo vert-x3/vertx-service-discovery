@@ -661,9 +661,9 @@ MessageSource.getConsumer(discovery, {
 Data sources represents databases or data stores. JDBC data sources are a specialization for databases accessible
 using a JDBC driver. The client of a JDBC data source service is a `link:../../jsdoc/module-vertx-jdbc-js_jdbc_client-JDBCClient.html[JDBCClient]`.
 
-=== Publishing a JDBC service
+==== Publishing a JDBC service
 
-As for the other service types, publishing a message source is a 2-step process:
+As for the other service types, publishing a JDBC data source is a 2-step process:
 
 1. create a record, using `link:../../jsdoc/module-vertx-service-discovery-js_jdbc_data_source-JDBCDataSource.html[JDBCDataSource]`
 2. publish the record
@@ -688,7 +688,7 @@ rather unstructured. The `location` is a simple JSON object that should provide 
 source (JDBC url, username...). The set of fields may depend on the database but also on the connection pool used
 in front.
 
-=== Consuming a JDBC service
+==== Consuming a JDBC service
 
 As stated in the previous section, how to access a data source depends on the data source itself. To build the
 `link:../../jsdoc/module-vertx-jdbc-js_jdbc_client-JDBCClient.html[JDBCClient]`, you can merge configuration: the record location, the metadata and a json object provided by
@@ -730,6 +730,86 @@ JDBCDataSource.getJDBCClient(discovery, {
 }, {
   "username" : "clement",
   "password" : "*****"
+}, function (ar, ar_err) {
+  if (ar_err == null) {
+    var client = ar;
+
+    // ...
+
+    // Dont' forget to release the service
+    ServiceDiscovery.releaseServiceObject(discovery, client);
+
+  }
+});
+
+----
+
+=== Redis Data source
+
+Redis data sources are a specialization for Redis persistence accessible.
+The client of a Redis data source service is a `link:../../jsdoc/module-vertx-redis-js_redis_client-RedisClient.html[RedisClient]`.
+
+==== Publishing a Redis service
+
+Publishing a Redis data source is a 2-step process:
+
+1. create a record, using `link:../../jsdoc/module-vertx-service-discovery-js_redis_data_source-RedisDataSource.html[RedisDataSource]`
+2. publish the record
+
+[source, js]
+----
+var RedisDataSource = require("vertx-service-discovery-js/redis_data_source");
+var record = RedisDataSource.createRecord("some-redis-data-source-service", {
+  "url" : "localhost"
+}, {
+  "some-metadata" : "some-value"
+});
+
+discovery.publish(record, function (ar, ar_err) {
+  // ...
+});
+
+----
+
+The `location` is a simple JSON object that should provide the fields to access the Redis data
+source (url, port...).
+
+==== Consuming a Redis service
+
+As stated in the previous section, how to access a data source depends on the data source itself. To build the
+`link:../../jsdoc/module-vertx-redis-js_redis_client-RedisClient.html[RedisClient]`, you can merge configuration: the record location, the metadata and a json object provided by
+the consumer:
+
+[source, js]
+----
+// Get the record
+discovery.getRecord({
+  "name" : "some-redis-data-source-service"
+}, function (ar, ar_err) {
+  if (ar_err == null && ar !== null) {
+    // Retrieve the service reference
+    var reference = discovery.getReference(ar);
+
+    // Retrieve the service instance
+    var client = reference.get();
+
+    // ...
+
+    // when done
+    reference.release();
+  }
+});
+
+----
+
+You can also use the `link:../../jsdoc/module-vertx-service-discovery-js_redis_data_source-RedisDataSource.html[RedisDataSource]` class to the lookup and retrieval in one call:
+
+[source, js]
+----
+var ServiceDiscovery = require("vertx-service-discovery-js/service_discovery");
+var RedisDataSource = require("vertx-service-discovery-js/redis_data_source");
+RedisDataSource.getRedisClient(discovery, {
+  "name" : "some-redis-data-source-service"
 }, function (ar, ar_err) {
   if (ar_err == null) {
     var client = ar;

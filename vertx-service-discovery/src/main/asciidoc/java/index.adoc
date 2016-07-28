@@ -691,9 +691,9 @@ MessageSource.<JsonObject>getConsumer(discovery, new JsonObject().put("name", "s
 Data sources represents databases or data stores. JDBC data sources are a specialization for databases accessible
 using a JDBC driver. The client of a JDBC data source service is a `link:../../apidocs/io/vertx/ext/jdbc/JDBCClient.html[JDBCClient]`.
 
-=== Publishing a JDBC service
+==== Publishing a JDBC service
 
-As for the other service types, publishing a message source is a 2-step process:
+As for the other service types, publishing a JDBC data source is a 2-step process:
 
 1. create a record, using `link:../../apidocs/io/vertx/servicediscovery/types/JDBCDataSource.html[JDBCDataSource]`
 2. publish the record
@@ -716,7 +716,7 @@ rather unstructured. The `location` is a simple JSON object that should provide 
 source (JDBC url, username...). The set of fields may depend on the database but also on the connection pool used
 in front.
 
-=== Consuming a JDBC service
+==== Consuming a JDBC service
 
 As stated in the previous section, how to access a data source depends on the data source itself. To build the
 `link:../../apidocs/io/vertx/ext/jdbc/JDBCClient.html[JDBCClient]`, you can merge configuration: the record location, the metadata and a json object provided by
@@ -762,6 +762,78 @@ JDBCDataSource.<JsonObject>getJDBCClient(discovery,
 
       }
     });
+----
+
+=== Redis Data source
+
+Redis data sources are a specialization for Redis persistence accessible.
+The client of a Redis data source service is a `link:../../apidocs/io/vertx/redis/RedisClient.html[RedisClient]`.
+
+==== Publishing a Redis service
+
+Publishing a Redis data source is a 2-step process:
+
+1. create a record, using `link:../../apidocs/io/vertx/servicediscovery/types/RedisDataSource.html[RedisDataSource]`
+2. publish the record
+
+[source, java]
+----
+Record record = RedisDataSource.createRecord(
+  "some-redis-data-source-service", // The service name
+  new JsonObject().put("url", "localhost"), // The location
+  new JsonObject().put("some-metadata", "some-value") // Some metadata
+);
+
+discovery.publish(record, ar -> {
+  // ...
+});
+----
+
+The `location` is a simple JSON object that should provide the fields to access the Redis data
+source (url, port...).
+
+==== Consuming a Redis service
+
+As stated in the previous section, how to access a data source depends on the data source itself. To build the
+`link:../../apidocs/io/vertx/redis/RedisClient.html[RedisClient]`, you can merge configuration: the record location, the metadata and a json object provided by
+the consumer:
+
+[source, java]
+----
+discovery.getRecord(
+  new JsonObject().put("name", "some-redis-data-source-service"), ar -> {
+    if (ar.succeeded() && ar.result() != null) {
+      // Retrieve the service reference
+      ServiceReference reference = discovery.getReference(ar.result());
+
+      // Retrieve the service instance
+      RedisClient client = reference.get();
+
+      // ...
+
+      // when done
+      reference.release();
+    }
+  });
+----
+
+You can also use the `link:../../apidocs/io/vertx/servicediscovery/types/RedisDataSource.html[RedisDataSource]` class to the lookup and retrieval in one call:
+
+[source, java]
+----
+RedisDataSource.getRedisClient(discovery,
+  new JsonObject().put("name", "some-redis-data-source-service"),
+  ar -> {
+    if (ar.succeeded()) {
+      RedisClient client = ar.result();
+
+      // ...
+
+      // Dont' forget to release the service
+      ServiceDiscovery.releaseServiceObject(discovery, client);
+
+    }
+  });
 ----
 
 == Listening for service arrivals and departures
