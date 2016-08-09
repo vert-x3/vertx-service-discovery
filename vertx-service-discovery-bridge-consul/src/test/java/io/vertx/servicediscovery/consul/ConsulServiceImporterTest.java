@@ -60,7 +60,7 @@ public class ConsulServiceImporterTest {
         .requestHandler(request -> {
           if (request.path().equals("/v1/catalog/services")) {
             JsonObject result = new JsonObject();
-            services.stream().forEach(object ->
+            services.forEach(object ->
                 result.put(object.getString("ServiceName"), object.getJsonArray("tags", new JsonArray())));
             request.response().end(result.encodePrettily());
           } else if (request.path().startsWith("/v1/catalog/service/")) {
@@ -211,11 +211,30 @@ public class ConsulServiceImporterTest {
     await().until(() -> getAllRecordsBlocking().size() == 1);
   }
 
+  @Test
+  public void testAServiceBeingTwiceInConsul() throws InterruptedException {
+    services.add(new JsonObject("{\"Node\":\"ubuntu221\",\"Address\":\"10.4.7.221\"," +
+        "\"ServiceID\":\"ubuntu221:mysql:3306\",\"ServiceName\":\"db\"," +
+        "\"ServiceTags\":[\"master\",\"backups\"],\"ServiceAddress\":\"\",\"ServicePort\":32769}"));
+    services.add(new JsonObject("{\"Node\":\"ubuntu220\",\"Address\":\"10.4.7.220\"," +
+        "\"ServiceID\":\"ubuntu220:mysql:3306\",\"ServiceName\":\"db\",\"ServiceTags\":[\"master\",\"backups\"]," +
+        "\"ServiceAddress\":\"\",\"ServicePort\":32771}"));
+
+    discovery = ServiceDiscovery.create(vertx)
+        .registerServiceImporter(new ConsulServiceImporter(),
+            new JsonObject().put("host", "localhost").put("port", 5601));
+
+    await().until(() -> getAllRecordsBlocking().size() > 0);
+    List<Record> list = getAllRecordsBlocking();
+
+    assertThat(list).hasSize(2);
+  }
+
   private JsonArray find(String service) {
-    for (JsonObject json : services) {
-      if (json.getString("ServiceName").equalsIgnoreCase(service)) {
-        return new JsonArray().add(json);
-      }
+    JsonArray array = new JsonArray();
+    services.stream().filter(json -> json.getString("ServiceName").equalsIgnoreCase(service)).forEach(array::add);
+    if (! array.isEmpty()) {
+      return array;
     }
     return null;
   }
