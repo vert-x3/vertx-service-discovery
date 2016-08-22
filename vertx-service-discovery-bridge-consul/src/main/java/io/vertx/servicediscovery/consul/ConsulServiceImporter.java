@@ -86,7 +86,6 @@ public class ConsulServiceImporter implements ServiceImporter {
             retrieveServicesFromConsul(future);
           });
         }
-
         completion.complete();
       } else {
         completion.fail(ar.cause());
@@ -116,13 +115,10 @@ public class ConsulServiceImporter implements ServiceImporter {
 
     client.get(path)
         .exceptionHandler(error)
-        .handler(response -> {
-          response
-              .exceptionHandler(error)
-              .bodyHandler(buffer -> {
-                retrieveIndividualServices(buffer.toJsonObject(), completed);
-              });
-        })
+        .handler(
+            response -> response
+                .exceptionHandler(error)
+                .bodyHandler(buffer -> retrieveIndividualServices(buffer.toJsonObject(), completed)))
         .end();
   }
 
@@ -177,73 +173,39 @@ public class ConsulServiceImporter implements ServiceImporter {
 
   private List<String> importService(JsonArray array, Future<Void> future) {
     if (array.isEmpty()) {
-      Future.failedFuture("no service with the given name");
+      future.fail("no service with the given name");
       return null;
     } else {
       List<String> ids = new ArrayList<>();
       List<Future> registrations = new ArrayList<>();
       for (int i = 0; i < array.size(); i++) {
         Future<Void> registration = Future.future();
-        registrations.add(future);
+
         JsonObject jsonObject = array.getJsonObject(i);
-        String address = jsonObject.getString("Address");
-        String name = jsonObject.getString("ServiceName");
         String id = jsonObject.getString("ServiceID");
-
-        JsonArray tags = jsonObject.getJsonArray("ServiceTags");
-        if (tags == null) {
-          tags = new JsonArray();
-        }
-
-        String path = jsonObject.getString("ServiceAddress");
-        int port = jsonObject.getInteger("ServicePort");
-
-        JsonObject metadata = jsonObject.copy();
-        tags.stream().forEach(tag -> metadata.put((String) tag, true));
-
-        Record record = new Record()
-            .setName(name)
-            .setMetadata(metadata);
-
-        // To determine the record type, check if we have a tag with a "type" name
-        record.setType(ServiceType.UNKNOWN);
-        ServiceTypes.all().forEachRemaining(type -> {
-          if (metadata.getBoolean(type.name(), false)) {
-            record.setType(type.name());
-          }
-        });
-
-        JsonObject location = new JsonObject();
-        location.put("host", address);
-        location.put("port", port);
-        if (path != null) {
-          location.put("path", path);
-        }
-
-        // Manage HTTP endpoint
-        if (record.getType().equals("http-endpoint")) {
-          if (path != null) {
-            location.put("root", path);
-          }
-          if (metadata.getBoolean("ssl", false)) {
-            location.put("ssl", true);
-          }
-          location = new HttpLocation(location).toJson();
-        }
-
-        record.setLocation(location);
+        String name = jsonObject.getString("ServiceName");
+        Record record = createRecord(jsonObject, name);
 
         // the id must be unique, so check if the service has already being imported
         ImportedConsulService imported = getImportedServiceById(id);
         if (imported != null) {
-          future.complete();
+          registration.complete();
         } else {
-          LOGGER.info("Importing service " + record.getName() + " (" + record.getMetadata().getString("ServiceID")
+          LOGGER.info("Importing service " + record.getName() + " (" + id + ")"
               + ") from consul");
-          imports.add(new ImportedConsulService(name, id, record).register(publisher, registration));
+          ImportedConsulService service = new ImportedConsulService(name, id, record);
+          service.register(publisher, Future.<Void>future().setHandler(res -> {
+            if (res.succeeded()) {
+              imports.add(service);
+              registration.complete();
+            } else {
+              registration.fail(res.cause());
+            }
+          }));
         }
-
+        //TODO We are adding an id, while we are not sure it will be registered correctly
         ids.add(id);
+        registrations.add(registration);
       }
 
       CompositeFuture.all(registrations).setHandler(ar -> {
@@ -256,6 +218,54 @@ public class ConsulServiceImporter implements ServiceImporter {
 
       return ids;
     }
+  }
+
+  private Record createRecord(JsonObject jsonObject, String name) {
+    String address = jsonObject.getString("Address");
+
+    JsonArray tags = jsonObject.getJsonArray("ServiceTags");
+    if (tags == null) {
+      tags = new JsonArray();
+    }
+
+    String path = jsonObject.getString("ServiceAddress");
+    int port = jsonObject.getInteger("ServicePort");
+
+    JsonObject metadata = jsonObject.copy();
+    tags.stream().forEach(tag -> metadata.put((String) tag, true));
+
+    Record record = new Record()
+        .setName(name)
+        .setMetadata(metadata);
+
+    // To determine the record type, check if we have a tag with a "type" name
+    record.setType(ServiceType.UNKNOWN);
+    ServiceTypes.all().forEachRemaining(type -> {
+      if (metadata.getBoolean(type.name(), false)) {
+        record.setType(type.name());
+      }
+    });
+
+    JsonObject location = new JsonObject();
+    location.put("host", address);
+    location.put("port", port);
+    if (path != null) {
+      location.put("path", path);
+    }
+
+    // Manage HTTP endpoint
+    if (record.getType().equals("http-endpoint")) {
+      if (path != null) {
+        location.put("root", path);
+      }
+      if (metadata.getBoolean("ssl", false)) {
+        location.put("ssl", true);
+      }
+      location = new HttpLocation(location).toJson();
+    }
+
+    record.setLocation(location);
+    return record;
   }
 
   private ImportedConsulService getImportedServiceById(String id) {

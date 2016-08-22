@@ -27,6 +27,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -71,11 +72,11 @@ public class ConsulServiceImporterTest {
             } else {
               request.response().setStatusCode(404).end();
             }
+          } else {
+            request.response().setStatusCode(404).end();
           }
         })
-        .listen(5601, ar -> {
-          done.set(ar.succeeded());
-        });
+        .listen(5601, ar -> done.set(ar.succeeded()));
 
     await().untilAtomic(done, is(true));
   }
@@ -152,10 +153,15 @@ public class ConsulServiceImporterTest {
         "    \"ServicePort\": 8000\n" +
         "  }"));
 
+    AtomicBoolean initialized = new AtomicBoolean();
     vertx.runOnContext(v ->
         discovery = ServiceDiscovery.create(vertx)
             .registerServiceImporter(new ConsulServiceImporter(),
-                new JsonObject().put("host", "localhost").put("port", 5601).put("scan-period", 100)));
+                new JsonObject().put("host", "localhost").put("port", 5601).put("scan-period", 100),
+        x -> initialized.set(true))
+    );
+
+    await().untilAtomic(initialized, is(true));
 
     await().until(() -> getAllRecordsBlocking().size() > 0);
     List<Record> list = getAllRecordsBlocking();
@@ -192,10 +198,15 @@ public class ConsulServiceImporterTest {
         "    \"ServicePort\": 8000\n" +
         "  }"));
 
+    AtomicBoolean initialized = new AtomicBoolean();
     vertx.runOnContext(v ->
         discovery = ServiceDiscovery.create(vertx)
             .registerServiceImporter(new ConsulServiceImporter(),
-                new JsonObject().put("host", "localhost").put("port", 5601).put("scan-period", 100)));
+                new JsonObject().put("host", "localhost").put("port", 5601).put("scan-period", 100),
+                x -> initialized.set(true))
+    );
+
+    await().untilAtomic(initialized, is(true));
 
     await().until(() -> getAllRecordsBlocking().size() > 0);
     List<Record> list = getAllRecordsBlocking();
