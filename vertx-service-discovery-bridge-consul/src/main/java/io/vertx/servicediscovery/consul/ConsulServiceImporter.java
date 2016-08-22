@@ -34,7 +34,9 @@ import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.HttpLocation;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A discovery bridge importing services from Consul.
@@ -68,7 +70,7 @@ public class ConsulServiceImporter implements ServiceImporter {
     dc = configuration.getString("dc");
     client = vertx.createHttpClient(options);
 
-    Future<Void> imports = Future.future();
+    Future<List<ImportedConsulService>> imports = Future.future();
 
     retrieveServicesFromConsul(imports);
 
@@ -77,7 +79,7 @@ public class ConsulServiceImporter implements ServiceImporter {
         Integer period = configuration.getInteger("scan-period", 2000);
         if (period != 0) {
           scanTask = vertx.setPeriodic(period, l -> {
-            Future<Void> future = Future.future();
+            Future<List<ImportedConsulService>> future = Future.future();
             future.setHandler(ar2 -> {
               if (ar2.failed()) {
                 LOGGER.warn("Consul importation has failed", ar.cause());
@@ -98,14 +100,16 @@ public class ConsulServiceImporter implements ServiceImporter {
   private Handler<Throwable> getErrorHandler(Future future) {
     return t -> {
       if (future != null) {
-        future.fail(t);
+        if (!future.isComplete()) {
+          future.fail(t);
+        }
       } else {
         LOGGER.error(t);
       }
     };
   }
 
-  private void retrieveServicesFromConsul(Future<Void> completed) {
+  private void retrieveServicesFromConsul(Future<List<ImportedConsulService>> completed) {
     String path = "/v1/catalog/services";
     if (dc != null) {
       path += "?dc=" + dc;
@@ -122,28 +126,23 @@ public class ConsulServiceImporter implements ServiceImporter {
         .end();
   }
 
-  private void retrieveIndividualServices(JsonObject jsonObject, Future<Void> completed) {
-    List<String> ids = new ArrayList<>();
-
+  private void retrieveIndividualServices(JsonObject jsonObject, Future<List<ImportedConsulService>> completed) {
     List<Future> futures = new ArrayList<>();
     jsonObject.fieldNames().forEach(name -> {
-      Future<Void> future = Future.future();
+
+      Future<List<ImportedConsulService>> future = Future.future();
       Handler<Throwable> error = getErrorHandler(future);
       String path = "/v1/catalog/service/" + name;
       if (dc != null) {
         path += "?dc=" + dc;
       }
 
-
       client.get(path)
           .exceptionHandler(error)
           .handler(response -> {
             response.exceptionHandler(error)
                 .bodyHandler(buffer -> {
-                  List<String> id = importService(buffer.toJsonArray(), future);
-                  if (id != null && !id.isEmpty()) {
-                    ids.addAll(id);
-                  }
+                  importService(buffer.toJsonArray(), future);
                 });
           })
           .end();
@@ -155,12 +154,36 @@ public class ConsulServiceImporter implements ServiceImporter {
       if (ar.failed()) {
         LOGGER.error("Fail to retrieve the services from consul", ar.cause());
       } else {
-        List<ImportedConsulService> toRemove = new ArrayList<>();
-        imports.stream().filter(svc -> !ids.contains(svc.id())).forEach(svc -> {
-          toRemove.add(svc);
-          svc.unregister(publisher, null);
-        });
-        imports.removeAll(toRemove);
+        List<ImportedConsulService> services =
+            futures.stream().map(future -> ((Future<List<ImportedConsulService>>) future).result())
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+
+        List<String> retrievedIds = services.stream().map(ImportedConsulService::id).collect(Collectors.toList());
+
+        synchronized (ConsulServiceImporter.this) {
+
+          List<String> existingIds = imports.stream().map(ImportedConsulService::id).collect(Collectors.toList());
+
+          LOGGER.trace("Imported services: " + existingIds + ", Retrieved services form Consul: " + retrievedIds);
+
+          services.forEach(svc -> {
+            String id = svc.id();
+
+            if (!existingIds.contains(id)) {
+              LOGGER.info("Imported service: " + id);
+              imports.add(svc);
+            }
+          });
+
+          imports.forEach(svc -> {
+            if (!retrievedIds.contains(svc.id())) {
+              LOGGER.info("Unregistering " + svc.id());
+              imports.remove(svc);
+              svc.unregister(publisher, null);
+            }
+          });
+        }
       }
 
       if (ar.succeeded()) {
@@ -171,12 +194,11 @@ public class ConsulServiceImporter implements ServiceImporter {
     });
   }
 
-  private List<String> importService(JsonArray array, Future<Void> future) {
+  private void importService(JsonArray array, Future<List<ImportedConsulService>> future) {
     if (array.isEmpty()) {
       future.fail("no service with the given name");
-      return null;
     } else {
-      List<String> ids = new ArrayList<>();
+      List<ImportedConsulService> importedServices = new ArrayList<>();
       List<Future> registrations = new ArrayList<>();
       for (int i = 0; i < array.size(); i++) {
         Future<Void> registration = Future.future();
@@ -189,34 +211,31 @@ public class ConsulServiceImporter implements ServiceImporter {
         // the id must be unique, so check if the service has already being imported
         ImportedConsulService imported = getImportedServiceById(id);
         if (imported != null) {
+          importedServices.add(imported);
           registration.complete();
         } else {
           LOGGER.info("Importing service " + record.getName() + " (" + id + ")"
-              + ") from consul");
+              + " from consul");
           ImportedConsulService service = new ImportedConsulService(name, id, record);
-          service.register(publisher, Future.<Void>future().setHandler(res -> {
+          service.register(publisher, Future.<ImportedConsulService>future().setHandler(res -> {
             if (res.succeeded()) {
-              imports.add(service);
+              importedServices.add(res.result());
               registration.complete();
             } else {
               registration.fail(res.cause());
             }
           }));
         }
-        //TODO We are adding an id, while we are not sure it will be registered correctly
-        ids.add(id);
         registrations.add(registration);
       }
 
       CompositeFuture.all(registrations).setHandler(ar -> {
         if (ar.succeeded()) {
-          future.complete(null);
+          future.complete(importedServices);
         } else {
           future.fail(ar.cause());
         }
       });
-
-      return ids;
     }
   }
 
@@ -268,7 +287,7 @@ public class ConsulServiceImporter implements ServiceImporter {
     return record;
   }
 
-  private ImportedConsulService getImportedServiceById(String id) {
+  private synchronized ImportedConsulService getImportedServiceById(String id) {
     for (ImportedConsulService svc : imports) {
       if (svc.id().equals(id)) {
         return svc;
@@ -278,7 +297,7 @@ public class ConsulServiceImporter implements ServiceImporter {
   }
 
   @Override
-  public void close(Handler<Void> completionHandler) {
+  public synchronized void close(Handler<Void> completionHandler) {
     if (scanTask != -1) {
       vertx.cancelTimer(scanTask);
     }
@@ -298,6 +317,7 @@ public class ConsulServiceImporter implements ServiceImporter {
     });
 
     CompositeFuture.all(list).setHandler(ar -> {
+      imports.clear();
       if (ar.succeeded()) {
         LOGGER.info("Successfully closed the service importer " + this);
       } else {

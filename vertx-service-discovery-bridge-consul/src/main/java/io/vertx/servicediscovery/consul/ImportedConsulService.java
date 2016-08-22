@@ -63,11 +63,11 @@ public class ImportedConsulService {
    * @param completion the completion future
    * @return the current {@link ImportedConsulService}
    */
-  public ImportedConsulService register(ServicePublisher publisher, Future<Void> completion) {
+  public ImportedConsulService register(ServicePublisher publisher, Future<ImportedConsulService> completion) {
     publisher.publish(record, ar -> {
       if (ar.succeeded()) {
         record.setRegistration(ar.result().getRegistration());
-        completion.complete();
+        completion.complete(this);
       } else {
         completion.fail(ar.cause());
       }
