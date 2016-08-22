@@ -1,7 +1,6 @@
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.servicediscovery.service.HelloService
 module TestServices
-  #  @author <a href="http://escoffier.me">Clement Escoffier</a>
   class HelloService
     # @private
     # @param j_del [::TestServices::HelloService] the java delegate

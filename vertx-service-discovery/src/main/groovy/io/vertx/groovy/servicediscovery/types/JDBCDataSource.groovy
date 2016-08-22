@@ -26,7 +26,6 @@ import io.vertx.groovy.servicediscovery.ServiceDiscovery
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
 /**
- * @author <a href="http://escoffier.me">Clement Escoffier</a>
 */
 @CompileStatic
 public class JDBCDataSource {

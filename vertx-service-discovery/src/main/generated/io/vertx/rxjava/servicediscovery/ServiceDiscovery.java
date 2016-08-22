@@ -476,7 +476,6 @@ public class ServiceDiscovery {
 
   /**
    * @return the set of service references retrieved by this service discovery.
-   * @return 
    */
   public Set<ServiceReference> bindings() { 
     Set<ServiceReference> ret = delegate.bindings().stream().map(elt -> ServiceReference.newInstance(elt)).collect(java.util.stream.Collectors.toSet());
@@ -484,9 +483,7 @@ public class ServiceDiscovery {
   }
 
   /**
-   * @return the discovery options. Modifying the returned object would not update the discovery service
-   * configuration. This object should be considered as read-only.
-   * @return 
+   * @return the discovery options. Modifying the returned object would not update the discovery service configuration. This object should be considered as read-only.
    */
   public ServiceDiscoveryOptions options() { 
     ServiceDiscoveryOptions ret = delegate.options();

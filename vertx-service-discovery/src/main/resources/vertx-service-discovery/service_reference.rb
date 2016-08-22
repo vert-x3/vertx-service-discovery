@@ -18,8 +18,7 @@ module VertxServiceDiscovery
     def j_del
       @j_del
     end
-    #  @return the service record.
-    # @return [Hash]
+    # @return [Hash] the service record.
     def record
       if !block_given?
         if @cached_record != nil

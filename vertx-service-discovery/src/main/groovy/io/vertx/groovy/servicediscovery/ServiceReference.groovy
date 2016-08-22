@@ -37,8 +37,7 @@ public class ServiceReference {
     return delegate;
   }
   /**
-   * @return the service record.
-   * @return  (see <a href="../../../../../../cheatsheet/Record.html">Record</a>)
+   * @return the service record. (see <a href="../../../../../../cheatsheet/Record.html">Record</a>)
    */
   public Map<String, Object> record() {
     if (cached_0 != null) {

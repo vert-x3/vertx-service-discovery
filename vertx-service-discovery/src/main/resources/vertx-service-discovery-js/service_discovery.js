@@ -306,11 +306,10 @@ var ServiceDiscovery = function(j_val) {
   };
 
   /**
-   @return the set of service references retrieved by this service discovery.
 
    @public
 
-   @return {Array.<ServiceReference>}
+   @return {Array.<ServiceReference>} the set of service references retrieved by this service discovery.
    */
   this.bindings = function() {
     var __args = arguments;
@@ -320,12 +319,10 @@ var ServiceDiscovery = function(j_val) {
   };
 
   /**
-   @return the discovery options. Modifying the returned object would not update the discovery service
-   configuration. This object should be considered as read-only.
 
    @public
 
-   @return {Object}
+   @return {Object} the discovery options. Modifying the returned object would not update the discovery service configuration. This object should be considered as read-only.
    */
   this.options = function() {
     var __args = arguments;

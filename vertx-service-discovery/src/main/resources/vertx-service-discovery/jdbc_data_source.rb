@@ -3,7 +3,6 @@ require 'vertx-service-discovery/service_discovery'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.servicediscovery.types.JDBCDataSource
 module VertxServiceDiscovery
-  #  @author <a href="http://escoffier.me">Clement Escoffier</a>
   class JDBCDataSource
     # @private
     # @param j_del [::VertxServiceDiscovery::JDBCDataSource] the java delegate

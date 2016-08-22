@@ -32,11 +32,10 @@ var ServiceReference = function(j_val) {
   var that = this;
 
   /**
-   @return the service record.
 
    @public
 
-   @return {Object}
+   @return {Object} the service record.
    */
   this.record = function() {
     var __args = arguments;

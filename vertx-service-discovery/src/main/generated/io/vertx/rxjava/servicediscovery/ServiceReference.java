@@ -46,7 +46,6 @@ public class ServiceReference {
 
   /**
    * @return the service record.
-   * @return 
    */
   public Record record() { 
     if (cached_0 != null) {

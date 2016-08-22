@@ -371,16 +371,13 @@ public class ServiceDiscovery {
   }
   /**
    * @return the set of service references retrieved by this service discovery.
-   * @return 
    */
   public Set<ServiceReference> bindings() {
     def ret = (Set)delegate.bindings()?.collect({InternalHelper.safeCreate(it, io.vertx.groovy.servicediscovery.ServiceReference.class)}) as Set;
     return ret;
   }
   /**
-   * @return the discovery options. Modifying the returned object would not update the discovery service
-   * configuration. This object should be considered as read-only.
-   * @return  (see <a href="../../../../../../cheatsheet/ServiceDiscoveryOptions.html">ServiceDiscoveryOptions</a>)
+   * @return the discovery options. Modifying the returned object would not update the discovery service configuration. This object should be considered as read-only. (see <a href="../../../../../../cheatsheet/ServiceDiscoveryOptions.html">ServiceDiscoveryOptions</a>)
    */
   public Map<String, Object> options() {
     def ret = (Map<String, Object>)InternalHelper.wrapObject(delegate.options()?.toJson());

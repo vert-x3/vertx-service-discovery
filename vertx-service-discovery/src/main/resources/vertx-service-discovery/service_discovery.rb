@@ -210,17 +210,14 @@ module VertxServiceDiscovery
       end
       raise ArgumentError, "Invalid arguments when calling update(record)"
     end
-    #  @return the set of service references retrieved by this service discovery.
-    # @return [Set<::VertxServiceDiscovery::ServiceReference>]
+    # @return [Set<::VertxServiceDiscovery::ServiceReference>] the set of service references retrieved by this service discovery.
     def bindings
       if !block_given?
         return ::Vertx::Util::Utils.to_set(@j_del.java_method(:bindings, []).call()).map! { |elt| ::Vertx::Util::Utils.safe_create(elt,::VertxServiceDiscovery::ServiceReference) }
       end
       raise ArgumentError, "Invalid arguments when calling bindings()"
     end
-    #  @return the discovery options. Modifying the returned object would not update the discovery service
-    #  configuration. This object should be considered as read-only.
-    # @return [Hash]
+    # @return [Hash] the discovery options. Modifying the returned object would not update the discovery service configuration. This object should be considered as read-only.
     def options
       if !block_given?
         return @j_del.java_method(:options, []).call() != nil ? JSON.parse(@j_del.java_method(:options, []).call().toJson.encode) : nil

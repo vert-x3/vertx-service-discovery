@@ -27,7 +27,6 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 
 /**
- * @author <a href="http://escoffier.me">Clement Escoffier</a>
  *
  * <p/>
  * NOTE: This class has been automatically generated from the {@link io.vertx.servicediscovery.types.JDBCDataSource original} non RX-ified interface using Vert.x codegen.
