@@ -293,11 +293,4 @@ public class ZookeeperBridgeTest {
       }
     });
   }
-
-
-  // check address and url for HTTP services
-
-  // check address and url for unknown
-
-  // Stop ZK and restart it
 }
