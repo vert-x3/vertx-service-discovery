@@ -36,7 +36,7 @@ public class ZookeeperBackendService implements ServiceDiscoveryBackend {
     int baseGraceBetweenRetries = configuration
         .getInteger("baseSleepTimeBetweenRetries", 1000);
     basePath = configuration.getString("basePath", "/services");
-    ephemeral = configuration.getBoolean("ephemeral", true);
+    ephemeral = configuration.getBoolean("ephemeral", false);
     guaranteed = configuration.getBoolean("guaranteed", false);
 
     client = CuratorFrameworkFactory.newClient(connection,
