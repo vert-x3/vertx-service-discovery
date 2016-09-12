@@ -125,6 +125,71 @@ public class RedisBackendTest {
   }
 
   @Test
+  public void testInsertionFollowedByAnUpdate() {
+    Record record = new Record().setName("my-service").setStatus(Status.UP);
+    assertThat(record.getRegistration()).isNull();
+
+    // Insertion
+    AtomicReference<Record> reference = new AtomicReference<>();
+    backend.store(record, ar -> {
+      if (!ar.succeeded()) {
+        ar.cause().printStackTrace();
+      }
+      reference.set(ar.result());
+    });
+
+    await().until(() -> reference.get() != null);
+    assertThat(reference.get().getName()).isEqualToIgnoringCase("my-service");
+    assertThat(reference.get().getRegistration()).isNotNull();
+    record = reference.get();
+
+    // Retrieve
+    reference.set(null);
+    backend.getRecord(record.getRegistration(), ar -> reference.set(ar.result()));
+    await().until(() -> reference.get() != null);
+    assertThat(reference.get().getName()).isEqualToIgnoringCase("my-service");
+    assertThat(reference.get().getRegistration()).isNotNull();
+
+    // Update
+    AtomicBoolean completed = new AtomicBoolean();
+    record.getMetadata().put("some-new-key", "some-new-value");
+    backend.update(record, ar -> {
+      completed.set(ar.succeeded());
+    });
+    await().untilAtomic(completed, is(true));
+
+    // Retrieve
+    reference.set(null);
+    backend.getRecord(record.getRegistration(), ar -> reference.set(ar.result()));
+    await().until(() -> reference.get() != null);
+    assertThat(reference.get().getName()).isEqualToIgnoringCase("my-service");
+    assertThat(reference.get().getMetadata().getString("some-new-key"))
+        .isEqualToIgnoringCase("some-new-value");
+    assertThat(reference.get().getRegistration()).isNotNull();
+
+    // Remove
+    completed.set(false);
+    backend.remove(record, ar -> {
+      completed.set(ar.succeeded());
+    });
+    await().untilAtomic(completed, is(true));
+
+    // Retrieve
+    completed.set(false);
+    reference.set(null);
+    backend.getRecord(record.getRegistration(), ar -> {
+      if (!ar.succeeded()) {
+        ar.cause().printStackTrace();
+      }
+      completed.set(ar.succeeded());
+      reference.set(ar.result());
+    });
+
+    await().untilAtomic(completed, is(true));
+    assertThat(reference.get()).isNull();
+  }
+
+  @Test
   public void testInsertionOfMultipleRecords() {
     Record record1 = new Record().setName("my-service-1").setStatus(Status.UP);
     assertThat(record1.getRegistration()).isNull();
