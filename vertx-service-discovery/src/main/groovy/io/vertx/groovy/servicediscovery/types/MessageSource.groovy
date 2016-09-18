@@ -18,7 +18,6 @@ package io.vertx.groovy.servicediscovery.types;
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
 import io.vertx.core.json.JsonObject
-import io.vertx.servicediscovery.spi.ServiceType
 import io.vertx.core.json.JsonObject
 import io.vertx.servicediscovery.Record
 import io.vertx.groovy.servicediscovery.ServiceDiscovery
@@ -36,6 +35,10 @@ public class MessageSource {
   }
   public Object getDelegate() {
     return delegate;
+  }
+  public static MessageSourceType serviceType() {
+    def ret = InternalHelper.safeCreate(io.vertx.servicediscovery.types.MessageSource.serviceType(), io.vertx.groovy.servicediscovery.types.MessageSourceType.class);
+    return ret;
   }
   /**
    * Create a record representing a data producer.

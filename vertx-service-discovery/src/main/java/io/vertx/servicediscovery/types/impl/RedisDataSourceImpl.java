@@ -25,19 +25,30 @@ import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.types.AbstractServiceReference;
 import io.vertx.servicediscovery.types.RedisDataSource;
+import io.vertx.servicediscovery.types.RedisDataSourceType;
 
 import java.util.Objects;
 
 /**
- * The implementation of {@link RedisDataSource}.
+ * The implementation of {@link RedisDataSourceType}.
  *
  * @author <a href="http://www.sczyh30.com">Eric Zhao</a>
  */
-public class RedisDataSourceImpl implements RedisDataSource {
+public class RedisDataSourceImpl implements RedisDataSourceType {
 
   @Override
   public String name() {
     return RedisDataSource.TYPE;
+  }
+
+  @Override
+  public RedisClient getService(ServiceReference ref) {
+    return (RedisClient) ref.get();
+  }
+
+  @Override
+  public RedisClient cachedService(ServiceReference ref) {
+    return (RedisClient) ref.cached();
   }
 
   @Override

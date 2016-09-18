@@ -24,6 +24,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.redis.RedisClient;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
+import io.vertx.servicediscovery.types.impl.RedisDataSourceImpl;
 
 import java.util.Objects;
 
@@ -33,11 +34,13 @@ import java.util.Objects;
  * @author <a href="http://www.sczyh30.com">Eric Zhao</a>
  */
 @VertxGen
-public interface RedisDataSource extends DataSource {
-
+public interface RedisDataSource {
   String TYPE = "datasource.redis";
-
   String DEFAULT_TYPE = "redis";
+
+  static RedisDataSourceType serviceType() {
+    return new RedisDataSourceImpl();
+  }
 
   /**
    * Convenient method to create a record for a Redis data source.
@@ -52,14 +55,14 @@ public interface RedisDataSource extends DataSource {
     Objects.requireNonNull(location);
 
     Record record = new Record().setName(name)
-      .setType(TYPE)
+      .setType(DataSource.TYPE)
       .setLocation(location);
 
     if (metadata != null) {
       record.setMetadata(metadata);
     }
 
-    record.setMetadata(new JsonObject().put(DS_TYPE, DEFAULT_TYPE));
+    record.setMetadata(new JsonObject().put(DataSource.DS_TYPE, DEFAULT_TYPE));
 
     return record;
   }
@@ -84,7 +87,7 @@ public interface RedisDataSource extends DataSource {
   }
 
   /**
-   * Convenient method that looks for a Redis data source and provides the configured {@link io.vertx.redis.RedisClient}.
+   * Convenient method that looks for a Redis data source and provides the configured {@link RedisClient}.
    * The async result is marked as failed is there are no matching services, or if the lookup fails.
    *
    * @param discovery             The service discovery instance

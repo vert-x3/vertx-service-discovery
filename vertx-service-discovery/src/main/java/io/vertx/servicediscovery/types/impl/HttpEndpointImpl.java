@@ -26,6 +26,7 @@ import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.AbstractServiceReference;
 import io.vertx.servicediscovery.types.HttpEndpoint;
+import io.vertx.servicediscovery.types.HttpEndpointType;
 import io.vertx.servicediscovery.types.HttpLocation;
 
 import java.util.Objects;
@@ -36,11 +37,11 @@ import java.util.Objects;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class HttpEndpointImpl implements HttpEndpoint {
+public class HttpEndpointImpl implements HttpEndpointType {
 
   @Override
   public String name() {
-    return TYPE;
+    return HttpEndpoint.TYPE;
   }
 
   @Override
@@ -49,6 +50,16 @@ public class HttpEndpointImpl implements HttpEndpoint {
     Objects.requireNonNull(record);
     Objects.requireNonNull(discovery);
     return new HttpEndpointReference(vertx, discovery, record, configuration);
+  }
+
+  @Override
+  public HttpClient getService(ServiceReference ref) {
+    return (HttpClient) ref.get();
+  }
+
+  @Override
+  public HttpClient cachedService(ServiceReference ref) {
+    return (HttpClient) ref.cached();
   }
 
   /**

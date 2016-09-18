@@ -18,6 +18,7 @@
 var utils = require('vertx-js/util/utils');
 var RedisClient = require('vertx-redis-js/redis_client');
 var ServiceDiscovery = require('vertx-service-discovery-js/service_discovery');
+var RedisDataSourceType = require('vertx-service-discovery-js/redis_data_source_type');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
@@ -41,6 +42,19 @@ var RedisDataSource = function(j_val) {
 };
 
 /**
+
+ @memberof module:vertx-service-discovery-js/redis_data_source
+
+ @return {RedisDataSourceType}
+ */
+RedisDataSource.serviceType = function() {
+  var __args = arguments;
+  if (__args.length === 0) {
+    return utils.convReturnVertxGen(JRedisDataSource["serviceType()"](), RedisDataSourceType);
+  } else throw new TypeError('function invoked with invalid arguments');
+};
+
+/**
  Convenient method to create a record for a Redis data source.
 
  @memberof module:vertx-service-discovery-js/redis_data_source
@@ -57,7 +71,7 @@ RedisDataSource.createRecord = function(name, location, metadata) {
 };
 
 /**
- Convenient method that looks for a Redis data source and provides the configured {@link RedisClient}.
+ Convenient method that looks for a Redis data source and provides the configured .
  The async result is marked as failed is there are no matching services, or if the lookup fails.
 
  @memberof module:vertx-service-discovery-js/redis_data_source

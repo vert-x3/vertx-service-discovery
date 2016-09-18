@@ -23,20 +23,30 @@ import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.types.AbstractServiceReference;
 import io.vertx.servicediscovery.types.DataSource;
-import io.vertx.servicediscovery.types.JDBCDataSource;
+import io.vertx.servicediscovery.types.JDBCDataSourceType;
 import io.vertx.ext.jdbc.JDBCClient;
 
 import java.util.Objects;
 
 /**
- * The implementation of {@link JDBCDataSource}.
+ * The implementation of {@link JDBCDataSourceType}.
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class JDBCDataSourceImpl implements JDBCDataSource {
+public class JDBCDataSourceImpl implements JDBCDataSourceType {
   @Override
   public String name() {
     return DataSource.TYPE;
+  }
+
+  @Override
+  public JDBCClient getService(ServiceReference ref) {
+    return (JDBCClient) ref.get();
+  }
+
+  @Override
+  public JDBCClient cachedService(ServiceReference ref) {
+    return (JDBCClient) ref.cached();
   }
 
   @Override

@@ -18,7 +18,6 @@ package io.vertx.groovy.servicediscovery.types;
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
 import io.vertx.core.json.JsonObject
-import io.vertx.servicediscovery.types.DataSource
 import io.vertx.core.json.JsonObject
 import io.vertx.groovy.redis.RedisClient
 import io.vertx.servicediscovery.Record
@@ -36,6 +35,10 @@ public class RedisDataSource {
   }
   public Object getDelegate() {
     return delegate;
+  }
+  public static RedisDataSourceType serviceType() {
+    def ret = InternalHelper.safeCreate(io.vertx.servicediscovery.types.RedisDataSource.serviceType(), io.vertx.groovy.servicediscovery.types.RedisDataSourceType.class);
+    return ret;
   }
   /**
    * Convenient method to create a record for a Redis data source.
@@ -67,7 +70,7 @@ public class RedisDataSource {
     } : null);
   }
   /**
-   * Convenient method that looks for a Redis data source and provides the configured {@link io.vertx.groovy.redis.RedisClient}.
+   * Convenient method that looks for a Redis data source and provides the configured .
    * The async result is marked as failed is there are no matching services, or if the lookup fails.
    * @param discovery The service discovery instance
    * @param filter The filter, optional

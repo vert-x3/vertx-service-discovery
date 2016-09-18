@@ -48,35 +48,6 @@ var ServiceReference = function(j_val) {
   };
 
   /**
-   Gets the object to access the service. It can be a proxy, a client or whatever object. The type depends on the
-   service type and the server itself.
-
-   @public
-
-   @return {Object} the object to access the service
-   */
-  this.get = function() {
-    var __args = arguments;
-    if (__args.length === 0) {
-      return utils.convReturnTypeUnknown(j_serviceReference["get()"]());
-    } else throw new TypeError('function invoked with invalid arguments');
-  };
-
-  /**
-   Gets the service object if already retrieved. It won't try to acquire the service object if not retrieved yet.
-
-   @public
-
-   @return {Object} the object, <code>null</code> if not yet retrieved
-   */
-  this.cached = function() {
-    var __args = arguments;
-    if (__args.length === 0) {
-      return utils.convReturnTypeUnknown(j_serviceReference["cached()"]());
-    } else throw new TypeError('function invoked with invalid arguments');
-  };
-
-  /**
    Releases the reference. Once released, the consumer must not use the reference anymore.
    This method must be idempotent and defensive, as multiple call may happen.
 

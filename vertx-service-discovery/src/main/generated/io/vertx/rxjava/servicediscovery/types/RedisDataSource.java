@@ -18,7 +18,6 @@ package io.vertx.rxjava.servicediscovery.types;
 
 import java.util.Map;
 import rx.Observable;
-import io.vertx.servicediscovery.types.DataSource;
 import io.vertx.core.json.JsonObject;
 import io.vertx.rxjava.redis.RedisClient;
 import io.vertx.servicediscovery.Record;
@@ -43,6 +42,11 @@ public class RedisDataSource {
 
   public Object getDelegate() {
     return delegate;
+  }
+
+  public static RedisDataSourceType serviceType() { 
+    RedisDataSourceType ret = RedisDataSourceType.newInstance(io.vertx.servicediscovery.types.RedisDataSource.serviceType());
+    return ret;
   }
 
   /**
@@ -90,7 +94,7 @@ public class RedisDataSource {
   }
 
   /**
-   * Convenient method that looks for a Redis data source and provides the configured {@link io.vertx.rxjava.redis.RedisClient}.
+   * Convenient method that looks for a Redis data source and provides the configured .
    * The async result is marked as failed is there are no matching services, or if the lookup fails.
    * @param discovery The service discovery instance
    * @param filter The filter, optional
@@ -110,7 +114,7 @@ public class RedisDataSource {
   }
 
   /**
-   * Convenient method that looks for a Redis data source and provides the configured {@link io.vertx.rxjava.redis.RedisClient}.
+   * Convenient method that looks for a Redis data source and provides the configured .
    * The async result is marked as failed is there are no matching services, or if the lookup fails.
    * @param discovery The service discovery instance
    * @param filter The filter, optional

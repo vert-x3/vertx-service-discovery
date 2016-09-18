@@ -16,6 +16,7 @@
 
 /** @module vertx-service-discovery-js/http_endpoint */
 var utils = require('vertx-js/util/utils');
+var HttpEndpointType = require('vertx-service-discovery-js/http_endpoint_type');
 var ServiceDiscovery = require('vertx-service-discovery-js/service_discovery');
 var HttpClient = require('vertx-js/http_client');
 
@@ -37,6 +38,19 @@ var HttpEndpoint = function(j_val) {
   // NOTE! This is an internal API and must not be used in user code.
   // If you rely on this property your code is likely to break if we change it / remove it without warning.
   this._jdel = j_httpEndpoint;
+};
+
+/**
+
+ @memberof module:vertx-service-discovery-js/http_endpoint
+
+ @return {HttpEndpointType}
+ */
+HttpEndpoint.serviceType = function() {
+  var __args = arguments;
+  if (__args.length === 0) {
+    return utils.convReturnVertxGen(JHttpEndpoint["serviceType()"](), HttpEndpointType);
+  } else throw new TypeError('function invoked with invalid arguments');
 };
 
 /**

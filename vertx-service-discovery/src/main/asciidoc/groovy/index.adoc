@@ -50,7 +50,7 @@ descriptor:
 <dependency>
 <groupId>io.vertx</groupId>
 <artifactId>vertx-service-discovery</artifactId>
-<version>3.3.3</version>
+<version>3.4.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -58,7 +58,7 @@ descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-discovery:3.3.3'
+compile 'io.vertx:vertx-service-discovery:3.4.0-SNAPSHOT'
 ----
 
 == Overall concepts
@@ -396,13 +396,13 @@ different services.
 
 These types are provided by default:
 
-* `link:../../groovydoc/io/vertx/groovy/servicediscovery/types/HttpEndpoint.html[HttpEndpoint]` - for REST API's, the service object is a
+* `link:../../groovydoc/io/vertx/groovy/servicediscovery/types/HttpEndpointType.html[HttpEndpointType]` - for REST API's, the service object is a
 `link:../../groovydoc/io/vertx/groovy/core/http/HttpClient.html[HttpClient]` configured on the host and port (the location is the url).
-* `link:../../groovydoc/io/vertx/groovy/servicediscovery/types/EventBusService.html[EventBusService]` - for service proxies, the service object is a proxy. Its
+* `link:../../groovydoc/io/vertx/groovy/servicediscovery/types/EventBusServiceType.html[EventBusServiceType]` - for service proxies, the service object is a proxy. Its
 type is the proxies interface (the location is the address).
-* `link:../../groovydoc/io/vertx/groovy/servicediscovery/types/MessageSource.html[MessageSource]` - for message sources (publisher), the service object is a
+* `link:../../groovydoc/io/vertx/groovy/servicediscovery/types/MessageSourceType.html[MessageSourceType]` - for message sources (publisher), the service object is a
 `link:../../groovydoc/io/vertx/groovy/core/eventbus/MessageConsumer.html[MessageConsumer]` (the location is the address).
-* `link:../../groovydoc/io/vertx/groovy/servicediscovery/types/JDBCDataSource.html[JDBCDataSource]` - for JDBC data sources, the service object is a
+* `link:../../groovydoc/io/vertx/groovy/servicediscovery/types/JDBCDataSourceType.html[JDBCDataSourceType]` - for JDBC data sources, the service object is a
 `link:../../groovydoc/io/vertx/groovy/ext/jdbc/JDBCClient.html[JDBCClient]` (the configuration of the client is computed from the location, metadata and
 consumer configuration).
 
@@ -429,7 +429,7 @@ To publish a HTTP endpoint, you need a `link:../dataobjects.html#Record[Record]`
 `link:../../groovydoc/io/vertx/groovy/servicediscovery/types/HttpEndpoint.html#createRecord(java.lang.String,%20java.lang.String,%20int,%20java.lang.String,%20io.vertx.core.json.JsonObject)[HttpEndpoint.createRecord]`.
 
 The next snippet illustrates hot to create a `link:../dataobjects.html#Record[Record]` from
-`link:../../groovydoc/io/vertx/groovy/servicediscovery/types/HttpEndpoint.html[HttpEndpoint]`:
+`link:../../groovydoc/io/vertx/groovy/servicediscovery/types/HttpEndpointType.html[HttpEndpointType]`:
 
 [source, groovy]
 ----
@@ -517,7 +517,7 @@ so you no longer hold on to the service reference.
 
 Event bus services are service proxies. They implement async-RPC services on top of the event bus. When retrieving
 a service object from an event bus service, you get a service proxy of the right type. You can access helper
-methods from `link:../../groovydoc/io/vertx/groovy/servicediscovery/types/EventBusService.html[EventBusService]`.
+methods from `link:../../groovydoc/io/vertx/groovy/servicediscovery/types/EventBusServiceType.html[EventBusServiceType]`.
 
 Notice that service proxies (service implementations and service interfaces) are developed in Java.
 
@@ -543,7 +543,7 @@ discovery.publish(record, { ar ->
 ==== Consuming an event bus service
 
 To consume an event bus service you can either retrieve the record and then get the reference, or use the
-`link:../../groovydoc/io/vertx/groovy/servicediscovery/types/EventBusService.html[EventBusService]` interface that combines the two operations in one call.
+`link:../../groovydoc/io/vertx/groovy/servicediscovery/types/EventBusServiceType.html[EventBusServiceType]` interface that combines the two operations in one call.
 
 However, as the service is searched by (Java) interface, you need to specify the type of client you expect.
 
@@ -575,7 +575,7 @@ The _location_ or a message source service is the event bus address on which mes
 
 As for the other service types, publishing a message source is a 2-step process:
 
-1. create a record, using `link:../../groovydoc/io/vertx/groovy/servicediscovery/types/MessageSource.html[MessageSource]`
+1. create a record, using `link:../../groovydoc/io/vertx/groovy/servicediscovery/types/MessageSourceType.html[MessageSourceType]`
 2. publish the record
 
 [source, groovy]
@@ -598,7 +598,7 @@ In the second record, the type of payload is also indicated. This information is
 ==== Consuming a message source
 
 On the consumer side, you can retrieve the record and the reference, or use the
-`link:../../groovydoc/io/vertx/groovy/servicediscovery/types/MessageSource.html[MessageSource]` class to retrieve the service is one call.
+`link:../../groovydoc/io/vertx/groovy/servicediscovery/types/MessageSourceType.html[MessageSourceType]` class to retrieve the service is one call.
 
 With the first approach, the code is the following:
 
@@ -628,7 +628,7 @@ discovery.getRecord([
 
 ----
 
-When, using `link:../../groovydoc/io/vertx/groovy/servicediscovery/types/MessageSource.html[MessageSource]`, it becomes:
+When, using `link:../../groovydoc/io/vertx/groovy/servicediscovery/types/MessageSourceType.html[MessageSourceType]`, it becomes:
 
 [source, groovy]
 ----
@@ -664,7 +664,7 @@ using a JDBC driver. The client of a JDBC data source service is a `link:../../g
 
 As for the other service types, publishing a JDBC data source is a 2-step process:
 
-1. create a record, using `link:../../groovydoc/io/vertx/groovy/servicediscovery/types/JDBCDataSource.html[JDBCDataSource]`
+1. create a record, using `link:../../groovydoc/io/vertx/groovy/servicediscovery/types/JDBCDataSourceType.html[JDBCDataSourceType]`
 2. publish the record
 
 [source, groovy]
@@ -752,7 +752,7 @@ The client of a Redis data source service is a `link:../../groovydoc/io/vertx/gr
 
 Publishing a Redis data source is a 2-step process:
 
-1. create a record, using `link:../../groovydoc/io/vertx/groovy/servicediscovery/types/RedisDataSource.html[RedisDataSource]`
+1. create a record, using `link:../../groovydoc/io/vertx/groovy/servicediscovery/types/RedisDataSourceType.html[RedisDataSourceType]`
 2. publish the record
 
 [source, groovy]
@@ -801,7 +801,7 @@ discovery.getRecord([
 
 ----
 
-You can also use the `link:../../groovydoc/io/vertx/groovy/servicediscovery/types/RedisDataSource.html[RedisDataSource]` class to the lookup and retrieval in one call:
+You can also use the `link:../../groovydoc/io/vertx/groovy/servicediscovery/types/RedisDataSourceType.html[RedisDataSourceType]` class to the lookup and retrieval in one call:
 
 [source, groovy]
 ----

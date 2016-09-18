@@ -23,9 +23,10 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.spi.ServiceType;
+import io.vertx.servicediscovery.types.impl.MessageSourceImpl;
 
 import java.util.Objects;
 
@@ -35,9 +36,12 @@ import java.util.Objects;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @VertxGen
-public interface MessageSource extends ServiceType {
-
+public interface MessageSource {
   String TYPE = "message-source";
+
+  static MessageSourceType serviceType() {
+    return new MessageSourceImpl();
+  }
 
   /**
    * Create a record representing a data producer.

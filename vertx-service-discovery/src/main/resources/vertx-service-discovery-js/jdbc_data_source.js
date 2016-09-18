@@ -16,6 +16,7 @@
 
 /** @module vertx-service-discovery-js/jdbc_data_source */
 var utils = require('vertx-js/util/utils');
+var JDBCDataSourceType = require('vertx-service-discovery-js/jdbc_data_source_type');
 var JDBCClient = require('vertx-jdbc-js/jdbc_client');
 var ServiceDiscovery = require('vertx-service-discovery-js/service_discovery');
 
@@ -42,6 +43,19 @@ var JDBCDataSource = function(j_val) {
 /**
 
  @memberof module:vertx-service-discovery-js/jdbc_data_source
+
+ @return {JDBCDataSourceType}
+ */
+JDBCDataSource.serviceType = function() {
+  var __args = arguments;
+  if (__args.length === 0) {
+    return utils.convReturnVertxGen(JJDBCDataSource["serviceType()"](), JDBCDataSourceType);
+  } else throw new TypeError('function invoked with invalid arguments');
+};
+
+/**
+
+ @memberof module:vertx-service-discovery-js/jdbc_data_source
  @param name {string} 
  @param location {Object} 
  @param metadata {Object} 
@@ -55,7 +69,7 @@ JDBCDataSource.createRecord = function(name, location, metadata) {
 };
 
 /**
- Convenient method that looks for a JDBC datasource source and provides the configured {@link JDBCClient}. The
+ Convenient method that looks for a JDBC datasource source and provides the configured . The
  async result is marked as failed is there are no matching services, or if the lookup fails.
 
  @memberof module:vertx-service-discovery-js/jdbc_data_source

@@ -1,3 +1,4 @@
+require 'vertx-service-discovery/jdbc_data_source_type'
 require 'vertx-jdbc/jdbc_client'
 require 'vertx-service-discovery/service_discovery'
 require 'vertx/util/utils.rb'
@@ -14,6 +15,13 @@ module VertxServiceDiscovery
     def j_del
       @j_del
     end
+    # @return [::VertxServiceDiscovery::JDBCDataSourceType]
+    def self.service_type
+      if !block_given?
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxServicediscoveryTypes::JDBCDataSource.java_method(:serviceType, []).call(),::VertxServiceDiscovery::JDBCDataSourceType)
+      end
+      raise ArgumentError, "Invalid arguments when calling service_type()"
+    end
     # @param [String] name 
     # @param [Hash{String => Object}] location 
     # @param [Hash{String => Object}] metadata 
@@ -24,7 +32,7 @@ module VertxServiceDiscovery
       end
       raise ArgumentError, "Invalid arguments when calling create_record(name,location,metadata)"
     end
-    #  Convenient method that looks for a JDBC datasource source and provides the configured {::VertxJdbc::JDBCClient}. The
+    #  Convenient method that looks for a JDBC datasource source and provides the configured . The
     #  async result is marked as failed is there are no matching services, or if the lookup fails.
     # @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
     # @param [Hash{String => Object}] filter The filter, optional

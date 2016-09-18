@@ -17,6 +17,7 @@
 package io.vertx.servicediscovery;
 
 import io.vertx.codegen.annotations.CacheReturn;
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 
 /**
@@ -45,6 +46,7 @@ public interface ServiceReference {
    * @param <T> the type
    * @return the object to access the service
    */
+  @GenIgnore
   <T> T get();
 
   /**
@@ -53,6 +55,7 @@ public interface ServiceReference {
    * @param <T> the type
    * @return the object, {@code null} if not yet retrieved
    */
+  @GenIgnore
   <T> T cached();
 
   /**

@@ -254,13 +254,13 @@
  *
  * These types are provided by default:
  *
- * * {@link io.vertx.servicediscovery.types.HttpEndpoint} - for REST API's, the service object is a
+ * * {@link io.vertx.servicediscovery.types.HttpEndpointType} - for REST API's, the service object is a
  * {@link io.vertx.core.http.HttpClient} configured on the host and port (the location is the url).
- * * {@link io.vertx.servicediscovery.types.EventBusService} - for service proxies, the service object is a proxy. Its
+ * * {@link io.vertx.servicediscovery.types.EventBusServiceType} - for service proxies, the service object is a proxy. Its
  * type is the proxies interface (the location is the address).
- * * {@link io.vertx.servicediscovery.types.MessageSource} - for message sources (publisher), the service object is a
+ * * {@link io.vertx.servicediscovery.types.MessageSourceType} - for message sources (publisher), the service object is a
  * {@link io.vertx.core.eventbus.MessageConsumer} (the location is the address).
- * * {@link io.vertx.servicediscovery.types.JDBCDataSource} - for JDBC data sources, the service object is a
+ * * {@link io.vertx.servicediscovery.types.JDBCDataSourceType} - for JDBC data sources, the service object is a
  * {@link io.vertx.ext.jdbc.JDBCClient} (the configuration of the client is computed from the location, metadata and
  * consumer configuration).
  *
@@ -282,8 +282,8 @@
  *
  * 1. (optional) Create a public interface extending {@link io.vertx.servicediscovery.spi.ServiceType}. This interface is
  * only used to provide helper methods to ease the usage of your type such as `createRecord` methods, `getX` where `X`
- * is the type of service object you retrieve and so on. Check {@link io.vertx.servicediscovery.types.HttpEndpoint} or
- * {@link io.vertx.servicediscovery.types.MessageSource} for example
+ * is the type of service object you retrieve and so on. Check {@link io.vertx.servicediscovery.types.HttpEndpointType} or
+ * {@link io.vertx.servicediscovery.types.MessageSourceType} for example
  * 2. Create a class implementing {@link io.vertx.servicediscovery.spi.ServiceType} or the interface you created in
  * step 1. The type has a `name`, and a method to create the {@link io.vertx.servicediscovery.ServiceReference} for this
  * type. The name must match the `type` field of the {@link io.vertx.servicediscovery.Record} associated with your type.
@@ -307,10 +307,10 @@
  * ==== Publishing a HTTP endpoint
  *
  * To publish a HTTP endpoint, you need a {@link io.vertx.servicediscovery.Record}. You can create the record using
- * {@link io.vertx.servicediscovery.types.HttpEndpoint#createRecord(java.lang.String, java.lang.String, int, java.lang.String, io.vertx.core.json.JsonObject)}.
+ * {@link io.vertx.servicediscovery.types.HttpEndpoint#createRecord(String, String, int, String, io.vertx.core.json.JsonObject)}.
  *
  * The next snippet illustrates hot to create a {@link io.vertx.servicediscovery.Record} from
- * {@link io.vertx.servicediscovery.types.HttpEndpoint}:
+ * {@link io.vertx.servicediscovery.types.HttpEndpointType}:
  *
  * [source, $lang]
  * ----
@@ -347,7 +347,7 @@
  *
  * Event bus services are service proxies. They implement async-RPC services on top of the event bus. When retrieving
  * a service object from an event bus service, you get a service proxy of the right type. You can access helper
- * methods from {@link io.vertx.servicediscovery.types.EventBusService}.
+ * methods from {@link io.vertx.servicediscovery.types.EventBusServiceType}.
  *
  * Notice that service proxies (service implementations and service interfaces) are developed in Java.
  *
@@ -374,7 +374,7 @@
  * [language, java]
  * ----
  * To consume an event bus service you can either retrieve the record and then get the reference, or use the
- * {@link io.vertx.servicediscovery.types.EventBusService} interface that combines the two operations in one call.
+ * {@link io.vertx.servicediscovery.types.EventBusServiceType} interface that combines the two operations in one call.
  *
  * When using the reference, you would do something like:
  * [source, java]
@@ -382,7 +382,7 @@
  * {@link examples.EventBusServiceExamples#example2(ServiceDiscovery)}
  * \----
  *
- * With the {@link io.vertx.servicediscovery.types.EventBusService} class, you can get the proxy as follows:
+ * With the {@link io.vertx.servicediscovery.types.EventBusServiceType} class, you can get the proxy as follows:
  * [source, java]
  * \----
  * {@link examples.EventBusServiceExamples#example3(ServiceDiscovery)}
@@ -391,7 +391,7 @@
  * [language, groovy]
  * ----
  * To consume an event bus service you can either retrieve the record and then get the reference, or use the
- * {@link io.vertx.servicediscovery.types.EventBusService} interface that combines the two operations in one call.
+ * {@link io.vertx.servicediscovery.types.EventBusServiceType} interface that combines the two operations in one call.
  *
  * However, as the service is searched by (Java) interface, you need to specify the type of client you expect.
  *
@@ -448,7 +448,7 @@
  *
  * As for the other service types, publishing a message source is a 2-step process:
  *
- * 1. create a record, using {@link io.vertx.servicediscovery.types.MessageSource}
+ * 1. create a record, using {@link io.vertx.servicediscovery.types.MessageSourceType}
  * 2. publish the record
  *
  * [source, $lang]
@@ -471,7 +471,7 @@
  * ==== Consuming a message source
  *
  * On the consumer side, you can retrieve the record and the reference, or use the
- * {@link io.vertx.servicediscovery.types.MessageSource} class to retrieve the service is one call.
+ * {@link io.vertx.servicediscovery.types.MessageSourceType} class to retrieve the service is one call.
  *
  * With the first approach, the code is the following:
  *
@@ -480,7 +480,7 @@
  * {@link examples.MessageSourceExamples#example2(ServiceDiscovery)}
  * ----
  *
- * When, using {@link io.vertx.servicediscovery.types.MessageSource}, it becomes:
+ * When, using {@link io.vertx.servicediscovery.types.MessageSourceType}, it becomes:
  *
  * [source, $lang]
  * ----
@@ -496,7 +496,7 @@
  *
  * As for the other service types, publishing a JDBC data source is a 2-step process:
  *
- * 1. create a record, using {@link io.vertx.servicediscovery.types.JDBCDataSource}
+ * 1. create a record, using {@link io.vertx.servicediscovery.types.JDBCDataSourceType}
  * 2. publish the record
  *
  * [source, $lang]
@@ -536,7 +536,7 @@
  *
  * Publishing a Redis data source is a 2-step process:
  *
- * 1. create a record, using {@link io.vertx.servicediscovery.types.RedisDataSource}
+ * 1. create a record, using {@link io.vertx.servicediscovery.types.RedisDataSourceType}
  * 2. publish the record
  *
  * [source, $lang]
@@ -558,7 +558,7 @@
  * {@link examples.RedisDataSourceExamples#example2(ServiceDiscovery)}
  * ----
  *
- * You can also use the {@link io.vertx.servicediscovery.types.RedisDataSource} class to the lookup and retrieval in one call:
+ * You can also use the {@link io.vertx.servicediscovery.types.RedisDataSourceType} class to the lookup and retrieval in one call:
  *
  * [source, $lang]
  * ----

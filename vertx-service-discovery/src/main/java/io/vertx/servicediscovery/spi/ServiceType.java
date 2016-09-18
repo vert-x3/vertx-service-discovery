@@ -35,7 +35,7 @@ import io.vertx.servicediscovery.ServiceReference;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public interface ServiceType {
+public interface ServiceType<T> {
 
   /**
    * Unknown type.
@@ -46,6 +46,22 @@ public interface ServiceType {
    * @return the name of the type.
    */
   String name();
+
+  /**
+   * Unwrap the service reference to its implementation and return it
+   *
+   * @param ref the service reference
+   * @return the service implementation
+   */
+  T getService(ServiceReference ref);
+
+  /**
+   * Unwrap the cached reference to its implementation and return it
+   *
+   * @param ref the service reference
+   * @return the cached implementation
+   */
+  T cachedService(ServiceReference ref);
 
   /**
    * Gets the `service` for the given record. The record's type must match the current type. From the

@@ -1,3 +1,4 @@
+require 'vertx-service-discovery/event_bus_service_type'
 require 'vertx-service-discovery/service_discovery'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.servicediscovery.types.EventBusService
@@ -14,6 +15,13 @@ module VertxServiceDiscovery
     # @return [::VertxServiceDiscovery::EventBusService] the underlying java delegate
     def j_del
       @j_del
+    end
+    # @return [::VertxServiceDiscovery::EventBusServiceType]
+    def self.service_type
+      if !block_given?
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxServicediscoveryTypes::EventBusService.java_method(:serviceType, []).call(),::VertxServiceDiscovery::EventBusServiceType)
+      end
+      raise ArgumentError, "Invalid arguments when calling service_type()"
     end
     #  Sugar method to creates a record for this type.
     #  <p>

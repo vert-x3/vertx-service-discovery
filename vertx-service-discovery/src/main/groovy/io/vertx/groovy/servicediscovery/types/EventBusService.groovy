@@ -18,7 +18,6 @@ package io.vertx.groovy.servicediscovery.types;
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
 import io.vertx.core.json.JsonObject
-import io.vertx.servicediscovery.spi.ServiceType
 import io.vertx.core.json.JsonObject
 import io.vertx.servicediscovery.Record
 import io.vertx.groovy.servicediscovery.ServiceDiscovery
@@ -36,6 +35,10 @@ public class EventBusService {
   }
   public Object getDelegate() {
     return delegate;
+  }
+  public static <T> EventBusServiceType<T> serviceType() {
+    def ret = InternalHelper.safeCreate(io.vertx.servicediscovery.types.EventBusService.serviceType(), io.vertx.groovy.servicediscovery.types.EventBusServiceType.class);
+    return ret;
   }
   /**
    * Sugar method to creates a record for this type.

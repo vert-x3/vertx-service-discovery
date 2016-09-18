@@ -18,7 +18,6 @@ package io.vertx.groovy.servicediscovery.types;
 import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
 import io.vertx.core.json.JsonObject
-import io.vertx.servicediscovery.spi.ServiceType
 import io.vertx.core.json.JsonObject
 import io.vertx.servicediscovery.Record
 import io.vertx.groovy.servicediscovery.ServiceDiscovery
@@ -37,6 +36,10 @@ public class HttpEndpoint {
   }
   public Object getDelegate() {
     return delegate;
+  }
+  public static HttpEndpointType serviceType() {
+    def ret = InternalHelper.safeCreate(io.vertx.servicediscovery.types.HttpEndpoint.serviceType(), io.vertx.groovy.servicediscovery.types.HttpEndpointType.class);
+    return ret;
   }
   /**
    * Convenient method to create a record for a HTTP endpoint.

@@ -1,5 +1,6 @@
 require 'vertx-redis/redis_client'
 require 'vertx-service-discovery/service_discovery'
+require 'vertx-service-discovery/redis_data_source_type'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.servicediscovery.types.RedisDataSource
 module VertxServiceDiscovery
@@ -15,6 +16,13 @@ module VertxServiceDiscovery
     def j_del
       @j_del
     end
+    # @return [::VertxServiceDiscovery::RedisDataSourceType]
+    def self.service_type
+      if !block_given?
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxServicediscoveryTypes::RedisDataSource.java_method(:serviceType, []).call(),::VertxServiceDiscovery::RedisDataSourceType)
+      end
+      raise ArgumentError, "Invalid arguments when calling service_type()"
+    end
     #  Convenient method to create a record for a Redis data source.
     # @param [String] name the service name
     # @param [Hash{String => Object}] location the location of the service (e.g. url, port...)
@@ -26,7 +34,7 @@ module VertxServiceDiscovery
       end
       raise ArgumentError, "Invalid arguments when calling create_record(name,location,metadata)"
     end
-    #  Convenient method that looks for a Redis data source and provides the configured {::VertxRedis::RedisClient}.
+    #  Convenient method that looks for a Redis data source and provides the configured .
     #  The async result is marked as failed is there are no matching services, or if the lookup fails.
     # @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
     # @param [Hash{String => Object}] filter The filter, optional

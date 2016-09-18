@@ -19,7 +19,6 @@ import groovy.transform.CompileStatic
 import io.vertx.lang.groovy.InternalHelper
 import io.vertx.core.json.JsonObject
 import io.vertx.groovy.ext.jdbc.JDBCClient
-import io.vertx.servicediscovery.types.DataSource
 import io.vertx.core.json.JsonObject
 import io.vertx.servicediscovery.Record
 import io.vertx.groovy.servicediscovery.ServiceDiscovery
@@ -35,6 +34,10 @@ public class JDBCDataSource {
   }
   public Object getDelegate() {
     return delegate;
+  }
+  public static JDBCDataSourceType serviceType() {
+    def ret = InternalHelper.safeCreate(io.vertx.servicediscovery.types.JDBCDataSource.serviceType(), io.vertx.groovy.servicediscovery.types.JDBCDataSourceType.class);
+    return ret;
   }
   public static Map<String, Object> createRecord(String name, Map<String, Object> location, Map<String, Object> metadata) {
     def ret = (Map<String, Object>)InternalHelper.wrapObject(io.vertx.servicediscovery.types.JDBCDataSource.createRecord(name, location != null ? new io.vertx.core.json.JsonObject(location) : null, metadata != null ? new io.vertx.core.json.JsonObject(metadata) : null)?.toJson());
@@ -59,7 +62,7 @@ public class JDBCDataSource {
     } : null);
   }
   /**
-   * Convenient method that looks for a JDBC datasource source and provides the configured {@link io.vertx.groovy.ext.jdbc.JDBCClient}. The
+   * Convenient method that looks for a JDBC datasource source and provides the configured . The
    * async result is marked as failed is there are no matching services, or if the lookup fails.
    * @param discovery The service discovery instance
    * @param filter The filter, optional

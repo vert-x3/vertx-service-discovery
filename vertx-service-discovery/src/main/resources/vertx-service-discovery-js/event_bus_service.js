@@ -16,6 +16,7 @@
 
 /** @module vertx-service-discovery-js/event_bus_service */
 var utils = require('vertx-js/util/utils');
+var EventBusServiceType = require('vertx-service-discovery-js/event_bus_service_type');
 var ServiceDiscovery = require('vertx-service-discovery-js/service_discovery');
 
 var io = Packages.io;
@@ -36,6 +37,19 @@ var EventBusService = function(j_val) {
   // NOTE! This is an internal API and must not be used in user code.
   // If you rely on this property your code is likely to break if we change it / remove it without warning.
   this._jdel = j_eventBusService;
+};
+
+/**
+
+ @memberof module:vertx-service-discovery-js/event_bus_service
+
+ @return {EventBusServiceType}
+ */
+EventBusService.serviceType = function() {
+  var __args = arguments;
+  if (__args.length === 0) {
+    return utils.convReturnVertxGen(JEventBusService["serviceType()"](), EventBusServiceType);
+  } else throw new TypeError('function invoked with invalid arguments');
 };
 
 /**

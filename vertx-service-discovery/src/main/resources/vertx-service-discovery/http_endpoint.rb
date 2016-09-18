@@ -1,3 +1,4 @@
+require 'vertx-service-discovery/http_endpoint_type'
 require 'vertx-service-discovery/service_discovery'
 require 'vertx/http_client'
 require 'vertx/util/utils.rb'
@@ -15,6 +16,13 @@ module VertxServiceDiscovery
     # @return [::VertxServiceDiscovery::HttpEndpoint] the underlying java delegate
     def j_del
       @j_del
+    end
+    # @return [::VertxServiceDiscovery::HttpEndpointType]
+    def self.service_type
+      if !block_given?
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxServicediscoveryTypes::HttpEndpoint.java_method(:serviceType, []).call(),::VertxServiceDiscovery::HttpEndpointType)
+      end
+      raise ArgumentError, "Invalid arguments when calling service_type()"
     end
     #  Same as {::VertxServiceDiscovery::HttpEndpoint#create_record} but let you configure whether or not the
     #  service is using <code>https</code>.

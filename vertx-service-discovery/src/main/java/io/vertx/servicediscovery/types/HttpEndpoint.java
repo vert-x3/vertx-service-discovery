@@ -22,9 +22,10 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.spi.ServiceType;
+import io.vertx.servicediscovery.types.impl.HttpEndpointImpl;
 
 import java.util.Objects;
 
@@ -35,9 +36,12 @@ import java.util.Objects;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @VertxGen
-public interface HttpEndpoint extends ServiceType {
-
+public interface HttpEndpoint {
   String TYPE = "http-endpoint";
+
+  static HttpEndpointType serviceType() {
+    return new HttpEndpointImpl();
+  }
 
   /**
    * Convenient method to create a record for a HTTP endpoint.

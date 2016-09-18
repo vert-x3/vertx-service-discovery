@@ -18,7 +18,6 @@ package io.vertx.rxjava.servicediscovery.types;
 
 import java.util.Map;
 import rx.Observable;
-import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
 import io.vertx.rxjava.servicediscovery.ServiceDiscovery;
@@ -44,6 +43,11 @@ public class HttpEndpoint {
 
   public Object getDelegate() {
     return delegate;
+  }
+
+  public static HttpEndpointType serviceType() { 
+    HttpEndpointType ret = HttpEndpointType.newInstance(io.vertx.servicediscovery.types.HttpEndpoint.serviceType());
+    return ret;
   }
 
   /**

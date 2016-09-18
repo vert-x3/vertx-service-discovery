@@ -32,7 +32,7 @@ import java.util.Objects;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public interface DataSource extends ServiceType {
+public interface DataSource {
 
   String DS_TYPE = "datasource.type";
 

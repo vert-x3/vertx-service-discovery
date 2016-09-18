@@ -23,7 +23,7 @@ import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.types.AbstractServiceReference;
-import io.vertx.servicediscovery.types.MessageSource;
+import io.vertx.servicediscovery.types.MessageSourceType;
 
 import java.util.Objects;
 
@@ -32,13 +32,23 @@ import java.util.Objects;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class MessageSourceImpl implements MessageSource {
+public class MessageSourceImpl implements MessageSourceType {
 
   public static final String TYPE = "message-source";
 
   @Override
   public String name() {
     return TYPE;
+  }
+
+  @Override
+  public MessageConsumer getService(ServiceReference ref) {
+    return (MessageConsumer) ref.get();
+  }
+
+  @Override
+  public MessageConsumer cachedService(ServiceReference ref) {
+    return (MessageConsumer) ref.cached();
   }
 
   @Override

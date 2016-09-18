@@ -146,4 +146,22 @@ public class HttpEndpointTest {
     await().until(() -> resp.get() != null);
     assertThat(resp.get().getString("url")).isEqualTo("https://httpbin.org/get");
   }
+
+  @Test
+  public void testWithJavaScript(TestContext context) {
+    Async async = context.async();
+
+    vertx.eventBus().<JsonObject>consumer("result", message -> {
+      context.assertEquals("ok", message.body().getString("status"));
+      context.assertEquals("hello", message.body().getString("message"));
+      vertx.undeploy("verticles/HttpEndpointConsumer.js");
+      async.complete();
+    });
+
+    // Publish the service
+    Record record = HttpEndpoint.createRecord("hello-service", "localhost", 8080, "/foo");
+    discovery.publish(record, rec -> {
+      vertx.deployVerticle("verticles/HttpEndpointConsumer.js", context.asyncAssertSuccess());
+    });
+  }
 }

@@ -1,3 +1,4 @@
+require 'vertx-service-discovery/message_source_type'
 require 'vertx-service-discovery/service_discovery'
 require 'vertx/message_consumer'
 require 'vertx/util/utils.rb'
@@ -14,6 +15,13 @@ module VertxServiceDiscovery
     # @return [::VertxServiceDiscovery::MessageSource] the underlying java delegate
     def j_del
       @j_del
+    end
+    # @return [::VertxServiceDiscovery::MessageSourceType]
+    def self.service_type
+      if !block_given?
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxServicediscoveryTypes::MessageSource.java_method(:serviceType, []).call(),::VertxServiceDiscovery::MessageSourceType)
+      end
+      raise ArgumentError, "Invalid arguments when calling service_type()"
     end
     #  Create a record representing a data producer.
     # @param [String] name the name of the service

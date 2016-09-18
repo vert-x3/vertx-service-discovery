@@ -19,7 +19,6 @@ package io.vertx.rxjava.servicediscovery.types;
 import java.util.Map;
 import rx.Observable;
 import io.vertx.rxjava.ext.jdbc.JDBCClient;
-import io.vertx.servicediscovery.types.DataSource;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
 import io.vertx.rxjava.servicediscovery.ServiceDiscovery;
@@ -42,6 +41,11 @@ public class JDBCDataSource {
 
   public Object getDelegate() {
     return delegate;
+  }
+
+  public static JDBCDataSourceType serviceType() { 
+    JDBCDataSourceType ret = JDBCDataSourceType.newInstance(io.vertx.servicediscovery.types.JDBCDataSource.serviceType());
+    return ret;
   }
 
   public static Record createRecord(String name, JsonObject location, JsonObject metadata) { 
@@ -82,7 +86,7 @@ public class JDBCDataSource {
   }
 
   /**
-   * Convenient method that looks for a JDBC datasource source and provides the configured {@link io.vertx.rxjava.ext.jdbc.JDBCClient}. The
+   * Convenient method that looks for a JDBC datasource source and provides the configured . The
    * async result is marked as failed is there are no matching services, or if the lookup fails.
    * @param discovery The service discovery instance
    * @param filter The filter, optional
@@ -102,7 +106,7 @@ public class JDBCDataSource {
   }
 
   /**
-   * Convenient method that looks for a JDBC datasource source and provides the configured {@link io.vertx.rxjava.ext.jdbc.JDBCClient}. The
+   * Convenient method that looks for a JDBC datasource source and provides the configured . The
    * async result is marked as failed is there are no matching services, or if the lookup fails.
    * @param discovery The service discovery instance
    * @param filter The filter, optional

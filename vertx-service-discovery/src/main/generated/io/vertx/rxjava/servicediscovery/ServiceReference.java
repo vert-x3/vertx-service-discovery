@@ -57,25 +57,6 @@ public class ServiceReference {
   }
 
   /**
-   * Gets the object to access the service. It can be a proxy, a client or whatever object. The type depends on the
-   * service type and the server itself.
-   * @return the object to access the service
-   */
-  public <T> T get() { 
-    T ret = (T) delegate.get();
-    return ret;
-  }
-
-  /**
-   * Gets the service object if already retrieved. It won't try to acquire the service object if not retrieved yet.
-   * @return the object, <code>null</code> if not yet retrieved
-   */
-  public <T> T cached() { 
-    T ret = (T) delegate.cached();
-    return ret;
-  }
-
-  /**
    * Releases the reference. Once released, the consumer must not use the reference anymore.
    * This method must be idempotent and defensive, as multiple call may happen.
    */

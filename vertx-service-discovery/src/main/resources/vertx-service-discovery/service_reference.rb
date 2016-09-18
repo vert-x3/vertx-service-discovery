@@ -28,23 +28,6 @@ module VertxServiceDiscovery
       end
       raise ArgumentError, "Invalid arguments when calling record()"
     end
-    #  Gets the object to access the service. It can be a proxy, a client or whatever object. The type depends on the
-    #  service type and the server itself.
-    # @return [Object] the object to access the service
-    def get
-      if !block_given?
-        return ::Vertx::Util::Utils.from_object(@j_del.java_method(:get, []).call())
-      end
-      raise ArgumentError, "Invalid arguments when calling get()"
-    end
-    #  Gets the service object if already retrieved. It won't try to acquire the service object if not retrieved yet.
-    # @return [Object] the object, <code>null</code> if not yet retrieved
-    def cached
-      if !block_given?
-        return ::Vertx::Util::Utils.from_object(@j_del.java_method(:cached, []).call())
-      end
-      raise ArgumentError, "Invalid arguments when calling cached()"
-    end
     #  Releases the reference. Once released, the consumer must not use the reference anymore.
     #  This method must be idempotent and defensive, as multiple call may happen.
     # @return [void]

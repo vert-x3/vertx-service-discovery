@@ -22,10 +22,11 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.spi.ServiceType;
+import io.vertx.servicediscovery.types.impl.EventBusServiceImpl;
 
 import java.util.Objects;
 
@@ -36,12 +37,15 @@ import java.util.Objects;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @VertxGen
-public interface EventBusService extends ServiceType {
-
+public interface EventBusService {
   /**
    * Name of the type.
    */
   String TYPE = "eventbus-service-proxy";
+
+  static <T> EventBusServiceType<T> serviceType() {
+    return (EventBusServiceType<T>) new EventBusServiceImpl();
+  }
 
   /**
    * Sugar method to creates a record for this type.

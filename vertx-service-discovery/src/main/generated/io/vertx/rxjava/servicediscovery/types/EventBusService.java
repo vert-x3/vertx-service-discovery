@@ -18,7 +18,6 @@ package io.vertx.rxjava.servicediscovery.types;
 
 import java.util.Map;
 import rx.Observable;
-import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
 import io.vertx.rxjava.servicediscovery.ServiceDiscovery;
@@ -43,6 +42,11 @@ public class EventBusService {
 
   public Object getDelegate() {
     return delegate;
+  }
+
+  public static <T> EventBusServiceType<T> serviceType() { 
+    EventBusServiceType<T> ret = EventBusServiceType.newInstance(io.vertx.servicediscovery.types.EventBusService.serviceType());
+    return ret;
   }
 
   /**

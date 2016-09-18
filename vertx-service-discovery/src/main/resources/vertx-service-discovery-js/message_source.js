@@ -16,6 +16,7 @@
 
 /** @module vertx-service-discovery-js/message_source */
 var utils = require('vertx-js/util/utils');
+var MessageSourceType = require('vertx-service-discovery-js/message_source_type');
 var ServiceDiscovery = require('vertx-service-discovery-js/service_discovery');
 var MessageConsumer = require('vertx-js/message_consumer');
 
@@ -38,6 +39,19 @@ var MessageSource = function(j_val) {
   // NOTE! This is an internal API and must not be used in user code.
   // If you rely on this property your code is likely to break if we change it / remove it without warning.
   this._jdel = j_messageSource;
+};
+
+/**
+
+ @memberof module:vertx-service-discovery-js/message_source
+
+ @return {MessageSourceType}
+ */
+MessageSource.serviceType = function() {
+  var __args = arguments;
+  if (__args.length === 0) {
+    return utils.convReturnVertxGen(JMessageSource["serviceType()"](), MessageSourceType);
+  } else throw new TypeError('function invoked with invalid arguments');
 };
 
 /**

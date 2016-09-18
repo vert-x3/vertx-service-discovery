@@ -24,6 +24,7 @@ import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.types.AbstractServiceReference;
 import io.vertx.servicediscovery.types.EventBusService;
+import io.vertx.servicediscovery.types.EventBusServiceType;
 import io.vertx.servicediscovery.utils.ClassLoaderUtils;
 import io.vertx.serviceproxy.ProxyHelper;
 
@@ -33,11 +34,21 @@ import java.util.Objects;
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class EventBusServiceImpl implements EventBusService {
+public class EventBusServiceImpl implements EventBusServiceType<Object> {
 
   @Override
   public String name() {
-    return TYPE;
+    return EventBusService.TYPE;
+  }
+
+  @Override
+  public Object getService(ServiceReference ref) {
+    return ref.get();
+  }
+
+  @Override
+  public Object cachedService(ServiceReference ref) {
+    return ref.cached();
   }
 
   @Override

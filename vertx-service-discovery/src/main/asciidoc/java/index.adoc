@@ -50,7 +50,7 @@ descriptor:
 <dependency>
 <groupId>io.vertx</groupId>
 <artifactId>vertx-service-discovery</artifactId>
-<version>3.3.3</version>
+<version>3.4.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -58,7 +58,7 @@ descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-discovery:3.3.3'
+compile 'io.vertx:vertx-service-discovery:3.4.0-SNAPSHOT'
 ----
 
 == Overall concepts
@@ -367,13 +367,13 @@ different services.
 
 These types are provided by default:
 
-* `link:../../apidocs/io/vertx/servicediscovery/types/HttpEndpoint.html[HttpEndpoint]` - for REST API's, the service object is a
+* `link:../../apidocs/io/vertx/servicediscovery/types/HttpEndpointType.html[HttpEndpointType]` - for REST API's, the service object is a
 `link:../../apidocs/io/vertx/core/http/HttpClient.html[HttpClient]` configured on the host and port (the location is the url).
-* `link:../../apidocs/io/vertx/servicediscovery/types/EventBusService.html[EventBusService]` - for service proxies, the service object is a proxy. Its
+* `link:../../apidocs/io/vertx/servicediscovery/types/EventBusServiceType.html[EventBusServiceType]` - for service proxies, the service object is a proxy. Its
 type is the proxies interface (the location is the address).
-* `link:../../apidocs/io/vertx/servicediscovery/types/MessageSource.html[MessageSource]` - for message sources (publisher), the service object is a
+* `link:../../apidocs/io/vertx/servicediscovery/types/MessageSourceType.html[MessageSourceType]` - for message sources (publisher), the service object is a
 `link:../../apidocs/io/vertx/core/eventbus/MessageConsumer.html[MessageConsumer]` (the location is the address).
-* `link:../../apidocs/io/vertx/servicediscovery/types/JDBCDataSource.html[JDBCDataSource]` - for JDBC data sources, the service object is a
+* `link:../../apidocs/io/vertx/servicediscovery/types/JDBCDataSourceType.html[JDBCDataSourceType]` - for JDBC data sources, the service object is a
 `link:../../apidocs/io/vertx/ext/jdbc/JDBCClient.html[JDBCClient]` (the configuration of the client is computed from the location, metadata and
 consumer configuration).
 
@@ -393,8 +393,8 @@ You can create your own service type by implementing the `link:../../apidocs/io/
 
 1. (optional) Create a public interface extending `link:../../apidocs/io/vertx/servicediscovery/spi/ServiceType.html[ServiceType]`. This interface is
 only used to provide helper methods to ease the usage of your type such as `createRecord` methods, `getX` where `X`
-is the type of service object you retrieve and so on. Check `link:../../apidocs/io/vertx/servicediscovery/types/HttpEndpoint.html[HttpEndpoint]` or
-`link:../../apidocs/io/vertx/servicediscovery/types/MessageSource.html[MessageSource]` for example
+is the type of service object you retrieve and so on. Check `link:../../apidocs/io/vertx/servicediscovery/types/HttpEndpointType.html[HttpEndpointType]` or
+`link:../../apidocs/io/vertx/servicediscovery/types/MessageSourceType.html[MessageSourceType]` for example
 2. Create a class implementing `link:../../apidocs/io/vertx/servicediscovery/spi/ServiceType.html[ServiceType]` or the interface you created in
 step 1. The type has a `name`, and a method to create the `link:../../apidocs/io/vertx/servicediscovery/ServiceReference.html[ServiceReference]` for this
 type. The name must match the `type` field of the `link:../../apidocs/io/vertx/servicediscovery/Record.html[Record]` associated with your type.
@@ -421,7 +421,7 @@ To publish a HTTP endpoint, you need a `link:../../apidocs/io/vertx/servicedisco
 `link:../../apidocs/io/vertx/servicediscovery/types/HttpEndpoint.html#createRecord-java.lang.String-java.lang.String-int-java.lang.String-io.vertx.core.json.JsonObject-[HttpEndpoint.createRecord]`.
 
 The next snippet illustrates hot to create a `link:../../apidocs/io/vertx/servicediscovery/Record.html[Record]` from
-`link:../../apidocs/io/vertx/servicediscovery/types/HttpEndpoint.html[HttpEndpoint]`:
+`link:../../apidocs/io/vertx/servicediscovery/types/HttpEndpointType.html[HttpEndpointType]`:
 
 [source, java]
 ----
@@ -507,7 +507,7 @@ so you no longer hold on to the service reference.
 
 Event bus services are service proxies. They implement async-RPC services on top of the event bus. When retrieving
 a service object from an event bus service, you get a service proxy of the right type. You can access helper
-methods from `link:../../apidocs/io/vertx/servicediscovery/types/EventBusService.html[EventBusService]`.
+methods from `link:../../apidocs/io/vertx/servicediscovery/types/EventBusServiceType.html[EventBusServiceType]`.
 
 Notice that service proxies (service implementations and service interfaces) are developed in Java.
 
@@ -548,7 +548,7 @@ discovery.publish(record, ar -> {
 
 ==== Consuming an event bus service
 To consume an event bus service you can either retrieve the record and then get the reference, or use the
-`link:../../apidocs/io/vertx/servicediscovery/types/EventBusService.html[EventBusService]` interface that combines the two operations in one call.
+`link:../../apidocs/io/vertx/servicediscovery/types/EventBusServiceType.html[EventBusServiceType]` interface that combines the two operations in one call.
 
 When using the reference, you would do something like:
 [source, java]
@@ -566,7 +566,7 @@ reference.release();
 });
 ----
 
-With the `link:../../apidocs/io/vertx/servicediscovery/types/EventBusService.html[EventBusService]` class, you can get the proxy as follows:
+With the `link:../../apidocs/io/vertx/servicediscovery/types/EventBusServiceType.html[EventBusServiceType]` class, you can get the proxy as follows:
 [source, java]
 ----
 EventBusService.getProxy(discovery, MyService.class, ar -> {
@@ -593,7 +593,7 @@ The _location_ or a message source service is the event bus address on which mes
 
 As for the other service types, publishing a message source is a 2-step process:
 
-1. create a record, using `link:../../apidocs/io/vertx/servicediscovery/types/MessageSource.html[MessageSource]`
+1. create a record, using `link:../../apidocs/io/vertx/servicediscovery/types/MessageSourceType.html[MessageSourceType]`
 2. publish the record
 
 [source, java]
@@ -638,7 +638,7 @@ new JsonObject().put("some-metadata", "some value")
 ==== Consuming a message source
 
 On the consumer side, you can retrieve the record and the reference, or use the
-`link:../../apidocs/io/vertx/servicediscovery/types/MessageSource.html[MessageSource]` class to retrieve the service is one call.
+`link:../../apidocs/io/vertx/servicediscovery/types/MessageSourceType.html[MessageSourceType]` class to retrieve the service is one call.
 
 With the first approach, the code is the following:
 
@@ -664,7 +664,7 @@ discovery.getRecord(new JsonObject().put("name", "some-message-source-service"),
 });
 ----
 
-When, using `link:../../apidocs/io/vertx/servicediscovery/types/MessageSource.html[MessageSource]`, it becomes:
+When, using `link:../../apidocs/io/vertx/servicediscovery/types/MessageSourceType.html[MessageSourceType]`, it becomes:
 
 [source, java]
 ----
@@ -695,7 +695,7 @@ using a JDBC driver. The client of a JDBC data source service is a `link:../../a
 
 As for the other service types, publishing a JDBC data source is a 2-step process:
 
-1. create a record, using `link:../../apidocs/io/vertx/servicediscovery/types/JDBCDataSource.html[JDBCDataSource]`
+1. create a record, using `link:../../apidocs/io/vertx/servicediscovery/types/JDBCDataSourceType.html[JDBCDataSourceType]`
 2. publish the record
 
 [source, java]
@@ -773,7 +773,7 @@ The client of a Redis data source service is a `link:../../apidocs/io/vertx/redi
 
 Publishing a Redis data source is a 2-step process:
 
-1. create a record, using `link:../../apidocs/io/vertx/servicediscovery/types/RedisDataSource.html[RedisDataSource]`
+1. create a record, using `link:../../apidocs/io/vertx/servicediscovery/types/RedisDataSourceType.html[RedisDataSourceType]`
 2. publish the record
 
 [source, java]
@@ -817,7 +817,7 @@ discovery.getRecord(
   });
 ----
 
-You can also use the `link:../../apidocs/io/vertx/servicediscovery/types/RedisDataSource.html[RedisDataSource]` class to the lookup and retrieval in one call:
+You can also use the `link:../../apidocs/io/vertx/servicediscovery/types/RedisDataSourceType.html[RedisDataSourceType]` class to the lookup and retrieval in one call:
 
 [source, java]
 ----

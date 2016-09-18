@@ -21,9 +21,11 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.ServiceDiscovery;
-import io.vertx.servicediscovery.Record;
 import io.vertx.ext.jdbc.JDBCClient;
+import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceDiscovery;
+import io.vertx.servicediscovery.spi.ServiceType;
+import io.vertx.servicediscovery.types.impl.JDBCDataSourceImpl;
 
 import java.util.Objects;
 
@@ -31,23 +33,26 @@ import java.util.Objects;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @VertxGen
-public interface JDBCDataSource extends DataSource {
-
+public interface JDBCDataSource {
   String DEFAULT_TYPE = "jdbc";
+
+  static JDBCDataSourceType serviceType() {
+    return new JDBCDataSourceImpl();
+  }
 
   static Record createRecord(String name, JsonObject location, JsonObject metadata) {
     Objects.requireNonNull(name);
     Objects.requireNonNull(location);
 
     Record record = new Record().setName(name)
-        .setType(TYPE)
+        .setType(DataSource.TYPE)
         .setLocation(location);
 
     if (metadata != null) {
       record.setMetadata(metadata);
     }
 
-    record.setMetadata(new JsonObject().put(DS_TYPE, DEFAULT_TYPE));
+    record.setMetadata(new JsonObject().put(DataSource.DS_TYPE, DEFAULT_TYPE));
 
     return record;
   }
@@ -72,7 +77,7 @@ public interface JDBCDataSource extends DataSource {
   }
 
   /**
-   * Convenient method that looks for a JDBC datasource source and provides the configured {@link io.vertx.ext.jdbc.JDBCClient}. The
+   * Convenient method that looks for a JDBC datasource source and provides the configured {@link JDBCClient}. The
    * async result is marked as failed is there are no matching services, or if the lookup fails.
    *
    * @param discovery             The service discovery instance
@@ -92,5 +97,3 @@ public interface JDBCDataSource extends DataSource {
     });
   }
 }
-
-
