@@ -50,6 +50,8 @@ In addition you can configure:
 * `baseSleepTimeBetweenRetries`: the amount of milliseconds to wait between retries (exponential backoff strategy).
 1000 ms by default.
 * `basePath`: the Zookeeper path in which the service are stored. Default to `/discovery`.
+* `connectionTimeoutMs`: the connection timeout in milliseconds. Defaults to 1000.
+* `canBeReadOnly` : whether or not the backend support the _read-only_ mode (defaults to true)
 
 [source,ruby]
 ----

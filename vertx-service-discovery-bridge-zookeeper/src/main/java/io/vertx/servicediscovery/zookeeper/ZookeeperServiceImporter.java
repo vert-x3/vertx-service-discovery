@@ -49,14 +49,20 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
     int maxRetries = configuration.getInteger("maxRetries", 3);
     int baseGraceBetweenRetries = configuration.getInteger("baseSleepTimeBetweenRetries", 1000);
     String basePath = configuration.getString("basePath", "/discovery");
+    boolean canBeReadOnly = configuration.getBoolean("canBeReadOnly", true);
+    int connectionTimeoutMs = configuration.getInteger("connectionTimeoutMs", 1000);
 
     vertx.<Void>executeBlocking(
         f -> {
           try {
-            client = CuratorFrameworkFactory.newClient(connection,
-                new ExponentialBackoffRetry(baseGraceBetweenRetries, maxRetries));
+
+            client = CuratorFrameworkFactory.builder()
+                .canBeReadOnly(canBeReadOnly)
+                .connectString(connection)
+                .connectionTimeoutMs(connectionTimeoutMs)
+                .retryPolicy(new ExponentialBackoffRetry(baseGraceBetweenRetries, maxRetries))
+                .build();
             client.start();
-            client.blockUntilConnected();
 
             discovery = ServiceDiscoveryBuilder.builder(JsonObject.class)
                 .client(client)

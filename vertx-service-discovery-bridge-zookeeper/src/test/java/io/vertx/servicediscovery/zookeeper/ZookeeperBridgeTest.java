@@ -24,8 +24,12 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+
+import static com.jayway.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.is;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -268,6 +272,83 @@ public class ZookeeperBridgeTest {
             });
           });
         });
+  }
+
+
+  @Test
+  public void testReconnection(TestContext tc) throws Exception {
+    UriSpec uriSpec = new UriSpec("{scheme}://foo.com:{port}");
+    ServiceInstance<String> instance = ServiceInstance.<String>builder()
+        .name("foo-service")
+        .payload(new JsonObject().put("foo", "bar").encodePrettily())
+        .port((int) (65535 * Math.random()))
+        .uriSpec(uriSpec)
+        .build();
+
+    discovery.registerService(instance);
+
+
+    AtomicBoolean importDone = new AtomicBoolean();
+    sd.registerServiceImporter(
+        new ZookeeperServiceImporter(),
+        new JsonObject()
+            .put("connection", zkTestServer.getConnectString())
+            .put("connectionTimeoutMs", 10)
+            .put("baseSleepTimeBetweenRetries", 10)
+            .put("maxRetries", 3),
+        v -> {
+          if (v.failed()) {
+            v.cause().printStackTrace();
+          }
+          tc.assertTrue(v.succeeded());
+
+          sd.getRecords(x -> true, l -> {
+            if (l.failed()) {
+              l.cause().printStackTrace();
+            }
+            tc.assertTrue(l.succeeded());
+            tc.assertTrue(l.result().size() == 1);
+            tc.assertEquals("foo-service", l.result().get(0).getName());
+
+            importDone.set(true);
+          });
+        });
+
+    await().untilAtomic(importDone, is(true));
+
+    // Stop the server
+    zkTestServer.stop();
+
+    importDone.set(false);
+    sd.getRecords(x -> true, l -> {
+      if (l.failed()) {
+        l.cause().printStackTrace();
+      }
+      tc.assertTrue(l.succeeded());
+      tc.assertTrue(l.result().size() == 1);
+      tc.assertEquals("foo-service", l.result().get(0).getName());
+
+      importDone.set(true);
+    });
+
+    await().untilAtomic(importDone, is(true));
+
+    zkTestServer.start();
+
+    importDone.set(false);
+    sd.getRecords(x -> true, l -> {
+      if (l.failed()) {
+        l.cause().printStackTrace();
+      }
+      tc.assertTrue(l.succeeded());
+      tc.assertTrue(l.result().size() == 1);
+      tc.assertEquals("foo-service", l.result().get(0).getName());
+
+      importDone.set(true);
+    });
+
+    await().untilAtomic(importDone, is(true));
+
   }
 
 
