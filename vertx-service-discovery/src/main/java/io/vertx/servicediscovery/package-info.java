@@ -617,7 +617,7 @@
  * complete the given future object.
  *
  * When the service discovery is stopped, the bridge is stopped. The
- * {@link io.vertx.servicediscovery.spi.ServiceImporter#stop}
+ * {@link io.vertx.servicediscovery.spi.ServiceImporter#close(io.vertx.core.Handler)}
  * method is called that provides the opportunity to cleanup resources, removed imported / exported services... This
  * method must complete the given {@link io.vertx.core.Future} to notify the caller of the completion.
  *

@@ -163,7 +163,7 @@ public class KubernetesServiceImporterTest {
     await().until(() -> record.get() != null);
     assertThat(record.get().getStatus()).isEqualTo(io.vertx.servicediscovery.Status.DOWN);
 
-    bridge.stop(vertx, discovery, Future.future());
+    bridge.close(v -> {});
 
   }
 

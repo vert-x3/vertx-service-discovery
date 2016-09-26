@@ -50,7 +50,7 @@ descriptor:
 <dependency>
 <groupId>io.vertx</groupId>
 <artifactId>vertx-service-discovery</artifactId>
-<version>3.3.3</version>
+<version>3.4.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -58,7 +58,7 @@ descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-discovery:3.3.3'
+compile 'io.vertx:vertx-service-discovery:3.4.0-SNAPSHOT'
 ----
 
 == Overall concepts
@@ -857,7 +857,7 @@ method is blocking, it must use an
 complete the given future object.
 
 When the service discovery is stopped, the bridge is stopped. The
-`link:../../yardoc/VertxServiceDiscovery/ServiceImporter.html#stop-instance_method[stop]`
+`link:../../yardoc/VertxServiceDiscovery/ServiceImporter.html#close-instance_method[close]`
 method is called that provides the opportunity to cleanup resources, removed imported / exported services... This
 method must complete the given `link:../../yardoc/Vertx/Future.html[Future]` to notify the caller of the completion.
 

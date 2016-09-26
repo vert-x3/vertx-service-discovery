@@ -56,17 +56,7 @@ public class ServiceImporter {
   }
 
   /**
-   * Stops the importer.
-   * @param vertx the vertx instance
-   * @param publisher the service discovery instance
-   * @param future the future on which the bridge must report the completion of the stopping process
-   */
-  public void stop(Vertx vertx, ServicePublisher publisher, Future<Void> future) { 
-    delegate.stop((io.vertx.core.Vertx)vertx.getDelegate(), (io.vertx.servicediscovery.spi.ServicePublisher)publisher.getDelegate(), (io.vertx.core.Future<java.lang.Void>)future.getDelegate());
-  }
-
-  /**
-   * Close the importer
+   * Closes the importer
    * @param closeHandler the handle to be notified when importer is closed, may be <code>null</code>
    */
   public void close(Handler<Void> closeHandler) { 

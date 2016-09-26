@@ -224,8 +224,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     List<Future> futures = new ArrayList<>();
     for (ServiceImporter importer : importers) {
       Future<Void> future = Future.future();
-      // TODO Change this call to call close, once the stop method has been removed
-      importer.stop(vertx, this, future);
+      importer.close(v -> future.complete());
       futures.add(future);
     }
 

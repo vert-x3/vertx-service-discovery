@@ -30,18 +30,7 @@ module VertxServiceDiscovery
       end
       raise ArgumentError, "Invalid arguments when calling start(vertx,publisher,configuration,future)"
     end
-    #  Stops the importer.
-    # @param [::Vertx::Vertx] vertx the vertx instance
-    # @param [::VertxServiceDiscovery::ServicePublisher] publisher the service discovery instance
-    # @param [::Vertx::Future] future the future on which the bridge must report the completion of the stopping process
-    # @return [void]
-    def stop(vertx=nil,publisher=nil,future=nil)
-      if vertx.class.method_defined?(:j_del) && publisher.class.method_defined?(:j_del) && future.class.method_defined?(:j_del) && !block_given?
-        return @j_del.java_method(:stop, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxServicediscoverySpi::ServicePublisher.java_class,Java::IoVertxCore::Future.java_class]).call(vertx.j_del,publisher.j_del,future.j_del)
-      end
-      raise ArgumentError, "Invalid arguments when calling stop(vertx,publisher,future)"
-    end
-    #  Close the importer
+    #  Closes the importer
     # @yield the handle to be notified when importer is closed, may be <code>null</code>
     # @return [void]
     def close
