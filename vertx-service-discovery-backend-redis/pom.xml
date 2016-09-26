@@ -44,6 +44,13 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-service-discovery</artifactId>
+      <version>${project.version}</version>
+      <classifier>tests</classifier>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>com.github.kstyrc</groupId>
       <artifactId>embedded-redis</artifactId>
       <version>0.6</version>

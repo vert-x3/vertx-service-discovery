@@ -45,6 +45,8 @@
     <module>vertx-service-discovery-bridge-docker-links</module>
     <module>vertx-service-discovery-backend-redis</module>
     <module>vertx-service-discovery-bridge-consul</module>
+    <module>vertx-service-discovery-bridge-zookeeper</module>
+    <module>vertx-service-discovery-backend-zookeeper</module>
   </modules>
 
   <dependencyManagement>
@@ -135,7 +137,5 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-
-
 
 </project>
