@@ -22,7 +22,10 @@ import com.hazelcast.nio.Address;
 import com.hazelcast.spi.discovery.AbstractDiscoveryStrategy;
 import com.hazelcast.spi.discovery.DiscoveryNode;
 import com.hazelcast.spi.discovery.SimpleDiscoveryNode;
-import io.fabric8.kubernetes.api.model.*;
+import io.fabric8.kubernetes.api.model.EndpointAddress;
+import io.fabric8.kubernetes.api.model.Endpoints;
+import io.fabric8.kubernetes.api.model.EndpointsList;
+import io.fabric8.kubernetes.api.model.ListMeta;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -30,7 +33,10 @@ import io.vertx.servicediscovery.kubernetes.KubernetesUtils;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -145,27 +151,35 @@ class HazelcastKubernetesDiscoveryStrategy extends AbstractDiscoveryStrategy {
    */
   @Override
   public Iterable<DiscoveryNode> discoverNodes() {
+    getLogger().info("Kubernetes Strategy - Discovering nodes");
     EndpointsList list = client.endpoints().inNamespace(namespace).withLabel(label, labelValue).list();
+    getLogger().info("Kubernetes Strategy - Endpoint list: " + (list == null ? "none" : list.getItems().size()));
 
     if (list == null || list.getItems() == null || list.getItems().isEmpty()) {
-      getLogger().info("No endpoints for service " + " in namespace " + namespace + " with label: "+label+" or `vertx-cluster=true`, look for endpoints in namespace without specific label");
+      getLogger().info("No endpoints for service " + " in namespace " + namespace + " with label: " + label
+          + " or `vertx-cluster=true`, look for endpoints in namespace without specific label");
       return Optional.
-              ofNullable(client.endpoints().inNamespace(namespace).list()).
-              orElse(new EndpointsList("", Collections.emptyList(),"",new ListMeta())).
-              getItems().
-              stream().
-              map(Endpoints::getSubsets).
-              flatMap(subset -> subset.stream()).
-              flatMap(endpointSubset -> endpointSubset.getAddresses().stream()).
-              map(this::getSimpleDiscoveryNode).collect(Collectors.toList());
+          ofNullable(client.endpoints().inNamespace(namespace).list()).
+          orElse(new EndpointsList("", Collections.emptyList(), "", new ListMeta())).
+          getItems().
+          stream().
+          map(Endpoints::getSubsets).
+          flatMap(Collection::stream).
+          flatMap(endpointSubset -> endpointSubset.getAddresses().stream()).
+          map(this::getSimpleDiscoveryNode).collect(Collectors.toList());
     }
 
     return list.getItems().
-            stream().
-            map(Endpoints::getSubsets).
-            flatMap(subset -> subset.stream()).
-            flatMap(endpointSubset -> endpointSubset.getAddresses().stream()).
-            map(this::getSimpleDiscoveryNode).collect(Collectors.toList());
+        stream().
+        map(Endpoints::getSubsets).
+        flatMap(Collection::stream).
+        flatMap(endpointSubset -> endpointSubset.getAddresses().stream()).
+        map(this::getSimpleDiscoveryNode).map(node -> {
+      getLogger().info("Kubernetes Strategy - Discovered node " + node.getPublicAddress().getHost() + " / " + node
+          .getPrivateAddress().getHost());
+      return node;
+    })
+        .collect(Collectors.toList());
 
   }
 
@@ -174,7 +188,7 @@ class HazelcastKubernetesDiscoveryStrategy extends AbstractDiscoveryStrategy {
     String ip = endpointAddress.getIp();
     InetAddress inetAddress = extractAddress(ip);
     int port = getServicePort(properties);
-    getLogger().info("Resolved node: " +"port: " + port + " inetAddress: " + inetAddress!=null?inetAddress.toString():"" + " ip:" + ip + "properties: " + properties);
+    getLogger().info("Resolved node: " + "port: " + port + " inetAddress: " + inetAddress != null ? inetAddress.toString() : "" + " ip:" + ip + "properties: " + properties);
     Address address = new Address(inetAddress, port);
     return new SimpleDiscoveryNode(address, properties);
   }
