@@ -24,6 +24,7 @@ import io.vertx.servicediscovery.Record
 import io.vertx.groovy.servicediscovery.ServiceDiscovery
 import io.vertx.core.AsyncResult
 import io.vertx.core.Handler
+import java.util.function.Function
 import io.vertx.groovy.core.http.HttpClient
 /**
  *  for HTTP endpoint (REST api).
@@ -98,6 +99,29 @@ public class HttpEndpoint {
    */
   public static void getClient(ServiceDiscovery discovery, Map<String, Object> filter, Handler<AsyncResult<HttpClient>> resultHandler) {
     io.vertx.servicediscovery.types.HttpEndpoint.getClient(discovery != null ? (io.vertx.servicediscovery.ServiceDiscovery)discovery.getDelegate() : null, filter != null ? new io.vertx.core.json.JsonObject(filter) : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.core.http.HttpClient>>() {
+      public void handle(AsyncResult<io.vertx.core.http.HttpClient> ar) {
+        if (ar.succeeded()) {
+          resultHandler.handle(io.vertx.core.Future.succeededFuture(InternalHelper.safeCreate(ar.result(), io.vertx.groovy.core.http.HttpClient.class)));
+        } else {
+          resultHandler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
+        }
+      }
+    } : null);
+  }
+  /**
+   * Convenient method that looks for a HTTP endpoint and provides the configured . The async result
+   * is marked as failed is there are no matching services, or if the lookup fails.
+   * @param discovery The service discovery instance
+   * @param filter The filter
+   * @param resultHandler The result handler
+   */
+  public static void getClient(ServiceDiscovery discovery, java.util.function.Function<Map<String, Object>, Boolean> filter, Handler<AsyncResult<HttpClient>> resultHandler) {
+    io.vertx.servicediscovery.types.HttpEndpoint.getClient(discovery != null ? (io.vertx.servicediscovery.ServiceDiscovery)discovery.getDelegate() : null, filter != null ? new java.util.function.Function<io.vertx.servicediscovery.Record, java.lang.Boolean>(){
+      public java.lang.Boolean apply(io.vertx.servicediscovery.Record arg_) {
+        def ret = filter.apply((Map<String, Object>)InternalHelper.wrapObject(arg_?.toJson()));
+        return ret != null ? ret : null;
+      }
+    } : null, resultHandler != null ? new Handler<AsyncResult<io.vertx.core.http.HttpClient>>() {
       public void handle(AsyncResult<io.vertx.core.http.HttpClient> ar) {
         if (ar.succeeded()) {
           resultHandler.handle(io.vertx.core.Future.succeededFuture(InternalHelper.safeCreate(ar.result(), io.vertx.groovy.core.http.HttpClient.class)));

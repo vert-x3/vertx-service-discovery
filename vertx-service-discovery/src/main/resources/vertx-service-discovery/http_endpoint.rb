@@ -54,15 +54,22 @@ module VertxServiceDiscovery
     end
     #  Convenient method that looks for a HTTP endpoint and provides the configured . The async result
     #  is marked as failed is there are no matching services, or if the lookup fails.
-    # @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
-    # @param [Hash{String => Object}] filter The filter, optional
-    # @yield The result handler
+    # @overload getClient(discovery,filter,resultHandler)
+    #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
+    #   @param [Hash{String => Object}] filter The filter, optional
+    #   @yield The result handler
+    # @overload getClient(discovery,filter,resultHandler)
+    #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
+    #   @param [Proc] filter The filter
+    #   @yield The result handler
     # @return [void]
-    def self.get_client(discovery=nil,filter=nil)
-      if discovery.class.method_defined?(:j_del) && filter.class == Hash && block_given?
-        return Java::IoVertxServicediscoveryTypes::HttpEndpoint.java_method(:getClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::Vertx::HttpClient) : nil) }))
+    def self.get_client(param_1=nil,param_2=nil)
+      if param_1.class.method_defined?(:j_del) && param_2.class == Hash && block_given?
+        return Java::IoVertxServicediscoveryTypes::HttpEndpoint.java_method(:getClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,::Vertx::Util::Utils.to_json_object(param_2),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::Vertx::HttpClient) : nil) }))
+      elsif param_1.class.method_defined?(:j_del) && param_2.class == Proc && block_given?
+        return Java::IoVertxServicediscoveryTypes::HttpEndpoint.java_method(:getClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::JavaUtilFunction::Function.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,(Proc.new { |event| param_2.call(event != nil ? JSON.parse(event.toJson.encode) : nil) }),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::Vertx::HttpClient) : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling get_client(discovery,filter)"
+      raise ArgumentError, "Invalid arguments when calling get_client(param_1,param_2)"
     end
   end
 end

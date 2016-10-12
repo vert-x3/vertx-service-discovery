@@ -27,6 +27,7 @@ import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.spi.ServiceType;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * {@link ServiceType} for HTTP endpoint (REST api).
@@ -117,6 +118,25 @@ public interface HttpEndpoint extends ServiceType {
    * @param resultHandler The result handler
    */
   static void getClient(ServiceDiscovery discovery, JsonObject filter, Handler<AsyncResult<HttpClient>>
+      resultHandler) {
+    discovery.getRecord(filter, ar -> {
+      if (ar.failed() || ar.result() == null) {
+        resultHandler.handle(Future.failedFuture("No matching record"));
+      } else {
+        resultHandler.handle(Future.succeededFuture(discovery.getReference(ar.result()).get()));
+      }
+    });
+  }
+
+  /**
+   * Convenient method that looks for a HTTP endpoint and provides the configured {@link HttpClient}. The async result
+   * is marked as failed is there are no matching services, or if the lookup fails.
+   *
+   * @param discovery     The service discovery instance
+   * @param filter        The filter
+   * @param resultHandler The result handler
+   */
+  static void getClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, Handler<AsyncResult<HttpClient>>
       resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {

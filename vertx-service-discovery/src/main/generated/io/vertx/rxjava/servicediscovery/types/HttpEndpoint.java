@@ -24,6 +24,7 @@ import io.vertx.servicediscovery.Record;
 import io.vertx.rxjava.servicediscovery.ServiceDiscovery;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import java.util.function.Function;
 import io.vertx.rxjava.core.http.HttpClient;
 
 /**
@@ -128,6 +129,43 @@ public class HttpEndpoint {
    * @return 
    */
   public static Observable<HttpClient> getClientObservable(ServiceDiscovery discovery, JsonObject filter) { 
+    io.vertx.rx.java.ObservableFuture<HttpClient> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
+    getClient(discovery, filter, resultHandler.toHandler());
+    return resultHandler;
+  }
+
+  /**
+   * Convenient method that looks for a HTTP endpoint and provides the configured . The async result
+   * is marked as failed is there are no matching services, or if the lookup fails.
+   * @param discovery The service discovery instance
+   * @param filter The filter
+   * @param resultHandler The result handler
+   */
+  public static void getClient(ServiceDiscovery discovery, Function<Record,Boolean> filter, Handler<AsyncResult<HttpClient>> resultHandler) { 
+    io.vertx.servicediscovery.types.HttpEndpoint.getClient((io.vertx.servicediscovery.ServiceDiscovery)discovery.getDelegate(), new java.util.function.Function<io.vertx.servicediscovery.Record,java.lang.Boolean>() {
+      public java.lang.Boolean apply(io.vertx.servicediscovery.Record arg) {
+        Boolean ret = filter.apply(arg);
+        return ret;
+      }
+    }, new Handler<AsyncResult<io.vertx.core.http.HttpClient>>() {
+      public void handle(AsyncResult<io.vertx.core.http.HttpClient> ar) {
+        if (ar.succeeded()) {
+          resultHandler.handle(io.vertx.core.Future.succeededFuture(HttpClient.newInstance(ar.result())));
+        } else {
+          resultHandler.handle(io.vertx.core.Future.failedFuture(ar.cause()));
+        }
+      }
+    });
+  }
+
+  /**
+   * Convenient method that looks for a HTTP endpoint and provides the configured . The async result
+   * is marked as failed is there are no matching services, or if the lookup fails.
+   * @param discovery The service discovery instance
+   * @param filter The filter
+   * @return 
+   */
+  public static Observable<HttpClient> getClientObservable(ServiceDiscovery discovery, Function<Record,Boolean> filter) { 
     io.vertx.rx.java.ObservableFuture<HttpClient> resultHandler = io.vertx.rx.java.RxHelper.observableFuture();
     getClient(discovery, filter, resultHandler.toHandler());
     return resultHandler;
