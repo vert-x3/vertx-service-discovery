@@ -292,7 +292,7 @@
  * `AbstractServiceReference#retrieve()` that creates the service object. This
  * method is only called once. If your service object needs cleanup, also override
  * `AbstractServiceReference#close()`.
- * 4. Create a `META-INF/services/io.vertx.ext.discovery.spi.ServiceType` file that is packaged in your jar. In this
+ * 4. Create a `META-INF/services/io.vertx.servicediscovery.spi.ServiceType` file that is packaged in your jar. In this
  * file, just indicate the fully qualified name of the class created at step 2.
  * 5. Creates a jar containing the service type interface (step 1), the implementation (step 2 and 3) and the
  * service descriptor file (step 4). Put this jar in the classpath of your application. Here you go, your service

@@ -31,7 +31,7 @@ import io.vertx.servicediscovery.ServiceReference;
  * the message.
  * <p>
  * You can define your own service type by implementing this interface and configure the SPI file
- * (META-INF/services/io.vertx.ext.discovery.spi.ServiceType) with your own implementation.
+ * (META-INF/services/io.vertx.servicediscovery.spi.ServiceType) with your own implementation.
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
