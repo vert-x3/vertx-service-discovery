@@ -1,0 +1,4 @@
+moduleName = vertx-service-discovery-zookeeper-module
+moduleVersion = 1.0
+extensionClasses = io.vertx.groovy.servicediscovery.zookeeper.GroovyExtension
+staticExtensionClasses = io.vertx.groovy.servicediscovery.zookeeper.GroovyStaticExtension
