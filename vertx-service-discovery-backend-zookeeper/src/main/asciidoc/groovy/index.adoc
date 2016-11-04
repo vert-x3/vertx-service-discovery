@@ -1,6 +1,6 @@
 == Vert.x Discovery Backend - Zookeeper
 
-The service discovery has a plug-able backend using the `ServiceDiscoveryBackend` SPI.
+The service discovery has a plug-able backend using the `link:../../apidocs/io/vertx/servicediscovery/spi/ServiceDiscoveryBackend.html[ServiceDiscoveryBackend]` SPI.
 
 This is an implementation of the SPI based
 on Apache Zookeeper.
@@ -39,7 +39,7 @@ Here is an example:
 
 [source,groovy]
 ----
-import io.vertx.groovy.servicediscovery.ServiceDiscovery
+import io.vertx.servicediscovery.ServiceDiscovery
 ServiceDiscovery.create(vertx, [
   backendConfiguration:[
     connection:"127.0.0.1:2181"
@@ -62,7 +62,7 @@ https://zookeeper.apache.org/doc/r3.4.5/zookeeperOver.html#Nodes+and+ephemeral+n
 
 [source,groovy]
 ----
-import io.vertx.groovy.servicediscovery.ServiceDiscovery
+import io.vertx.servicediscovery.ServiceDiscovery
 ServiceDiscovery.create(vertx, [
   backendConfiguration:[
     connection:"127.0.0.1:2181",

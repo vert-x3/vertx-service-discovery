@@ -13,17 +13,17 @@
  *
  * You may elect to redistribute this code under either of these licenses.
  */
-package verticles;
+package verticles
 
-import io.vertx.groovy.servicediscovery.ServiceDiscovery
-import io.vertx.groovy.servicediscovery.types.EventBusService
-import io.vertx.groovy.servicediscovery.service.HelloService
+import io.vertx.core.json.JsonObject
+import io.vertx.servicediscovery.ServiceDiscovery
+import io.vertx.servicediscovery.service.HelloService
+import io.vertx.servicediscovery.types.EventBusService;
 
 def discovery = ServiceDiscovery.create(vertx);
 EventBusService.<HelloService> getProxy(
         discovery,
-        io.vertx.servicediscovery.service.HelloService.class.getName(), // service interface
-        HelloService.class.getName(), // client class
+        HelloService.class.getName(), // service interface
         { ar ->
           if (ar.failed()) {
             vertx.eventBus().send("result", [
@@ -32,7 +32,7 @@ EventBusService.<HelloService> getProxy(
             ])
           } else {
             HelloService hello = ar.result();
-            hello.hello(['name': "vert.x"], { result ->
+            hello.hello(new JsonObject().put('name', "vert.x"), { result ->
               if (result.failed()) {
                 vertx.eventBus().send("result", [
                         "status" : "ko",

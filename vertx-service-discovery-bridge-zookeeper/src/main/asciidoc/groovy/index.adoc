@@ -35,7 +35,7 @@ Then, when creating the service discovery registers this bridge as follows:
 
 [source, groovy]
 ----
-import io.vertx.groovy.servicediscovery.ServiceDiscovery
+import io.vertx.servicediscovery.ServiceDiscovery
 ServiceDiscovery.create(vertx).registerServiceImporter(new io.vertx.servicediscovery.zookeeper.ZookeeperServiceImporter(), [
   connection:"127.0.0.1:2181"
 ])
@@ -55,7 +55,7 @@ In addition you can configure:
 
 [source,groovy]
 ----
-import io.vertx.groovy.servicediscovery.ServiceDiscovery
+import io.vertx.servicediscovery.ServiceDiscovery
 ServiceDiscovery.create(vertx).registerServiceImporter(new io.vertx.servicediscovery.zookeeper.ZookeeperServiceImporter(), [
   connection:"127.0.0.1:2181",
   maxRetries:5,

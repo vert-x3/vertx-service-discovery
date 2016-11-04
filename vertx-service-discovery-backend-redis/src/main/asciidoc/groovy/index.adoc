@@ -1,6 +1,6 @@
 == Vert.x Discovery Backend - Redis
 
-The service discovery has a plug-able backend using the `ServiceDiscoveryBackend` SPI.
+The service discovery has a plug-able backend using the `link:../../apidocs/io/vertx/servicediscovery/spi/ServiceDiscoveryBackend.html[ServiceDiscoveryBackend]` SPI.
 
 This is an implementation of the SPI based
 on Redis.
@@ -41,7 +41,7 @@ Here is an example:
 
 [source,groovy]
 ----
-import io.vertx.groovy.servicediscovery.ServiceDiscovery
+import io.vertx.servicediscovery.ServiceDiscovery
 ServiceDiscovery.create(vertx, [
   backendConfiguration:[
     host:"127.0.0.1",
