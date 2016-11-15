@@ -76,7 +76,7 @@ public class KubernetesServiceImporter implements Watcher<Service>, ServiceImpor
     }
 
     // 1) get kubernetes auth info
-    this.namespace = conf.getString("namespace", "default");
+    this.namespace = conf.getString("namespace", getNamespaceOrDefault());
     LOGGER.info("Kubernetes discovery configured for namespace: " + namespace);
     String master = conf.getString("master",
         KubernetesUtils.getDefaultKubernetesMasterUrl());
@@ -148,6 +148,19 @@ public class KubernetesServiceImporter implements Watcher<Service>, ServiceImpor
       }
     }
     return records.add(record);
+  }
+
+  private String getNamespaceOrDefault() {
+    // Kubernetes with Fabric8 build
+    String namespace = System.getenv("KUBERNETES_NAMESPACE");
+    if (namespace == null) {
+      // oc / docker build
+      namespace = System.getenv("OPENSHIFT_BUILD_NAMESPACE");
+      if (namespace == null) {
+        namespace = "default";
+      }
+    }
+    return namespace;
   }
 
   private boolean areTheSameService(Record record1, Record record2) {

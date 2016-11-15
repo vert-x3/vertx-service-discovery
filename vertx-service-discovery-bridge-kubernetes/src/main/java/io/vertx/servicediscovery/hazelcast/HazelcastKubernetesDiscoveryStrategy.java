@@ -155,7 +155,7 @@ class HazelcastKubernetesDiscoveryStrategy extends AbstractDiscoveryStrategy {
               getItems().
               stream().
               map(Endpoints::getSubsets).
-              flatMap(subset -> subset.stream()).
+              flatMap(Collection::stream).
               flatMap(endpointSubset -> endpointSubset.getAddresses().stream()).
               map(this::getSimpleDiscoveryNode).collect(Collectors.toList());
     }
@@ -163,7 +163,7 @@ class HazelcastKubernetesDiscoveryStrategy extends AbstractDiscoveryStrategy {
     return list.getItems().
             stream().
             map(Endpoints::getSubsets).
-            flatMap(subset -> subset.stream()).
+            flatMap(Collection::stream).
             flatMap(endpointSubset -> endpointSubset.getAddresses().stream()).
             map(this::getSimpleDiscoveryNode).collect(Collectors.toList());
 
