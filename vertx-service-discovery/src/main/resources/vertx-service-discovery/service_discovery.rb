@@ -47,6 +47,22 @@ module VertxServiceDiscovery
     def j_del
       @j_del
     end
+    @@j_api_type = Object.new
+    def @@j_api_type.accept?(obj)
+      obj.class == ServiceDiscovery
+    end
+    def @@j_api_type.wrap(obj)
+      ServiceDiscovery.new(obj)
+    end
+    def @@j_api_type.unwrap(obj)
+      obj.j_del
+    end
+    def self.j_api_type
+      @@j_api_type
+    end
+    def self.j_class
+      Java::IoVertxServicediscovery::ServiceDiscovery.java_class
+    end
     #  Creates an instance of {::VertxServiceDiscovery::ServiceDiscovery}.
     # @param [::Vertx::Vertx] vertx the vert.x instance
     # @param [Hash] options the discovery options
@@ -57,7 +73,7 @@ module VertxServiceDiscovery
       elsif vertx.class.method_defined?(:j_del) && options.class == Hash && !block_given?
         return ::Vertx::Util::Utils.safe_create(Java::IoVertxServicediscovery::ServiceDiscovery.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxServicediscovery::ServiceDiscoveryOptions.java_class]).call(vertx.j_del,Java::IoVertxServicediscovery::ServiceDiscoveryOptions.new(::Vertx::Util::Utils.to_json_object(options))),::VertxServiceDiscovery::ServiceDiscovery)
       end
-      raise ArgumentError, "Invalid arguments when calling create(vertx,options)"
+      raise ArgumentError, "Invalid arguments when calling create(#{vertx},#{options})"
     end
     #  Gets a service reference from the given record.
     # @param [Hash] record the chosen record
@@ -66,7 +82,7 @@ module VertxServiceDiscovery
       if record.class == Hash && !block_given?
         return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:getReference, [Java::IoVertxServicediscovery::Record.java_class]).call(Java::IoVertxServicediscovery::Record.new(::Vertx::Util::Utils.to_json_object(record))),::VertxServiceDiscovery::ServiceReference)
       end
-      raise ArgumentError, "Invalid arguments when calling get_reference(record)"
+      raise ArgumentError, "Invalid arguments when calling get_reference(#{record})"
     end
     #  Gets a service reference from the given record, the reference is configured with the given json object.
     # @param [Hash] record the chosen record
@@ -76,7 +92,7 @@ module VertxServiceDiscovery
       if record.class == Hash && configuration.class == Hash && !block_given?
         return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:getReferenceWithConfiguration, [Java::IoVertxServicediscovery::Record.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(Java::IoVertxServicediscovery::Record.new(::Vertx::Util::Utils.to_json_object(record)),::Vertx::Util::Utils.to_json_object(configuration)),::VertxServiceDiscovery::ServiceReference)
       end
-      raise ArgumentError, "Invalid arguments when calling get_reference_with_configuration(record,configuration)"
+      raise ArgumentError, "Invalid arguments when calling get_reference_with_configuration(#{record},#{configuration})"
     end
     #  Releases the service reference.
     # @param [::VertxServiceDiscovery::ServiceReference] reference the reference to release, must not be <code>null</code>
@@ -85,7 +101,7 @@ module VertxServiceDiscovery
       if reference.class.method_defined?(:j_del) && !block_given?
         return @j_del.java_method(:release, [Java::IoVertxServicediscovery::ServiceReference.java_class]).call(reference.j_del)
       end
-      raise ArgumentError, "Invalid arguments when calling release?(reference)"
+      raise ArgumentError, "Invalid arguments when calling release?(#{reference})"
     end
     #  Registers a discovery service importer. Importers let you integrate other discovery technologies in this service
     #  discovery.
@@ -99,7 +115,7 @@ module VertxServiceDiscovery
       elsif importer.class.method_defined?(:j_del) && configuration.class == Hash && block_given?
         return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:registerServiceImporter, [Java::IoVertxServicediscoverySpi::ServiceImporter.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(importer.j_del,::Vertx::Util::Utils.to_json_object(configuration),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil) })),::VertxServiceDiscovery::ServiceDiscovery)
       end
-      raise ArgumentError, "Invalid arguments when calling register_service_importer(importer,configuration)"
+      raise ArgumentError, "Invalid arguments when calling register_service_importer(#{importer},#{configuration})"
     end
     #  Registers a discovery bridge. Exporters let you integrate other discovery technologies in this service
     #  discovery.
@@ -113,7 +129,7 @@ module VertxServiceDiscovery
       elsif exporter.class.method_defined?(:j_del) && configuration.class == Hash && block_given?
         return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:registerServiceExporter, [Java::IoVertxServicediscoverySpi::ServiceExporter.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(exporter.j_del,::Vertx::Util::Utils.to_json_object(configuration),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil) })),::VertxServiceDiscovery::ServiceDiscovery)
       end
-      raise ArgumentError, "Invalid arguments when calling register_service_exporter(exporter,configuration)"
+      raise ArgumentError, "Invalid arguments when calling register_service_exporter(#{exporter},#{configuration})"
     end
     #  Closes the service discovery
     # @return [void]
@@ -131,7 +147,7 @@ module VertxServiceDiscovery
       if record.class == Hash && block_given?
         return @j_del.java_method(:publish, [Java::IoVertxServicediscovery::Record.java_class,Java::IoVertxCore::Handler.java_class]).call(Java::IoVertxServicediscovery::Record.new(::Vertx::Util::Utils.to_json_object(record)),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result != nil ? JSON.parse(ar.result.toJson.encode) : nil : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling publish(record)"
+      raise ArgumentError, "Invalid arguments when calling publish(#{record})"
     end
     #  Un-publishes a record.
     # @param [String] id the registration id
@@ -141,7 +157,7 @@ module VertxServiceDiscovery
       if id.class == String && block_given?
         return @j_del.java_method(:unpublish, [Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(id,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling unpublish(id)"
+      raise ArgumentError, "Invalid arguments when calling unpublish(#{id})"
     end
     #  Lookups for a single record.
     #  <p>
@@ -169,7 +185,7 @@ module VertxServiceDiscovery
       elsif param_1.class == Proc && (param_2.class == TrueClass || param_2.class == FalseClass) && block_given?
         return @j_del.java_method(:getRecord, [Java::JavaUtilFunction::Function.java_class,Java::boolean.java_class,Java::IoVertxCore::Handler.java_class]).call((Proc.new { |event| param_1.call(event != nil ? JSON.parse(event.toJson.encode) : nil) }),param_2,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result != nil ? JSON.parse(ar.result.toJson.encode) : nil : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling get_record(param_1,param_2)"
+      raise ArgumentError, "Invalid arguments when calling get_record(#{param_1},#{param_2})"
     end
     #  Lookups for a set of records. Unlike {::VertxServiceDiscovery::ServiceDiscovery#get_record}, this method returns all matching
     #  records.
@@ -198,7 +214,7 @@ module VertxServiceDiscovery
       elsif param_1.class == Proc && (param_2.class == TrueClass || param_2.class == FalseClass) && block_given?
         return @j_del.java_method(:getRecords, [Java::JavaUtilFunction::Function.java_class,Java::boolean.java_class,Java::IoVertxCore::Handler.java_class]).call((Proc.new { |event| param_1.call(event != nil ? JSON.parse(event.toJson.encode) : nil) }),param_2,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result.to_a.map { |elt| elt != nil ? JSON.parse(elt.toJson.encode) : nil } : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling get_records(param_1,param_2)"
+      raise ArgumentError, "Invalid arguments when calling get_records(#{param_1},#{param_2})"
     end
     #  Updates the given record. The record must has been published, and has it's registration id set.
     # @param [Hash] record the updated record
@@ -208,7 +224,7 @@ module VertxServiceDiscovery
       if record.class == Hash && block_given?
         return @j_del.java_method(:update, [Java::IoVertxServicediscovery::Record.java_class,Java::IoVertxCore::Handler.java_class]).call(Java::IoVertxServicediscovery::Record.new(::Vertx::Util::Utils.to_json_object(record)),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ar.result != nil ? JSON.parse(ar.result.toJson.encode) : nil : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling update(record)"
+      raise ArgumentError, "Invalid arguments when calling update(#{record})"
     end
     # @return [Set<::VertxServiceDiscovery::ServiceReference>] the set of service references retrieved by this service discovery.
     def bindings
@@ -230,10 +246,10 @@ module VertxServiceDiscovery
     # @param [Object] svcObject the service object
     # @return [void]
     def self.release_service_object(discovery=nil,svcObject=nil)
-      if discovery.class.method_defined?(:j_del) && (svcObject.class == String  || svcObject.class == Hash || svcObject.class == Array || svcObject.class == NilClass || svcObject.class == TrueClass || svcObject.class == FalseClass || svcObject.class == Fixnum || svcObject.class == Float) && !block_given?
+      if discovery.class.method_defined?(:j_del) && ::Vertx::Util::unknown_type.accept?(svcObject) && !block_given?
         return Java::IoVertxServicediscovery::ServiceDiscovery.java_method(:releaseServiceObject, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::java.lang.Object.java_class]).call(discovery.j_del,::Vertx::Util::Utils.to_object(svcObject))
       end
-      raise ArgumentError, "Invalid arguments when calling release_service_object(discovery,svcObject)"
+      raise ArgumentError, "Invalid arguments when calling release_service_object(#{discovery},#{svcObject})"
     end
   end
 end

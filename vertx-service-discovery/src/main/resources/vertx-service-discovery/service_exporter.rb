@@ -18,6 +18,22 @@ module VertxServiceDiscovery
     def j_del
       @j_del
     end
+    @@j_api_type = Object.new
+    def @@j_api_type.accept?(obj)
+      obj.class == ServiceExporter
+    end
+    def @@j_api_type.wrap(obj)
+      ServiceExporter.new(obj)
+    end
+    def @@j_api_type.unwrap(obj)
+      obj.j_del
+    end
+    def self.j_api_type
+      @@j_api_type
+    end
+    def self.j_class
+      Java::IoVertxServicediscoverySpi::ServiceExporter.java_class
+    end
     #  Starts the exporter.
     # @param [::Vertx::Vertx] vertx the vertx instance
     # @param [::VertxServiceDiscovery::ServicePublisher] publisher the service discovery instance
@@ -28,7 +44,7 @@ module VertxServiceDiscovery
       if vertx.class.method_defined?(:j_del) && publisher.class.method_defined?(:j_del) && configuration.class == Hash && future.class.method_defined?(:j_del) && !block_given?
         return @j_del.java_method(:init, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxServicediscoverySpi::ServicePublisher.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Future.java_class]).call(vertx.j_del,publisher.j_del,::Vertx::Util::Utils.to_json_object(configuration),future.j_del)
       end
-      raise ArgumentError, "Invalid arguments when calling init(vertx,publisher,configuration,future)"
+      raise ArgumentError, "Invalid arguments when calling init(#{vertx},#{publisher},#{configuration},#{future})"
     end
     #  Notify a new record has been published, the record's registration can be used to uniquely
     #  identify the record
@@ -38,7 +54,7 @@ module VertxServiceDiscovery
       if record.class == Hash && !block_given?
         return @j_del.java_method(:onPublish, [Java::IoVertxServicediscovery::Record.java_class]).call(Java::IoVertxServicediscovery::Record.new(::Vertx::Util::Utils.to_json_object(record)))
       end
-      raise ArgumentError, "Invalid arguments when calling on_publish(record)"
+      raise ArgumentError, "Invalid arguments when calling on_publish(#{record})"
     end
     #  Notify an existing record has been updated, the record's registration can be used to uniquely
     #  identify the record
@@ -48,7 +64,7 @@ module VertxServiceDiscovery
       if record.class == Hash && !block_given?
         return @j_del.java_method(:onUpdate, [Java::IoVertxServicediscovery::Record.java_class]).call(Java::IoVertxServicediscovery::Record.new(::Vertx::Util::Utils.to_json_object(record)))
       end
-      raise ArgumentError, "Invalid arguments when calling on_update(record)"
+      raise ArgumentError, "Invalid arguments when calling on_update(#{record})"
     end
     #  Notify an existing record has been removed
     # @param [String] id the record registration id
@@ -57,7 +73,7 @@ module VertxServiceDiscovery
       if id.class == String && !block_given?
         return @j_del.java_method(:onUnpublish, [Java::java.lang.String.java_class]).call(id)
       end
-      raise ArgumentError, "Invalid arguments when calling on_unpublish(id)"
+      raise ArgumentError, "Invalid arguments when calling on_unpublish(#{id})"
     end
     #  Close the exporter
     # @yield the handle to be notified when exporter is closed, may be <code>null</code>

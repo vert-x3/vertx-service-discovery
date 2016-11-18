@@ -15,6 +15,22 @@ module VertxServiceDiscovery
     def j_del
       @j_del
     end
+    @@j_api_type = Object.new
+    def @@j_api_type.accept?(obj)
+      obj.class == MessageSource
+    end
+    def @@j_api_type.wrap(obj)
+      MessageSource.new(obj)
+    end
+    def @@j_api_type.unwrap(obj)
+      obj.j_del
+    end
+    def self.j_api_type
+      @@j_api_type
+    end
+    def self.j_class
+      Java::IoVertxServicediscoveryTypes::MessageSource.java_class
+    end
     #  Create a record representing a data producer.
     # @param [String] name the name of the service
     # @param [String] address the address on which the data is sent
@@ -29,7 +45,7 @@ module VertxServiceDiscovery
       elsif name.class == String && address.class == String && type.class == String && metadata.class == Hash && !block_given?
         return Java::IoVertxServicediscoveryTypes::MessageSource.java_method(:createRecord, [Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(name,address,type,::Vertx::Util::Utils.to_json_object(metadata)) != nil ? JSON.parse(Java::IoVertxServicediscoveryTypes::MessageSource.java_method(:createRecord, [Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(name,address,type,::Vertx::Util::Utils.to_json_object(metadata)).toJson.encode) : nil
       end
-      raise ArgumentError, "Invalid arguments when calling create_record(name,address,type,metadata)"
+      raise ArgumentError, "Invalid arguments when calling create_record(#{name},#{address},#{type},#{metadata})"
     end
     #  Convenient method that looks for a message source and provides the configured . The
     #  async result is marked as failed is there are no matching services, or if the lookup fails.
@@ -39,9 +55,9 @@ module VertxServiceDiscovery
     # @return [void]
     def self.get_consumer(discovery=nil,filter=nil)
       if discovery.class.method_defined?(:j_del) && filter.class == Hash && block_given?
-        return Java::IoVertxServicediscoveryTypes::MessageSource.java_method(:getConsumer, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::Vertx::MessageConsumer) : nil) }))
+        return Java::IoVertxServicediscoveryTypes::MessageSource.java_method(:getConsumer, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::Vertx::MessageConsumer, nil) : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling get_consumer(discovery,filter)"
+      raise ArgumentError, "Invalid arguments when calling get_consumer(#{discovery},#{filter})"
     end
   end
 end

@@ -39,6 +39,25 @@ var HttpEndpoint = function(j_val) {
   this._jdel = j_httpEndpoint;
 };
 
+HttpEndpoint._jclass = utils.getJavaClass("io.vertx.servicediscovery.types.HttpEndpoint");
+HttpEndpoint._jtype = {
+  accept: function(obj) {
+    return HttpEndpoint._jclass.isInstance(obj._jdel);
+  },
+  wrap: function(jdel) {
+    var obj = Object.create(HttpEndpoint.prototype, {});
+    HttpEndpoint.apply(obj, arguments);
+    return obj;
+  },
+  unwrap: function(obj) {
+    return obj._jdel;
+  }
+};
+HttpEndpoint._create = function(jdel) {
+  var obj = Object.create(HttpEndpoint.prototype, {});
+  HttpEndpoint.apply(obj, arguments);
+  return obj;
+}
 /**
  Same as {@link HttpEndpoint#createRecord} but let you configure whether or not the
  service is using <code>https</code>.
@@ -79,7 +98,7 @@ HttpEndpoint.getClient = function() {
   if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'function') {
     JHttpEndpoint["getClient(io.vertx.servicediscovery.ServiceDiscovery,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](__args[0]._jdel, utils.convParamJsonObject(__args[1]), function(ar) {
     if (ar.succeeded()) {
-      __args[2](utils.convReturnVertxGen(ar.result(), HttpClient), null);
+      __args[2](utils.convReturnVertxGen(HttpClient, ar.result()), null);
     } else {
       __args[2](null, ar.cause());
     }
@@ -90,7 +109,7 @@ HttpEndpoint.getClient = function() {
     return jRet;
   }, function(ar) {
     if (ar.succeeded()) {
-      __args[2](utils.convReturnVertxGen(ar.result(), HttpClient), null);
+      __args[2](utils.convReturnVertxGen(HttpClient, ar.result()), null);
     } else {
       __args[2](null, ar.cause());
     }
@@ -98,5 +117,4 @@ HttpEndpoint.getClient = function() {
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
-// We export the Constructor function
 module.exports = HttpEndpoint;

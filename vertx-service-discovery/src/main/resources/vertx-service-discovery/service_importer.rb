@@ -18,6 +18,22 @@ module VertxServiceDiscovery
     def j_del
       @j_del
     end
+    @@j_api_type = Object.new
+    def @@j_api_type.accept?(obj)
+      obj.class == ServiceImporter
+    end
+    def @@j_api_type.wrap(obj)
+      ServiceImporter.new(obj)
+    end
+    def @@j_api_type.unwrap(obj)
+      obj.j_del
+    end
+    def self.j_api_type
+      @@j_api_type
+    end
+    def self.j_class
+      Java::IoVertxServicediscoverySpi::ServiceImporter.java_class
+    end
     #  Starts the importer.
     # @param [::Vertx::Vertx] vertx the vertx instance
     # @param [::VertxServiceDiscovery::ServicePublisher] publisher the service discovery instance
@@ -28,7 +44,7 @@ module VertxServiceDiscovery
       if vertx.class.method_defined?(:j_del) && publisher.class.method_defined?(:j_del) && configuration.class == Hash && future.class.method_defined?(:j_del) && !block_given?
         return @j_del.java_method(:start, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxServicediscoverySpi::ServicePublisher.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Future.java_class]).call(vertx.j_del,publisher.j_del,::Vertx::Util::Utils.to_json_object(configuration),future.j_del)
       end
-      raise ArgumentError, "Invalid arguments when calling start(vertx,publisher,configuration,future)"
+      raise ArgumentError, "Invalid arguments when calling start(#{vertx},#{publisher},#{configuration},#{future})"
     end
     #  Closes the importer
     # @yield the handle to be notified when importer is closed, may be <code>null</code>

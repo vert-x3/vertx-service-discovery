@@ -55,5 +55,23 @@ var HelloService = function(j_val) {
   this._jdel = j_helloService;
 };
 
-// We export the Constructor function
+HelloService._jclass = utils.getJavaClass("io.vertx.servicediscovery.service.HelloService");
+HelloService._jtype = {
+  accept: function(obj) {
+    return HelloService._jclass.isInstance(obj._jdel);
+  },
+  wrap: function(jdel) {
+    var obj = Object.create(HelloService.prototype, {});
+    HelloService.apply(obj, arguments);
+    return obj;
+  },
+  unwrap: function(obj) {
+    return obj._jdel;
+  }
+};
+HelloService._create = function(jdel) {
+  var obj = Object.create(HelloService.prototype, {});
+  HelloService.apply(obj, arguments);
+  return obj;
+}
 module.exports = HelloService;

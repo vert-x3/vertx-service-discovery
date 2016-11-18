@@ -15,6 +15,22 @@ module VertxServiceDiscovery
     def j_del
       @j_del
     end
+    @@j_api_type = Object.new
+    def @@j_api_type.accept?(obj)
+      obj.class == RedisDataSource
+    end
+    def @@j_api_type.wrap(obj)
+      RedisDataSource.new(obj)
+    end
+    def @@j_api_type.unwrap(obj)
+      obj.j_del
+    end
+    def self.j_api_type
+      @@j_api_type
+    end
+    def self.j_class
+      Java::IoVertxServicediscoveryTypes::RedisDataSource.java_class
+    end
     #  Convenient method to create a record for a Redis data source.
     # @param [String] name the service name
     # @param [Hash{String => Object}] location the location of the service (e.g. url, port...)
@@ -24,7 +40,7 @@ module VertxServiceDiscovery
       if name.class == String && location.class == Hash && metadata.class == Hash && !block_given?
         return Java::IoVertxServicediscoveryTypes::RedisDataSource.java_method(:createRecord, [Java::java.lang.String.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(name,::Vertx::Util::Utils.to_json_object(location),::Vertx::Util::Utils.to_json_object(metadata)) != nil ? JSON.parse(Java::IoVertxServicediscoveryTypes::RedisDataSource.java_method(:createRecord, [Java::java.lang.String.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(name,::Vertx::Util::Utils.to_json_object(location),::Vertx::Util::Utils.to_json_object(metadata)).toJson.encode) : nil
       end
-      raise ArgumentError, "Invalid arguments when calling create_record(name,location,metadata)"
+      raise ArgumentError, "Invalid arguments when calling create_record(#{name},#{location},#{metadata})"
     end
     #  Convenient method that looks for a Redis data source and provides the configured {::VertxRedis::RedisClient}.
     #  The async result is marked as failed is there are no matching services, or if the lookup fails.
@@ -39,7 +55,7 @@ module VertxServiceDiscovery
       elsif discovery.class.method_defined?(:j_del) && filter.class == Hash && consumerConfiguration.class == Hash && block_given?
         return Java::IoVertxServicediscoveryTypes::RedisDataSource.java_method(:getRedisClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),::Vertx::Util::Utils.to_json_object(consumerConfiguration),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxRedis::RedisClient) : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling get_redis_client(discovery,filter,consumerConfiguration)"
+      raise ArgumentError, "Invalid arguments when calling get_redis_client(#{discovery},#{filter},#{consumerConfiguration})"
     end
   end
 end

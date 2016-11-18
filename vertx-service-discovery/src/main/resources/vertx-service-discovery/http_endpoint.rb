@@ -16,6 +16,22 @@ module VertxServiceDiscovery
     def j_del
       @j_del
     end
+    @@j_api_type = Object.new
+    def @@j_api_type.accept?(obj)
+      obj.class == HttpEndpoint
+    end
+    def @@j_api_type.wrap(obj)
+      HttpEndpoint.new(obj)
+    end
+    def @@j_api_type.unwrap(obj)
+      obj.j_del
+    end
+    def self.j_api_type
+      @@j_api_type
+    end
+    def self.j_class
+      Java::IoVertxServicediscoveryTypes::HttpEndpoint.java_class
+    end
     #  Same as {::VertxServiceDiscovery::HttpEndpoint#create_record} but let you configure whether or not the
     #  service is using <code>https</code>.
     # @overload createRecord(name,host)
@@ -50,7 +66,7 @@ module VertxServiceDiscovery
       elsif param_1.class == String && (param_2.class == TrueClass || param_2.class == FalseClass) && param_3.class == String && param_4.class == Fixnum && param_5.class == String && param_6.class == Hash && !block_given?
         return Java::IoVertxServicediscoveryTypes::HttpEndpoint.java_method(:createRecord, [Java::java.lang.String.java_class,Java::boolean.java_class,Java::java.lang.String.java_class,Java::int.java_class,Java::java.lang.String.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(param_1,param_2,param_3,param_4,param_5,::Vertx::Util::Utils.to_json_object(param_6)) != nil ? JSON.parse(Java::IoVertxServicediscoveryTypes::HttpEndpoint.java_method(:createRecord, [Java::java.lang.String.java_class,Java::boolean.java_class,Java::java.lang.String.java_class,Java::int.java_class,Java::java.lang.String.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(param_1,param_2,param_3,param_4,param_5,::Vertx::Util::Utils.to_json_object(param_6)).toJson.encode) : nil
       end
-      raise ArgumentError, "Invalid arguments when calling create_record(param_1,param_2,param_3,param_4,param_5,param_6)"
+      raise ArgumentError, "Invalid arguments when calling create_record(#{param_1},#{param_2},#{param_3},#{param_4},#{param_5},#{param_6})"
     end
     #  Convenient method that looks for a HTTP endpoint and provides the configured . The async result
     #  is marked as failed is there are no matching services, or if the lookup fails.
@@ -69,7 +85,7 @@ module VertxServiceDiscovery
       elsif param_1.class.method_defined?(:j_del) && param_2.class == Proc && block_given?
         return Java::IoVertxServicediscoveryTypes::HttpEndpoint.java_method(:getClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::JavaUtilFunction::Function.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,(Proc.new { |event| param_2.call(event != nil ? JSON.parse(event.toJson.encode) : nil) }),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::Vertx::HttpClient) : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling get_client(param_1,param_2)"
+      raise ArgumentError, "Invalid arguments when calling get_client(#{param_1},#{param_2})"
     end
   end
 end
