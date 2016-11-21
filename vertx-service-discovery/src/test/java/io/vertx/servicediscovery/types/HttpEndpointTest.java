@@ -118,6 +118,33 @@ public class HttpEndpointTest {
   }
 
   @Test
+  public void testPublicationAndConsumptionWithConfiguration(TestContext context) {
+    Async async = context.async();
+
+    // Publish the service
+    Record record = HttpEndpoint.createRecord("hello-service", "localhost", 8080, "/foo");
+    discovery.publish(record, rec -> {
+      Record published = rec.result();
+
+      HttpEndpoint.getClient(discovery, new JsonObject().put("name", "hello-service"), new JsonObject().put
+        ("keepAlive", false), found -> {
+        context.assertTrue(found.succeeded());
+        context.assertTrue(found.result() != null);
+        HttpClient client = found.result();
+        client.getNow("/foo", response -> {
+          context.assertEquals(response.statusCode(), 200);
+          context.assertEquals(response.getHeader("connection"), "close");
+          response.bodyHandler(body -> {
+            context.assertEquals(body.toString(), "hello");
+            ServiceDiscovery.releaseServiceObject(discovery, client);
+            discovery.unpublish(published.getRegistration(), v -> async.complete());
+          });
+        });
+      });
+    });
+  }
+
+  @Test
   public void testRecordCreation() {
     Record record = HttpEndpoint.createRecord("some-name", "123.456.789.111", 80, null);
     assertThat(record.getLocation().getString(Record.ENDPOINT)).isEqualTo("http://123.456.789.111:80/");

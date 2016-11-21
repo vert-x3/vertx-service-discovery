@@ -69,7 +69,8 @@ module VertxServiceDiscovery
       raise ArgumentError, "Invalid arguments when calling create_record(#{param_1},#{param_2},#{param_3},#{param_4},#{param_5},#{param_6})"
     end
     #  Convenient method that looks for a HTTP endpoint and provides the configured . The async result
-    #  is marked as failed is there are no matching services, or if the lookup fails.
+    #  is marked as failed is there are no matching services, or if the lookup fails. This method accepts a
+    #  configuration for the HTTP client.
     # @overload getClient(discovery,filter,resultHandler)
     #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
     #   @param [Hash{String => Object}] filter The filter, optional
@@ -78,14 +79,28 @@ module VertxServiceDiscovery
     #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
     #   @param [Proc] filter The filter
     #   @yield The result handler
+    # @overload getClient(discovery,filter,conf,resultHandler)
+    #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
+    #   @param [Hash{String => Object}] filter The filter, optional
+    #   @param [Hash{String => Object}] conf the configuration of the client
+    #   @yield The result handler
+    # @overload getClient(discovery,filter,conf,resultHandler)
+    #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
+    #   @param [Proc] filter The filter
+    #   @param [Hash{String => Object}] conf the configuration of the client
+    #   @yield The result handler
     # @return [void]
-    def self.get_client(param_1=nil,param_2=nil)
-      if param_1.class.method_defined?(:j_del) && param_2.class == Hash && block_given?
+    def self.get_client(param_1=nil,param_2=nil,param_3=nil)
+      if param_1.class.method_defined?(:j_del) && param_2.class == Hash && block_given? && param_3 == nil
         return Java::IoVertxServicediscoveryTypes::HttpEndpoint.java_method(:getClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,::Vertx::Util::Utils.to_json_object(param_2),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::Vertx::HttpClient) : nil) }))
-      elsif param_1.class.method_defined?(:j_del) && param_2.class == Proc && block_given?
+      elsif param_1.class.method_defined?(:j_del) && param_2.class == Proc && block_given? && param_3 == nil
         return Java::IoVertxServicediscoveryTypes::HttpEndpoint.java_method(:getClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::JavaUtilFunction::Function.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,(Proc.new { |event| param_2.call(event != nil ? JSON.parse(event.toJson.encode) : nil) }),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::Vertx::HttpClient) : nil) }))
+      elsif param_1.class.method_defined?(:j_del) && param_2.class == Hash && param_3.class == Hash && block_given?
+        return Java::IoVertxServicediscoveryTypes::HttpEndpoint.java_method(:getClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,::Vertx::Util::Utils.to_json_object(param_2),::Vertx::Util::Utils.to_json_object(param_3),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::Vertx::HttpClient) : nil) }))
+      elsif param_1.class.method_defined?(:j_del) && param_2.class == Proc && param_3.class == Hash && block_given?
+        return Java::IoVertxServicediscoveryTypes::HttpEndpoint.java_method(:getClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::JavaUtilFunction::Function.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,(Proc.new { |event| param_2.call(event != nil ? JSON.parse(event.toJson.encode) : nil) }),::Vertx::Util::Utils.to_json_object(param_3),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::Vertx::HttpClient) : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling get_client(#{param_1},#{param_2})"
+      raise ArgumentError, "Invalid arguments when calling get_client(#{param_1},#{param_2},#{param_3})"
     end
   end
 end

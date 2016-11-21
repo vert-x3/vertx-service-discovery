@@ -22,8 +22,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.spi.ServiceType;
 
 import java.util.Objects;
@@ -73,9 +73,9 @@ public interface HttpEndpoint extends ServiceType {
       root = "/";
     }
     Record record = new Record().setName(name)
-        .setType(TYPE)
-        .setLocation(new HttpLocation()
-            .setSsl(ssl).setHost(host).setPort(port).setRoot(root).toJson());
+      .setType(TYPE)
+      .setLocation(new HttpLocation()
+        .setSsl(ssl).setHost(host).setPort(port).setRoot(root).toJson());
 
     if (metadata != null) {
       record.setMetadata(metadata);
@@ -118,7 +118,7 @@ public interface HttpEndpoint extends ServiceType {
    * @param resultHandler The result handler
    */
   static void getClient(ServiceDiscovery discovery, JsonObject filter, Handler<AsyncResult<HttpClient>>
-      resultHandler) {
+    resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
@@ -130,6 +130,28 @@ public interface HttpEndpoint extends ServiceType {
 
   /**
    * Convenient method that looks for a HTTP endpoint and provides the configured {@link HttpClient}. The async result
+   * is marked as failed is there are no matching services, or if the lookup fails. This method accepts a
+   * configuration for the HTTP client
+   *
+   * @param discovery     The service discovery instance
+   * @param filter        The filter, optional
+   * @param conf          the configuration of the client
+   * @param resultHandler The result handler
+   */
+  static void getClient(ServiceDiscovery discovery, JsonObject filter, JsonObject conf, Handler<AsyncResult<HttpClient>>
+    resultHandler) {
+    discovery.getRecord(filter, ar -> {
+      if (ar.failed() || ar.result() == null) {
+        resultHandler.handle(Future.failedFuture("No matching record"));
+      } else {
+        resultHandler.handle(Future.succeededFuture(discovery.getReferenceWithConfiguration(ar.result(), conf).get()));
+      }
+    });
+  }
+
+
+  /**
+   * Convenient method that looks for a HTTP endpoint and provides the configured {@link HttpClient}. The async result
    * is marked as failed is there are no matching services, or if the lookup fails.
    *
    * @param discovery     The service discovery instance
@@ -137,12 +159,34 @@ public interface HttpEndpoint extends ServiceType {
    * @param resultHandler The result handler
    */
   static void getClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, Handler<AsyncResult<HttpClient>>
-      resultHandler) {
+    resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
         resultHandler.handle(Future.succeededFuture(discovery.getReference(ar.result()).get()));
+      }
+    });
+  }
+
+  /**
+   * Convenient method that looks for a HTTP endpoint and provides the configured {@link HttpClient}. The async result
+   * is marked as failed is there are no matching services, or if the lookup fails. This method accepts a
+   * configuration for the HTTP client.
+   *
+   * @param discovery     The service discovery instance
+   * @param filter        The filter
+   * @param conf          the configuration of the client
+   * @param resultHandler The result handler
+   */
+  static void getClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject conf,
+    Handler<AsyncResult<HttpClient>>
+    resultHandler) {
+    discovery.getRecord(filter, ar -> {
+      if (ar.failed() || ar.result() == null) {
+        resultHandler.handle(Future.failedFuture("No matching record"));
+      } else {
+        resultHandler.handle(Future.succeededFuture(discovery.getReferenceWithConfiguration(ar.result(), conf).get()));
       }
     });
   }
