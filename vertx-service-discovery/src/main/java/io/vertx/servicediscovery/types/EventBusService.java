@@ -120,7 +120,7 @@ public interface EventBusService extends ServiceType {
         if (ar.result() == null) {
           resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
         } else {
-          ServiceReference service = discovery.getReference(ar.result());
+          ServiceReference<T> service = discovery.getReference(ar.result());
           resultHandler.handle(Future.succeededFuture(service.get()));
         }
       }
@@ -159,7 +159,7 @@ public interface EventBusService extends ServiceType {
         if (ar.result() == null) {
           resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
         } else {
-          ServiceReference service = discovery.getReferenceWithConfiguration(ar.result(),
+          ServiceReference<T> service = discovery.getReferenceWithConfiguration(ar.result(),
               new JsonObject().put("client.class", proxyClass));
           resultHandler.handle(Future.succeededFuture(service.get()));
         }

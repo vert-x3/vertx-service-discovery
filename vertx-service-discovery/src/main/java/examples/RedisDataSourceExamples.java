@@ -46,7 +46,7 @@ public class RedisDataSourceExamples {
       new JsonObject().put("name", "some-redis-data-source-service"), ar -> {
         if (ar.succeeded() && ar.result() != null) {
           // Retrieve the service reference
-          ServiceReference reference = discovery.getReference(ar.result());
+          ServiceReference<RedisClient> reference = discovery.getReference(ar.result());
 
           // Retrieve the service instance
           RedisClient client = reference.get();

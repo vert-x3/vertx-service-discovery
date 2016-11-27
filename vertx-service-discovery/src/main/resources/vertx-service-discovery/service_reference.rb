@@ -10,29 +10,14 @@ module VertxServiceDiscovery
   class ServiceReference
     # @private
     # @param j_del [::VertxServiceDiscovery::ServiceReference] the java delegate
-    def initialize(j_del)
+    def initialize(j_del, j_arg_T=nil)
       @j_del = j_del
+      @j_arg_T = j_arg_T != nil ? j_arg_T : ::Vertx::Util::unknown_type
     end
     # @private
     # @return [::VertxServiceDiscovery::ServiceReference] the underlying java delegate
     def j_del
       @j_del
-    end
-    @@j_api_type = Object.new
-    def @@j_api_type.accept?(obj)
-      obj.class == ServiceReference
-    end
-    def @@j_api_type.wrap(obj)
-      ServiceReference.new(obj)
-    end
-    def @@j_api_type.unwrap(obj)
-      obj.j_del
-    end
-    def self.j_api_type
-      @@j_api_type
-    end
-    def self.j_class
-      Java::IoVertxServicediscovery::ServiceReference.java_class
     end
     # @return [Hash] the service record.
     def record
@@ -49,7 +34,7 @@ module VertxServiceDiscovery
     # @return [Object] the object to access the service
     def get
       if !block_given?
-        return ::Vertx::Util::Utils.from_object(@j_del.java_method(:get, []).call())
+        return @j_arg_T.wrap(@j_del.java_method(:get, []).call())
       end
       raise ArgumentError, "Invalid arguments when calling get()"
     end
@@ -57,7 +42,7 @@ module VertxServiceDiscovery
     # @return [Object] the object, <code>null</code> if not yet retrieved
     def cached
       if !block_given?
-        return ::Vertx::Util::Utils.from_object(@j_del.java_method(:cached, []).call())
+        return @j_arg_T.wrap(@j_del.java_method(:cached, []).call())
       end
       raise ArgumentError, "Invalid arguments when calling cached()"
     end

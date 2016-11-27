@@ -30,7 +30,7 @@ import io.vertx.servicediscovery.impl.DiscoveryImpl;
  * @param <T> the type of service object
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public abstract class AbstractServiceReference<T> implements ServiceReference {
+public abstract class AbstractServiceReference<T> implements ServiceReference<T> {
 
   private final ServiceDiscovery discovery;
 
@@ -55,22 +55,20 @@ public abstract class AbstractServiceReference<T> implements ServiceReference {
   /**
    * Returns the service object. If not retrieved or released, it returns {@code null}.
    *
-   * @param <X> the type of result.
    * @return the cached service object, {@code null} if none
    */
   @Override
-  public synchronized <X> X cached() {
-    return (X) service;
+  public synchronized T cached() {
+    return service;
   }
 
   /**
    * Gets the service object. If not retrieved, call {@link #retrieve()}, otherwise returned the cached value.
    *
-   * @param <X> the type of result
    * @return the service object
    */
   @Override
-  public synchronized <X> X get() {
+  public synchronized T get() {
     if (service == null) {
       service = retrieve();
     }

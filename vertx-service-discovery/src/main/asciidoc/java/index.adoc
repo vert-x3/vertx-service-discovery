@@ -326,16 +326,18 @@ Once you have chosen the `link:../../apidocs/io/vertx/servicediscovery/Record.ht
 
 [source,java]
 ----
-ServiceReference reference = discovery.getReference(record);
+ServiceReference<HttpClient> reference1 = discovery.getReference(record1);
+ServiceReference<MessageConsumer> reference2 = discovery.getReference(record2);
 
 // Then, gets the service object, the returned type depends on the service type:
 // For http endpoint:
-HttpClient client = reference.get();
+HttpClient client = reference1.get();
 // For message source
-MessageConsumer consumer = reference.get();
+MessageConsumer consumer = reference2.get();
 
 // When done with the service
-reference.release();
+reference1.release();
+reference2.release();
 ----
 
 Don't forget to release the reference once done.
@@ -348,7 +350,7 @@ configuration, some require configuration (as data sources):
 
 [source,java]
 ----
-ServiceReference reference = discovery.getReferenceWithConfiguration(record, conf);
+ServiceReference<JDBCClient> reference = discovery.getReferenceWithConfiguration(record, conf);
 
 // Then, gets the service object, the returned type depends on the service type:
 // For http endpoint:
@@ -459,7 +461,7 @@ Once a HTTP endpoint is published, a consumer can retrieve it. The service objec
 discovery.getRecord(new JsonObject().put("name", "some-http-service"), ar -> {
   if (ar.succeeded()  && ar.result() != null) {
     // Retrieve the service reference
-    ServiceReference reference = discovery.getReference(ar.result());
+    ServiceReference<HttpClient> reference = discovery.getReference(ar.result());
     // Retrieve the service object
     HttpClient client = reference.get();
 
@@ -556,7 +558,7 @@ When using the reference, you would do something like:
 discovery.getRecord(new JsonObject().put("name", "some-eventbus-service"), ar -> {
 if (ar.succeeded() && ar.result() != null) {
 // Retrieve the service reference
-ServiceReference reference = discovery.getReference(ar.result());
+ServiceReference<MyService> reference = discovery.getReference(ar.result());
 // Retrieve the service object
 MyService service = reference.get();
 
@@ -647,7 +649,7 @@ With the first approach, the code is the following:
 discovery.getRecord(new JsonObject().put("name", "some-message-source-service"), ar -> {
   if (ar.succeeded() && ar.result() != null) {
     // Retrieve the service reference
-    ServiceReference reference = discovery.getReference(ar.result());
+    ServiceReference<MessageConsumer<JsonObject>> reference = discovery.getReference(ar.result());
     // Retrieve the service object
     MessageConsumer<JsonObject> consumer = reference.get();
 
@@ -729,7 +731,7 @@ discovery.getRecord(
     ar -> {
       if (ar.succeeded() && ar.result() != null) {
         // Retrieve the service reference
-        ServiceReference reference = discovery.getReferenceWithConfiguration(
+        ServiceReference<JDBCClient> reference = discovery.getReferenceWithConfiguration(
             ar.result(), // The record
             new JsonObject().put("username", "clement").put("password", "*****")); // Some additional metadata
 
@@ -804,7 +806,7 @@ discovery.getRecord(
   new JsonObject().put("name", "some-redis-data-source-service"), ar -> {
     if (ar.succeeded() && ar.result() != null) {
       // Retrieve the service reference
-      ServiceReference reference = discovery.getReference(ar.result());
+      ServiceReference<RedisClient> reference = discovery.getReference(ar.result());
 
       // Retrieve the service instance
       RedisClient client = reference.get();

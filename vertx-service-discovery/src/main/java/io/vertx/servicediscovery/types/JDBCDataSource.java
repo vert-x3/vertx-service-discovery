@@ -66,7 +66,7 @@ public interface JDBCDataSource extends DataSource {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.getReference(ar.result()).get()));
+        resultHandler.handle(Future.succeededFuture(discovery.<JDBCClient>getReference(ar.result()).get()));
       }
     });
   }
@@ -87,7 +87,7 @@ public interface JDBCDataSource extends DataSource {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
         resultHandler.handle(Future.succeededFuture(
-            discovery.getReferenceWithConfiguration(ar.result(), consumerConfiguration).get()));
+            discovery.<JDBCClient>getReferenceWithConfiguration(ar.result(), consumerConfiguration).get()));
       }
     });
   }

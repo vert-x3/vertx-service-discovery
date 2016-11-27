@@ -80,7 +80,7 @@ module VertxServiceDiscovery
     # @return [::VertxServiceDiscovery::ServiceReference] the service reference, that allows retrieving the service object. Once called the service reference is cached, and need to be released.
     def get_reference(record=nil)
       if record.class == Hash && !block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:getReference, [Java::IoVertxServicediscovery::Record.java_class]).call(Java::IoVertxServicediscovery::Record.new(::Vertx::Util::Utils.to_json_object(record))),::VertxServiceDiscovery::ServiceReference)
+        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:getReference, [Java::IoVertxServicediscovery::Record.java_class]).call(Java::IoVertxServicediscovery::Record.new(::Vertx::Util::Utils.to_json_object(record))),::VertxServiceDiscovery::ServiceReference, nil)
       end
       raise ArgumentError, "Invalid arguments when calling get_reference(#{record})"
     end
@@ -90,7 +90,7 @@ module VertxServiceDiscovery
     # @return [::VertxServiceDiscovery::ServiceReference] the service reference, that allows retrieving the service object. Once called the service reference is cached, and need to be released.
     def get_reference_with_configuration(record=nil,configuration=nil)
       if record.class == Hash && configuration.class == Hash && !block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:getReferenceWithConfiguration, [Java::IoVertxServicediscovery::Record.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(Java::IoVertxServicediscovery::Record.new(::Vertx::Util::Utils.to_json_object(record)),::Vertx::Util::Utils.to_json_object(configuration)),::VertxServiceDiscovery::ServiceReference)
+        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:getReferenceWithConfiguration, [Java::IoVertxServicediscovery::Record.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(Java::IoVertxServicediscovery::Record.new(::Vertx::Util::Utils.to_json_object(record)),::Vertx::Util::Utils.to_json_object(configuration)),::VertxServiceDiscovery::ServiceReference, nil)
       end
       raise ArgumentError, "Invalid arguments when calling get_reference_with_configuration(#{record},#{configuration})"
     end

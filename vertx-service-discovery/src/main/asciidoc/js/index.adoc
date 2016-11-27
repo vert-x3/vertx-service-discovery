@@ -353,16 +353,18 @@ Once you have chosen the `link:../dataobjects.html#Record[Record]`, you can retr
 
 [source,js]
 ----
-var reference = discovery.getReference(record);
+var reference1 = discovery.getReference(record1);
+var reference2 = discovery.getReference(record2);
 
 // Then, gets the service object, the returned type depends on the service type:
 // For http endpoint:
-var client = reference.get();
+var client = reference1.get();
 // For message source
-var consumer = reference.get();
+var consumer = reference2.get();
 
 // When done with the service
-reference.release();
+reference1.release();
+reference2.release();
 
 ----
 

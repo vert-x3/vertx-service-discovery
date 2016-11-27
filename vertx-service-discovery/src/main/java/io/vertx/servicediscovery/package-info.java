@@ -231,7 +231,7 @@
  *
  * [source,$lang]
  * ----
- * {@link examples.Examples#example5(ServiceDiscovery, Record)}
+ * {@link examples.Examples#example5(ServiceDiscovery, Record, Record)}
  * ----
  *
  * Don't forget to release the reference once done.

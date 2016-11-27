@@ -30,7 +30,7 @@ import io.vertx.codegen.annotations.VertxGen;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @VertxGen
-public interface ServiceReference {
+public interface ServiceReference<T> {
 
   /**
    * @return the service record.
@@ -42,18 +42,16 @@ public interface ServiceReference {
    * Gets the object to access the service. It can be a proxy, a client or whatever object. The type depends on the
    * service type and the server itself.
    *
-   * @param <T> the type
    * @return the object to access the service
    */
-  <T> T get();
+   T get();
 
   /**
    * Gets the service object if already retrieved. It won't try to acquire the service object if not retrieved yet.
    *
-   * @param <T> the type
    * @return the object, {@code null} if not yet retrieved
    */
-  <T> T cached();
+   T cached();
 
   /**
    * Releases the reference. Once released, the consumer must not use the reference anymore.

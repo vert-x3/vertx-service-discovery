@@ -123,7 +123,7 @@ public interface HttpEndpoint extends ServiceType {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.getReference(ar.result()).get()));
+        resultHandler.handle(Future.succeededFuture(discovery.<HttpClient>getReference(ar.result()).get()));
       }
     });
   }
@@ -144,7 +144,8 @@ public interface HttpEndpoint extends ServiceType {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.getReferenceWithConfiguration(ar.result(), conf).get()));
+        resultHandler.handle(Future.succeededFuture(discovery.<HttpClient>getReferenceWithConfiguration(ar.result(), conf).get
+          ()));
       }
     });
   }
@@ -164,7 +165,7 @@ public interface HttpEndpoint extends ServiceType {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.getReference(ar.result()).get()));
+        resultHandler.handle(Future.succeededFuture(discovery.<HttpClient>getReference(ar.result()).get()));
       }
     });
   }
@@ -186,7 +187,8 @@ public interface HttpEndpoint extends ServiceType {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.getReferenceWithConfiguration(ar.result(), conf).get()));
+        resultHandler.handle(Future.succeededFuture(
+          discovery.<HttpClient>getReferenceWithConfiguration(ar.result(), conf).get()));
       }
     });
   }

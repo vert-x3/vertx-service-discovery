@@ -78,7 +78,7 @@ public interface RedisDataSource extends DataSource {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.getReference(ar.result()).get()));
+        resultHandler.handle(Future.succeededFuture(discovery.<RedisClient>getReference(ar.result()).get()));
       }
     });
   }
@@ -99,7 +99,7 @@ public interface RedisDataSource extends DataSource {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
         resultHandler.handle(Future.succeededFuture(
-          discovery.getReferenceWithConfiguration(ar.result(), consumerConfiguration).get()));
+          discovery.<RedisClient>getReferenceWithConfiguration(ar.result(), consumerConfiguration).get()));
       }
     });
   }

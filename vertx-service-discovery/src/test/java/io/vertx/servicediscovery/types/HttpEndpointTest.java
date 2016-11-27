@@ -94,7 +94,7 @@ public class HttpEndpointTest {
         context.assertTrue(found.succeeded());
         context.assertTrue(found.result() != null);
         Record match = found.result();
-        ServiceReference reference = discovery.getReference( match);
+        ServiceReference<HttpClient> reference = discovery.getReference( match);
         context.assertEquals(reference.record().getLocation().getString("endpoint"), "http://localhost:8080/foo");
         context.assertFalse(reference.record().getLocation().getBoolean("ssl"));
         HttpClient client = reference.get();
@@ -160,7 +160,7 @@ public class HttpEndpointTest {
     assertThat(record.getLocation().getString(Record.ENDPOINT)).isEqualTo("http://acme.org:80/");
 
     record = HttpEndpoint.createRecord("http-bin", true, "httpbin.org", 443, "/get", null);
-    ServiceReference reference = discovery.getReference( record);
+    ServiceReference<HttpClient> reference = discovery.getReference( record);
 
     HttpClient client = reference.get();
     AtomicReference<JsonObject> resp = new AtomicReference<>();
