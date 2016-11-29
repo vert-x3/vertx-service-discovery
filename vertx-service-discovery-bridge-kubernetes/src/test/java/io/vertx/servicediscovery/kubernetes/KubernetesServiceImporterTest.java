@@ -25,7 +25,9 @@ import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.spi.ServicePublisher;
 import io.vertx.servicediscovery.spi.ServiceType;
+import io.vertx.servicediscovery.types.DataSource;
 import io.vertx.servicediscovery.types.HttpEndpoint;
+import io.vertx.servicediscovery.types.RedisDataSource;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -53,7 +55,7 @@ public class KubernetesServiceImporterTest {
     ServiceSpec spec = new ServiceSpec();
     ServicePort port = new ServicePort();
     port.setTargetPort(new IntOrString(8080));
-    port.setPort(8080);
+    port.setPort(1524);
     spec.setPorts(Collections.singletonList(port));
 
     Service service = mock(Service.class);
@@ -67,7 +69,7 @@ public class KubernetesServiceImporterTest {
     assertThat(record.getMetadata().getString("kubernetes.namespace")).isEqualTo("my-project");
     assertThat(record.getMetadata().getString("kubernetes.uuid")).isEqualTo("uuid");
     assertThat(record.getType()).isEqualTo(ServiceType.UNKNOWN);
-    assertThat(record.getLocation().getInteger("port")).isEqualTo(8080);
+    assertThat(record.getLocation().getInteger("port")).isEqualTo(1524);
   }
 
   @Test
@@ -164,6 +166,54 @@ public class KubernetesServiceImporterTest {
     assertThat(record.get().getStatus()).isEqualTo(io.vertx.servicediscovery.Status.DOWN);
 
     bridge.close(v -> {});
+
+  }
+
+  @Test
+  public void testServiceTypeDetection() {
+    Map<String, String> labels = new LinkedHashMap<>();
+
+    ObjectMeta metadata = new ObjectMeta();
+    metadata.setName("my-service");
+    metadata.setUid("uuid");
+    metadata.setNamespace("my-project");
+    metadata.setLabels(labels);
+
+    ServiceSpec spec = new ServiceSpec();
+    ServicePort port = new ServicePort();
+    port.setTargetPort(new IntOrString(8080));
+    port.setPort(8080);
+    spec.setPorts(Collections.singletonList(port));
+
+    Service service = mock(Service.class);
+    when(service.getMetadata()).thenReturn(metadata);
+    when(service.getSpec()).thenReturn(spec);
+
+    assertThat(KubernetesServiceImporter.discoveryType(service)).isEqualTo(HttpEndpoint.TYPE);
+
+    port.setPort(443);
+    assertThat(KubernetesServiceImporter.discoveryType(service)).isEqualTo(HttpEndpoint.TYPE);
+
+    port.setPort(433);
+    assertThat(KubernetesServiceImporter.discoveryType(service)).isEqualTo(ServiceType.UNKNOWN);
+
+    port.setPort(8888);
+    assertThat(KubernetesServiceImporter.discoveryType(service)).isEqualTo(HttpEndpoint.TYPE);
+
+    port.setPort(8080);
+    assertThat(KubernetesServiceImporter.discoveryType(service)).isEqualTo(HttpEndpoint.TYPE);
+
+    port.setPort(9000);
+    assertThat(KubernetesServiceImporter.discoveryType(service)).isEqualTo(HttpEndpoint.TYPE);
+
+    port.setPort(80);
+    assertThat(KubernetesServiceImporter.discoveryType(service)).isEqualTo(HttpEndpoint.TYPE);
+
+    port.setPort(6379);
+    assertThat(KubernetesServiceImporter.discoveryType(service)).isEqualTo(RedisDataSource.TYPE);
+
+    port.setPort(3306);
+    assertThat(KubernetesServiceImporter.discoveryType(service)).isEqualTo(DataSource.TYPE);
 
   }
 
