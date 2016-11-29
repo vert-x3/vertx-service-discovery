@@ -30,8 +30,10 @@ import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServicePublisher;
 import io.vertx.servicediscovery.spi.ServiceType;
+import io.vertx.servicediscovery.types.DataSource;
 import io.vertx.servicediscovery.types.HttpEndpoint;
 import io.vertx.servicediscovery.types.HttpLocation;
+import io.vertx.servicediscovery.types.RedisDataSource;
 
 import java.util.List;
 import java.util.Map;
@@ -188,21 +190,62 @@ public class KubernetesServiceImporter implements Watcher<Service>, ServiceImpor
     record.getMetadata().put("kubernetes.name", service.getMetadata().getName());
     record.getMetadata().put("kubernetes.uuid", service.getMetadata().getUid());
 
-    String type = labels != null ? labels.get("service-type") : ServiceType.UNKNOWN;
+    String type = null;
+
+    if (labels != null) {
+      type = labels.get("service-type");
+    }
+    // If not set, try to discovery it
     if (type == null) {
-      type = ServiceType.UNKNOWN;
+      type = discoveryType(service);
     }
 
     switch (type) {
-      case "http-endpoint":
+      case HttpEndpoint.TYPE:
         manageHttpService(record, service, labels);
         break;
+      // TODO Add JDBC client and redis
       default:
         manageUnknownService(record, service, type);
         break;
     }
 
     return record;
+  }
+
+  static String discoveryType(Service service) {
+    List<ServicePort> ports = service.getSpec().getPorts();
+    if (ports == null  || ports.isEmpty()) {
+      return ServiceType.UNKNOWN;
+    }
+    if (ports.size() > 1) {
+      LOGGER.warn("More than one ports has been found for " + service.getMetadata().getName() + " - taking the " +
+        "first one to build the record location");
+    }
+
+    ServicePort port = ports.get(0);
+
+    // Http
+    if (port.getPort() == 80 || port.getPort() == 443 || port.getPort() >= 8080  && port.getPort() <= 9000) {
+      return HttpEndpoint.TYPE;
+    }
+
+    // Postgres
+    if (port.getPort() == 5432  || port.getPort() == 5433) {
+      return DataSource.TYPE;
+    }
+
+    // MySQL
+    if (port.getPort() == 3306 || port.getPort() == 13306) {
+      return DataSource.TYPE;
+    }
+
+    // Redis
+    if (port.getPort() == 6379) {
+      return RedisDataSource.TYPE;
+    }
+
+    return ServiceType.UNKNOWN;
   }
 
   private static void manageUnknownService(Record record, Service service, String type) {
