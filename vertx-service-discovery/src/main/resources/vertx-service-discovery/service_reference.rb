@@ -46,6 +46,13 @@ module VertxServiceDiscovery
       end
       raise ArgumentError, "Invalid arguments when calling cached()"
     end
+    # @return [Object]
+    def foo
+      if !block_given?
+        return @j_arg_T.wrap(@j_del.java_method(:foo, []).call())
+      end
+      raise ArgumentError, "Invalid arguments when calling foo()"
+    end
     #  Releases the reference. Once released, the consumer must not use the reference anymore.
     #  This method must be idempotent and defensive, as multiple call may happen.
     # @return [void]

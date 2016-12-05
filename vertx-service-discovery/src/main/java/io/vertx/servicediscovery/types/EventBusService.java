@@ -21,13 +21,16 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceReference;
+import io.vertx.servicediscovery.impl.ServiceTypes;
 import io.vertx.servicediscovery.spi.ServiceType;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * {@link ServiceType} for event bus services (service proxies).
@@ -36,12 +39,16 @@ import java.util.Objects;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @VertxGen
-public interface EventBusService extends ServiceType {
+public interface EventBusService extends ServiceType<MessageConsumer> {
 
   /**
    * Name of the type.
    */
   String TYPE = "eventbus-service-proxy";
+
+  static  <T> EventBusServiceType<T> serviceType() {
+    return (EventBusServiceType) ServiceTypes.get(TYPE);
+  }
 
   /**
    * Sugar method to creates a record for this type.
@@ -83,10 +90,10 @@ public interface EventBusService extends ServiceType {
     }
 
     return new Record()
-        .setType(TYPE)
-        .setName(name)
-        .setMetadata(meta.put("service.interface", itf))
-        .setLocation(new JsonObject().put(Record.ENDPOINT, address));
+      .setType(TYPE)
+      .setName(name)
+      .setMetadata(meta.put("service.interface", itf))
+      .setLocation(new JsonObject().put(Record.ENDPOINT, address));
   }
 
   /**
@@ -112,7 +119,32 @@ public interface EventBusService extends ServiceType {
    * @param <T>           the service interface
    */
   static <T> void getProxy(ServiceDiscovery discovery, JsonObject filter, Handler<AsyncResult<T>>
-      resultHandler) {
+    resultHandler) {
+    discovery.getRecord(filter, ar -> {
+      if (ar.failed()) {
+        resultHandler.handle(Future.failedFuture(ar.cause()));
+      } else {
+        if (ar.result() == null) {
+          resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
+        } else {
+          ServiceReference<T> service = discovery.getReference(ar.result());
+          resultHandler.handle(Future.succeededFuture(service.get()));
+        }
+      }
+    });
+  }
+
+  /**
+   * Lookup for a service record and if found, retrieve it and return the service object (used to consume the service).
+   * This is a convenient method to avoid explicit lookup and then retrieval of the service.
+   *
+   * @param discovery     the service discovery instance
+   * @param filter        the filter to select the service, must not be {@code null}
+   * @param resultHandler the result handler
+   * @param <T>           the service interface
+   */
+  static <T> void getProxy(ServiceDiscovery discovery, Function<Record, Boolean> filter, Handler<AsyncResult<T>>
+    resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed()) {
         resultHandler.handle(Future.failedFuture(ar.cause()));
@@ -139,7 +171,7 @@ public interface EventBusService extends ServiceType {
    */
   @GenIgnore
   static <T> void getProxy(ServiceDiscovery discovery, Class<T> itf, Handler<AsyncResult<T>>
-      resultHandler) {
+    resultHandler) {
     JsonObject filter = new JsonObject().put("service.interface", itf.getName());
     getProxy(discovery, filter, resultHandler);
   }
@@ -151,7 +183,7 @@ public interface EventBusService extends ServiceType {
   }
 
   static <T> void getProxy(ServiceDiscovery discovery, JsonObject filter, String
-      proxyClass, Handler<AsyncResult<T>> resultHandler) {
+    proxyClass, Handler<AsyncResult<T>> resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed()) {
         resultHandler.handle(Future.failedFuture(ar.cause()));
@@ -160,7 +192,7 @@ public interface EventBusService extends ServiceType {
           resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
         } else {
           ServiceReference<T> service = discovery.getReferenceWithConfiguration(ar.result(),
-              new JsonObject().put("client.class", proxyClass));
+            new JsonObject().put("client.class", proxyClass));
           resultHandler.handle(Future.succeededFuture(service.get()));
         }
       }
@@ -178,7 +210,7 @@ public interface EventBusService extends ServiceType {
    * @param <T>           the service interface
    */
   static <T> void getProxy(ServiceDiscovery discovery, String itf, Handler<AsyncResult<T>>
-      resultHandler) {
+    resultHandler) {
     JsonObject filter = new JsonObject().put("service.interface", itf);
     getProxy(discovery, filter, resultHandler);
   }

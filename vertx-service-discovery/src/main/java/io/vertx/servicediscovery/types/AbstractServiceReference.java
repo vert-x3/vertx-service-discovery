@@ -21,6 +21,7 @@ import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.impl.DiscoveryImpl;
+import io.vertx.servicediscovery.spi.ServiceType;
 
 /**
  * A class to simplify the implementation of service reference.
@@ -34,9 +35,9 @@ public abstract class AbstractServiceReference<T> implements ServiceReference<T>
 
   private final ServiceDiscovery discovery;
 
-  protected T service;
-
   private final Record record;
+
+  protected T service;
 
   protected final Vertx vertx;
 

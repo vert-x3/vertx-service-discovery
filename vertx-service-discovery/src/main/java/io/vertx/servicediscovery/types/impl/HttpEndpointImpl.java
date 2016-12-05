@@ -26,9 +26,12 @@ import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.AbstractServiceReference;
 import io.vertx.servicediscovery.types.HttpEndpoint;
+import io.vertx.servicediscovery.types.HttpEndpointType;
 import io.vertx.servicediscovery.types.HttpLocation;
 
 import java.util.Objects;
+
+import static io.vertx.servicediscovery.types.HttpEndpoint.TYPE;
 
 /**
  * Implementation of {@link ServiceType} for HTTP endpoint (REST api).
@@ -36,7 +39,7 @@ import java.util.Objects;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class HttpEndpointImpl implements HttpEndpoint {
+public class HttpEndpointImpl implements HttpEndpointType, HttpEndpoint {
 
   @Override
   public String name() {
@@ -44,11 +47,21 @@ public class HttpEndpointImpl implements HttpEndpoint {
   }
 
   @Override
-  public ServiceReference get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration) {
+  public ServiceReference<HttpClient> get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration) {
     Objects.requireNonNull(vertx);
     Objects.requireNonNull(record);
     Objects.requireNonNull(discovery);
     return new HttpEndpointReference(vertx, discovery, record, configuration);
+  }
+
+  @Override
+  public HttpClient getService(ServiceReference<HttpClient> ref) {
+    return ref.get();
+  }
+
+  @Override
+  public HttpClient cachedService(ServiceReference<HttpClient> ref) {
+    return ref.cached();
   }
 
   /**
@@ -63,6 +76,10 @@ public class HttpEndpointImpl implements HttpEndpoint {
       super(vertx, discovery, record);
       this.config = config;
       this.location = new HttpLocation(record.getLocation());
+    }
+
+    public HttpClient foo() {
+      return getService(this);
     }
 
 

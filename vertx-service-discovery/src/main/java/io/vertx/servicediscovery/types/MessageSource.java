@@ -25,9 +25,11 @@ import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.impl.ServiceTypes;
 import io.vertx.servicediscovery.spi.ServiceType;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * Service type for data producer. Providers are publishing data to a specific event bus address.
@@ -35,9 +37,14 @@ import java.util.Objects;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @VertxGen
-public interface MessageSource extends ServiceType {
+public interface MessageSource extends MessageSourceType {
 
   String TYPE = "message-source";
+
+  static MessageSourceType serviceType() {
+    return (MessageSourceType) ServiceTypes.get(TYPE);
+  }
+
 
   /**
    * Create a record representing a data producer.
@@ -129,6 +136,27 @@ public interface MessageSource extends ServiceType {
   static <T> void getConsumer(ServiceDiscovery discovery, JsonObject filter,
                               Handler<AsyncResult<MessageConsumer<T>>>
                                   resultHandler) {
+    discovery.getRecord(filter, ar -> {
+      if (ar.failed() || ar.result() == null) {
+        resultHandler.handle(Future.failedFuture("No matching record"));
+      } else {
+        resultHandler.handle(Future.succeededFuture(discovery.<MessageConsumer<T>>getReference(ar.result()).get()));
+      }
+    });
+  }
+
+  /**
+   * Convenient method that looks for a message source and provides the configured {@link MessageConsumer}. The
+   * async result is marked as failed is there are no matching services, or if the lookup fails.
+   *
+   * @param discovery     The service discovery instance
+   * @param filter        The filter, must not be {@code null}
+   * @param resultHandler The result handler
+   * @param <T>           The class of the message
+   */
+  static <T> void getConsumer(ServiceDiscovery discovery, Function<Record, Boolean> filter,
+                              Handler<AsyncResult<MessageConsumer<T>>>
+                                resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));

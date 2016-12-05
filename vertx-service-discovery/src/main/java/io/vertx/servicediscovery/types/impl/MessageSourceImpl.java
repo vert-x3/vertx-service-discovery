@@ -19,11 +19,11 @@ package io.vertx.servicediscovery.types.impl;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.types.AbstractServiceReference;
-import io.vertx.servicediscovery.types.MessageSource;
+import io.vertx.servicediscovery.types.MessageSourceType;
 
 import java.util.Objects;
 
@@ -32,7 +32,7 @@ import java.util.Objects;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class MessageSourceImpl implements MessageSource {
+public class MessageSourceImpl implements MessageSourceType {
 
   public static final String TYPE = "message-source";
 
@@ -42,11 +42,23 @@ public class MessageSourceImpl implements MessageSource {
   }
 
   @Override
-  public ServiceReference get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration) {
+  public ServiceReference<MessageConsumer>
+    get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration) {
+
     Objects.requireNonNull(vertx);
     Objects.requireNonNull(record);
     Objects.requireNonNull(discovery);
     return new MessageSourceReference(vertx, discovery, record);
+  }
+
+  @Override
+  public MessageConsumer getService(ServiceReference<MessageConsumer> ref) {
+    return ref.get();
+  }
+
+  @Override
+  public MessageConsumer cachedService(ServiceReference<MessageConsumer> ref) {
+    return ref.cached();
   }
 
   /**

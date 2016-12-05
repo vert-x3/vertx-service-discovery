@@ -16,7 +16,9 @@
 
 /** @module vertx-service-discovery-js/event_bus_service */
 var utils = require('vertx-js/util/utils');
+var EventBusServiceType = require('vertx-service-discovery-js/event_bus_service_type');
 var ServiceDiscovery = require('vertx-service-discovery-js/service_discovery');
+var MessageConsumer = require('vertx-js/message_consumer');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
@@ -58,6 +60,19 @@ EventBusService._create = function(jdel) {
   return obj;
 }
 /**
+
+ @memberof module:vertx-service-discovery-js/event_bus_service
+
+ @return {EventBusServiceType}
+ */
+EventBusService.serviceType = function() {
+  var __args = arguments;
+  if (__args.length === 0) {
+    return utils.convReturnVertxGen(EventBusServiceType, JEventBusService["serviceType()"]());
+  } else throw new TypeError('function invoked with invalid arguments');
+};
+
+/**
  Sugar method to creates a record for this type.
  <p>
  The java interface is added to the metadata in the `service.interface` key.
@@ -88,6 +103,17 @@ EventBusService.getProxy = function() {
   var __args = arguments;
   if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'function') {
     JEventBusService["getProxy(io.vertx.servicediscovery.ServiceDiscovery,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](__args[0]._jdel, utils.convParamJsonObject(__args[1]), function(ar) {
+    if (ar.succeeded()) {
+      __args[2](utils.convReturnTypeUnknown(ar.result()), null);
+    } else {
+      __args[2](null, ar.cause());
+    }
+  });
+  }else if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'function' && typeof __args[2] === 'function') {
+    JEventBusService["getProxy(io.vertx.servicediscovery.ServiceDiscovery,java.util.function.Function,io.vertx.core.Handler)"](__args[0]._jdel, function(jVal) {
+    var jRet = __args[1](utils.convReturnDataObject(jVal));
+    return jRet;
+  }, function(ar) {
     if (ar.succeeded()) {
       __args[2](utils.convReturnTypeUnknown(ar.result()), null);
     } else {

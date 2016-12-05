@@ -24,16 +24,19 @@ import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.types.AbstractServiceReference;
 import io.vertx.servicediscovery.types.EventBusService;
+import io.vertx.servicediscovery.types.EventBusServiceType;
 import io.vertx.servicediscovery.utils.ClassLoaderUtils;
 import io.vertx.serviceproxy.ProxyHelper;
 
 import java.lang.reflect.Constructor;
 import java.util.Objects;
 
+import static io.vertx.servicediscovery.types.EventBusService.TYPE;
+
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class EventBusServiceImpl implements EventBusService {
+public class EventBusServiceImpl<T> implements EventBusServiceType<T> {
 
   @Override
   public String name() {
@@ -41,17 +44,27 @@ public class EventBusServiceImpl implements EventBusService {
   }
 
   @Override
-  public ServiceReference get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration) {
+  public ServiceReference<T> get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration) {
     Objects.requireNonNull(vertx);
     Objects.requireNonNull(record);
     Objects.requireNonNull(discovery);
     return new EventBusServiceReference(vertx, discovery, record, configuration);
   }
 
+  @Override
+  public T getService(ServiceReference<T> ref) {
+    return ref.get();
+  }
+
+  @Override
+  public T cachedService(ServiceReference<T> ref) {
+    return ref.cached();
+  }
+
   /**
    * Implementation of {@link ServiceReference} for event bus service proxies.
    */
-  private class EventBusServiceReference extends AbstractServiceReference<Object> {
+  private class EventBusServiceReference extends AbstractServiceReference<T> {
 
     private final DeliveryOptions deliveryOptions;
     private final String clientClass;
@@ -77,20 +90,20 @@ public class EventBusServiceImpl implements EventBusService {
      * @return the proxy
      */
     @Override
-    public synchronized Object retrieve() {
-      Class itf = ClassLoaderUtils.load(serviceInterface, this.getClass().getClassLoader());
+    public synchronized T retrieve() {
+      Class<T> itf = ClassLoaderUtils.load(serviceInterface, this.getClass().getClassLoader());
       if (itf == null) {
         throw new IllegalStateException("Cannot load class " + clientClass);
       } else {
         // 1) Create the java proxy
-        Object proxy = ProxyHelper.createProxy(itf, vertx, record().getLocation().getString(Record.ENDPOINT),
+        T proxy = ProxyHelper.createProxy(itf, vertx, record().getLocation().getString(Record.ENDPOINT),
             deliveryOptions);
 
         // 2) if we have a client class, create an instance with the proxy
         if (clientClass != null) {
           try {
-            Class client = ClassLoaderUtils.load(clientClass, this.getClass().getClassLoader());
-            Constructor constructor = client.getConstructor(Object.class);
+            Class<T> client = ClassLoaderUtils.load(clientClass, this.getClass().getClassLoader());
+            Constructor<T> constructor = client.getConstructor(Object.class);
             return constructor.newInstance(proxy);
           } catch (Exception e) {
             throw new RuntimeException(e);

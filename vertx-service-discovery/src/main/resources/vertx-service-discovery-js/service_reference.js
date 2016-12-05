@@ -78,6 +78,19 @@ var ServiceReference = function(j_val, j_arg_0) {
   };
 
   /**
+
+   @public
+
+   @return {Object}
+   */
+  this.foo = function() {
+    var __args = arguments;
+    if (__args.length === 0) {
+      return j_T.wrap(j_serviceReference["foo()"]());
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
    Releases the reference. Once released, the consumer must not use the reference anymore.
    This method must be idempotent and defensive, as multiple call may happen.
 

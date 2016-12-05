@@ -24,7 +24,9 @@ import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
+import io.vertx.servicediscovery.impl.ServiceTypes;
 import io.vertx.servicediscovery.spi.ServiceType;
+import io.vertx.servicediscovery.types.impl.HttpEndpointImpl;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -36,9 +38,13 @@ import java.util.function.Function;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @VertxGen
-public interface HttpEndpoint extends ServiceType {
+public interface HttpEndpoint {
 
   String TYPE = "http-endpoint";
+
+  static HttpEndpointType serviceType() {
+    return (HttpEndpointType) ServiceTypes.get(TYPE);
+  }
 
   /**
    * Convenient method to create a record for a HTTP endpoint.
@@ -181,8 +187,8 @@ public interface HttpEndpoint extends ServiceType {
    * @param resultHandler The result handler
    */
   static void getClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject conf,
-    Handler<AsyncResult<HttpClient>>
-    resultHandler) {
+                        Handler<AsyncResult<HttpClient>>
+                          resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));

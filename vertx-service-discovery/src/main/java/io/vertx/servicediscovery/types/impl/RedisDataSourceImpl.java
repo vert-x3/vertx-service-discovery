@@ -25,6 +25,7 @@ import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.types.AbstractServiceReference;
 import io.vertx.servicediscovery.types.RedisDataSource;
+import io.vertx.servicediscovery.types.RedisDataSourceType;
 
 import java.util.Objects;
 
@@ -33,7 +34,7 @@ import java.util.Objects;
  *
  * @author <a href="http://www.sczyh30.com">Eric Zhao</a>
  */
-public class RedisDataSourceImpl implements RedisDataSource {
+public class RedisDataSourceImpl implements RedisDataSourceType {
 
   @Override
   public String name() {
@@ -41,11 +42,21 @@ public class RedisDataSourceImpl implements RedisDataSource {
   }
 
   @Override
-  public ServiceReference get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration) {
+  public ServiceReference<RedisClient> get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration) {
     Objects.requireNonNull(vertx);
     Objects.requireNonNull(record);
     Objects.requireNonNull(discovery);
     return new RedisServiceReference(vertx, discovery, record, configuration);
+  }
+
+  @Override
+  public RedisClient getService(ServiceReference<RedisClient> ref) {
+    return ref.get();
+  }
+
+  @Override
+  public RedisClient cachedService(ServiceReference<RedisClient> ref) {
+    return ref.cached();
   }
 
   /**

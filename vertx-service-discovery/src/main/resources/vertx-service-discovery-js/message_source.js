@@ -16,6 +16,8 @@
 
 /** @module vertx-service-discovery-js/message_source */
 var utils = require('vertx-js/util/utils');
+var ServiceReference = require('vertx-service-discovery-js/service_reference');
+var MessageSourceType = require('vertx-service-discovery-js/message_source_type');
 var ServiceDiscovery = require('vertx-service-discovery-js/service_discovery');
 var MessageConsumer = require('vertx-js/message_consumer');
 
@@ -33,6 +35,33 @@ var MessageSource = function(j_val) {
 
   var j_messageSource = j_val;
   var that = this;
+  MessageSourceType.call(this, j_val);
+
+  /**
+
+   @public
+   @param ref {ServiceReference} 
+   @return {MessageConsumer}
+   */
+  this.getService = function(ref) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
+      return utils.convReturnVertxGen(MessageConsumer, j_messageSource["getService(io.vertx.servicediscovery.ServiceReference)"](ref._jdel));
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+
+   @public
+   @param ref {ServiceReference} 
+   @return {MessageConsumer}
+   */
+  this.cachedService = function(ref) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
+      return utils.convReturnVertxGen(MessageConsumer, j_messageSource["cachedService(io.vertx.servicediscovery.ServiceReference)"](ref._jdel));
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
 
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
@@ -60,6 +89,19 @@ MessageSource._create = function(jdel) {
   return obj;
 }
 /**
+
+ @memberof module:vertx-service-discovery-js/message_source
+
+ @return {MessageSourceType}
+ */
+MessageSource.serviceType = function() {
+  var __args = arguments;
+  if (__args.length === 0) {
+    return utils.convReturnVertxGen(MessageSourceType, JMessageSource["serviceType()"]());
+  } else throw new TypeError('function invoked with invalid arguments');
+};
+
+/**
  Create a record representing a data producer.
 
  @memberof module:vertx-service-discovery-js/message_source
@@ -86,17 +128,28 @@ MessageSource.createRecord = function() {
 
  @memberof module:vertx-service-discovery-js/message_source
  @param discovery {ServiceDiscovery} The service discovery instance 
- @param filter {Object} The filter, optional 
+ @param filter {todo} The filter, must not be <code>null</code> 
  @param resultHandler {function} The result handler 
  */
-MessageSource.getConsumer = function(discovery, filter, resultHandler) {
+MessageSource.getConsumer = function() {
   var __args = arguments;
   if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'function') {
-    JMessageSource["getConsumer(io.vertx.servicediscovery.ServiceDiscovery,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](discovery._jdel, utils.convParamJsonObject(filter), function(ar) {
+    JMessageSource["getConsumer(io.vertx.servicediscovery.ServiceDiscovery,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](__args[0]._jdel, utils.convParamJsonObject(__args[1]), function(ar) {
     if (ar.succeeded()) {
-      resultHandler(utils.convReturnVertxGen(MessageConsumer, ar.result(), undefined), null);
+      __args[2](utils.convReturnVertxGen(MessageConsumer, ar.result(), undefined), null);
     } else {
-      resultHandler(null, ar.cause());
+      __args[2](null, ar.cause());
+    }
+  });
+  }else if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'function' && typeof __args[2] === 'function') {
+    JMessageSource["getConsumer(io.vertx.servicediscovery.ServiceDiscovery,java.util.function.Function,io.vertx.core.Handler)"](__args[0]._jdel, function(jVal) {
+    var jRet = __args[1](utils.convReturnDataObject(jVal));
+    return jRet;
+  }, function(ar) {
+    if (ar.succeeded()) {
+      __args[2](utils.convReturnVertxGen(MessageConsumer, ar.result(), undefined), null);
+    } else {
+      __args[2](null, ar.cause());
     }
   });
   } else throw new TypeError('function invoked with invalid arguments');

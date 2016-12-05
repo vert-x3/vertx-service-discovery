@@ -1,4 +1,6 @@
+require 'vertx-service-discovery/event_bus_service_type'
 require 'vertx-service-discovery/service_discovery'
+require 'vertx/message_consumer'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.servicediscovery.types.EventBusService
 module VertxServiceDiscovery
@@ -31,6 +33,13 @@ module VertxServiceDiscovery
     def self.j_class
       Java::IoVertxServicediscoveryTypes::EventBusService.java_class
     end
+    # @return [::VertxServiceDiscovery::EventBusServiceType]
+    def self.service_type
+      if !block_given?
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxServicediscoveryTypes::EventBusService.java_method(:serviceType, []).call(),::VertxServiceDiscovery::EventBusServiceType)
+      end
+      raise ArgumentError, "Invalid arguments when calling service_type()"
+    end
     #  Sugar method to creates a record for this type.
     #  <p>
     #  The java interface is added to the metadata in the `service.interface` key.
@@ -48,6 +57,10 @@ module VertxServiceDiscovery
     # @overload getProxy(discovery,filter,resultHandler)
     #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery the service discovery instance
     #   @param [Hash{String => Object}] filter the filter to select the service
+    #   @yield the result handler
+    # @overload getProxy(discovery,filter,resultHandler)
+    #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery the service discovery instance
+    #   @param [Proc] filter the filter to select the service, must not be <code>null</code>
     #   @yield the result handler
     # @overload getProxy(discovery,itf,resultHandler)
     #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery the service discovery instance
@@ -67,6 +80,8 @@ module VertxServiceDiscovery
     def self.get_proxy(param_1=nil,param_2=nil,param_3=nil)
       if param_1.class.method_defined?(:j_del) && param_2.class == Hash && block_given? && param_3 == nil
         return Java::IoVertxServicediscoveryTypes::EventBusService.java_method(:getProxy, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,::Vertx::Util::Utils.to_json_object(param_2),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.from_object(ar.result) : nil) }))
+      elsif param_1.class.method_defined?(:j_del) && param_2.class == Proc && block_given? && param_3 == nil
+        return Java::IoVertxServicediscoveryTypes::EventBusService.java_method(:getProxy, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::JavaUtilFunction::Function.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,(Proc.new { |event| param_2.call(event != nil ? JSON.parse(event.toJson.encode) : nil) }),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.from_object(ar.result) : nil) }))
       elsif param_1.class.method_defined?(:j_del) && param_2.class == String && block_given? && param_3 == nil
         return Java::IoVertxServicediscoveryTypes::EventBusService.java_method(:getProxy, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,param_2,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.from_object(ar.result) : nil) }))
       elsif param_1.class.method_defined?(:j_del) && param_2.class == String && param_3.class == String && block_given?

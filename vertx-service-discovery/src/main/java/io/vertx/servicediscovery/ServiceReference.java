@@ -53,6 +53,11 @@ public interface ServiceReference<T> {
    */
    T cached();
 
+
+   default T foo() {
+     return null;
+   }
+
   /**
    * Releases the reference. Once released, the consumer must not use the reference anymore.
    * This method must be idempotent and defensive, as multiple call may happen.

@@ -18,8 +18,8 @@ package io.vertx.servicediscovery.spi;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceReference;
 
 /**
@@ -35,7 +35,7 @@ import io.vertx.servicediscovery.ServiceReference;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public interface ServiceType {
+public interface ServiceType<T> {
 
   /**
    * Unknown type.
@@ -57,6 +57,23 @@ public interface ServiceType {
    * @param configuration some optional configuration, maybe be {@code null} or empty
    * @return the retrieved {@link ServiceReference}
    */
-  ServiceReference get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration);
+  ServiceReference<T> get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration);
+
+
+  /**
+   * Unwrap the service reference to its implementation and return it.
+   *
+   * @param ref the service reference
+   * @return the service implementation
+   */
+  T getService(ServiceReference<T> ref);
+
+  /**
+   * Unwrap the cached reference to its implementation and return it.
+   *
+   * @param ref the service reference
+   * @return the cached implementation
+   */
+  T cachedService(ServiceReference<T> ref);
 
 }

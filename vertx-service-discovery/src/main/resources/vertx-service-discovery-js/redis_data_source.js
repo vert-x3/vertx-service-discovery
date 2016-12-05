@@ -16,8 +16,10 @@
 
 /** @module vertx-service-discovery-js/redis_data_source */
 var utils = require('vertx-js/util/utils');
+var ServiceReference = require('vertx-service-discovery-js/service_reference');
 var RedisClient = require('vertx-redis-js/redis_client');
 var ServiceDiscovery = require('vertx-service-discovery-js/service_discovery');
+var RedisDataSourceType = require('vertx-service-discovery-js/redis_data_source_type');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
@@ -33,6 +35,33 @@ var RedisDataSource = function(j_val) {
 
   var j_redisDataSource = j_val;
   var that = this;
+  RedisDataSourceType.call(this, j_val);
+
+  /**
+
+   @public
+   @param ref {ServiceReference} 
+   @return {RedisClient}
+   */
+  this.getService = function(ref) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
+      return utils.convReturnVertxGen(RedisClient, j_redisDataSource["getService(io.vertx.servicediscovery.ServiceReference)"](ref._jdel));
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+
+   @public
+   @param ref {ServiceReference} 
+   @return {RedisClient}
+   */
+  this.cachedService = function(ref) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
+      return utils.convReturnVertxGen(RedisClient, j_redisDataSource["cachedService(io.vertx.servicediscovery.ServiceReference)"](ref._jdel));
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
 
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
@@ -60,6 +89,19 @@ RedisDataSource._create = function(jdel) {
   return obj;
 }
 /**
+
+ @memberof module:vertx-service-discovery-js/redis_data_source
+
+ @return {RedisDataSourceType}
+ */
+RedisDataSource.serviceType = function() {
+  var __args = arguments;
+  if (__args.length === 0) {
+    return utils.convReturnVertxGen(RedisDataSourceType, JRedisDataSource["serviceType()"]());
+  } else throw new TypeError('function invoked with invalid arguments');
+};
+
+/**
  Convenient method to create a record for a Redis data source.
 
  @memberof module:vertx-service-discovery-js/redis_data_source
@@ -81,7 +123,7 @@ RedisDataSource.createRecord = function(name, location, metadata) {
 
  @memberof module:vertx-service-discovery-js/redis_data_source
  @param discovery {ServiceDiscovery} The service discovery instance 
- @param filter {Object} The filter, optional 
+ @param filter {todo} The filter, cannot be <code>null</code> 
  @param consumerConfiguration {Object} The additional consumer configuration 
  @param resultHandler {function} The result handler 
  */
@@ -95,8 +137,30 @@ RedisDataSource.getRedisClient = function() {
       __args[2](null, ar.cause());
     }
   });
+  }else if (__args.length === 3 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'function' && typeof __args[2] === 'function') {
+    JRedisDataSource["getRedisClient(io.vertx.servicediscovery.ServiceDiscovery,java.util.function.Function,io.vertx.core.Handler)"](__args[0]._jdel, function(jVal) {
+    var jRet = __args[1](utils.convReturnDataObject(jVal));
+    return jRet;
+  }, function(ar) {
+    if (ar.succeeded()) {
+      __args[2](utils.convReturnVertxGen(RedisClient, ar.result()), null);
+    } else {
+      __args[2](null, ar.cause());
+    }
+  });
   }else if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null) && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
     JRedisDataSource["getRedisClient(io.vertx.servicediscovery.ServiceDiscovery,io.vertx.core.json.JsonObject,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](__args[0]._jdel, utils.convParamJsonObject(__args[1]), utils.convParamJsonObject(__args[2]), function(ar) {
+    if (ar.succeeded()) {
+      __args[3](utils.convReturnVertxGen(RedisClient, ar.result()), null);
+    } else {
+      __args[3](null, ar.cause());
+    }
+  });
+  }else if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'function' && (typeof __args[2] === 'object' && __args[2] != null) && typeof __args[3] === 'function') {
+    JRedisDataSource["getRedisClient(io.vertx.servicediscovery.ServiceDiscovery,java.util.function.Function,io.vertx.core.json.JsonObject,io.vertx.core.Handler)"](__args[0]._jdel, function(jVal) {
+    var jRet = __args[1](utils.convReturnDataObject(jVal));
+    return jRet;
+  }, utils.convParamJsonObject(__args[2]), function(ar) {
     if (ar.succeeded()) {
       __args[3](utils.convReturnVertxGen(RedisClient, ar.result()), null);
     } else {
