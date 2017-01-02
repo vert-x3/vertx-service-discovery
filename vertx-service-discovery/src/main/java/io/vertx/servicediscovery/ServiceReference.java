@@ -46,6 +46,8 @@ public interface ServiceReference<T> {
    */
    T get();
 
+//   T getServiceObject(Class<T> x);
+
   /**
    * Gets the service object if already retrieved. It won't try to acquire the service object if not retrieved yet.
    *

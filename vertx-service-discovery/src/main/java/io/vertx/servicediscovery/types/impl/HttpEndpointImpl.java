@@ -55,6 +55,11 @@ public class HttpEndpointImpl implements HttpEndpointType, HttpEndpoint {
   }
 
   @Override
+  public <X> X getObject(ServiceReference ref, Class<X> clazz) {
+    return (X) getService(ref);
+  }
+
+  @Override
   public HttpClient getService(ServiceReference<HttpClient> ref) {
     return ref.get();
   }
@@ -76,10 +81,6 @@ public class HttpEndpointImpl implements HttpEndpointType, HttpEndpoint {
       super(vertx, discovery, record);
       this.config = config;
       this.location = new HttpLocation(record.getLocation());
-    }
-
-    public HttpClient foo() {
-      return getService(this);
     }
 
 

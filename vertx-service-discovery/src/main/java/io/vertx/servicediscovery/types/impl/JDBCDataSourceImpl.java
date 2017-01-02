@@ -48,6 +48,11 @@ public class JDBCDataSourceImpl implements JDBCDataSourceType {
   }
 
   @Override
+  public <X> X getObject(ServiceReference ref, Class<X> clazz) {
+    return (X) getService(ref);
+  }
+
+  @Override
   public JDBCClient getService(ServiceReference<JDBCClient> ref) {
     return ref.get();
   }

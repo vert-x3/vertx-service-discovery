@@ -50,6 +50,11 @@ public class RedisDataSourceImpl implements RedisDataSourceType {
   }
 
   @Override
+  public <X> X getObject(ServiceReference ref, Class<X> clazz) {
+    return (X) getService(ref);
+  }
+
+  @Override
   public RedisClient getService(ServiceReference<RedisClient> ref) {
     return ref.get();
   }

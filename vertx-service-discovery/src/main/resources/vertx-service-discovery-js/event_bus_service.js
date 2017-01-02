@@ -68,7 +68,7 @@ EventBusService._create = function(jdel) {
 EventBusService.serviceType = function() {
   var __args = arguments;
   if (__args.length === 0) {
-    return utils.convReturnVertxGen(EventBusServiceType, JEventBusService["serviceType()"]());
+    return utils.convReturnVertxGen(EventBusServiceType, JEventBusService["serviceType()"](), undefined);
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
@@ -84,10 +84,12 @@ EventBusService.serviceType = function() {
  @param metadata {Object} the metadata 
  @return {Object} the created record
  */
-EventBusService.createRecord = function(name, address, itf, metadata) {
+EventBusService.createRecord = function() {
   var __args = arguments;
-  if (__args.length === 4 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && typeof __args[2] === 'string' && (typeof __args[3] === 'object' && __args[3] != null)) {
-    return utils.convReturnDataObject(JEventBusService["createRecord(java.lang.String,java.lang.String,java.lang.String,io.vertx.core.json.JsonObject)"](name, address, itf, utils.convParamJsonObject(metadata)));
+  if (__args.length === 3 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && typeof __args[2] === 'string') {
+    return utils.convReturnDataObject(JEventBusService["createRecord(java.lang.String,java.lang.String,java.lang.String)"](__args[0], __args[1], __args[2]));
+  }else if (__args.length === 4 && typeof __args[0] === 'string' && typeof __args[1] === 'string' && typeof __args[2] === 'string' && (typeof __args[3] === 'object' && __args[3] != null)) {
+    return utils.convReturnDataObject(JEventBusService["createRecord(java.lang.String,java.lang.String,java.lang.String,io.vertx.core.json.JsonObject)"](__args[0], __args[1], __args[2], utils.convParamJsonObject(__args[3])));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 

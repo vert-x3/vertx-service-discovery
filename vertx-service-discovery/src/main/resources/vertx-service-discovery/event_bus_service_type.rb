@@ -24,6 +24,15 @@ module VertxServiceDiscovery
       raise ArgumentError, "Invalid arguments when calling get_service(#{ref})"
     end
     # @param [::VertxServiceDiscovery::ServiceReference] ref 
+    # @param [Nil] clazz 
+    # @return [Object]
+    def get_object(ref=nil,clazz=nil)
+      if ref.class.method_defined?(:j_del) && clazz.class == Class && !block_given?
+        return ::Vertx::Util::Utils.v_type_of(clazz).wrap(@j_del.java_method(:getObject, [Java::IoVertxServicediscovery::ServiceReference.java_class,Java::JavaLang::Class.java_class]).call(ref.j_del,::Vertx::Util::Utils.j_class_of(clazz)))
+      end
+      raise ArgumentError, "Invalid arguments when calling get_object(#{ref},#{clazz})"
+    end
+    # @param [::VertxServiceDiscovery::ServiceReference] ref 
     # @return [Object]
     def cached_service(ref=nil)
       if ref.class.method_defined?(:j_del) && !block_given?

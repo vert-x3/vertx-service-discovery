@@ -36,7 +36,7 @@ module VertxServiceDiscovery
     # @return [::VertxServiceDiscovery::EventBusServiceType]
     def self.service_type
       if !block_given?
-        return ::Vertx::Util::Utils.safe_create(Java::IoVertxServicediscoveryTypes::EventBusService.java_method(:serviceType, []).call(),::VertxServiceDiscovery::EventBusServiceType)
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxServicediscoveryTypes::EventBusService.java_method(:serviceType, []).call(),::VertxServiceDiscovery::EventBusServiceType, nil)
       end
       raise ArgumentError, "Invalid arguments when calling service_type()"
     end
@@ -49,7 +49,9 @@ module VertxServiceDiscovery
     # @param [Hash{String => Object}] metadata the metadata
     # @return [Hash] the created record
     def self.create_record(name=nil,address=nil,itf=nil,metadata=nil)
-      if name.class == String && address.class == String && itf.class == String && metadata.class == Hash && !block_given?
+      if name.class == String && address.class == String && itf.class == String && !block_given? && metadata == nil
+        return Java::IoVertxServicediscoveryTypes::EventBusService.java_method(:createRecord, [Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::java.lang.String.java_class]).call(name,address,itf) != nil ? JSON.parse(Java::IoVertxServicediscoveryTypes::EventBusService.java_method(:createRecord, [Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::java.lang.String.java_class]).call(name,address,itf).toJson.encode) : nil
+      elsif name.class == String && address.class == String && itf.class == String && metadata.class == Hash && !block_given?
         return Java::IoVertxServicediscoveryTypes::EventBusService.java_method(:createRecord, [Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(name,address,itf,::Vertx::Util::Utils.to_json_object(metadata)) != nil ? JSON.parse(Java::IoVertxServicediscoveryTypes::EventBusService.java_method(:createRecord, [Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(name,address,itf,::Vertx::Util::Utils.to_json_object(metadata)).toJson.encode) : nil
       end
       raise ArgumentError, "Invalid arguments when calling create_record(#{name},#{address},#{itf},#{metadata})"

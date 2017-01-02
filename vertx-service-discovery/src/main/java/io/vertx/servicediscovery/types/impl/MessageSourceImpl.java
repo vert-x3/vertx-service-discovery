@@ -52,6 +52,11 @@ public class MessageSourceImpl implements MessageSourceType {
   }
 
   @Override
+  public <X> X getObject(ServiceReference ref, Class<X> clazz) {
+    return (X) getService(ref);
+  }
+
+  @Override
   public MessageConsumer getService(ServiceReference<MessageConsumer> ref) {
     return ref.get();
   }

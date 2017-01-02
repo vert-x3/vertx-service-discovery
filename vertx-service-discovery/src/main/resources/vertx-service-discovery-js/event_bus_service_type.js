@@ -50,6 +50,20 @@ var EventBusServiceType = function(j_val, j_arg_0) {
 
    @public
    @param ref {ServiceReference} 
+   @param clazz {todo} 
+   @return {Object}
+   */
+  this.getObject = function(ref, clazz) {
+    var __args = arguments;
+    if (__args.length === 2 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'function') {
+      return utils.get_jtype(clazz).wrap(j_eventBusServiceType["getObject(io.vertx.servicediscovery.ServiceReference,java.lang.Class)"](ref._jdel, utils.get_jclass(clazz)));
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+
+   @public
+   @param ref {ServiceReference} 
    @return {Object}
    */
   this.cachedService = function(ref) {

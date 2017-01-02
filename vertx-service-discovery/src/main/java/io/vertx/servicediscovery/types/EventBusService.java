@@ -46,7 +46,7 @@ public interface EventBusService extends ServiceType<MessageConsumer> {
    */
   String TYPE = "eventbus-service-proxy";
 
-  static  <T> EventBusServiceType<T> serviceType() {
+  static <T> EventBusServiceType<T> serviceType() {
     return (EventBusServiceType) ServiceTypes.get(TYPE);
   }
 
@@ -213,5 +213,10 @@ public interface EventBusService extends ServiceType<MessageConsumer> {
     resultHandler) {
     JsonObject filter = new JsonObject().put("service.interface", itf);
     getProxy(discovery, filter, resultHandler);
+  }
+
+
+  static Record createRecord(String name, String address, String classname) {
+    return createRecord(name, address, classname, null);
   }
 }

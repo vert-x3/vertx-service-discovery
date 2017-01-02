@@ -30,9 +30,9 @@ import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServicePublisher;
 import io.vertx.servicediscovery.spi.ServiceType;
-import io.vertx.servicediscovery.types.DataSource;
 import io.vertx.servicediscovery.types.HttpEndpoint;
 import io.vertx.servicediscovery.types.HttpLocation;
+import io.vertx.servicediscovery.types.JDBCDataSource;
 import io.vertx.servicediscovery.types.RedisDataSource;
 
 import java.util.List;
@@ -232,12 +232,12 @@ public class KubernetesServiceImporter implements Watcher<Service>, ServiceImpor
 
     // Postgres
     if (port.getPort() == 5432  || port.getPort() == 5433) {
-      return DataSource.TYPE;
+      return JDBCDataSource.TYPE;
     }
 
     // MySQL
     if (port.getPort() == 3306 || port.getPort() == 13306) {
-      return DataSource.TYPE;
+      return JDBCDataSource.TYPE;
     }
 
     // Redis

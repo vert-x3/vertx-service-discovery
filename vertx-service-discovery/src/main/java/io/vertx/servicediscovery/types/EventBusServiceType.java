@@ -33,5 +33,8 @@ public interface EventBusServiceType<T> extends ServiceType<T> {
   T getService(ServiceReference<T> ref);
 
   @Override
+  <X> X getObject(ServiceReference ref, Class<X> clazz);
+
+  @Override
   T cachedService(ServiceReference<T> ref);
 }

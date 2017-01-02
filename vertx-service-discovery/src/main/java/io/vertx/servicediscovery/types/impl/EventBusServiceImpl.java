@@ -57,6 +57,11 @@ public class EventBusServiceImpl<T> implements EventBusServiceType<T> {
   }
 
   @Override
+  public <X> X getObject(ServiceReference ref, Class<X> clazz) {
+    return (X) getService(ref);
+  }
+
+  @Override
   public T cachedService(ServiceReference<T> ref) {
     return ref.cached();
   }

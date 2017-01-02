@@ -68,6 +68,8 @@ public interface ServiceType<T> {
    */
   T getService(ServiceReference<T> ref);
 
+  <X> X getObject(ServiceReference ref, Class<X> clazz);
+
   /**
    * Unwrap the cached reference to its implementation and return it.
    *
