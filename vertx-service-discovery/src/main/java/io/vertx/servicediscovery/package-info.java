@@ -447,7 +447,7 @@
  * require 'org-acme/MyService'
  * VertxServiceDiscovery::EventBusService.get_service_proxy_with_json_filter(discovery, {
  * 'service.interface' => "org.acme.MyService"
- * }, MyService) { |ar_err,ar|
+ * }, Acme::MyService) { |ar_err,ar|
  *    if (ar_err == nil)
  *      service = ar
  *
