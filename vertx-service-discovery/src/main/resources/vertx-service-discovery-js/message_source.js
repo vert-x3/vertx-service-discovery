@@ -16,8 +16,6 @@
 
 /** @module vertx-service-discovery-js/message_source */
 var utils = require('vertx-js/util/utils');
-var ServiceReference = require('vertx-service-discovery-js/service_reference');
-var MessageSourceType = require('vertx-service-discovery-js/message_source_type');
 var ServiceDiscovery = require('vertx-service-discovery-js/service_discovery');
 var MessageConsumer = require('vertx-js/message_consumer');
 
@@ -31,37 +29,11 @@ var Record = io.vertx.servicediscovery.Record;
 
  @class
 */
-var MessageSource = function(j_val) {
+var MessageSource = function(j_val, j_arg_0) {
 
   var j_messageSource = j_val;
   var that = this;
-  MessageSourceType.call(this, j_val);
-
-  /**
-
-   @public
-   @param ref {ServiceReference} 
-   @return {MessageConsumer}
-   */
-  this.getService = function(ref) {
-    var __args = arguments;
-    if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
-      return utils.convReturnVertxGen(MessageConsumer, j_messageSource["getService(io.vertx.servicediscovery.ServiceReference)"](ref._jdel));
-    } else throw new TypeError('function invoked with invalid arguments');
-  };
-
-  /**
-
-   @public
-   @param ref {ServiceReference} 
-   @return {MessageConsumer}
-   */
-  this.cachedService = function(ref) {
-    var __args = arguments;
-    if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
-      return utils.convReturnVertxGen(MessageConsumer, j_messageSource["cachedService(io.vertx.servicediscovery.ServiceReference)"](ref._jdel));
-    } else throw new TypeError('function invoked with invalid arguments');
-  };
+  var j_X = typeof j_arg_0 !== 'undefined' ? j_arg_0 : utils.unknown_jtype;
 
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
@@ -88,19 +60,6 @@ MessageSource._create = function(jdel) {
   MessageSource.apply(obj, arguments);
   return obj;
 }
-/**
-
- @memberof module:vertx-service-discovery-js/message_source
-
- @return {MessageSourceType}
- */
-MessageSource.serviceType = function() {
-  var __args = arguments;
-  if (__args.length === 0) {
-    return utils.convReturnVertxGen(MessageSourceType, JMessageSource["serviceType()"]());
-  } else throw new TypeError('function invoked with invalid arguments');
-};
-
 /**
  Create a record representing a data producer.
 

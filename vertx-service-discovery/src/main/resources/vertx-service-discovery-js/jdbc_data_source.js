@@ -16,9 +16,7 @@
 
 /** @module vertx-service-discovery-js/jdbc_data_source */
 var utils = require('vertx-js/util/utils');
-var JDBCDataSourceType = require('vertx-service-discovery-js/jdbc_data_source_type');
 var JDBCClient = require('vertx-jdbc-js/jdbc_client');
-var ServiceReference = require('vertx-service-discovery-js/service_reference');
 var ServiceDiscovery = require('vertx-service-discovery-js/service_discovery');
 
 var io = Packages.io;
@@ -34,33 +32,6 @@ var JDBCDataSource = function(j_val) {
 
   var j_jDBCDataSource = j_val;
   var that = this;
-  JDBCDataSourceType.call(this, j_val);
-
-  /**
-
-   @public
-   @param ref {ServiceReference} 
-   @return {JDBCClient}
-   */
-  this.getService = function(ref) {
-    var __args = arguments;
-    if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
-      return utils.convReturnVertxGen(JDBCClient, j_jDBCDataSource["getService(io.vertx.servicediscovery.ServiceReference)"](ref._jdel));
-    } else throw new TypeError('function invoked with invalid arguments');
-  };
-
-  /**
-
-   @public
-   @param ref {ServiceReference} 
-   @return {JDBCClient}
-   */
-  this.cachedService = function(ref) {
-    var __args = arguments;
-    if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
-      return utils.convReturnVertxGen(JDBCClient, j_jDBCDataSource["cachedService(io.vertx.servicediscovery.ServiceReference)"](ref._jdel));
-    } else throw new TypeError('function invoked with invalid arguments');
-  };
 
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
@@ -87,19 +58,6 @@ JDBCDataSource._create = function(jdel) {
   JDBCDataSource.apply(obj, arguments);
   return obj;
 }
-/**
-
- @memberof module:vertx-service-discovery-js/jdbc_data_source
-
- @return {JDBCDataSourceType}
- */
-JDBCDataSource.serviceType = function() {
-  var __args = arguments;
-  if (__args.length === 0) {
-    return utils.convReturnVertxGen(JDBCDataSourceType, JJDBCDataSource["serviceType()"]());
-  } else throw new TypeError('function invoked with invalid arguments');
-};
-
 /**
 
  @memberof module:vertx-service-discovery-js/jdbc_data_source

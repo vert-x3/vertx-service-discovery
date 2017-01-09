@@ -16,10 +16,8 @@
 
 /** @module vertx-service-discovery-js/redis_data_source */
 var utils = require('vertx-js/util/utils');
-var ServiceReference = require('vertx-service-discovery-js/service_reference');
 var RedisClient = require('vertx-redis-js/redis_client');
 var ServiceDiscovery = require('vertx-service-discovery-js/service_discovery');
-var RedisDataSourceType = require('vertx-service-discovery-js/redis_data_source_type');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
@@ -35,33 +33,6 @@ var RedisDataSource = function(j_val) {
 
   var j_redisDataSource = j_val;
   var that = this;
-  RedisDataSourceType.call(this, j_val);
-
-  /**
-
-   @public
-   @param ref {ServiceReference} 
-   @return {RedisClient}
-   */
-  this.getService = function(ref) {
-    var __args = arguments;
-    if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
-      return utils.convReturnVertxGen(RedisClient, j_redisDataSource["getService(io.vertx.servicediscovery.ServiceReference)"](ref._jdel));
-    } else throw new TypeError('function invoked with invalid arguments');
-  };
-
-  /**
-
-   @public
-   @param ref {ServiceReference} 
-   @return {RedisClient}
-   */
-  this.cachedService = function(ref) {
-    var __args = arguments;
-    if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
-      return utils.convReturnVertxGen(RedisClient, j_redisDataSource["cachedService(io.vertx.servicediscovery.ServiceReference)"](ref._jdel));
-    } else throw new TypeError('function invoked with invalid arguments');
-  };
 
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
@@ -88,19 +59,6 @@ RedisDataSource._create = function(jdel) {
   RedisDataSource.apply(obj, arguments);
   return obj;
 }
-/**
-
- @memberof module:vertx-service-discovery-js/redis_data_source
-
- @return {RedisDataSourceType}
- */
-RedisDataSource.serviceType = function() {
-  var __args = arguments;
-  if (__args.length === 0) {
-    return utils.convReturnVertxGen(RedisDataSourceType, JRedisDataSource["serviceType()"]());
-  } else throw new TypeError('function invoked with invalid arguments');
-};
-
 /**
  Convenient method to create a record for a Redis data source.
 

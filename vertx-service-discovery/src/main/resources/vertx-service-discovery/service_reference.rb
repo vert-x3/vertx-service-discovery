@@ -29,14 +29,21 @@ module VertxServiceDiscovery
       end
       raise ArgumentError, "Invalid arguments when calling record()"
     end
-    #  Gets the object to access the service. It can be a proxy, a client or whatever object. The type depends on the
-    #  service type and the server itself.
-    # @return [Object] the object to access the service
-    def get
-      if !block_given?
-        return @j_arg_T.wrap(@j_del.java_method(:get, []).call())
+    # @param [Nil] x 
+    # @return [Object]
+    def get_service(x=nil)
+      if x.class == Class && !block_given?
+        return ::Vertx::Util::Utils.v_type_of(x).wrap(@j_del.java_method(:getService, [Java::JavaLang::Class.java_class]).call(::Vertx::Util::Utils.j_class_of(x)))
       end
-      raise ArgumentError, "Invalid arguments when calling get()"
+      raise ArgumentError, "Invalid arguments when calling get_service(#{x})"
+    end
+    # @param [Nil] x 
+    # @return [Object]
+    def get_cached_service(x=nil)
+      if x.class == Class && !block_given?
+        return ::Vertx::Util::Utils.v_type_of(x).wrap(@j_del.java_method(:getCachedService, [Java::JavaLang::Class.java_class]).call(::Vertx::Util::Utils.j_class_of(x)))
+      end
+      raise ArgumentError, "Invalid arguments when calling get_cached_service(#{x})"
     end
     #  Gets the service object if already retrieved. It won't try to acquire the service object if not retrieved yet.
     # @return [Object] the object, <code>null</code> if not yet retrieved
@@ -46,13 +53,6 @@ module VertxServiceDiscovery
       end
       raise ArgumentError, "Invalid arguments when calling cached()"
     end
-    # @return [Object]
-    def foo
-      if !block_given?
-        return @j_arg_T.wrap(@j_del.java_method(:foo, []).call())
-      end
-      raise ArgumentError, "Invalid arguments when calling foo()"
-    end
     #  Releases the reference. Once released, the consumer must not use the reference anymore.
     #  This method must be idempotent and defensive, as multiple call may happen.
     # @return [void]
@@ -61,6 +61,15 @@ module VertxServiceDiscovery
         return @j_del.java_method(:release, []).call()
       end
       raise ArgumentError, "Invalid arguments when calling release()"
+    end
+    #  Checks whether or not the service reference has the given service object.
+    # @param [Object] object the service object, must not be <code>null</code>
+    # @return [true,false] <code>true</code> if the service reference service object is equal to the given object, <code>false</code> otherwise.
+    def has_service_object?(object=nil)
+      if ::Vertx::Util::unknown_type.accept?(object) && !block_given?
+        return @j_del.java_method(:hasServiceObject, [Java::java.lang.Object.java_class]).call(::Vertx::Util::Utils.to_object(object))
+      end
+      raise ArgumentError, "Invalid arguments when calling has_service_object?(#{object})"
     end
   end
 end

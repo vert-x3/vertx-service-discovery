@@ -16,7 +16,6 @@
 
 /** @module vertx-service-discovery-js/http_endpoint */
 var utils = require('vertx-js/util/utils');
-var HttpEndpointType = require('vertx-service-discovery-js/http_endpoint_type');
 var ServiceDiscovery = require('vertx-service-discovery-js/service_discovery');
 var HttpClient = require('vertx-js/http_client');
 
@@ -59,19 +58,6 @@ HttpEndpoint._create = function(jdel) {
   HttpEndpoint.apply(obj, arguments);
   return obj;
 }
-/**
-
- @memberof module:vertx-service-discovery-js/http_endpoint
-
- @return {HttpEndpointType}
- */
-HttpEndpoint.serviceType = function() {
-  var __args = arguments;
-  if (__args.length === 0) {
-    return utils.convReturnVertxGen(HttpEndpointType, JHttpEndpoint["serviceType()"]());
-  } else throw new TypeError('function invoked with invalid arguments');
-};
-
 /**
  Same as {@link HttpEndpoint#createRecord} but let you configure whether or not the
  service is using <code>https</code>.

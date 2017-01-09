@@ -49,17 +49,28 @@ var ServiceReference = function(j_val, j_arg_0) {
   };
 
   /**
-   Gets the object to access the service. It can be a proxy, a client or whatever object. The type depends on the
-   service type and the server itself.
 
    @public
-
-   @return {Object} the object to access the service
+   @param x {todo} 
+   @return {Object}
    */
-  this.get = function() {
+  this.getService = function(x) {
     var __args = arguments;
-    if (__args.length === 0) {
-      return j_T.wrap(j_serviceReference["get()"]());
+    if (__args.length === 1 && typeof __args[0] === 'function') {
+      return utils.get_jtype(x).wrap(j_serviceReference["getService(java.lang.Class)"](utils.get_jclass(x)));
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+
+   @public
+   @param x {todo} 
+   @return {Object}
+   */
+  this.getCachedService = function(x) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'function') {
+      return utils.get_jtype(x).wrap(j_serviceReference["getCachedService(java.lang.Class)"](utils.get_jclass(x)));
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -78,19 +89,6 @@ var ServiceReference = function(j_val, j_arg_0) {
   };
 
   /**
-
-   @public
-
-   @return {Object}
-   */
-  this.foo = function() {
-    var __args = arguments;
-    if (__args.length === 0) {
-      return j_T.wrap(j_serviceReference["foo()"]());
-    } else throw new TypeError('function invoked with invalid arguments');
-  };
-
-  /**
    Releases the reference. Once released, the consumer must not use the reference anymore.
    This method must be idempotent and defensive, as multiple call may happen.
 
@@ -101,6 +99,20 @@ var ServiceReference = function(j_val, j_arg_0) {
     var __args = arguments;
     if (__args.length === 0) {
       j_serviceReference["release()"]();
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+   Checks whether or not the service reference has the given service object.
+
+   @public
+   @param object {Object} the service object, must not be <code>null</code> 
+   @return {boolean} <code>true</code> if the service reference service object is equal to the given object, <code>false</code> otherwise.
+   */
+  this.hasServiceObject = function(object) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] !== 'function') {
+      return j_serviceReference["hasServiceObject(java.lang.Object)"](utils.convParamTypeUnknown(object));
     } else throw new TypeError('function invoked with invalid arguments');
   };
 

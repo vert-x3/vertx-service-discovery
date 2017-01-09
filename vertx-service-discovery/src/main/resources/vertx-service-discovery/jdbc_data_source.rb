@@ -1,15 +1,12 @@
-require 'vertx-service-discovery/jdbc_data_source_type'
 require 'vertx-jdbc/jdbc_client'
-require 'vertx-service-discovery/service_reference'
 require 'vertx-service-discovery/service_discovery'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.servicediscovery.types.JDBCDataSource
 module VertxServiceDiscovery
-  class JDBCDataSource < ::VertxServiceDiscovery::JDBCDataSourceType
+  class JDBCDataSource
     # @private
     # @param j_del [::VertxServiceDiscovery::JDBCDataSource] the java delegate
     def initialize(j_del)
-      super(j_del)
       @j_del = j_del
     end
     # @private
@@ -32,29 +29,6 @@ module VertxServiceDiscovery
     end
     def self.j_class
       Java::IoVertxServicediscoveryTypes::JDBCDataSource.java_class
-    end
-    # @param [::VertxServiceDiscovery::ServiceReference] ref 
-    # @return [::VertxJdbc::JDBCClient]
-    def get_service(ref=nil)
-      if ref.class.method_defined?(:j_del) && !block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:getService, [Java::IoVertxServicediscovery::ServiceReference.java_class]).call(ref.j_del),::VertxJdbc::JDBCClient)
-      end
-      raise ArgumentError, "Invalid arguments when calling get_service(#{ref})"
-    end
-    # @param [::VertxServiceDiscovery::ServiceReference] ref 
-    # @return [::VertxJdbc::JDBCClient]
-    def cached_service(ref=nil)
-      if ref.class.method_defined?(:j_del) && !block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:cachedService, [Java::IoVertxServicediscovery::ServiceReference.java_class]).call(ref.j_del),::VertxJdbc::JDBCClient)
-      end
-      raise ArgumentError, "Invalid arguments when calling cached_service(#{ref})"
-    end
-    # @return [::VertxServiceDiscovery::JDBCDataSourceType]
-    def self.service_type
-      if !block_given?
-        return ::Vertx::Util::Utils.safe_create(Java::IoVertxServicediscoveryTypes::JDBCDataSource.java_method(:serviceType, []).call(),::VertxServiceDiscovery::JDBCDataSourceType)
-      end
-      raise ArgumentError, "Invalid arguments when calling service_type()"
     end
     # @param [String] name 
     # @param [Hash{String => Object}] location 

@@ -1,61 +1,20 @@
-require 'vertx-service-discovery/service_reference'
-require 'vertx-service-discovery/message_source_type'
 require 'vertx-service-discovery/service_discovery'
 require 'vertx/message_consumer'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.servicediscovery.types.MessageSource
 module VertxServiceDiscovery
   #  Service type for data producer. Providers are publishing data to a specific event bus address.
-  class MessageSource < ::VertxServiceDiscovery::MessageSourceType
+  class MessageSource
     # @private
     # @param j_del [::VertxServiceDiscovery::MessageSource] the java delegate
-    def initialize(j_del)
-      super(j_del)
+    def initialize(j_del, j_arg_X=nil)
       @j_del = j_del
+      @j_arg_X = j_arg_X != nil ? j_arg_X : ::Vertx::Util::unknown_type
     end
     # @private
     # @return [::VertxServiceDiscovery::MessageSource] the underlying java delegate
     def j_del
       @j_del
-    end
-    @@j_api_type = Object.new
-    def @@j_api_type.accept?(obj)
-      obj.class == MessageSource
-    end
-    def @@j_api_type.wrap(obj)
-      MessageSource.new(obj)
-    end
-    def @@j_api_type.unwrap(obj)
-      obj.j_del
-    end
-    def self.j_api_type
-      @@j_api_type
-    end
-    def self.j_class
-      Java::IoVertxServicediscoveryTypes::MessageSource.java_class
-    end
-    # @param [::VertxServiceDiscovery::ServiceReference] ref 
-    # @return [::Vertx::MessageConsumer]
-    def get_service(ref=nil)
-      if ref.class.method_defined?(:j_del) && !block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:getService, [Java::IoVertxServicediscovery::ServiceReference.java_class]).call(ref.j_del),::Vertx::MessageConsumer)
-      end
-      raise ArgumentError, "Invalid arguments when calling get_service(#{ref})"
-    end
-    # @param [::VertxServiceDiscovery::ServiceReference] ref 
-    # @return [::Vertx::MessageConsumer]
-    def cached_service(ref=nil)
-      if ref.class.method_defined?(:j_del) && !block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:cachedService, [Java::IoVertxServicediscovery::ServiceReference.java_class]).call(ref.j_del),::Vertx::MessageConsumer)
-      end
-      raise ArgumentError, "Invalid arguments when calling cached_service(#{ref})"
-    end
-    # @return [::VertxServiceDiscovery::MessageSourceType]
-    def self.service_type
-      if !block_given?
-        return ::Vertx::Util::Utils.safe_create(Java::IoVertxServicediscoveryTypes::MessageSource.java_method(:serviceType, []).call(),::VertxServiceDiscovery::MessageSourceType)
-      end
-      raise ArgumentError, "Invalid arguments when calling service_type()"
     end
     #  Create a record representing a data producer.
     # @param [String] name the name of the service

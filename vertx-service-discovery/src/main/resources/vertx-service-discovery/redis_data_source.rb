@@ -1,16 +1,13 @@
-require 'vertx-service-discovery/service_reference'
 require 'vertx-redis/redis_client'
 require 'vertx-service-discovery/service_discovery'
-require 'vertx-service-discovery/redis_data_source_type'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.servicediscovery.types.RedisDataSource
 module VertxServiceDiscovery
   #  Service type for Redis data source.
-  class RedisDataSource < ::VertxServiceDiscovery::RedisDataSourceType
+  class RedisDataSource
     # @private
     # @param j_del [::VertxServiceDiscovery::RedisDataSource] the java delegate
     def initialize(j_del)
-      super(j_del)
       @j_del = j_del
     end
     # @private
@@ -33,29 +30,6 @@ module VertxServiceDiscovery
     end
     def self.j_class
       Java::IoVertxServicediscoveryTypes::RedisDataSource.java_class
-    end
-    # @param [::VertxServiceDiscovery::ServiceReference] ref 
-    # @return [::VertxRedis::RedisClient]
-    def get_service(ref=nil)
-      if ref.class.method_defined?(:j_del) && !block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:getService, [Java::IoVertxServicediscovery::ServiceReference.java_class]).call(ref.j_del),::VertxRedis::RedisClient)
-      end
-      raise ArgumentError, "Invalid arguments when calling get_service(#{ref})"
-    end
-    # @param [::VertxServiceDiscovery::ServiceReference] ref 
-    # @return [::VertxRedis::RedisClient]
-    def cached_service(ref=nil)
-      if ref.class.method_defined?(:j_del) && !block_given?
-        return ::Vertx::Util::Utils.safe_create(@j_del.java_method(:cachedService, [Java::IoVertxServicediscovery::ServiceReference.java_class]).call(ref.j_del),::VertxRedis::RedisClient)
-      end
-      raise ArgumentError, "Invalid arguments when calling cached_service(#{ref})"
-    end
-    # @return [::VertxServiceDiscovery::RedisDataSourceType]
-    def self.service_type
-      if !block_given?
-        return ::Vertx::Util::Utils.safe_create(Java::IoVertxServicediscoveryTypes::RedisDataSource.java_method(:serviceType, []).call(),::VertxServiceDiscovery::RedisDataSourceType)
-      end
-      raise ArgumentError, "Invalid arguments when calling service_type()"
     end
     #  Convenient method to create a record for a Redis data source.
     # @param [String] name the service name
