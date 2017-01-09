@@ -172,9 +172,9 @@ public class Examples {
 
     // Then, gets the service object, the returned type depends on the service type:
     // For http endpoint:
-    HttpClient client = reference1.get();
+    HttpClient client = reference1.getService(HttpClient.class);
     // For message source
-    MessageConsumer consumer = reference2.get();
+    MessageConsumer consumer = reference2.getService(MessageConsumer.class);
 
     // When done with the service
     reference1.release();
@@ -186,7 +186,7 @@ public class Examples {
 
     // Then, gets the service object, the returned type depends on the service type:
     // For http endpoint:
-    JDBCClient client = reference.get();
+    JDBCClient client = reference.getService(JDBCClient.class);
 
     // Do something with the client...
 

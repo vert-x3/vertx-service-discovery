@@ -1,15 +1,15 @@
 = Vert.x Service Discovery
 
-This components provides an infrastructure to publish and discover various resources, such as service
+This component provides an infrastructure to publish and discover various resources, such as service
 proxies, HTTP endpoints, data sources...
 
 These resources are called `services`. A `service` is a discoverable
 functionality. It can be qualified by its type, metadata, and location. So a `service` can be a database, a
-service proxy, a HTTP endpoint and any other resource you can imagine as soon as you can describe it and interact
-with it. It does not have to be a vert.x entity, but can be anything. Each service is described by a
+service proxy, a HTTP endpoint and any other resource you can imagine as soon as you can describe it, discover it
+and interact with it. It does not have to be a vert.x entity, but can be anything. Each service is described by a
 `link:../dataobjects.html#Record[Record]`.
 
-The service discovery implements the interactions defined in service-oriented computing. And to some extend,
+The service discovery implements the interactions defined in service-oriented computing. And to some extent,
 also provides the dynamic service-oriented computing interactions. So, applications can react to arrival and
 departure of services.
 
@@ -29,6 +29,9 @@ A service consumer can:
 Consumer would 1) lookup a service record matching their need, 2) retrieve the
 `link:../../jsdoc/module-vertx-service-discovery-js_service_reference-ServiceReference.html[ServiceReference]` that give access to the service, 3) get a service object to access
 the service, 4) release the service object once done.
+
+The process can be simplified using _service type_ where you can directly retrieve the service object if you know
+from which type it is (JDBC client, Http client...).
 
 As stated above, the central piece of information shared by the providers and consumers are
 `link:../dataobjects.html#Record[records]`.
@@ -94,14 +97,17 @@ It is important to release service references to cleanup the objects and update 
 The service object is the object that gives access to a service. It can come in various forms, such as a proxy, a client,
 and may even be non-existent for some service types. The nature of the service object depends on the service type.
 
+Notice that because of the polyglot nature of Vert.x, the service object can differ if you retrieve it from Java,
+Groovy or another language.
+
 === Service types
 
-Services are just resources, and they exist in wide variety. They can be functional services, databases,
-REST APIs, and so on. The Vert.x service discovery has the concept of service types to handle this heterogeneity.
-Each type defines:
+Services are just resources, and there are a lot of different kinds of services. They can be functional services,
+databases, REST APIs, and so on. The Vert.x service discovery has the concept of service types to handle this
+heterogeneity. Each type defines:
 
-* how the service is located (URI, event bus address, IP / DNS...)
-* the nature of the service object (service proxy, HTTP client, message consumer...)
+* how the service is located (URI, event bus address, IP / DNS...) - _location_
+* the nature of the service object (service proxy, HTTP client, message consumer...) - _client_
 
 Some service types are implemented and provided by the service discovery component, but you can add
 your own.
@@ -120,11 +126,12 @@ More details on these events below.
 
 === Backend
 
-The service discovery uses a distributed structure to store the records. So, all members of the cluster have access
-to all the records. This is the default backend implementation. You can implement your own by implementing the
-`ServiceDiscoveryBackend` SPI.
+The service discovery uses a Vert.x distributed data structure to store the records. So, all members of the cluster
+have access to all the records. This is the default backend implementation. You can implement your own by
+implementing the `ServiceDiscoveryBackend` SPI. For instance, we provide an
+implementation based on Redis.
 
-Notice that the discovery does not require vert.x clustering. In single-node mode, the map is a local map. It can
+Notice that the discovery does not require Vert.x clustering. In single-node mode, the structure is local. It can
 be populated with `link:../../jsdoc/module-vertx-service-discovery-js_service_importer-ServiceImporter.html[ServiceImporter]`s.
 
 == Creating a service discovery instance
@@ -153,12 +160,14 @@ discovery.close();
 By default, the announce address (the event bus address on which service events are sent is: `vertx.discovery
 .announce`. You can also configure a name used for the service usage (see section about service usage).
 
-When you don't need the service discovery object anymore, don't forget to close it. It closes the different discovery bridges you
-have configured and releases the service references.
+When you don't need the service discovery object anymore, don't forget to close it. It closes the different
+discovery importers and exporters you have configured and releases the service references.
+
+You should avoid sharing the service discovery instance, so service usage would represent the right "usages".
 
 == Publishing services
 
-Once you have a service discovery instance, you can start to publish services. The process is the following:
+Once you have a service discovery instance, you can publish services. The process is the following:
 
 1. create a record for a specific service provider
 2. publish this record
@@ -223,14 +232,18 @@ discovery.unpublish(record.registration, function (ar, ar_err) {
 
 ----
 
-== Looking for service
+== Looking for services
+
+_This section explains the low-level process to retrieve services, each service type provide convenient method to
+aggregates the different steps._
 
 On the consumer side, the first thing to do is to lookup for records. You can search for a single record or all
 the matching ones. In the first case, the first matching record is returned.
 
 Consumer can pass a filter to select the service. There are two ways to describe the filter:
 
-1. A function taking a `link:../dataobjects.html#Record[Record]` as parameter and returning a boolean
+1. A function taking a `link:../dataobjects.html#Record[Record]` as parameter and returning a boolean (it's a
+predicate)
 2. This filter is a JSON object. Each entry of the given filter is checked against the record. All entries must
 exactly match the record. The entry can use the special `*` value to denote a requirement on the key, but not on
 the value.
@@ -353,14 +366,16 @@ Once you have chosen the `link:../dataobjects.html#Record[Record]`, you can retr
 
 [source,js]
 ----
+var HttpClient = require("vertx-js/http_client");
+var MessageConsumer = require("vertx-js/message_consumer");
 var reference1 = discovery.getReference(record1);
 var reference2 = discovery.getReference(record2);
 
 // Then, gets the service object, the returned type depends on the service type:
 // For http endpoint:
-var client = reference1.get();
+var client = reference1.getService(HttpClient.class);
 // For message source
-var consumer = reference2.get();
+var consumer = reference2.getService(MessageConsumer.class);
 
 // When done with the service
 reference1.release();
@@ -373,16 +388,17 @@ Don't forget to release the reference once done.
 The service reference represents a binding with the service provider.
 
 When retrieving a service reference you can pass a `JsonObject` used to configure the
-service object. It can contain various data about the service object. Some service types do not needs additional
+service object. It can contain various data about the service object. Some service types do not need additional
 configuration, some require configuration (as data sources):
 
 [source,js]
 ----
+var JDBCClient = require("vertx-jdbc-js/jdbc_client");
 var reference = discovery.getReferenceWithConfiguration(record, conf);
 
 // Then, gets the service object, the returned type depends on the service type:
 // For http endpoint:
-var client = reference.get();
+var client = reference.getService(JDBCClient.class);
 
 // Do something with the client...
 
@@ -390,6 +406,12 @@ var client = reference.get();
 reference.release();
 
 ----
+
+In the previous examples, the code uses
+`link:../../jsdoc/module-vertx-service-discovery-js_service_reference-ServiceReference.html#getService[getService]`. The parameter is the type of
+object you expect to get. If you are using Java, you can use
+`link:../../jsdoc/module-vertx-service-discovery-js_service_reference-ServiceReference.html#get[get]`. However in the other language you must pass the expected
+type.
 
 == Types of services
 
@@ -406,6 +428,9 @@ type is the proxies interface (the location is the address).
 `link:../../jsdoc/module-vertx-js_message_consumer-MessageConsumer.html[MessageConsumer]` (the location is the address).
 * `link:../../jsdoc/module-vertx-service-discovery-js_jdbc_data_source-JDBCDataSource.html[JDBCDataSource]` - for JDBC data sources, the service object is a
 `link:../../jsdoc/module-vertx-jdbc-js_jdbc_client-JDBCClient.html[JDBCClient]` (the configuration of the client is computed from the location, metadata and
+consumer configuration).
+* `link:../../jsdoc/module-vertx-service-discovery-js_redis_data_source-RedisDataSource.html[RedisDataSource]` - for Redis data sources, the service object is a
+`link:../../jsdoc/module-vertx-redis-js_redis_client-RedisClient.html[RedisClient]` (the configuration of the client is computed from the location, metadata and
 consumer configuration).
 
 This section gives details about service types in general and describes how to use the default service types.
@@ -459,6 +484,7 @@ Once a HTTP endpoint is published, a consumer can retrieve it. The service objec
 
 [source, js]
 ----
+var HttpClient = require("vertx-js/http_client");
 // Get the record
 discovery.getRecord({
   "name" : "some-http-service"
@@ -467,7 +493,7 @@ discovery.getRecord({
     // Retrieve the service reference
     var reference = discovery.getReference(ar);
     // Retrieve the service object
-    var client = reference.get();
+    var client = reference.getService(HttpClient.class);
 
     // You need to path the complete path
     client.getNow("/api/persons", function (response) {
@@ -513,7 +539,7 @@ HttpEndpoint.getClient(discovery, {
 
 In this second version, the service object is released using
 `link:../../jsdoc/module-vertx-service-discovery-js_service_discovery-ServiceDiscovery.html#releaseServiceObject[ServiceDiscovery.releaseServiceObject]`,
-so you no longer hold on to the service reference.
+so you don't need to keep the service reference.
 
 === Event bus services
 
@@ -544,27 +570,34 @@ discovery.publish(record, function (ar, ar_err) {
 
 ==== Consuming an event bus service
 
+To consume an event bus service you can either retrieve the record and then get the reference, or use the
+`link:../../jsdoc/module-vertx-service-discovery-js_event_bus_service-EventBusService.html[EventBusService]` interface that combines the two operations in one call.
 
-To consume an event bus service, you need to retrieve the record and get the reference as usual. However, as the
-lookup is made using the java interface (and not the javascript structure) you would need to wrap the service
-object into the javascript object:
 
-[source, javascript]
+
+However, as the service is searched by (Java) interface, you need to specify the type of client you expect.
+
+[source, js]
 ----
-var MyService = require("examples-js/my_service.js");
-var discovery = ServiceDiscovery.create(vertx);
+var ServiceDiscovery = require("vertx-service-discovery-js/service_discovery");
+var EventBusService = require("vertx-service-discovery-js/event_bus_service");
+var MyService = require("org-acme-js/MyService");
+EventBusService.getServiceProxyWithJsonFilter(discovery,
+{ "service.interface" : "org.acme.MyService"},
+MyService,
+function (ar, ar_err) {
+if (ar_err == null) {
+var service = ar;
 
-discovery.getRecord({"service.interface" : "examples.MyService"},
-function(ar, ar_err) {
-var reference = discovery.getReference(ar);
-var svc = reference.get();
-var proxy = new MyService(svc);
-proxy.hello({"name" : "vert.x"}, function(r, err) {
-// ...
-reference.release(); // release the service
-});
+// Dont' forget to release the service
+ServiceDiscovery.releaseServiceObject(discovery, service);
+}
 });
 ----
+
+
+
+
 
 
 === Message source
@@ -607,6 +640,7 @@ With the first approach, the code is the following:
 
 [source, js]
 ----
+var MessageConsumer = require("vertx-js/message_consumer");
 // Get the record
 discovery.getRecord({
   "name" : "some-message-source-service"
@@ -615,7 +649,7 @@ discovery.getRecord({
     // Retrieve the service reference
     var reference = discovery.getReference(ar);
     // Retrieve the service object
-    var consumer = reference.get();
+    var consumer = reference.getService(MessageConsumer.class);
 
     // Attach a message handler on it
     consumer.handler(function (message) {
@@ -698,6 +732,7 @@ the consumer:
 
 [source, js]
 ----
+var JDBCClient = require("vertx-jdbc-js/jdbc_client");
 // Get the record
 discovery.getRecord({
   "name" : "some-data-source-service"
@@ -710,7 +745,7 @@ discovery.getRecord({
     });
 
     // Retrieve the service object
-    var client = reference.get();
+    var client = reference.getService(JDBCClient.class);
 
     // ...
 
@@ -784,6 +819,7 @@ the consumer:
 
 [source, js]
 ----
+var RedisClient = require("vertx-redis-js/redis_client");
 // Get the record
 discovery.getRecord({
   "name" : "some-redis-data-source-service"
@@ -793,7 +829,7 @@ discovery.getRecord({
     var reference = discovery.getReference(ar);
 
     // Retrieve the service instance
-    var client = reference.get();
+    var client = reference.getService(RedisClient.class);
 
     // ...
 

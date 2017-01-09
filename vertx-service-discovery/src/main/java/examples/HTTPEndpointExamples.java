@@ -58,7 +58,7 @@ public class HTTPEndpointExamples {
         // Retrieve the service reference
         ServiceReference<HttpClient> reference = discovery.getReference(ar.result());
         // Retrieve the service object
-        HttpClient client = reference.get();
+        HttpClient client = reference.getService(HttpClient.class);
 
         // You need to path the complete path
         client.getNow("/api/persons", response -> {

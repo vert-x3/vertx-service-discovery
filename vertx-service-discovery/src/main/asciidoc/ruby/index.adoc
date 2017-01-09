@@ -1,15 +1,15 @@
 = Vert.x Service Discovery
 
-This components provides an infrastructure to publish and discover various resources, such as service
+This component provides an infrastructure to publish and discover various resources, such as service
 proxies, HTTP endpoints, data sources...
 
 These resources are called `services`. A `service` is a discoverable
 functionality. It can be qualified by its type, metadata, and location. So a `service` can be a database, a
-service proxy, a HTTP endpoint and any other resource you can imagine as soon as you can describe it and interact
-with it. It does not have to be a vert.x entity, but can be anything. Each service is described by a
+service proxy, a HTTP endpoint and any other resource you can imagine as soon as you can describe it, discover it
+and interact with it. It does not have to be a vert.x entity, but can be anything. Each service is described by a
 `link:../dataobjects.html#Record[Record]`.
 
-The service discovery implements the interactions defined in service-oriented computing. And to some extend,
+The service discovery implements the interactions defined in service-oriented computing. And to some extent,
 also provides the dynamic service-oriented computing interactions. So, applications can react to arrival and
 departure of services.
 
@@ -29,6 +29,9 @@ A service consumer can:
 Consumer would 1) lookup a service record matching their need, 2) retrieve the
 `link:../../yardoc/VertxServiceDiscovery/ServiceReference.html[ServiceReference]` that give access to the service, 3) get a service object to access
 the service, 4) release the service object once done.
+
+The process can be simplified using _service type_ where you can directly retrieve the service object if you know
+from which type it is (JDBC client, Http client...).
 
 As stated above, the central piece of information shared by the providers and consumers are
 `link:../dataobjects.html#Record[records]`.
@@ -94,14 +97,17 @@ It is important to release service references to cleanup the objects and update 
 The service object is the object that gives access to a service. It can come in various forms, such as a proxy, a client,
 and may even be non-existent for some service types. The nature of the service object depends on the service type.
 
+Notice that because of the polyglot nature of Vert.x, the service object can differ if you retrieve it from Java,
+Groovy or another language.
+
 === Service types
 
-Services are just resources, and they exist in wide variety. They can be functional services, databases,
-REST APIs, and so on. The Vert.x service discovery has the concept of service types to handle this heterogeneity.
-Each type defines:
+Services are just resources, and there are a lot of different kinds of services. They can be functional services,
+databases, REST APIs, and so on. The Vert.x service discovery has the concept of service types to handle this
+heterogeneity. Each type defines:
 
-* how the service is located (URI, event bus address, IP / DNS...)
-* the nature of the service object (service proxy, HTTP client, message consumer...)
+* how the service is located (URI, event bus address, IP / DNS...) - _location_
+* the nature of the service object (service proxy, HTTP client, message consumer...) - _client_
 
 Some service types are implemented and provided by the service discovery component, but you can add
 your own.
@@ -120,11 +126,12 @@ More details on these events below.
 
 === Backend
 
-The service discovery uses a distributed structure to store the records. So, all members of the cluster have access
-to all the records. This is the default backend implementation. You can implement your own by implementing the
-`link:unavailable[ServiceDiscoveryBackend]` SPI.
+The service discovery uses a Vert.x distributed data structure to store the records. So, all members of the cluster
+have access to all the records. This is the default backend implementation. You can implement your own by
+implementing the `link:unavailable[ServiceDiscoveryBackend]` SPI. For instance, we provide an
+implementation based on Redis.
 
-Notice that the discovery does not require vert.x clustering. In single-node mode, the map is a local map. It can
+Notice that the discovery does not require Vert.x clustering. In single-node mode, the structure is local. It can
 be populated with `link:../../yardoc/VertxServiceDiscovery/ServiceImporter.html[ServiceImporter]`s.
 
 == Creating a service discovery instance
@@ -153,12 +160,14 @@ discovery.close()
 By default, the announce address (the event bus address on which service events are sent is: `vertx.discovery
 .announce`. You can also configure a name used for the service usage (see section about service usage).
 
-When you don't need the service discovery object anymore, don't forget to close it. It closes the different discovery bridges you
-have configured and releases the service references.
+When you don't need the service discovery object anymore, don't forget to close it. It closes the different
+discovery importers and exporters you have configured and releases the service references.
+
+You should avoid sharing the service discovery instance, so service usage would represent the right "usages".
 
 == Publishing services
 
-Once you have a service discovery instance, you can start to publish services. The process is the following:
+Once you have a service discovery instance, you can publish services. The process is the following:
 
 1. create a record for a specific service provider
 2. publish this record
@@ -223,14 +232,18 @@ discovery.unpublish(record['registration']) { |ar_err,ar|
 
 ----
 
-== Looking for service
+== Looking for services
+
+_This section explains the low-level process to retrieve services, each service type provide convenient method to
+aggregates the different steps._
 
 On the consumer side, the first thing to do is to lookup for records. You can search for a single record or all
 the matching ones. In the first case, the first matching record is returned.
 
 Consumer can pass a filter to select the service. There are two ways to describe the filter:
 
-1. A function taking a `link:../dataobjects.html#Record[Record]` as parameter and returning a boolean
+1. A function taking a `link:../dataobjects.html#Record[Record]` as parameter and returning a boolean (it's a
+predicate)
 2. This filter is a JSON object. Each entry of the given filter is checked against the record. All entries must
 exactly match the record. The entry can use the special `*` value to denote a requirement on the key, but not on
 the value.
@@ -353,14 +366,16 @@ Once you have chosen the `link:../dataobjects.html#Record[Record]`, you can retr
 
 [source,ruby]
 ----
+require 'vertx/http_client'
+require 'vertx/message_consumer'
 reference1 = discovery.get_reference(record1)
 reference2 = discovery.get_reference(record2)
 
 # Then, gets the service object, the returned type depends on the service type:
 # For http endpoint:
-client = reference1.get()
+client = reference1.get_service(Vertx::HttpClient::class)
 # For message source
-consumer = reference2.get()
+consumer = reference2.get_service(Vertx::MessageConsumer::class)
 
 # When done with the service
 reference1.release()
@@ -373,16 +388,17 @@ Don't forget to release the reference once done.
 The service reference represents a binding with the service provider.
 
 When retrieving a service reference you can pass a `link:unavailable[JsonObject]` used to configure the
-service object. It can contain various data about the service object. Some service types do not needs additional
+service object. It can contain various data about the service object. Some service types do not need additional
 configuration, some require configuration (as data sources):
 
 [source,ruby]
 ----
+require 'vertx-jdbc/jdbc_client'
 reference = discovery.get_reference_with_configuration(record, conf)
 
 # Then, gets the service object, the returned type depends on the service type:
 # For http endpoint:
-client = reference.get()
+client = reference.get_service(VertxJdbc::JDBCClient::class)
 
 # Do something with the client...
 
@@ -390,6 +406,12 @@ client = reference.get()
 reference.release()
 
 ----
+
+In the previous examples, the code uses
+`link:../../yardoc/VertxServiceDiscovery/ServiceReference.html#get_service-instance_method[getService]`. The parameter is the type of
+object you expect to get. If you are using Java, you can use
+`link:../../yardoc/VertxServiceDiscovery/ServiceReference.html#get-instance_method[get]`. However in the other language you must pass the expected
+type.
 
 == Types of services
 
@@ -406,6 +428,9 @@ type is the proxies interface (the location is the address).
 `link:../../yardoc/Vertx/MessageConsumer.html[MessageConsumer]` (the location is the address).
 * `link:../../yardoc/VertxServiceDiscovery/JDBCDataSource.html[JDBCDataSource]` - for JDBC data sources, the service object is a
 `link:../../yardoc/VertxJdbc/JDBCClient.html[JDBCClient]` (the configuration of the client is computed from the location, metadata and
+consumer configuration).
+* `link:../../yardoc/VertxServiceDiscovery/RedisDataSource.html[RedisDataSource]` - for Redis data sources, the service object is a
+`link:../../yardoc/VertxRedis/RedisClient.html[RedisClient]` (the configuration of the client is computed from the location, metadata and
 consumer configuration).
 
 This section gives details about service types in general and describes how to use the default service types.
@@ -459,6 +484,7 @@ Once a HTTP endpoint is published, a consumer can retrieve it. The service objec
 
 [source, ruby]
 ----
+require 'vertx/http_client'
 # Get the record
 discovery.get_record({
   'name' => "some-http-service"
@@ -467,7 +493,7 @@ discovery.get_record({
     # Retrieve the service reference
     reference = discovery.get_reference(ar)
     # Retrieve the service object
-    client = reference.get()
+    client = reference.get_service(Vertx::HttpClient::class)
 
     # You need to path the complete path
     client.get_now("/api/persons") { |response|
@@ -513,7 +539,7 @@ VertxServiceDiscovery::HttpEndpoint.get_client(discovery, {
 
 In this second version, the service object is released using
 `link:../../yardoc/VertxServiceDiscovery/ServiceDiscovery.html#release_service_object-class_method[ServiceDiscovery.releaseServiceObject]`,
-so you no longer hold on to the service reference.
+so you don't need to keep the service reference.
 
 === Event bus services
 
@@ -544,9 +570,34 @@ discovery.publish(record) { |ar_err,ar|
 
 ==== Consuming an event bus service
 
+To consume an event bus service you can either retrieve the record and then get the reference, or use the
+`link:../../yardoc/VertxServiceDiscovery/EventBusService.html[EventBusService]` interface that combines the two operations in one call.
 
 
-TODO
+
+
+
+However, as the service is searched by (Java) interface, you need to specify the type of client you expect.
+
+[source, ruby]
+----
+require 'vertx-service-discovery/service_discovery'
+require 'vertx-service-discovery/event_bus_service'
+require 'org-acme/MyService'
+VertxServiceDiscovery::EventBusService.get_service_proxy_with_json_filter(discovery, {
+'service.interface' => "org.acme.MyService"
+}, MyService) { |ar_err,ar|
+if (ar_err == nil)
+service = ar
+
+# Dont' forget to release the service
+VertxServiceDiscovery::ServiceDiscovery.release_service_object(discovery, service)
+end
+}
+----
+
+
+
 
 === Message source
 
@@ -588,6 +639,7 @@ With the first approach, the code is the following:
 
 [source, ruby]
 ----
+require 'vertx/message_consumer'
 # Get the record
 discovery.get_record({
   'name' => "some-message-source-service"
@@ -596,7 +648,7 @@ discovery.get_record({
     # Retrieve the service reference
     reference = discovery.get_reference(ar)
     # Retrieve the service object
-    consumer = reference.get()
+    consumer = reference.get_service(Vertx::MessageConsumer::class)
 
     # Attach a message handler on it
     consumer.handler() { |message|
@@ -679,6 +731,7 @@ the consumer:
 
 [source, ruby]
 ----
+require 'vertx-jdbc/jdbc_client'
 # Get the record
 discovery.get_record({
   'name' => "some-data-source-service"
@@ -691,7 +744,7 @@ discovery.get_record({
     })
 
     # Retrieve the service object
-    client = reference.get()
+    client = reference.get_service(VertxJdbc::JDBCClient::class)
 
     # ...
 
@@ -765,6 +818,7 @@ the consumer:
 
 [source, ruby]
 ----
+require 'vertx-redis/redis_client'
 # Get the record
 discovery.get_record({
   'name' => "some-redis-data-source-service"
@@ -774,7 +828,7 @@ discovery.get_record({
     reference = discovery.get_reference(ar)
 
     # Retrieve the service instance
-    client = reference.get()
+    client = reference.get_service(VertxRedis::RedisClient::class)
 
     # ...
 

@@ -49,7 +49,7 @@ public class RedisDataSourceExamples {
           ServiceReference<RedisClient> reference = discovery.getReference(ar.result());
 
           // Retrieve the service instance
-          RedisClient client = reference.get();
+          RedisClient client = reference.getService(RedisClient.class);
 
           // ...
 
