@@ -33,7 +33,7 @@ public class MyVerticle extends AbstractVerticle {
           if (reference == null) {
             message.reply("FAIL - reference is null");
           } else {
-            HttpClient client = HttpEndpoint.serviceType().getService(reference);
+            HttpClient client = reference.get();
             result.put("client", client.toString());
             result.put("direct", reference.get().toString());
             message.reply(result);
@@ -43,7 +43,8 @@ public class MyVerticle extends AbstractVerticle {
 
     eb.consumer("http-sugar", message -> {
       JsonObject result = new JsonObject();
-      HttpEndpoint.getClient(discovery, record -> record.getName().equalsIgnoreCase("my-http-service"),
+      HttpEndpoint.getClient(discovery,
+        record -> record.getName().equalsIgnoreCase("my-http-service"),
         ar -> {
           if (ar.failed()) {
             message.reply("FAIL - no service");
@@ -65,10 +66,8 @@ public class MyVerticle extends AbstractVerticle {
           if (reference == null) {
             message.reply("FAIL - reference is null");
           } else {
-            HelloService client = EventBusService.<HelloService>serviceType().getService(reference);
-            HelloService direct = reference.get();
+            HelloService client = reference.get();
             result.put("client", client.toString());
-            result.put("direct", direct.toString());
             message.reply(result);
           }
         }
@@ -76,7 +75,9 @@ public class MyVerticle extends AbstractVerticle {
 
     eb.consumer("service-sugar", message -> {
       JsonObject result = new JsonObject();
-      EventBusService.<HelloService>getProxy(discovery, record -> record.getName().equalsIgnoreCase("my-service"),
+      EventBusService.getServiceProxy(discovery,
+        record -> record.getName().equalsIgnoreCase("my-service"),
+        HelloService.class,
         ar -> {
           if (ar.failed()) {
             message.reply("FAIL - no service");
@@ -98,9 +99,8 @@ public class MyVerticle extends AbstractVerticle {
           if (reference == null) {
             message.reply("FAIL - reference is null");
           } else {
-            JDBCClient client = JDBCDataSource.serviceType().getService(reference);
+            JDBCClient client = reference.get();
             result.put("client", client.toString());
-            result.put("direct", reference.get().toString());
             message.reply(result);
           }
         }
@@ -130,7 +130,7 @@ public class MyVerticle extends AbstractVerticle {
           if (reference == null) {
             message.reply("FAIL - reference is null");
           } else {
-            RedisClient client = RedisDataSource.serviceType().getService(reference);
+            RedisClient client = reference.get();
             result.put("client", client.toString());
             result.put("direct", reference.get().toString());
             message.reply(result);
@@ -162,7 +162,7 @@ public class MyVerticle extends AbstractVerticle {
           if (reference == null) {
             message.reply("FAIL - reference is null");
           } else {
-            MessageConsumer client = MessageSource.serviceType().getService(reference);
+            MessageConsumer client = reference.get();
             result.put("client", client.toString());
             result.put("direct", reference.get().toString());
             message.reply(result);
@@ -172,12 +172,12 @@ public class MyVerticle extends AbstractVerticle {
 
     eb.consumer("source1-sugar", message -> {
       JsonObject result = new JsonObject();
-      MessageSource.getConsumer(discovery, record -> record.getName().equalsIgnoreCase("my-message-source-1"),
+      MessageSource.<String>getConsumer(discovery, record -> record.getName().equalsIgnoreCase("my-message-source-1"),
         ar -> {
           if (ar.failed()) {
             message.reply("FAIL - no service");
           } else {
-            MessageConsumer client = ar.result();
+            MessageConsumer<String> client = ar.result();
             result.put("client", client.toString());
             message.reply(result);
           }

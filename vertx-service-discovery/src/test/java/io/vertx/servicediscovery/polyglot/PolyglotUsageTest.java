@@ -116,7 +116,6 @@ public class PolyglotUsageTest {
       vertx.eventBus().<JsonObject>send("http-ref", "", reply -> {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("client").contains("HttpClient"));
-        tc.assertTrue(reply.result().body().getString("direct").contains("HttpClient"));
         http_ref.complete();
       });
 
@@ -135,7 +134,6 @@ public class PolyglotUsageTest {
       vertx.eventBus().<JsonObject>send("service-ref", "", reply -> {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("client").contains("HelloServiceVertxEBProxy"));
-        tc.assertTrue(reply.result().body().getString("direct").contains("HelloServiceVertxEBProxy"));
         svc_ref.complete();
       });
 
@@ -148,7 +146,6 @@ public class PolyglotUsageTest {
       vertx.eventBus().<JsonObject>send("ds-ref", "", reply -> {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("client").contains("JDBCClientImpl"));
-        tc.assertTrue(reply.result().body().getString("direct").contains("JDBCClientImpl"));
         ds_ref.complete();
       });
 
@@ -161,7 +158,6 @@ public class PolyglotUsageTest {
       vertx.eventBus().<JsonObject>send("redis-ref", "", reply -> {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("client").contains("RedisClientImpl"));
-        tc.assertTrue(reply.result().body().getString("direct").contains("RedisClientImpl"));
         redis_ref.complete();
       });
 
@@ -174,7 +170,6 @@ public class PolyglotUsageTest {
       vertx.eventBus().<JsonObject>send("source1-ref", "", reply -> {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("client").contains("HandlerRegistration"));
-        tc.assertTrue(reply.result().body().getString("direct").contains("HandlerRegistration"));
         ms_ref.complete();
       });
 
@@ -202,6 +197,8 @@ public class PolyglotUsageTest {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("ref_del").contains("HttpEndpointReference"));
         tc.assertTrue(reply.result().body().getString("client_del").contains("HttpClient"));
+        tc.assertTrue(reply.result().body().getString("cached_del").contains("HttpClient"));
+
         http_ref.complete();
       });
 
@@ -222,6 +219,7 @@ public class PolyglotUsageTest {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("ref_del").contains("EventBusServiceReference"));
         tc.assertTrue(reply.result().body().getString("client_del").contains("HelloServiceVertxEBProxy"));
+        tc.assertTrue(reply.result().body().getString("cached_del").contains("HelloServiceVertxEBProxy"));
         tc.assertTrue(reply.result().body().getString("client").contains("[object"));
         svc_ref.complete();
       });
@@ -288,7 +286,6 @@ public class PolyglotUsageTest {
       vertx.eventBus().<JsonObject>send("http-ref", "", reply -> {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("client").contains("HttpClient"));
-//        tc.assertTrue(reply.result().body().getString("direct").contains("HttpClient"));
         http_ref.complete();
       });
 
@@ -307,47 +304,50 @@ public class PolyglotUsageTest {
 
       vertx.eventBus().<JsonObject>send("service-ref", "", reply -> {
         tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("HelloServiceVertxEBProxy"));
-        tc.assertTrue(reply.result().body().getString("direct").contains("HelloServiceVertxEBProxy"));
+        tc.assertTrue(reply.result().body().getString("client").contains("HelloService"));
+        tc.assertTrue(reply.result().body().getString("client").contains("rx"));
         svc_ref.complete();
       });
 
       vertx.eventBus().<JsonObject>send("ds-sugar", "", reply -> {
         tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("JDBCClientImpl"));
+        tc.assertTrue(reply.result().body().getString("client").contains("JDBCClient"));
+        tc.assertTrue(reply.result().body().getString("client").contains("rx"));
         ds_sugar.complete();
       });
 
       vertx.eventBus().<JsonObject>send("ds-ref", "", reply -> {
         tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("JDBCClientImpl"));
-        tc.assertTrue(reply.result().body().getString("direct").contains("JDBCClientImpl"));
+        tc.assertTrue(reply.result().body().getString("client").contains("JDBCClient"));
+        tc.assertTrue(reply.result().body().getString("client").contains("rx"));
         ds_ref.complete();
       });
 
       vertx.eventBus().<JsonObject>send("redis-sugar", "", reply -> {
         tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("RedisClientImpl"));
+        tc.assertTrue(reply.result().body().getString("client").contains("RedisClient"));
+        tc.assertTrue(reply.result().body().getString("client").contains("rx"));
         redis_sugar.complete();
       });
 
       vertx.eventBus().<JsonObject>send("redis-ref", "", reply -> {
         tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("RedisClientImpl"));
-        tc.assertTrue(reply.result().body().getString("direct").contains("RedisClientImpl"));
+        tc.assertTrue(reply.result().body().getString("client").contains("RedisClient"));
+        tc.assertTrue(reply.result().body().getString("client").contains("rx"));
         redis_ref.complete();
       });
 
       vertx.eventBus().<JsonObject>send("source1-sugar", "", reply -> {
         tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("HandlerRegistration"));
+        tc.assertTrue(reply.result().body().getString("client").contains("MessageConsumer"));
+        tc.assertTrue(reply.result().body().getString("client").contains("rx"));
         ms_sugar.complete();
       });
 
       vertx.eventBus().<JsonObject>send("source1-ref", "", reply -> {
         tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("HandlerRegistration"));
-        tc.assertTrue(reply.result().body().getString("direct").contains("HandlerRegistration"));
+        tc.assertTrue(reply.result().body().getString("client").contains("MessageConsumer"));
+        tc.assertTrue(reply.result().body().getString("client").contains("rx"));
         ms_ref.complete();
       });
 

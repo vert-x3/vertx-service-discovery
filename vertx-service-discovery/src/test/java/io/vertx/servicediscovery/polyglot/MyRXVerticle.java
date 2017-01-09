@@ -29,14 +29,12 @@ public class MyRXVerticle extends AbstractVerticle {
           message.reply("FAIL - No service");
         } else {
           JsonObject result = new JsonObject();
-          ServiceReference reference = discovery.getReference(ar.result());
+          ServiceReference<HttpClient> reference = discovery.getReference(ar.result());
           if (reference == null) {
             message.reply("FAIL - reference is null");
           } else {
-            HttpClient client = HttpEndpoint.serviceType().getService(reference);
+            HttpClient client = reference.getService(HttpClient.class);
             result.put("client", client.toString());
-            //System.out.println(reference.get());
-            //result.put("direct", reference.get().getDelegate().toString());
             message.reply(result);
           }
         }
@@ -62,15 +60,12 @@ public class MyRXVerticle extends AbstractVerticle {
           message.reply("FAIL - No service");
         } else {
           JsonObject result = new JsonObject();
-          ServiceReference reference = discovery.getReference(ar.result());
+          ServiceReference<HelloService> reference = discovery.getReference(ar.result());
           if (reference == null) {
             message.reply("FAIL - reference is null");
           } else {
-            HelloService client = EventBusService.serviceType().getObject(reference, HelloService.class);
-//            HelloService direct = reference.get();
-            //HelloService client = reference.(HelloService.class);
+            HelloService client = reference.getService(HelloService.class);
             result.put("client", client.toString());
-//            result.put("direct", direct.toString());
             message.reply(result);
           }
         }
@@ -78,12 +73,14 @@ public class MyRXVerticle extends AbstractVerticle {
 
     eb.consumer("service-sugar", message -> {
       JsonObject result = new JsonObject();
-      EventBusService.getProxy(discovery, record -> record.getName().equalsIgnoreCase("my-service"),
+      EventBusService.getServiceProxy(discovery,
+        record -> record.getName().equalsIgnoreCase("my-service"),
+        HelloService.class,
         ar -> {
           if (ar.failed()) {
             message.reply("FAIL - no service");
           } else {
-            HelloService client = new HelloService((io.vertx.servicediscovery.service.HelloService) ar.result());
+            HelloService client = ar.result();
             result.put("client", client.toString());
             message.reply(result);
           }
@@ -100,9 +97,8 @@ public class MyRXVerticle extends AbstractVerticle {
           if (reference == null) {
             message.reply("FAIL - reference is null");
           } else {
-            JDBCClient client = JDBCDataSource.serviceType().getService(reference);
+            JDBCClient client = reference.getService(JDBCClient.class);
             result.put("client", client.toString());
-            result.put("direct", reference.get().toString());
             message.reply(result);
           }
         }
@@ -132,9 +128,8 @@ public class MyRXVerticle extends AbstractVerticle {
           if (reference == null) {
             message.reply("FAIL - reference is null");
           } else {
-            RedisClient client = RedisDataSource.serviceType().getService(reference);
+            RedisClient client = reference.getService(RedisClient.class);
             result.put("client", client.toString());
-            result.put("direct", reference.get().toString());
             message.reply(result);
           }
         }
@@ -160,13 +155,12 @@ public class MyRXVerticle extends AbstractVerticle {
           message.reply("FAIL - No service");
         } else {
           JsonObject result = new JsonObject();
-          ServiceReference<MessageConsumer> reference = discovery.getReference(ar.result());
+          ServiceReference<MessageConsumer<String>> reference = discovery.getReference(ar.result());
           if (reference == null) {
             message.reply("FAIL - reference is null");
           } else {
-            MessageConsumer client = MessageSource.serviceType().getService(reference);
+            MessageConsumer<String> client = reference.getService(MessageConsumer.class);
             result.put("client", client.toString());
-            result.put("direct", reference.get().toString());
             message.reply(result);
           }
         }

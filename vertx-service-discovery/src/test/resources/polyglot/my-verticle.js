@@ -5,11 +5,22 @@ var MessageSource = require("vertx-service-discovery-js/message_source");
 var DataSource = require("vertx-service-discovery-js/jdbc_data_source");
 var RedisDataSource = require("vertx-service-discovery-js/redis_data_source");
 var HelloService = require("test-services-js/hello_service");
+var HttpClient = require("vertx-js/http_client");
+var MessageConsumer = require("vertx-js/message_consumer");
+var RedisClient = require("vertx-redis-js/redis_client");
+var JDBCClient = require("vertx-jdbc-js/jdbc_client");
 
+function getVertx() {
+  return vertx;
+}
 
-var discovery = ServiceDiscovery.create(vertx);
+var discovery = ServiceDiscovery.create(getVertx());
 
-vertx.eventBus().consumer("http-ref", function (message) {
+function getDelegate(obj) {
+  return "" + obj._jdel;
+}
+
+getVertx().eventBus().consumer("http-ref", function (message) {
   discovery.getRecord(function (rec) {
     return rec.name === "my-http-service"
   }, function (rec, err) {
@@ -18,16 +29,16 @@ vertx.eventBus().consumer("http-ref", function (message) {
       message.reply("FAIL - no http service");
     } else {
       var reference = discovery.getReference(rec);
-      result.ref_del = "" + reference._jdel;
+      result.ref_del = getDelegate(reference);
       if (!reference) {
         message.reply("FAIL - reference is null");
       } else {
-        var client = HttpEndpoint.serviceType().getService(reference);
-
+        var client = reference.getService(HttpClient);
         if (!client) {
           message.reply("FAIL - client is null");
         } else {
-          result.client_del = "" + client._jdel;
+          result.client_del = getDelegate(client);
+          result.cached_del = getDelegate(reference.getCachedService(HttpClient));
           message.reply(result);
           reference.release();
         }
@@ -36,7 +47,7 @@ vertx.eventBus().consumer("http-ref", function (message) {
   });
 });
 
-vertx.eventBus().consumer("http-sugar", function (message) {
+getVertx().eventBus().consumer("http-sugar", function (message) {
   HttpEndpoint.getClient(discovery, function (rec) {
     return rec.name === "my-http-service"
   }, function (res, err) {
@@ -47,34 +58,35 @@ vertx.eventBus().consumer("http-sugar", function (message) {
       if (!res) {
         message.reply("FAIL - client is null");
       } else {
-        result.client_del = res._jdel.toString();
+        result.client_del = getDelegate(res);
         message.reply(result);
       }
     }
   });
 });
 
-vertx.eventBus().consumer("service-sugar", function (message) {
-  EventBusService.getProxy(discovery, function (rec) {
-    return rec.name === "my-service"
-  }, function (res, err) {
-    if (err) {
-      message.reply("FAIL - no service");
-    } else {
-      var result = {};
-      if (!res) {
-        message.reply("FAIL - client is null");
+getVertx().eventBus().consumer("service-sugar", function (message) {
+  EventBusService.getServiceProxy(discovery, function (rec) {
+      return rec.name === "my-service"
+    },
+    HelloService,
+    function (res, err) {
+      if (err) {
+        message.reply("FAIL - no service");
       } else {
-        var proxy = new HelloService(res);
-        result.client = "" + proxy;
-        result.client_del = "" + proxy._jdel;
-        message.reply(result)
+        var result = {};
+        if (!res) {
+          message.reply("FAIL - client is null");
+        } else {
+          result.client = res.toString();
+          result.client_del = getDelegate(res);
+          message.reply(result)
+        }
       }
-    }
-  });
+    });
 });
 
-vertx.eventBus().consumer("service-ref", function (message) {
+getVertx().eventBus().consumer("service-ref", function (message) {
   discovery.getRecord(function (rec) {
     return rec.name === "my-service"
   }, function (rec, err) {
@@ -87,14 +99,15 @@ vertx.eventBus().consumer("service-ref", function (message) {
       if (!reference) {
         message.reply("FAIL - reference is null");
       } else {
-        var client = EventBusService.serviceType().getService(reference);
-        var proxy = new HelloService(client);
+        // Must create the object.
+        var proxy = reference.getService(HelloService);
 
-        if (!client) {
+        if (!proxy) {
           message.reply("FAIL - client is null");
         } else {
-          result.client = "" + proxy;
-          result.client_del = "" + proxy._jdel;
+          result.client = proxy.toString();
+          result.client_del = getDelegate(proxy);
+          result.cached_del = getDelegate(reference.getCachedService(HelloService));
           message.reply(result);
           reference.release();
         }
@@ -104,7 +117,7 @@ vertx.eventBus().consumer("service-ref", function (message) {
 });
 
 
-vertx.eventBus().consumer("ds-ref", function (message) {
+getVertx().eventBus().consumer("ds-ref", function (message) {
   discovery.getRecord(function (rec) {
     return rec.name === "my-data-source"
   }, function (rec, err) {
@@ -113,16 +126,16 @@ vertx.eventBus().consumer("ds-ref", function (message) {
       message.reply("FAIL - no http service");
     } else {
       var reference = discovery.getReference(rec);
-      result.ref_del = "" + reference._jdel;
+      result.ref_del = getDelegate(reference);
       if (!reference) {
         message.reply("FAIL - reference is null");
       } else {
-        var client = DataSource.serviceType().getService(reference);
+        var client = reference.getService(JDBCClient);
 
         if (!client) {
           message.reply("FAIL - client is null");
         } else {
-          result.client_del = "" + client._jdel;
+          result.client_del = getDelegate(client);
           message.reply(result);
           reference.release();
         }
@@ -131,7 +144,7 @@ vertx.eventBus().consumer("ds-ref", function (message) {
   });
 });
 
-vertx.eventBus().consumer("ds-sugar", function (message) {
+getVertx().eventBus().consumer("ds-sugar", function (message) {
   DataSource.getJDBCClient(discovery, function (rec) {
     return rec.name === "my-data-source"
   }, function (res, err) {
@@ -142,14 +155,16 @@ vertx.eventBus().consumer("ds-sugar", function (message) {
       if (!res) {
         message.reply("FAIL - client is null");
       } else {
-        result.client_del = res._jdel.toString();
+        result.client_del = getDelegate(res);
         message.reply(result);
       }
     }
   });
 });
 
-vertx.eventBus().consumer("redis-ref", function (message) {
+
+
+getVertx().eventBus().consumer("redis-ref", function (message) {
   discovery.getRecord(function (rec) {
     return rec.name === "my-redis-data-source"
   }, function (rec, err) {
@@ -162,8 +177,7 @@ vertx.eventBus().consumer("redis-ref", function (message) {
       if (!reference) {
         message.reply("FAIL - reference is null");
       } else {
-        var client = RedisDataSource.serviceType().getService(reference);
-
+        var client = reference.getService(RedisClient);
         if (!client) {
           message.reply("FAIL - client is null");
         } else {
@@ -176,7 +190,7 @@ vertx.eventBus().consumer("redis-ref", function (message) {
   });
 });
 
-vertx.eventBus().consumer("redis-sugar", function (message) {
+getVertx().eventBus().consumer("redis-sugar", function (message) {
   RedisDataSource.getRedisClient(discovery, function (rec) {
     return rec.name === "my-redis-data-source"
   }, function (res, err) {
@@ -187,14 +201,14 @@ vertx.eventBus().consumer("redis-sugar", function (message) {
       if (!res) {
         message.reply("FAIL - client is null");
       } else {
-        result.client_del = res._jdel.toString();
+        result.client_del = getDelegate(res);
         message.reply(result);
       }
     }
   });
 });
 
-vertx.eventBus().consumer("source1-ref", function (message) {
+getVertx().eventBus().consumer("source1-ref", function (message) {
   discovery.getRecord(function (rec) {
     return rec.name === "my-message-source-1"
   }, function (rec, err) {
@@ -207,7 +221,7 @@ vertx.eventBus().consumer("source1-ref", function (message) {
       if (!reference) {
         message.reply("FAIL - reference is null");
       } else {
-        var client = MessageSource.serviceType().getService(reference);
+        var client = reference.getService(MessageConsumer);
 
         if (!client) {
           message.reply("FAIL - client is null");
@@ -221,7 +235,7 @@ vertx.eventBus().consumer("source1-ref", function (message) {
   });
 });
 
-vertx.eventBus().consumer("source1-sugar", function (message) {
+getVertx().eventBus().consumer("source1-sugar", function (message) {
   MessageSource.getConsumer(discovery, function (rec) {
     return rec.name === "my-message-source-1"
   }, function (res, err) {
