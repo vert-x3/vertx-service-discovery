@@ -24,6 +24,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.impl.DiscoveryImpl;
 import io.vertx.servicediscovery.spi.ServiceExporter;
 import io.vertx.servicediscovery.spi.ServiceImporter;
+import io.vertx.servicediscovery.utils.ClassLoaderUtils;
 
 import java.util.Collection;
 import java.util.List;
@@ -312,7 +313,9 @@ public interface ServiceDiscovery {
   static void releaseServiceObject(ServiceDiscovery discovery, Object svcObject) {
     Objects.requireNonNull(discovery);
     Objects.requireNonNull(svcObject);
+    // TODO Change here - it may be the polyglot object, and so `delegate` must be "retrieved"
+
     Collection<ServiceReference> references = discovery.bindings();
-    references.stream().filter(ref -> svcObject.equals(ref.cached())).forEach(discovery::release);
+    references.stream().filter(ref -> ref.hasServiceObject(svcObject)).forEach(ServiceReference::release);
   }
 }

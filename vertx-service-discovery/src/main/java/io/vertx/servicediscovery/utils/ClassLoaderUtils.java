@@ -16,7 +16,12 @@
 
 package io.vertx.servicediscovery.utils;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -49,6 +54,23 @@ public class ClassLoaderUtils {
     try {
       return (Class<T>) classLoader.loadClass(className);
     } catch (ClassNotFoundException e) {
+      return null;
+    }
+  }
+
+  public static <X, T> X createWithDelegate(Class<X> x, T svc) {
+    try {
+      Optional<Constructor<?>> maybe = Arrays.stream(x.getConstructors())
+        .filter(c -> c.getParameterCount() == 1)
+        .filter(c -> c.getParameterTypes()[0].isAssignableFrom(svc.getClass()))
+        .findFirst();
+
+      if (maybe.isPresent()) {
+        return (X) maybe.get().newInstance(svc);
+      } else {
+        return null;
+      }
+    } catch (Exception e) {
       return null;
     }
   }

@@ -17,6 +17,7 @@
 package io.vertx.servicediscovery;
 
 import io.vertx.codegen.annotations.CacheReturn;
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 
 /**
@@ -40,25 +41,24 @@ public interface ServiceReference<T> {
 
   /**
    * Gets the object to access the service. It can be a proxy, a client or whatever object. The type depends on the
-   * service type and the server itself.
+   * service type and the server itself. This method returns the Java version of the object, use
+   * {@link #getService(Class)} to retrieve the polyglot instance of the object.
    *
    * @return the object to access the service
    */
-   T get();
+  @GenIgnore
+  T get();
 
-//   T getServiceObject(Class<T> x);
+  <X> X getService(Class<X> x);
+
+  <X> X getCachedService(Class<X> x);
 
   /**
    * Gets the service object if already retrieved. It won't try to acquire the service object if not retrieved yet.
    *
    * @return the object, {@code null} if not yet retrieved
    */
-   T cached();
-
-
-   default T foo() {
-     return null;
-   }
+  T cached();
 
   /**
    * Releases the reference. Once released, the consumer must not use the reference anymore.
@@ -66,4 +66,11 @@ public interface ServiceReference<T> {
    */
   void release();
 
+  /**
+   * Checks whether or not the service reference has the given service object.
+   *
+   * @param object the service object, must not be {@code null}
+   * @return {@code true} if the service reference service object is equal to the given object, {@code false} otherwise.
+   */
+  boolean hasServiceObject(Object object);
 }

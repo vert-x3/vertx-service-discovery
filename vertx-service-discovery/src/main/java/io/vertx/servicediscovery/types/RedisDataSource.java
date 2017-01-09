@@ -24,7 +24,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.redis.RedisClient;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
-import io.vertx.servicediscovery.impl.ServiceTypes;
+import io.vertx.servicediscovery.spi.ServiceType;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -35,14 +35,9 @@ import java.util.function.Function;
  * @author <a href="http://www.sczyh30.com">Eric Zhao</a>
  */
 @VertxGen
-public interface RedisDataSource extends RedisDataSourceType {
+public interface RedisDataSource extends ServiceType<RedisClient> {
 
   String TYPE = "redis";
-
-  static RedisDataSourceType serviceType() {
-    return (RedisDataSourceType) ServiceTypes.get(TYPE);
-  }
-
 
   /**
    * Convenient method to create a record for a Redis data source.

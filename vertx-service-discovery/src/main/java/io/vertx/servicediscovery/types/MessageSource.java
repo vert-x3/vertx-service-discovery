@@ -37,14 +37,9 @@ import java.util.function.Function;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @VertxGen
-public interface MessageSource extends MessageSourceType {
+public interface MessageSource<X> extends ServiceType<MessageConsumer<X>> {
 
   String TYPE = "message-source";
-
-  static MessageSourceType serviceType() {
-    return (MessageSourceType) ServiceTypes.get(TYPE);
-  }
-
 
   /**
    * Create a record representing a data producer.

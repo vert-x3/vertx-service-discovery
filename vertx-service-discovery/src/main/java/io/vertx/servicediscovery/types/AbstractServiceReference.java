@@ -17,11 +17,11 @@
 package io.vertx.servicediscovery.types;
 
 import io.vertx.core.Vertx;
-import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.impl.DiscoveryImpl;
-import io.vertx.servicediscovery.spi.ServiceType;
+import io.vertx.servicediscovery.utils.ClassLoaderUtils;
 
 /**
  * A class to simplify the implementation of service reference.
@@ -77,6 +77,48 @@ public abstract class AbstractServiceReference<T> implements ServiceReference<T>
   }
 
   /**
+   * Gets the service object.  It can be a proxy, a client or whatever object depending on the service type. Unlike
+   * {@link #get()} this method let you configure the type of object you want to retrieve. This parameter must match
+   * the expected service type, and must pass the "polyglot" version of the class.
+   *
+   * @param x the
+   * @return the object to access the service
+   */
+  @Override
+  public  <X> X getService(Class<X> x) {
+    T svc = get();
+
+    if (x == null  || x.isInstance(svc)) {
+      return (X) svc;
+    } else {
+      return ClassLoaderUtils.createWithDelegate(x, svc);
+    }
+  }
+
+  /**
+   * GGets the service object if already retrieved. It won't try to acquire the service object if not retrieved yet. Unlike
+   * {@link #cached()} this method let you configure the type of object you want to retrieve. This parameter must match
+   * the expected service type, and must pass the "polyglot" version of the class.
+   *
+   * @param x the
+   * @return the object to access the service
+   */
+  @Override
+  public  <X> X getCachedService(Class<X> x) {
+    T svc = cached();
+
+    if (svc == null) {
+      return null;
+    }
+
+    if (x == null  || x.isInstance(svc)) {
+      return (X) svc;
+    } else {
+      return ClassLoaderUtils.createWithDelegate(x, svc);
+    }
+  }
+
+  /**
    * Method to implement to retrieve the service object. It can be a proxy creation, or a new client. This method is
    * called once, then the return is cached.
    *
@@ -107,5 +149,10 @@ public abstract class AbstractServiceReference<T> implements ServiceReference<T>
       close();
       service = null;
     }
+  }
+
+  @Override
+  public boolean hasServiceObject(Object object) {
+    return object != null && object.equals(service);
   }
 }

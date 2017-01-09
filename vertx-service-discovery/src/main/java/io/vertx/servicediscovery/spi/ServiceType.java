@@ -59,23 +59,4 @@ public interface ServiceType<T> {
    */
   ServiceReference<T> get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration);
 
-
-  /**
-   * Unwrap the service reference to its implementation and return it.
-   *
-   * @param ref the service reference
-   * @return the service implementation
-   */
-  T getService(ServiceReference<T> ref);
-
-  <X> X getObject(ServiceReference ref, Class<X> clazz);
-
-  /**
-   * Unwrap the cached reference to its implementation and return it.
-   *
-   * @param ref the service reference
-   * @return the cached implementation
-   */
-  T cachedService(ServiceReference<T> ref);
-
 }

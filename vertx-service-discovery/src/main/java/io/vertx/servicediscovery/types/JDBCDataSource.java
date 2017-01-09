@@ -25,6 +25,7 @@ import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.Record;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.servicediscovery.impl.ServiceTypes;
+import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.impl.HttpEndpointImpl;
 import io.vertx.servicediscovery.types.impl.JDBCDataSourceImpl;
 
@@ -35,13 +36,10 @@ import java.util.function.Function;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @VertxGen
-public interface JDBCDataSource extends JDBCDataSourceType {
+public interface JDBCDataSource extends ServiceType<JDBCClient> {
 
   String TYPE = "jdbc";
 
-  static JDBCDataSourceType serviceType() {
-    return (JDBCDataSourceType) ServiceTypes.get(TYPE);
-  }
 
   static Record createRecord(String name, JsonObject location, JsonObject metadata) {
     Objects.requireNonNull(name);

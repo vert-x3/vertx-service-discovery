@@ -19,24 +19,20 @@ package io.vertx.servicediscovery.types.impl;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.types.AbstractServiceReference;
 import io.vertx.servicediscovery.types.EventBusService;
-import io.vertx.servicediscovery.types.EventBusServiceType;
 import io.vertx.servicediscovery.utils.ClassLoaderUtils;
 import io.vertx.serviceproxy.ProxyHelper;
 
-import java.lang.reflect.Constructor;
 import java.util.Objects;
-
-import static io.vertx.servicediscovery.types.EventBusService.TYPE;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class EventBusServiceImpl<T> implements EventBusServiceType<T> {
+public class EventBusServiceImpl<T> implements EventBusService<T> {
 
   @Override
   public String name() {
@@ -44,26 +40,12 @@ public class EventBusServiceImpl<T> implements EventBusServiceType<T> {
   }
 
   @Override
-  public ServiceReference<T> get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration) {
+  public ServiceReference<T> get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject
+    configuration) {
     Objects.requireNonNull(vertx);
     Objects.requireNonNull(record);
     Objects.requireNonNull(discovery);
     return new EventBusServiceReference(vertx, discovery, record, configuration);
-  }
-
-  @Override
-  public T getService(ServiceReference<T> ref) {
-    return ref.get();
-  }
-
-  @Override
-  public <X> X getObject(ServiceReference ref, Class<X> clazz) {
-    return (X) getService(ref);
-  }
-
-  @Override
-  public T cachedService(ServiceReference<T> ref) {
-    return ref.cached();
   }
 
   /**
@@ -72,17 +54,14 @@ public class EventBusServiceImpl<T> implements EventBusServiceType<T> {
   private class EventBusServiceReference extends AbstractServiceReference<T> {
 
     private final DeliveryOptions deliveryOptions;
-    private final String clientClass;
     private final String serviceInterface;
 
     EventBusServiceReference(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject conf) {
       super(vertx, discovery, record);
       this.serviceInterface = record.getMetadata().getString("service.interface");
       if (conf != null) {
-        this.clientClass = conf.getString("client.class");
         this.deliveryOptions = new DeliveryOptions(conf);
       } else {
-        this.clientClass = serviceInterface;
         this.deliveryOptions = null;
       }
       Objects.requireNonNull(serviceInterface);
@@ -98,24 +77,9 @@ public class EventBusServiceImpl<T> implements EventBusServiceType<T> {
     public synchronized T retrieve() {
       Class<T> itf = ClassLoaderUtils.load(serviceInterface, this.getClass().getClassLoader());
       if (itf == null) {
-        throw new IllegalStateException("Cannot load class " + clientClass);
+        throw new IllegalStateException("Cannot load class " + serviceInterface);
       } else {
-        // 1) Create the java proxy
-        T proxy = ProxyHelper.createProxy(itf, vertx, record().getLocation().getString(Record.ENDPOINT),
-            deliveryOptions);
-
-        // 2) if we have a client class, create an instance with the proxy
-        if (clientClass != null) {
-          try {
-            Class<T> client = ClassLoaderUtils.load(clientClass, this.getClass().getClassLoader());
-            Constructor<T> constructor = client.getConstructor(Object.class);
-            return constructor.newInstance(proxy);
-          } catch (Exception e) {
-            throw new RuntimeException(e);
-          }
-        } else {
-          return proxy;
-        }
+        return ProxyHelper.createProxy(itf, vertx, record().getLocation().getString(Record.ENDPOINT), deliveryOptions);
       }
     }
   }

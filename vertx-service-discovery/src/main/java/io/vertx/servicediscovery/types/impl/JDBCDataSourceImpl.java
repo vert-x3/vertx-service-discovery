@@ -24,7 +24,6 @@ import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.types.AbstractServiceReference;
 import io.vertx.servicediscovery.types.JDBCDataSource;
-import io.vertx.servicediscovery.types.JDBCDataSourceType;
 
 import java.util.Objects;
 
@@ -33,7 +32,7 @@ import java.util.Objects;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class JDBCDataSourceImpl implements JDBCDataSourceType {
+public class JDBCDataSourceImpl implements JDBCDataSource {
   @Override
   public String name() {
     return JDBCDataSource.TYPE;
@@ -45,21 +44,6 @@ public class JDBCDataSourceImpl implements JDBCDataSourceType {
     Objects.requireNonNull(record);
     Objects.requireNonNull(discovery);
     return new JdbcServiceReference(vertx, discovery, record, configuration);
-  }
-
-  @Override
-  public <X> X getObject(ServiceReference ref, Class<X> clazz) {
-    return (X) getService(ref);
-  }
-
-  @Override
-  public JDBCClient getService(ServiceReference<JDBCClient> ref) {
-    return ref.get();
-  }
-
-  @Override
-  public JDBCClient cachedService(ServiceReference<JDBCClient> ref) {
-    return ref.cached();
   }
 
   /**

@@ -23,7 +23,7 @@ import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.types.AbstractServiceReference;
-import io.vertx.servicediscovery.types.MessageSourceType;
+import io.vertx.servicediscovery.types.MessageSource;
 
 import java.util.Objects;
 
@@ -32,7 +32,7 @@ import java.util.Objects;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class MessageSourceImpl implements MessageSourceType {
+public class MessageSourceImpl<X> implements MessageSource<X> {
 
   public static final String TYPE = "message-source";
 
@@ -42,7 +42,7 @@ public class MessageSourceImpl implements MessageSourceType {
   }
 
   @Override
-  public ServiceReference<MessageConsumer>
+  public ServiceReference<MessageConsumer<X>>
     get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration) {
 
     Objects.requireNonNull(vertx);
@@ -51,25 +51,10 @@ public class MessageSourceImpl implements MessageSourceType {
     return new MessageSourceReference(vertx, discovery, record);
   }
 
-  @Override
-  public <X> X getObject(ServiceReference ref, Class<X> clazz) {
-    return (X) getService(ref);
-  }
-
-  @Override
-  public MessageConsumer getService(ServiceReference<MessageConsumer> ref) {
-    return ref.get();
-  }
-
-  @Override
-  public MessageConsumer cachedService(ServiceReference<MessageConsumer> ref) {
-    return ref.cached();
-  }
-
   /**
    * Implementation of {@link ServiceReference} for data producer.
    */
-  private class MessageSourceReference extends AbstractServiceReference<MessageConsumer> {
+  private class MessageSourceReference extends AbstractServiceReference<MessageConsumer<X>> {
 
     MessageSourceReference(Vertx vertx, ServiceDiscovery discovery, Record record) {
       super(vertx, discovery, record);
@@ -81,7 +66,7 @@ public class MessageSourceImpl implements MessageSourceType {
      * @return the consumer
      */
     @Override
-    public MessageConsumer retrieve() {
+    public MessageConsumer<X> retrieve() {
       return vertx.eventBus().consumer(record().getLocation().getString(Record.ENDPOINT));
     }
 
