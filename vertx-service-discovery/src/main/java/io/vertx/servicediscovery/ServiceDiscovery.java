@@ -313,9 +313,14 @@ public interface ServiceDiscovery {
   static void releaseServiceObject(ServiceDiscovery discovery, Object svcObject) {
     Objects.requireNonNull(discovery);
     Objects.requireNonNull(svcObject);
-    // TODO Change here - it may be the polyglot object, and so `delegate` must be "retrieved"
+
+    Object svc = ClassLoaderUtils.extractDelegate(svcObject);
+    if (svc == null) {
+      svc = svcObject;
+    }
 
     Collection<ServiceReference> references = discovery.bindings();
-    references.stream().filter(ref -> ref.hasServiceObject(svcObject)).forEach(ServiceReference::release);
+    Object finalSvc = svc;
+    references.stream().filter(ref -> ref.isHolding(finalSvc)).forEach(ServiceReference::release);
   }
 }

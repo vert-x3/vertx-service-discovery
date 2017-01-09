@@ -109,10 +109,10 @@ var ServiceReference = function(j_val, j_arg_0) {
    @param object {Object} the service object, must not be <code>null</code> 
    @return {boolean} <code>true</code> if the service reference service object is equal to the given object, <code>false</code> otherwise.
    */
-  this.hasServiceObject = function(object) {
+  this.isHolding = function(object) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] !== 'function') {
-      return j_serviceReference["hasServiceObject(java.lang.Object)"](utils.convParamTypeUnknown(object));
+      return j_serviceReference["isHolding(java.lang.Object)"](utils.convParamTypeUnknown(object));
     } else throw new TypeError('function invoked with invalid arguments');
   };
 

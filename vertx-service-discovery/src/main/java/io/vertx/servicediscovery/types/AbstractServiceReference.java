@@ -152,7 +152,8 @@ public abstract class AbstractServiceReference<T> implements ServiceReference<T>
   }
 
   @Override
-  public boolean hasServiceObject(Object object) {
-    return object != null && object.equals(service);
+  public synchronized boolean isHolding(Object object) {
+    // Because some language may use proxy, we compare hashCode and equals
+    return service != null  && (object.hashCode() == service.hashCode()  || object.equals(service));
   }
 }

@@ -65,11 +65,11 @@ module VertxServiceDiscovery
     #  Checks whether or not the service reference has the given service object.
     # @param [Object] object the service object, must not be <code>null</code>
     # @return [true,false] <code>true</code> if the service reference service object is equal to the given object, <code>false</code> otherwise.
-    def has_service_object?(object=nil)
+    def holding?(object=nil)
       if ::Vertx::Util::unknown_type.accept?(object) && !block_given?
-        return @j_del.java_method(:hasServiceObject, [Java::java.lang.Object.java_class]).call(::Vertx::Util::Utils.to_object(object))
+        return @j_del.java_method(:isHolding, [Java::java.lang.Object.java_class]).call(::Vertx::Util::Utils.to_object(object))
       end
-      raise ArgumentError, "Invalid arguments when calling has_service_object?(#{object})"
+      raise ArgumentError, "Invalid arguments when calling holding?(#{object})"
     end
   end
 end

@@ -72,5 +72,5 @@ public interface ServiceReference<T> {
    * @param object the service object, must not be {@code null}
    * @return {@code true} if the service reference service object is equal to the given object, {@code false} otherwise.
    */
-  boolean hasServiceObject(Object object);
+  boolean isHolding(Object object);
 }

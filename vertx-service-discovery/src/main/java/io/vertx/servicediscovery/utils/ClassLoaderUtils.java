@@ -17,7 +17,6 @@
 package io.vertx.servicediscovery.utils;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Objects;
@@ -43,7 +42,7 @@ public class ClassLoaderUtils {
     }
 
     // Last attempt, try with the TCCL
-    if (loaded == null  && Thread.currentThread().getContextClassLoader() != null) {
+    if (loaded == null && Thread.currentThread().getContextClassLoader() != null) {
       return tryToLoad(className, Thread.currentThread().getContextClassLoader());
     }
 
@@ -72,6 +71,52 @@ public class ClassLoaderUtils {
       }
     } catch (Exception e) {
       return null;
+    }
+  }
+
+  public static Object extractDelegate(Object object) {
+    if (object == null) {
+      return null;
+    }
+
+    if (object.getClass().getName().equals("jdk.nashorn.api.scripting.ScriptObjectMirror")) {
+      return extractDelegateFromJsObject(object);
+    }
+
+    if (object.getClass().getName().startsWith("org.jruby.RubyObjectVar")) {
+      return extractDelegateFromJRubyObject(object);
+    }
+
+    return extractDelegateFromRX(object);
+  }
+
+  private static Object extractDelegateFromRX(Object object) {
+    try {
+      Method method = object.getClass().getMethod("getDelegate");
+      return method.invoke(object);
+    } catch (NoSuchMethodException e) {
+      // Not a RX object
+      return null;
+    }  catch (Exception e) {
+      throw new RuntimeException("Unable to extract the delegate from the given RX object", e);
+    }
+  }
+
+  public static Object extractDelegateFromJRubyObject(Object object) {
+    try {
+      Method method = object.getClass().getMethod("callMethod", String.class);
+      return method.invoke(object, "j_del");
+    } catch (Exception e) {
+      throw new RuntimeException("Unable to extract the delegate from the given Ruby object", e);
+    }
+  }
+
+  public static Object extractDelegateFromJsObject(Object object) {
+    try {
+      Method method = object.getClass().getMethod("getMember", String.class);
+      return method.invoke(object, "_jdel");
+    } catch (Exception e) {
+      throw new RuntimeException("Unable to extract the delegate from the given JavaScript object", e);
     }
   }
 }
