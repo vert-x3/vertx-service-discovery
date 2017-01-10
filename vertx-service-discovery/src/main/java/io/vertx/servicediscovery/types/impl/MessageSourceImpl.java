@@ -19,8 +19,8 @@ package io.vertx.servicediscovery.types.impl;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.types.AbstractServiceReference;
 import io.vertx.servicediscovery.types.MessageSource;
@@ -32,7 +32,7 @@ import java.util.Objects;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class MessageSourceImpl implements MessageSource {
+public class MessageSourceImpl<X> implements MessageSource<X> {
 
   public static final String TYPE = "message-source";
 
@@ -42,7 +42,9 @@ public class MessageSourceImpl implements MessageSource {
   }
 
   @Override
-  public ServiceReference get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration) {
+  public ServiceReference<MessageConsumer<X>>
+    get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration) {
+
     Objects.requireNonNull(vertx);
     Objects.requireNonNull(record);
     Objects.requireNonNull(discovery);
@@ -52,7 +54,7 @@ public class MessageSourceImpl implements MessageSource {
   /**
    * Implementation of {@link ServiceReference} for data producer.
    */
-  private class MessageSourceReference extends AbstractServiceReference<MessageConsumer> {
+  private class MessageSourceReference extends AbstractServiceReference<MessageConsumer<X>> {
 
     MessageSourceReference(Vertx vertx, ServiceDiscovery discovery, Record record) {
       super(vertx, discovery, record);
@@ -64,7 +66,7 @@ public class MessageSourceImpl implements MessageSource {
      * @return the consumer
      */
     @Override
-    public MessageConsumer retrieve() {
+    public MessageConsumer<X> retrieve() {
       return vertx.eventBus().consumer(record().getLocation().getString(Record.ENDPOINT));
     }
 

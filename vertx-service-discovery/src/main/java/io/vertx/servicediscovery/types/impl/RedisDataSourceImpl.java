@@ -41,7 +41,7 @@ public class RedisDataSourceImpl implements RedisDataSource {
   }
 
   @Override
-  public ServiceReference get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration) {
+  public ServiceReference<RedisClient> get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration) {
     Objects.requireNonNull(vertx);
     Objects.requireNonNull(record);
     Objects.requireNonNull(discovery);

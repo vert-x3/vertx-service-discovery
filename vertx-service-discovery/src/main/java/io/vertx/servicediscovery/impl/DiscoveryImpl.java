@@ -102,13 +102,13 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
 
   @Override
-  public ServiceReference getReference(Record record) {
+  public <T> ServiceReference<T> getReference(Record record) {
     return getReferenceWithConfiguration(record, new JsonObject());
   }
 
   @Override
-  public ServiceReference getReferenceWithConfiguration(Record record, JsonObject configuration) {
-    ServiceReference reference = ServiceTypes.get(record).get(vertx, this, record, configuration);
+  public <T> ServiceReference<T> getReferenceWithConfiguration(Record record, JsonObject configuration) {
+    ServiceReference<T> reference = ServiceTypes.get(record).get(vertx, this, record, configuration);
     bindings.add(reference);
     sendBindEvent(reference);
     return reference;

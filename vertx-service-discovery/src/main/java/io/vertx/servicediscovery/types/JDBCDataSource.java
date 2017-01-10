@@ -24,16 +24,22 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.Record;
 import io.vertx.ext.jdbc.JDBCClient;
+import io.vertx.servicediscovery.impl.ServiceTypes;
+import io.vertx.servicediscovery.spi.ServiceType;
+import io.vertx.servicediscovery.types.impl.HttpEndpointImpl;
+import io.vertx.servicediscovery.types.impl.JDBCDataSourceImpl;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @VertxGen
-public interface JDBCDataSource extends DataSource {
+public interface JDBCDataSource extends ServiceType<JDBCClient> {
 
-  String DEFAULT_TYPE = "jdbc";
+  String TYPE = "jdbc";
+
 
   static Record createRecord(String name, JsonObject location, JsonObject metadata) {
     Objects.requireNonNull(name);
@@ -46,8 +52,6 @@ public interface JDBCDataSource extends DataSource {
     if (metadata != null) {
       record.setMetadata(metadata);
     }
-
-    record.setMetadata(new JsonObject().put(DS_TYPE, DEFAULT_TYPE));
 
     return record;
   }
@@ -66,7 +70,26 @@ public interface JDBCDataSource extends DataSource {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.getReference(ar.result()).get()));
+        resultHandler.handle(Future.succeededFuture(discovery.<JDBCClient>getReference(ar.result()).get()));
+      }
+    });
+  }
+
+  /**
+   * Convenient method that looks for a JDBC datasource source and provides the configured {@link io.vertx.ext.jdbc.JDBCClient}. The
+   * async result is marked as failed is there are no matching services, or if the lookup fails.
+   *
+   * @param discovery     The service discovery instance
+   * @param filter        The filter (must not be {@code null})
+   * @param resultHandler The result handler
+   */
+  static void getJDBCClient(ServiceDiscovery discovery, Function<Record, Boolean> filter,
+                            Handler<AsyncResult<JDBCClient>> resultHandler) {
+    discovery.getRecord(filter, ar -> {
+      if (ar.failed() || ar.result() == null) {
+        resultHandler.handle(Future.failedFuture("No matching record"));
+      } else {
+        resultHandler.handle(Future.succeededFuture(discovery.<JDBCClient>getReference(ar.result()).get()));
       }
     });
   }
@@ -87,7 +110,28 @@ public interface JDBCDataSource extends DataSource {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
         resultHandler.handle(Future.succeededFuture(
-            discovery.getReferenceWithConfiguration(ar.result(), consumerConfiguration).get()));
+            discovery.<JDBCClient>getReferenceWithConfiguration(ar.result(), consumerConfiguration).get()));
+      }
+    });
+  }
+
+  /**
+   * Convenient method that looks for a JDBC datasource source and provides the configured {@link io.vertx.ext.jdbc.JDBCClient}. The
+   * async result is marked as failed is there are no matching services, or if the lookup fails.
+   *
+   * @param discovery             The service discovery instance
+   * @param filter                The filter, must not be {@code null}
+   * @param consumerConfiguration the consumer configuration
+   * @param resultHandler         the result handler
+   */
+  static void getJDBCClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject consumerConfiguration,
+                            Handler<AsyncResult<JDBCClient>> resultHandler) {
+    discovery.getRecord(filter, ar -> {
+      if (ar.failed() || ar.result() == null) {
+        resultHandler.handle(Future.failedFuture("No matching record"));
+      } else {
+        resultHandler.handle(Future.succeededFuture(
+          discovery.<JDBCClient>getReferenceWithConfiguration(ar.result(), consumerConfiguration).get()));
       }
     });
   }

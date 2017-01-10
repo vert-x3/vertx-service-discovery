@@ -24,6 +24,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.impl.DiscoveryImpl;
 import io.vertx.servicediscovery.spi.ServiceExporter;
 import io.vertx.servicediscovery.spi.ServiceImporter;
+import io.vertx.servicediscovery.utils.ClassLoaderUtils;
 
 import java.util.Collection;
 import java.util.List;
@@ -97,7 +98,7 @@ public interface ServiceDiscovery {
    * @return the service reference, that allows retrieving the service object. Once called the service reference is
    * cached, and need to be released.
    */
-  ServiceReference getReference(Record record);
+  <T> ServiceReference<T> getReference(Record record);
 
   /**
    * Gets a service reference from the given record, the reference is configured with the given json object.
@@ -107,7 +108,7 @@ public interface ServiceDiscovery {
    * @return the service reference, that allows retrieving the service object. Once called the service reference is
    * cached, and need to be released.
    */
-  ServiceReference getReferenceWithConfiguration(Record record, JsonObject configuration);
+  <T> ServiceReference<T> getReferenceWithConfiguration(Record record, JsonObject configuration);
 
   /**
    * Releases the service reference.
@@ -115,7 +116,7 @@ public interface ServiceDiscovery {
    * @param reference the reference to release, must not be {@code null}
    * @return whether or not the reference has been released.
    */
-  boolean release(ServiceReference reference);
+  <T> boolean release(ServiceReference<T> reference);
 
   /**
    * Registers a discovery service importer. Importers let you integrate other discovery technologies in this service
@@ -312,7 +313,14 @@ public interface ServiceDiscovery {
   static void releaseServiceObject(ServiceDiscovery discovery, Object svcObject) {
     Objects.requireNonNull(discovery);
     Objects.requireNonNull(svcObject);
+
+    Object svc = ClassLoaderUtils.extractDelegate(svcObject);
+    if (svc == null) {
+      svc = svcObject;
+    }
+
     Collection<ServiceReference> references = discovery.bindings();
-    references.stream().filter(ref -> svcObject.equals(ref.cached())).forEach(discovery::release);
+    Object finalSvc = svc;
+    references.stream().filter(ref -> ref.isHolding(finalSvc)).forEach(ServiceReference::release);
   }
 }

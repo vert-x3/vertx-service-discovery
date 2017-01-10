@@ -17,10 +17,11 @@
 package io.vertx.servicediscovery.types;
 
 import io.vertx.core.Vertx;
-import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.impl.DiscoveryImpl;
+import io.vertx.servicediscovery.utils.ClassLoaderUtils;
 
 /**
  * A class to simplify the implementation of service reference.
@@ -30,13 +31,13 @@ import io.vertx.servicediscovery.impl.DiscoveryImpl;
  * @param <T> the type of service object
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public abstract class AbstractServiceReference<T> implements ServiceReference {
+public abstract class AbstractServiceReference<T> implements ServiceReference<T> {
 
   private final ServiceDiscovery discovery;
 
-  protected T service;
-
   private final Record record;
+
+  protected T service;
 
   protected final Vertx vertx;
 
@@ -55,26 +56,66 @@ public abstract class AbstractServiceReference<T> implements ServiceReference {
   /**
    * Returns the service object. If not retrieved or released, it returns {@code null}.
    *
-   * @param <X> the type of result.
    * @return the cached service object, {@code null} if none
    */
   @Override
-  public synchronized <X> X cached() {
-    return (X) service;
+  public synchronized T cached() {
+    return service;
   }
 
   /**
    * Gets the service object. If not retrieved, call {@link #retrieve()}, otherwise returned the cached value.
    *
-   * @param <X> the type of result
    * @return the service object
    */
   @Override
-  public synchronized <X> X get() {
+  public synchronized T get() {
     if (service == null) {
       service = retrieve();
     }
     return cached();
+  }
+
+  /**
+   * Gets the service object.  It can be a proxy, a client or whatever object depending on the service type. Unlike
+   * {@link #get()} this method let you configure the type of object you want to retrieve. This parameter must match
+   * the expected service type, and must pass the "polyglot" version of the class.
+   *
+   * @param x the
+   * @return the object to access the service
+   */
+  @Override
+  public  <X> X getService(Class<X> x) {
+    T svc = get();
+
+    if (x == null  || x.isInstance(svc)) {
+      return (X) svc;
+    } else {
+      return ClassLoaderUtils.createWithDelegate(x, svc);
+    }
+  }
+
+  /**
+   * GGets the service object if already retrieved. It won't try to acquire the service object if not retrieved yet. Unlike
+   * {@link #cached()} this method let you configure the type of object you want to retrieve. This parameter must match
+   * the expected service type, and must pass the "polyglot" version of the class.
+   *
+   * @param x the
+   * @return the object to access the service
+   */
+  @Override
+  public  <X> X getCachedService(Class<X> x) {
+    T svc = cached();
+
+    if (svc == null) {
+      return null;
+    }
+
+    if (x == null  || x.isInstance(svc)) {
+      return (X) svc;
+    } else {
+      return ClassLoaderUtils.createWithDelegate(x, svc);
+    }
   }
 
   /**
@@ -108,5 +149,11 @@ public abstract class AbstractServiceReference<T> implements ServiceReference {
       close();
       service = null;
     }
+  }
+
+  @Override
+  public synchronized boolean isHolding(Object object) {
+    // Because some language may use proxy, we compare hashCode and equals
+    return service != null  && (object.hashCode() == service.hashCode()  || object.equals(service));
   }
 }
