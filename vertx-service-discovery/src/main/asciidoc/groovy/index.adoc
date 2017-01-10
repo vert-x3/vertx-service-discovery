@@ -745,7 +745,7 @@ JDBCDataSource.getJDBCClient(discovery, [
 
 === Redis Data source
 
-Redis data sources are a specialization for Redis persistence accessible.
+Redis data sources are a specialization for Redis persistence databases.
 The client of a Redis data source service is a `link:../../apidocs/io/vertx/redis/RedisClient.html[RedisClient]`.
 
 ==== Publishing a Redis service
@@ -809,6 +809,92 @@ import io.vertx.servicediscovery.ServiceDiscovery
 import io.vertx.servicediscovery.types.RedisDataSource
 RedisDataSource.getRedisClient(discovery, [
   name:"some-redis-data-source-service"
+], { ar ->
+  if (ar.succeeded()) {
+    def client = ar.result()
+
+    // ...
+
+    // Dont' forget to release the service
+    ServiceDiscovery.releaseServiceObject(discovery, client)
+
+  }
+})
+
+----
+
+=== Mongo Data source
+
+Mongo data sources are a specialization for MongoDB databases.
+The client of a Mongo data source service is a `link:../../apidocs/io/vertx/ext/mongo/MongoClient.html[MongoClient]`.
+
+==== Publishing a Mongo service
+
+Publishing a Mongo data source is a 2-step process:
+
+1. create a record, using `link:../../apidocs/io/vertx/servicediscovery/types/MongoDataSource.html[MongoDataSource]`
+2. publish the record
+
+[source, groovy]
+----
+import io.vertx.servicediscovery.types.MongoDataSource
+def record = MongoDataSource.createRecord("some-data-source-service", [
+  connection_string:"some mongo connection"
+], [
+  'some-metadata':"some-value"
+])
+
+discovery.publish(record, { ar ->
+  // ...
+})
+
+----
+
+The `location` is a simple JSON object that should provide the fields to access the Redis data
+source (url, port...).
+
+==== Consuming a Redis service
+
+As stated in the previous section, how to access a data source depends on the data source itself. To build the
+`link:../../apidocs/io/vertx/ext/mongo/MongoClient.html[MongoClient]`, you can merge configuration: the record location, the metadata and a json object
+provided by the consumer:
+
+[source, groovy]
+----
+// Get the record
+discovery.getRecord([
+  name:"some-data-source-service"
+], { ar ->
+  if (ar.succeeded() && ar.result() != null) {
+    // Retrieve the service reference
+    def reference = discovery.getReferenceWithConfiguration(ar.result(), [
+      username:"clement",
+      password:"*****"
+    ])
+
+    // Retrieve the service object
+    def client = reference.get()
+
+    // ...
+
+    // when done
+    reference.release()
+  }
+})
+
+----
+
+You can also use the `link:../../apidocs/io/vertx/servicediscovery/types/MongoDataSource.html[MongoDataSource]` class to the lookup and retrieval in one call:
+
+[source, groovy]
+----
+import io.vertx.servicediscovery.ServiceDiscovery
+import io.vertx.servicediscovery.types.MongoDataSource
+MongoDataSource.getMongoClient(discovery, [
+  name:"some-data-source-service"
+], [
+  username:"clement",
+  password:"*****"
 ], { ar ->
   if (ar.succeeded()) {
     def client = ar.result()

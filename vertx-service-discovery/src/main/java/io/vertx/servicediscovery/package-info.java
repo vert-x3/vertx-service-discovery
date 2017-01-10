@@ -529,7 +529,7 @@
  *
  * === Redis Data source
  *
- * Redis data sources are a specialization for Redis persistence accessible.
+ * Redis data sources are a specialization for Redis persistence databases.
  * The client of a Redis data source service is a {@link io.vertx.redis.RedisClient}.
  *
  * ==== Publishing a Redis service
@@ -563,6 +563,44 @@
  * [source, $lang]
  * ----
  * {@link examples.RedisDataSourceExamples#example3(ServiceDiscovery)}
+ * ----
+ *
+ * === Mongo Data source
+ *
+ * Mongo data sources are a specialization for MongoDB databases.
+ * The client of a Mongo data source service is a {@link io.vertx.ext.mongo.MongoClient}.
+ *
+ * ==== Publishing a Mongo service
+ *
+ * Publishing a Mongo data source is a 2-step process:
+ *
+ * 1. create a record, using {@link io.vertx.servicediscovery.types.MongoDataSource}
+ * 2. publish the record
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.MongoDataSourceExamples#example1(ServiceDiscovery)}
+ * ----
+ *
+ * The `location` is a simple JSON object that should provide the fields to access the Redis data
+ * source (url, port...).
+ *
+ * ==== Consuming a Redis service
+ *
+ * As stated in the previous section, how to access a data source depends on the data source itself. To build the
+ * {@link io.vertx.ext.mongo.MongoClient}, you can merge configuration: the record location, the metadata and a json object
+ * provided by the consumer:
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.MongoDataSourceExamples#example2(ServiceDiscovery)}
+ * ----
+ *
+ * You can also use the {@link io.vertx.servicediscovery.types.MongoDataSource} class to the lookup and retrieval in one call:
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.MongoDataSourceExamples#example3(ServiceDiscovery)}
  * ----
  *
  * == Listening for service arrivals and departures
