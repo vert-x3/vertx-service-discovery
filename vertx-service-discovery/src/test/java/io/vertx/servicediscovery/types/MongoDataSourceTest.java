@@ -49,7 +49,6 @@ public class MongoDataSourceTest {
         .build());
     MongodProcess process = mongodExe.start();
     await().until(() -> process != null);
-    System.out.println("process ok");
   }
 
   @AfterClass
@@ -75,10 +74,6 @@ public class MongoDataSourceTest {
 
   @Test
   public void test() throws InterruptedException {
-    //JsonObject conf = new JsonObject()
-    //  .put("driverclass", "org.hsqldb.jdbcDriver");
-    System.out.println("test start");
-
     Record record = MongoDataSource.createRecord("some-mongo-db",
       new JsonObject().put("connection_string", "mongodb://localhost:12345"),
       new JsonObject().put("database", "some-raw-data"));
@@ -123,15 +118,11 @@ public class MongoDataSourceTest {
 
   @Test
   public void testWithSugar() throws InterruptedException {
-    //JsonObject conf = new JsonObject()
-    //  .put("driverclass", "org.hsqldb.jdbcDriver");
-
     Record record = MongoDataSource.createRecord("some-mongo-db",
       new JsonObject().put("connection_string", "mongodb://localhost:12345"),
       new JsonObject().put("database", "some-raw-data"));
 
-    discovery.publish(record, (r) -> {
-    });
+    discovery.publish(record, r -> { });
     await().until(() -> record.getRegistration() != null);
 
 
