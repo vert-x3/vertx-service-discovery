@@ -783,7 +783,7 @@ JDBCDataSource.getJDBCClient(discovery, {
 
 === Redis Data source
 
-Redis data sources are a specialization for Redis persistence accessible.
+Redis data sources are a specialization for Redis persistence databases.
 The client of a Redis data source service is a `link:../../jsdoc/module-vertx-redis-js_redis_client-RedisClient.html[RedisClient]`.
 
 ==== Publishing a Redis service
@@ -848,6 +848,92 @@ var ServiceDiscovery = require("vertx-service-discovery-js/service_discovery");
 var RedisDataSource = require("vertx-service-discovery-js/redis_data_source");
 RedisDataSource.getRedisClient(discovery, {
   "name" : "some-redis-data-source-service"
+}, function (ar, ar_err) {
+  if (ar_err == null) {
+    var client = ar;
+
+    // ...
+
+    // Dont' forget to release the service
+    ServiceDiscovery.releaseServiceObject(discovery, client);
+
+  }
+});
+
+----
+
+=== Mongo Data source
+
+Mongo data sources are a specialization for MongoDB databases.
+The client of a Mongo data source service is a `link:../../jsdoc/module-vertx-mongo-js_mongo_client-MongoClient.html[MongoClient]`.
+
+==== Publishing a Mongo service
+
+Publishing a Mongo data source is a 2-step process:
+
+1. create a record, using `link:../../jsdoc/module-vertx-service-discovery-js_mongo_data_source-MongoDataSource.html[MongoDataSource]`
+2. publish the record
+
+[source, js]
+----
+var MongoDataSource = require("vertx-service-discovery-js/mongo_data_source");
+var record = MongoDataSource.createRecord("some-data-source-service", {
+  "connection_string" : "some mongo connection"
+}, {
+  "some-metadata" : "some-value"
+});
+
+discovery.publish(record, function (ar, ar_err) {
+  // ...
+});
+
+----
+
+The `location` is a simple JSON object that should provide the fields to access the Redis data
+source (url, port...).
+
+==== Consuming a Redis service
+
+As stated in the previous section, how to access a data source depends on the data source itself. To build the
+`link:../../jsdoc/module-vertx-mongo-js_mongo_client-MongoClient.html[MongoClient]`, you can merge configuration: the record location, the metadata and a json object
+provided by the consumer:
+
+[source, js]
+----
+// Get the record
+discovery.getRecord({
+  "name" : "some-data-source-service"
+}, function (ar, ar_err) {
+  if (ar_err == null && ar !== null) {
+    // Retrieve the service reference
+    var reference = discovery.getReferenceWithConfiguration(ar, {
+      "username" : "clement",
+      "password" : "*****"
+    });
+
+    // Retrieve the service object
+    var client = reference.get();
+
+    // ...
+
+    // when done
+    reference.release();
+  }
+});
+
+----
+
+You can also use the `link:../../jsdoc/module-vertx-service-discovery-js_mongo_data_source-MongoDataSource.html[MongoDataSource]` class to the lookup and retrieval in one call:
+
+[source, js]
+----
+var ServiceDiscovery = require("vertx-service-discovery-js/service_discovery");
+var MongoDataSource = require("vertx-service-discovery-js/mongo_data_source");
+MongoDataSource.getMongoClient(discovery, {
+  "name" : "some-data-source-service"
+}, {
+  "username" : "clement",
+  "password" : "*****"
 }, function (ar, ar_err) {
   if (ar_err == null) {
     var client = ar;

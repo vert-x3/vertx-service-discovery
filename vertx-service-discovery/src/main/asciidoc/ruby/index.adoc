@@ -782,7 +782,7 @@ VertxServiceDiscovery::JDBCDataSource.get_jdbc_client(discovery, {
 
 === Redis Data source
 
-Redis data sources are a specialization for Redis persistence accessible.
+Redis data sources are a specialization for Redis persistence databases.
 The client of a Redis data source service is a `link:../../yardoc/VertxRedis/RedisClient.html[RedisClient]`.
 
 ==== Publishing a Redis service
@@ -847,6 +847,92 @@ require 'vertx-service-discovery/service_discovery'
 require 'vertx-service-discovery/redis_data_source'
 VertxServiceDiscovery::RedisDataSource.get_redis_client(discovery, {
   'name' => "some-redis-data-source-service"
+}) { |ar_err,ar|
+  if (ar_err == nil)
+    client = ar
+
+    # ...
+
+    # Dont' forget to release the service
+    VertxServiceDiscovery::ServiceDiscovery.release_service_object(discovery, client)
+
+  end
+}
+
+----
+
+=== Mongo Data source
+
+Mongo data sources are a specialization for MongoDB databases.
+The client of a Mongo data source service is a `link:../../yardoc/VertxMongo/MongoClient.html[MongoClient]`.
+
+==== Publishing a Mongo service
+
+Publishing a Mongo data source is a 2-step process:
+
+1. create a record, using `link:../../yardoc/VertxServiceDiscovery/MongoDataSource.html[MongoDataSource]`
+2. publish the record
+
+[source, ruby]
+----
+require 'vertx-service-discovery/mongo_data_source'
+record = VertxServiceDiscovery::MongoDataSource.create_record("some-data-source-service", {
+  'connection_string' => "some mongo connection"
+}, {
+  'some-metadata' => "some-value"
+})
+
+discovery.publish(record) { |ar_err,ar|
+  # ...
+}
+
+----
+
+The `location` is a simple JSON object that should provide the fields to access the Redis data
+source (url, port...).
+
+==== Consuming a Redis service
+
+As stated in the previous section, how to access a data source depends on the data source itself. To build the
+`link:../../yardoc/VertxMongo/MongoClient.html[MongoClient]`, you can merge configuration: the record location, the metadata and a json object
+provided by the consumer:
+
+[source, ruby]
+----
+# Get the record
+discovery.get_record({
+  'name' => "some-data-source-service"
+}) { |ar_err,ar|
+  if (ar_err == nil && ar != nil)
+    # Retrieve the service reference
+    reference = discovery.get_reference_with_configuration(ar, {
+      'username' => "clement",
+      'password' => "*****"
+    })
+
+    # Retrieve the service object
+    client = reference.get()
+
+    # ...
+
+    # when done
+    reference.release()
+  end
+}
+
+----
+
+You can also use the `link:../../yardoc/VertxServiceDiscovery/MongoDataSource.html[MongoDataSource]` class to the lookup and retrieval in one call:
+
+[source, ruby]
+----
+require 'vertx-service-discovery/service_discovery'
+require 'vertx-service-discovery/mongo_data_source'
+VertxServiceDiscovery::MongoDataSource.get_mongo_client(discovery, {
+  'name' => "some-data-source-service"
+}, {
+  'username' => "clement",
+  'password' => "*****"
 }) { |ar_err,ar|
   if (ar_err == nil)
     client = ar
