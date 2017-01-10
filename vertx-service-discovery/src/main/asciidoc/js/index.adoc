@@ -373,9 +373,9 @@ var reference2 = discovery.getReference(record2);
 
 // Then, gets the service object, the returned type depends on the service type:
 // For http endpoint:
-var client = reference1.getService(HttpClient.class);
+var client = reference1.getAs(HttpClient.class);
 // For message source
-var consumer = reference2.getService(MessageConsumer.class);
+var consumer = reference2.getAs(MessageConsumer.class);
 
 // When done with the service
 reference1.release();
@@ -398,7 +398,7 @@ var reference = discovery.getReferenceWithConfiguration(record, conf);
 
 // Then, gets the service object, the returned type depends on the service type:
 // For http endpoint:
-var client = reference.getService(JDBCClient.class);
+var client = reference.getAs(JDBCClient.class);
 
 // Do something with the client...
 
@@ -408,7 +408,7 @@ reference.release();
 ----
 
 In the previous examples, the code uses
-`link:../../jsdoc/module-vertx-service-discovery-js_service_reference-ServiceReference.html#getService[getService]`. The parameter is the type of
+`link:../../jsdoc/module-vertx-service-discovery-js_service_reference-ServiceReference.html#getAs[getAs]`. The parameter is the type of
 object you expect to get. If you are using Java, you can use
 `link:../../jsdoc/module-vertx-service-discovery-js_service_reference-ServiceReference.html#get[get]`. However in the other language you must pass the expected
 type.
@@ -493,7 +493,7 @@ discovery.getRecord({
     // Retrieve the service reference
     var reference = discovery.getReference(ar);
     // Retrieve the service object
-    var client = reference.getService(HttpClient.class);
+    var client = reference.getAs(HttpClient.class);
 
     // You need to path the complete path
     client.getNow("/api/persons", function (response) {
@@ -649,7 +649,7 @@ discovery.getRecord({
     // Retrieve the service reference
     var reference = discovery.getReference(ar);
     // Retrieve the service object
-    var consumer = reference.getService(MessageConsumer.class);
+    var consumer = reference.getAs(MessageConsumer.class);
 
     // Attach a message handler on it
     consumer.handler(function (message) {
@@ -745,7 +745,7 @@ discovery.getRecord({
     });
 
     // Retrieve the service object
-    var client = reference.getService(JDBCClient.class);
+    var client = reference.getAs(JDBCClient.class);
 
     // ...
 
@@ -829,7 +829,7 @@ discovery.getRecord({
     var reference = discovery.getReference(ar);
 
     // Retrieve the service instance
-    var client = reference.getService(RedisClient.class);
+    var client = reference.getAs(RedisClient.class);
 
     // ...
 

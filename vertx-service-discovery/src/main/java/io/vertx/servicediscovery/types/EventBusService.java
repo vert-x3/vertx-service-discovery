@@ -37,7 +37,7 @@ import java.util.function.Function;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @VertxGen
-public interface EventBusService<T> extends ServiceType<T> {
+public interface EventBusService extends ServiceType {
 
   /**
    * Name of the type.
@@ -125,7 +125,7 @@ public interface EventBusService<T> extends ServiceType<T> {
         if (ar.result() == null) {
           resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
         } else {
-          ServiceReference<T> service = discovery.getReference(ar.result());
+          ServiceReference service = discovery.getReference(ar.result());
           resultHandler.handle(Future.succeededFuture(service.get()));
         }
       }
@@ -157,8 +157,8 @@ public interface EventBusService<T> extends ServiceType<T> {
         if (ar.result() == null) {
           resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
         } else {
-          ServiceReference<T> service = discovery.getReference(ar.result());
-          resultHandler.handle(Future.succeededFuture(service.getService(clientClass)));
+          ServiceReference service = discovery.getReference(ar.result());
+          resultHandler.handle(Future.succeededFuture(service.getAs(clientClass)));
         }
       }
     });
@@ -189,8 +189,8 @@ public interface EventBusService<T> extends ServiceType<T> {
         if (ar.result() == null) {
           resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
         } else {
-          ServiceReference<T> service = discovery.getReference(ar.result());
-          resultHandler.handle(Future.succeededFuture(service.getService(clientClass)));
+          ServiceReference service = discovery.getReference(ar.result());
+          resultHandler.handle(Future.succeededFuture(service.getAs(clientClass)));
         }
       }
     });

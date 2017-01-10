@@ -7,14 +7,29 @@ module VertxServiceDiscovery
   class MessageSource
     # @private
     # @param j_del [::VertxServiceDiscovery::MessageSource] the java delegate
-    def initialize(j_del, j_arg_X=nil)
+    def initialize(j_del)
       @j_del = j_del
-      @j_arg_X = j_arg_X != nil ? j_arg_X : ::Vertx::Util::unknown_type
     end
     # @private
     # @return [::VertxServiceDiscovery::MessageSource] the underlying java delegate
     def j_del
       @j_del
+    end
+    @@j_api_type = Object.new
+    def @@j_api_type.accept?(obj)
+      obj.class == MessageSource
+    end
+    def @@j_api_type.wrap(obj)
+      MessageSource.new(obj)
+    end
+    def @@j_api_type.unwrap(obj)
+      obj.j_del
+    end
+    def self.j_api_type
+      @@j_api_type
+    end
+    def self.j_class
+      Java::IoVertxServicediscoveryTypes::MessageSource.java_class
     end
     #  Create a record representing a data producer.
     # @param [String] name the name of the service

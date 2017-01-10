@@ -261,7 +261,7 @@
  * ----
  *
  * In the previous examples, the code uses
- * {@link io.vertx.servicediscovery.ServiceReference#getService(java.lang.Class)}. The parameter is the type of
+ * {@link io.vertx.servicediscovery.ServiceReference#getAs(java.lang.Class)}. The parameter is the type of
  * object you expect to get. If you are using Java, you can use
  * {@link io.vertx.servicediscovery.ServiceReference#get()}. However in the other language you must pass the expected
  * type.

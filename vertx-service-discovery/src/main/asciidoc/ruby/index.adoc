@@ -373,9 +373,9 @@ reference2 = discovery.get_reference(record2)
 
 # Then, gets the service object, the returned type depends on the service type:
 # For http endpoint:
-client = reference1.get_service(Vertx::HttpClient::class)
+client = reference1.get_as(Vertx::HttpClient::class)
 # For message source
-consumer = reference2.get_service(Vertx::MessageConsumer::class)
+consumer = reference2.get_as(Vertx::MessageConsumer::class)
 
 # When done with the service
 reference1.release()
@@ -398,7 +398,7 @@ reference = discovery.get_reference_with_configuration(record, conf)
 
 # Then, gets the service object, the returned type depends on the service type:
 # For http endpoint:
-client = reference.get_service(VertxJdbc::JDBCClient::class)
+client = reference.get_as(VertxJdbc::JDBCClient::class)
 
 # Do something with the client...
 
@@ -408,7 +408,7 @@ reference.release()
 ----
 
 In the previous examples, the code uses
-`link:../../yardoc/VertxServiceDiscovery/ServiceReference.html#get_service-instance_method[getService]`. The parameter is the type of
+`link:../../yardoc/VertxServiceDiscovery/ServiceReference.html#get_as-instance_method[getAs]`. The parameter is the type of
 object you expect to get. If you are using Java, you can use
 `link:../../yardoc/VertxServiceDiscovery/ServiceReference.html#get-instance_method[get]`. However in the other language you must pass the expected
 type.
@@ -493,7 +493,7 @@ discovery.get_record({
     # Retrieve the service reference
     reference = discovery.get_reference(ar)
     # Retrieve the service object
-    client = reference.get_service(Vertx::HttpClient::class)
+    client = reference.get_as(Vertx::HttpClient::class)
 
     # You need to path the complete path
     client.get_now("/api/persons") { |response|
@@ -648,7 +648,7 @@ discovery.get_record({
     # Retrieve the service reference
     reference = discovery.get_reference(ar)
     # Retrieve the service object
-    consumer = reference.get_service(Vertx::MessageConsumer::class)
+    consumer = reference.get_as(Vertx::MessageConsumer::class)
 
     # Attach a message handler on it
     consumer.handler() { |message|
@@ -744,7 +744,7 @@ discovery.get_record({
     })
 
     # Retrieve the service object
-    client = reference.get_service(VertxJdbc::JDBCClient::class)
+    client = reference.get_as(VertxJdbc::JDBCClient::class)
 
     # ...
 
@@ -828,7 +828,7 @@ discovery.get_record({
     reference = discovery.get_reference(ar)
 
     # Retrieve the service instance
-    client = reference.get_service(VertxRedis::RedisClient::class)
+    client = reference.get_as(VertxRedis::RedisClient::class)
 
     # ...
 

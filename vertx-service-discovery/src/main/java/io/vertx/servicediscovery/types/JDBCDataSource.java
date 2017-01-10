@@ -36,7 +36,7 @@ import java.util.function.Function;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @VertxGen
-public interface JDBCDataSource extends ServiceType<JDBCClient> {
+public interface JDBCDataSource extends ServiceType {
 
   String TYPE = "jdbc";
 

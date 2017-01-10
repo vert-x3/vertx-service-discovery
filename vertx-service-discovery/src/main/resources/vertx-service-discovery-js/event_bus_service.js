@@ -27,11 +27,10 @@ var Record = io.vertx.servicediscovery.Record;
 
  @class
 */
-var EventBusService = function(j_val, j_arg_0) {
+var EventBusService = function(j_val) {
 
   var j_eventBusService = j_val;
   var that = this;
-  var j_T = typeof j_arg_0 !== 'undefined' ? j_arg_0 : utils.unknown_jtype;
 
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.

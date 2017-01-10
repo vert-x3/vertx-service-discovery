@@ -33,12 +33,12 @@ getVertx().eventBus().consumer("http-ref", function (message) {
       if (!reference) {
         message.reply("FAIL - reference is null");
       } else {
-        var client = reference.getService(HttpClient);
+        var client = reference.getAs(HttpClient);
         if (!client) {
           message.reply("FAIL - client is null");
         } else {
           result.client_del = getDelegate(client);
-          result.cached_del = getDelegate(reference.getCachedService(HttpClient));
+          result.cached_del = getDelegate(reference.cachedAs(HttpClient));
           message.reply(result);
           reference.release();
         }
@@ -100,14 +100,14 @@ getVertx().eventBus().consumer("service-ref", function (message) {
         message.reply("FAIL - reference is null");
       } else {
         // Must create the object.
-        var proxy = reference.getService(HelloService);
+        var proxy = reference.getAs(HelloService);
 
         if (!proxy) {
           message.reply("FAIL - client is null");
         } else {
           result.client = proxy.toString();
           result.client_del = getDelegate(proxy);
-          result.cached_del = getDelegate(reference.getCachedService(HelloService));
+          result.cached_del = getDelegate(reference.cachedAs(HelloService));
           message.reply(result);
           reference.release();
         }
@@ -130,7 +130,7 @@ getVertx().eventBus().consumer("ds-ref", function (message) {
       if (!reference) {
         message.reply("FAIL - reference is null");
       } else {
-        var client = reference.getService(JDBCClient);
+        var client = reference.getAs(JDBCClient);
 
         if (!client) {
           message.reply("FAIL - client is null");
@@ -177,7 +177,7 @@ getVertx().eventBus().consumer("redis-ref", function (message) {
       if (!reference) {
         message.reply("FAIL - reference is null");
       } else {
-        var client = reference.getService(RedisClient);
+        var client = reference.getAs(RedisClient);
         if (!client) {
           message.reply("FAIL - client is null");
         } else {
@@ -221,7 +221,7 @@ getVertx().eventBus().consumer("source1-ref", function (message) {
       if (!reference) {
         message.reply("FAIL - reference is null");
       } else {
-        var client = reference.getService(MessageConsumer);
+        var client = reference.getAs(MessageConsumer);
 
         if (!client) {
           message.reply("FAIL - client is null");

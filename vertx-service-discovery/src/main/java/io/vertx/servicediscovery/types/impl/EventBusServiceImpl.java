@@ -32,7 +32,7 @@ import java.util.Objects;
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class EventBusServiceImpl<T> implements EventBusService<T> {
+public class EventBusServiceImpl<T> implements EventBusService {
 
   @Override
   public String name() {
@@ -40,7 +40,7 @@ public class EventBusServiceImpl<T> implements EventBusService<T> {
   }
 
   @Override
-  public ServiceReference<T> get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject
+  public ServiceReference get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject
     configuration) {
     Objects.requireNonNull(vertx);
     Objects.requireNonNull(record);

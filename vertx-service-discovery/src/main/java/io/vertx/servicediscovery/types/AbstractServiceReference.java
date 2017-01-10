@@ -31,7 +31,7 @@ import io.vertx.servicediscovery.utils.ClassLoaderUtils;
  * @param <T> the type of service object
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public abstract class AbstractServiceReference<T> implements ServiceReference<T> {
+public abstract class AbstractServiceReference<T> implements ServiceReference {
 
   private final ServiceDiscovery discovery;
 
@@ -59,8 +59,8 @@ public abstract class AbstractServiceReference<T> implements ServiceReference<T>
    * @return the cached service object, {@code null} if none
    */
   @Override
-  public synchronized T cached() {
-    return service;
+  public synchronized <X> X cached() {
+    return (X) service;
   }
 
   /**
@@ -69,7 +69,7 @@ public abstract class AbstractServiceReference<T> implements ServiceReference<T>
    * @return the service object
    */
   @Override
-  public synchronized T get() {
+  public synchronized <X> X get() {
     if (service == null) {
       service = retrieve();
     }
@@ -85,8 +85,8 @@ public abstract class AbstractServiceReference<T> implements ServiceReference<T>
    * @return the object to access the service
    */
   @Override
-  public  <X> X getService(Class<X> x) {
-    T svc = get();
+  public  <X> X getAs(Class<X> x) {
+    Object svc = get();
 
     if (x == null  || x.isInstance(svc)) {
       return (X) svc;
@@ -104,8 +104,8 @@ public abstract class AbstractServiceReference<T> implements ServiceReference<T>
    * @return the object to access the service
    */
   @Override
-  public  <X> X getCachedService(Class<X> x) {
-    T svc = cached();
+  public  <X> X cachedAs(Class<X> x) {
+    Object svc = cached();
 
     if (svc == null) {
       return null;

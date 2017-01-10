@@ -29,7 +29,7 @@ public class MyVerticle extends AbstractVerticle {
           message.reply("FAIL - No service");
         } else {
           JsonObject result = new JsonObject();
-          ServiceReference<HttpClient> reference = discovery.getReference(ar.result());
+          ServiceReference reference = discovery.getReference(ar.result());
           if (reference == null) {
             message.reply("FAIL - reference is null");
           } else {
@@ -62,7 +62,7 @@ public class MyVerticle extends AbstractVerticle {
           message.reply("FAIL - No service");
         } else {
           JsonObject result = new JsonObject();
-          ServiceReference<HelloService> reference = discovery.getReference(ar.result());
+          ServiceReference reference = discovery.getReference(ar.result());
           if (reference == null) {
             message.reply("FAIL - reference is null");
           } else {
@@ -95,7 +95,7 @@ public class MyVerticle extends AbstractVerticle {
           message.reply("FAIL - No service");
         } else {
           JsonObject result = new JsonObject();
-          ServiceReference<JDBCClient> reference = discovery.getReference(ar.result());
+          ServiceReference reference = discovery.getReference(ar.result());
           if (reference == null) {
             message.reply("FAIL - reference is null");
           } else {
@@ -126,7 +126,7 @@ public class MyVerticle extends AbstractVerticle {
           message.reply("FAIL - No service");
         } else {
           JsonObject result = new JsonObject();
-          ServiceReference<RedisClient> reference = discovery.getReference(ar.result());
+          ServiceReference reference = discovery.getReference(ar.result());
           if (reference == null) {
             message.reply("FAIL - reference is null");
           } else {
@@ -158,7 +158,7 @@ public class MyVerticle extends AbstractVerticle {
           message.reply("FAIL - No service");
         } else {
           JsonObject result = new JsonObject();
-          ServiceReference<MessageConsumer> reference = discovery.getReference(ar.result());
+          ServiceReference reference = discovery.getReference(ar.result());
           if (reference == null) {
             message.reply("FAIL - reference is null");
           } else {

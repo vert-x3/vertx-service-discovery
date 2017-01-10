@@ -80,7 +80,7 @@ public class MessageSourceTest {
 
     await().until(() -> found.get() != null);
 
-    ServiceReference<MessageConsumer<Double>> service = discovery.getReference(found.get());
+    ServiceReference service = discovery.getReference(found.get());
     MessageConsumer<Double> consumer = service.get();
 
     List<Double> data = new ArrayList<>();

@@ -81,7 +81,7 @@ public class JDBCDataSourceTest {
 
     await().until(() -> found.get() != null);
 
-    ServiceReference<JDBCClient> service = discovery.getReferenceWithConfiguration(found.get(), conf);
+    ServiceReference service = discovery.getReferenceWithConfiguration(found.get(), conf);
     JDBCClient client = service.get();
     AtomicBoolean success = new AtomicBoolean();
     client.getConnection(ar -> {

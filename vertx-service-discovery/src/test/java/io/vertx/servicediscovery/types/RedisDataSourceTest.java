@@ -78,7 +78,7 @@ public class RedisDataSourceTest {
     });
 
     await().until(() -> found.get() != null);
-    ServiceReference<RedisClient> service = discovery.getReference(found.get());
+    ServiceReference service = discovery.getReference(found.get());
     RedisClient client = service.get();
     AtomicBoolean success = new AtomicBoolean();
     client.ping(ar -> {

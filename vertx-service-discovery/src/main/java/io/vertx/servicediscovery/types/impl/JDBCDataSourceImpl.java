@@ -39,7 +39,7 @@ public class JDBCDataSourceImpl implements JDBCDataSource {
   }
 
   @Override
-  public ServiceReference<JDBCClient> get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration) {
+  public ServiceReference get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration) {
     Objects.requireNonNull(vertx);
     Objects.requireNonNull(record);
     Objects.requireNonNull(discovery);

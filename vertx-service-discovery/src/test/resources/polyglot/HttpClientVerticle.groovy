@@ -1,4 +1,4 @@
-def discovery = io.vertx.servicediscovery.ServiceDiscovery.create(vertx);
+def discovery = io.vertx.servicediscovery.ServiceDiscovery.create(vertx)
 
 
 vertx.eventBus().consumer("ref", { message ->
@@ -7,8 +7,8 @@ vertx.eventBus().consumer("ref", { message ->
       message.reply("FAIL - no http service")
       return
     } else {
-      def record = ar.result();
-      def reference = discovery.getReference(record);
+      def record = ar.result()
+      def reference = discovery.getReference(record)
       if (!reference) {
         message.reply("FAIL - reference is null")
         return

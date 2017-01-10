@@ -35,7 +35,7 @@ import java.util.function.Function;
  * @author <a href="http://www.sczyh30.com">Eric Zhao</a>
  */
 @VertxGen
-public interface RedisDataSource extends ServiceType<RedisClient> {
+public interface RedisDataSource extends ServiceType {
 
   String TYPE = "redis";
 

@@ -373,9 +373,9 @@ def reference2 = discovery.getReference(record2)
 
 // Then, gets the service object, the returned type depends on the service type:
 // For http endpoint:
-def client = reference1.getService(HttpClient.class)
+def client = reference1.getAs(HttpClient.class)
 // For message source
-def consumer = reference2.getService(MessageConsumer.class)
+def consumer = reference2.getAs(MessageConsumer.class)
 
 // When done with the service
 reference1.release()
@@ -398,7 +398,7 @@ def reference = discovery.getReferenceWithConfiguration(record, conf)
 
 // Then, gets the service object, the returned type depends on the service type:
 // For http endpoint:
-def client = reference.getService(JDBCClient.class)
+def client = reference.getAs(JDBCClient.class)
 
 // Do something with the client...
 
@@ -408,7 +408,7 @@ reference.release()
 ----
 
 In the previous examples, the code uses
-`link:../../apidocs/io/vertx/servicediscovery/ServiceReference.html#getService-java.lang.Class-[getService]`. The parameter is the type of
+`link:../../apidocs/io/vertx/servicediscovery/ServiceReference.html#getAs-java.lang.Class-[getAs]`. The parameter is the type of
 object you expect to get. If you are using Java, you can use
 `link:../../apidocs/io/vertx/servicediscovery/ServiceReference.html#get--[get]`. However in the other language you must pass the expected
 type.
@@ -493,7 +493,7 @@ discovery.getRecord([
     // Retrieve the service reference
     def reference = discovery.getReference(ar.result())
     // Retrieve the service object
-    def client = reference.getService(HttpClient.class)
+    def client = reference.getAs(HttpClient.class)
 
     // You need to path the complete path
     client.getNow("/api/persons", { response ->
@@ -648,7 +648,7 @@ discovery.getRecord([
     // Retrieve the service reference
     def reference = discovery.getReference(ar.result())
     // Retrieve the service object
-    def consumer = reference.getService(MessageConsumer.class)
+    def consumer = reference.getAs(MessageConsumer.class)
 
     // Attach a message handler on it
     consumer.handler({ message ->
@@ -744,7 +744,7 @@ discovery.getRecord([
     ])
 
     // Retrieve the service object
-    def client = reference.getService(JDBCClient.class)
+    def client = reference.getAs(JDBCClient.class)
 
     // ...
 
@@ -828,7 +828,7 @@ discovery.getRecord([
     def reference = discovery.getReference(ar.result())
 
     // Retrieve the service instance
-    def client = reference.getService(RedisClient.class)
+    def client = reference.getAs(RedisClient.class)
 
     // ...
 

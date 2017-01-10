@@ -26,11 +26,10 @@ var Record = io.vertx.servicediscovery.Record;
 
  @class
 */
-var ServiceReference = function(j_val, j_arg_0) {
+var ServiceReference = function(j_val) {
 
   var j_serviceReference = j_val;
   var that = this;
-  var j_T = typeof j_arg_0 !== 'undefined' ? j_arg_0 : utils.unknown_jtype;
 
   /**
 
@@ -49,28 +48,48 @@ var ServiceReference = function(j_val, j_arg_0) {
   };
 
   /**
+   Gets the object to access the service. It can be a proxy, a client or whatever object. The type depends on the
+   service type and the server itself. This method returns the Java version and primary facet of the object, use
+   {@link ServiceReference#getAs} to retrieve the polyglot instance of the object or another facet..
 
    @public
-   @param x {todo} 
-   @return {Object}
+
+   @return {Object} the object to access the service
    */
-  this.getService = function(x) {
+  this.get = function() {
     var __args = arguments;
-    if (__args.length === 1 && typeof __args[0] === 'function') {
-      return utils.get_jtype(x).wrap(j_serviceReference["getService(java.lang.Class)"](utils.get_jclass(x)));
+    if (__args.length === 0) {
+      return utils.convReturnTypeUnknown(j_serviceReference["get()"]());
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
+   Gets the object to access the service. It can be a proxy, a client or whatever object. The type depends on the
+   service type and the server itself. This method wraps the service object into the desired type.
 
    @public
-   @param x {todo} 
-   @return {Object}
+   @param x {todo} the type of object 
+   @return {Object} the object to access the service wrapped to the given type
    */
-  this.getCachedService = function(x) {
+  this.getAs = function(x) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'function') {
-      return utils.get_jtype(x).wrap(j_serviceReference["getCachedService(java.lang.Class)"](utils.get_jclass(x)));
+      return utils.get_jtype(x).wrap(j_serviceReference["getAs(java.lang.Class)"](utils.get_jclass(x)));
+    } else throw new TypeError('function invoked with invalid arguments');
+  };
+
+  /**
+   Gets the service object if already retrieved. It won't try to acquire the service object if not retrieved yet.
+   Unlike {@link ServiceReference#cached}, this method return the warpped object to the desired (given) type.
+
+   @public
+   @param x {todo} the type of object 
+   @return {Object} the object, <code>null</code> if not yet retrieved
+   */
+  this.cachedAs = function(x) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'function') {
+      return utils.get_jtype(x).wrap(j_serviceReference["cachedAs(java.lang.Class)"](utils.get_jclass(x)));
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -84,7 +103,7 @@ var ServiceReference = function(j_val, j_arg_0) {
   this.cached = function() {
     var __args = arguments;
     if (__args.length === 0) {
-      return j_T.wrap(j_serviceReference["cached()"]());
+      return utils.convReturnTypeUnknown(j_serviceReference["cached()"]());
     } else throw new TypeError('function invoked with invalid arguments');
   };
 

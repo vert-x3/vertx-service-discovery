@@ -47,12 +47,12 @@ public class JDBCDataSourceExamples {
         ar -> {
           if (ar.succeeded() && ar.result() != null) {
             // Retrieve the service reference
-            ServiceReference<JDBCClient> reference = discovery.getReferenceWithConfiguration(
+            ServiceReference reference = discovery.getReferenceWithConfiguration(
                 ar.result(), // The record
                 new JsonObject().put("username", "clement").put("password", "*****")); // Some additional metadata
 
             // Retrieve the service object
-            JDBCClient client = reference.getService(JDBCClient.class);
+            JDBCClient client = reference.getAs(JDBCClient.class);
 
             // ...
 

@@ -7,14 +7,29 @@ module VertxServiceDiscovery
   class EventBusService
     # @private
     # @param j_del [::VertxServiceDiscovery::EventBusService] the java delegate
-    def initialize(j_del, j_arg_T=nil)
+    def initialize(j_del)
       @j_del = j_del
-      @j_arg_T = j_arg_T != nil ? j_arg_T : ::Vertx::Util::unknown_type
     end
     # @private
     # @return [::VertxServiceDiscovery::EventBusService] the underlying java delegate
     def j_del
       @j_del
+    end
+    @@j_api_type = Object.new
+    def @@j_api_type.accept?(obj)
+      obj.class == EventBusService
+    end
+    def @@j_api_type.wrap(obj)
+      EventBusService.new(obj)
+    end
+    def @@j_api_type.unwrap(obj)
+      obj.j_del
+    end
+    def self.j_api_type
+      @@j_api_type
+    end
+    def self.j_class
+      Java::IoVertxServicediscoveryTypes::EventBusService.java_class
     end
     #  Sugar method to creates a record for this type.
     #  <p>

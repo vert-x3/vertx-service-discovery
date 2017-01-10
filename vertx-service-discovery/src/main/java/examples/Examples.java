@@ -167,14 +167,14 @@ public class Examples {
   }
 
   public void example5(ServiceDiscovery discovery, Record record1, Record record2) {
-    ServiceReference<HttpClient> reference1 = discovery.getReference(record1);
-    ServiceReference<MessageConsumer> reference2 = discovery.getReference(record2);
+    ServiceReference reference1 = discovery.getReference(record1);
+    ServiceReference reference2 = discovery.getReference(record2);
 
     // Then, gets the service object, the returned type depends on the service type:
     // For http endpoint:
-    HttpClient client = reference1.getService(HttpClient.class);
+    HttpClient client = reference1.getAs(HttpClient.class);
     // For message source
-    MessageConsumer consumer = reference2.getService(MessageConsumer.class);
+    MessageConsumer consumer = reference2.getAs(MessageConsumer.class);
 
     // When done with the service
     reference1.release();
@@ -182,11 +182,11 @@ public class Examples {
   }
 
   public void example51(ServiceDiscovery discovery, Record record, JsonObject conf) {
-    ServiceReference<JDBCClient> reference = discovery.getReferenceWithConfiguration(record, conf);
+    ServiceReference reference = discovery.getReferenceWithConfiguration(record, conf);
 
     // Then, gets the service object, the returned type depends on the service type:
     // For http endpoint:
-    JDBCClient client = reference.getService(JDBCClient.class);
+    JDBCClient client = reference.getAs(JDBCClient.class);
 
     // Do something with the client...
 

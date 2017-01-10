@@ -35,7 +35,7 @@ import io.vertx.servicediscovery.ServiceReference;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public interface ServiceType<T> {
+public interface ServiceType {
 
   /**
    * Unknown type.
@@ -57,6 +57,6 @@ public interface ServiceType<T> {
    * @param configuration some optional configuration, maybe be {@code null} or empty
    * @return the retrieved {@link ServiceReference}
    */
-  ServiceReference<T> get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration);
+  ServiceReference get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration);
 
 }

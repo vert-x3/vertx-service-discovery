@@ -37,7 +37,7 @@ import java.util.function.Function;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @VertxGen
-public interface MessageSource<X> extends ServiceType<MessageConsumer<X>> {
+public interface MessageSource extends ServiceType {
 
   String TYPE = "message-source";
 

@@ -29,11 +29,10 @@ var Record = io.vertx.servicediscovery.Record;
 
  @class
 */
-var MessageSource = function(j_val, j_arg_0) {
+var MessageSource = function(j_val) {
 
   var j_messageSource = j_val;
   var that = this;
-  var j_X = typeof j_arg_0 !== 'undefined' ? j_arg_0 : utils.unknown_jtype;
 
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.

@@ -83,7 +83,7 @@ public class ServiceProxiesTest {
     await().until(() -> found.get() != null);
     assertThat(found.get().getLocation().getString("endpoint")).isEqualTo("address");
 
-    ServiceReference<HelloService> service = discovery.getReference(found.get());
+    ServiceReference service = discovery.getReference(found.get());
     HelloService hello = service.get();
     AtomicReference<String> result = new AtomicReference<>();
     hello.hello(name, ar -> result.set(ar.result()));
@@ -284,7 +284,7 @@ public class ServiceProxiesTest {
 
     await().until(() -> found.get() != null);
 
-    ServiceReference<HelloService> service = discovery.getReference(found.get());
+    ServiceReference service = discovery.getReference(found.get());
     HelloService hello = service.get();
     AtomicReference<String> result = new AtomicReference<>();
     hello.hello(name, ar -> result.set(ar.result()));

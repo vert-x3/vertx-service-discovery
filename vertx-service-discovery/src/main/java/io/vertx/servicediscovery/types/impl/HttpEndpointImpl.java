@@ -44,7 +44,7 @@ public class HttpEndpointImpl implements HttpEndpoint {
   }
 
   @Override
-  public ServiceReference<HttpClient> get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration) {
+  public ServiceReference get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration) {
     Objects.requireNonNull(vertx);
     Objects.requireNonNull(record);
     Objects.requireNonNull(discovery);

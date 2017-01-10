@@ -50,7 +50,7 @@ var ServiceDiscovery = function(j_val) {
   this.getReference = function(record) {
     var __args = arguments;
     if (__args.length === 1 && (typeof __args[0] === 'object' && __args[0] != null)) {
-      return utils.convReturnVertxGen(ServiceReference, j_serviceDiscovery["getReference(io.vertx.servicediscovery.Record)"](record != null ? new Record(new JsonObject(JSON.stringify(record))) : null), undefined);
+      return utils.convReturnVertxGen(ServiceReference, j_serviceDiscovery["getReference(io.vertx.servicediscovery.Record)"](record != null ? new Record(new JsonObject(JSON.stringify(record))) : null));
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -65,7 +65,7 @@ var ServiceDiscovery = function(j_val) {
   this.getReferenceWithConfiguration = function(record, configuration) {
     var __args = arguments;
     if (__args.length === 2 && (typeof __args[0] === 'object' && __args[0] != null) && (typeof __args[1] === 'object' && __args[1] != null)) {
-      return utils.convReturnVertxGen(ServiceReference, j_serviceDiscovery["getReferenceWithConfiguration(io.vertx.servicediscovery.Record,io.vertx.core.json.JsonObject)"](record != null ? new Record(new JsonObject(JSON.stringify(record))) : null, utils.convParamJsonObject(configuration)), undefined);
+      return utils.convReturnVertxGen(ServiceReference, j_serviceDiscovery["getReferenceWithConfiguration(io.vertx.servicediscovery.Record,io.vertx.core.json.JsonObject)"](record != null ? new Record(new JsonObject(JSON.stringify(record))) : null, utils.convParamJsonObject(configuration)));
     } else throw new TypeError('function invoked with invalid arguments');
   };
 

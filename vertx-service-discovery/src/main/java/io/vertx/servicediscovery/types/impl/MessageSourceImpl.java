@@ -32,7 +32,7 @@ import java.util.Objects;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class MessageSourceImpl<X> implements MessageSource<X> {
+public class MessageSourceImpl implements MessageSource {
 
   public static final String TYPE = "message-source";
 
@@ -42,7 +42,7 @@ public class MessageSourceImpl<X> implements MessageSource<X> {
   }
 
   @Override
-  public ServiceReference<MessageConsumer<X>>
+  public ServiceReference
     get(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject configuration) {
 
     Objects.requireNonNull(vertx);
@@ -54,7 +54,7 @@ public class MessageSourceImpl<X> implements MessageSource<X> {
   /**
    * Implementation of {@link ServiceReference} for data producer.
    */
-  private class MessageSourceReference extends AbstractServiceReference<MessageConsumer<X>> {
+  private class MessageSourceReference<X> extends AbstractServiceReference<MessageConsumer<X>> {
 
     MessageSourceReference(Vertx vertx, ServiceDiscovery discovery, Record record) {
       super(vertx, discovery, record);

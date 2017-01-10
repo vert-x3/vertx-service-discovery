@@ -46,9 +46,9 @@ public class EventBusServiceJavaExamples {
     discovery.getRecord(new JsonObject().put("name", "some-eventbus-service"), ar -> {
       if (ar.succeeded() && ar.result() != null) {
         // Retrieve the service reference
-        ServiceReference<MyService> reference = discovery.getReference(ar.result());
+        ServiceReference reference = discovery.getReference(ar.result());
         // Retrieve the service object
-        MyService service = reference.getService(MyService.class);
+        MyService service = reference.getAs(MyService.class);
 
         // Dont' forget to release the service
         reference.release();

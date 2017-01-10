@@ -38,7 +38,7 @@ import java.util.function.Function;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @VertxGen
-public interface HttpEndpoint extends ServiceType<HttpClient> {
+public interface HttpEndpoint extends ServiceType {
 
   String TYPE = "http-endpoint";
 

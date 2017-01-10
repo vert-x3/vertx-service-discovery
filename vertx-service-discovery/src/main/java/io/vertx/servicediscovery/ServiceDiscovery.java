@@ -98,7 +98,7 @@ public interface ServiceDiscovery {
    * @return the service reference, that allows retrieving the service object. Once called the service reference is
    * cached, and need to be released.
    */
-  <T> ServiceReference<T> getReference(Record record);
+  ServiceReference getReference(Record record);
 
   /**
    * Gets a service reference from the given record, the reference is configured with the given json object.
@@ -108,7 +108,7 @@ public interface ServiceDiscovery {
    * @return the service reference, that allows retrieving the service object. Once called the service reference is
    * cached, and need to be released.
    */
-  <T> ServiceReference<T> getReferenceWithConfiguration(Record record, JsonObject configuration);
+  ServiceReference getReferenceWithConfiguration(Record record, JsonObject configuration);
 
   /**
    * Releases the service reference.
@@ -116,7 +116,7 @@ public interface ServiceDiscovery {
    * @param reference the reference to release, must not be {@code null}
    * @return whether or not the reference has been released.
    */
-  <T> boolean release(ServiceReference<T> reference);
+  boolean release(ServiceReference reference);
 
   /**
    * Registers a discovery service importer. Importers let you integrate other discovery technologies in this service

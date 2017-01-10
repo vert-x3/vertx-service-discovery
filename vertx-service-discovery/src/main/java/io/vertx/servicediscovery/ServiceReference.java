@@ -17,7 +17,6 @@
 package io.vertx.servicediscovery;
 
 import io.vertx.codegen.annotations.CacheReturn;
-import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 
 /**
@@ -31,7 +30,7 @@ import io.vertx.codegen.annotations.VertxGen;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @VertxGen
-public interface ServiceReference<T> {
+public interface ServiceReference {
 
   /**
    * @return the service record.
@@ -41,24 +40,39 @@ public interface ServiceReference<T> {
 
   /**
    * Gets the object to access the service. It can be a proxy, a client or whatever object. The type depends on the
-   * service type and the server itself. This method returns the Java version of the object, use
-   * {@link #getService(Class)} to retrieve the polyglot instance of the object.
+   * service type and the server itself. This method returns the Java version and primary facet of the object, use
+   * {@link #getAs(Class)} to retrieve the polyglot instance of the object or another facet..
    *
    * @return the object to access the service
    */
-  @GenIgnore
-  T get();
+  <T> T get();
 
-  <X> X getService(Class<X> x);
+  /**
+   * Gets the object to access the service. It can be a proxy, a client or whatever object. The type depends on the
+   * service type and the server itself. This method wraps the service object into the desired type.
+   *
+   * @param x   the type of object
+   * @param <X> the type of object
+   * @return the object to access the service wrapped to the given type
+   */
+  <X> X getAs(Class<X> x);
 
-  <X> X getCachedService(Class<X> x);
+  /**
+   * Gets the service object if already retrieved. It won't try to acquire the service object if not retrieved yet.
+   * Unlike {@link #cached()}, this method return the warpped object to the desired (given) type.
+   *
+   * @param x   the type of object
+   * @param <X> the type of object
+   * @return the object, {@code null} if not yet retrieved
+   */
+  <X> X cachedAs(Class<X> x);
 
   /**
    * Gets the service object if already retrieved. It won't try to acquire the service object if not retrieved yet.
    *
    * @return the object, {@code null} if not yet retrieved
    */
-  T cached();
+  <T> T cached();
 
   /**
    * Releases the reference. Once released, the consumer must not use the reference anymore.
