@@ -20,9 +20,9 @@ import io.vertx.servicediscovery.service.HelloService
 import io.vertx.servicediscovery.types.EventBusService
 
 def discovery = ServiceDiscovery.create(vertx)
-EventBusService.<HelloService> getServiceProxy(
+EventBusService.<HelloService> getServiceProxyWithJsonFilter(
         discovery,
-        { rec -> rec.metadata["service.interface"] == HelloService.class.getName() },
+        ["service.interface" : HelloService.class.getName()],
         HelloService.class, // service interface
         { ar ->
           if (ar.failed()) {

@@ -31,6 +31,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -82,7 +83,7 @@ public class ServiceProxiesTest {
     await().until(() -> found.get() != null);
     assertThat(found.get().getLocation().getString("endpoint")).isEqualTo("address");
 
-    ServiceReference service = discovery.getReference(found.get());
+    ServiceReference<HelloService> service = discovery.getReference(found.get());
     HelloService hello = service.get();
     AtomicReference<String> result = new AtomicReference<>();
     hello.hello(name, ar -> result.set(ar.result()));
@@ -150,6 +151,35 @@ public class ServiceProxiesTest {
   }
 
   @Test
+  public void testWithGroovyConsumerWithJsonFilter() {
+    // Step 1 - register the service
+    HelloService svc = new HelloServiceImpl("stuff");
+    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    Record record = EventBusService.createRecord("Hello", "address", HelloService.class);
+
+    discovery.publish(record, (r) -> {
+    });
+    await().until(() -> record.getRegistration() != null);
+
+    // Step 2 - register a consumer that get the result
+    AtomicReference<JsonObject> result = new AtomicReference<>();
+    vertx.eventBus().<JsonObject>consumer("result", message -> result.set(message.body()));
+
+    // Step 3 - deploy the verticle
+    vertx.deployVerticle("verticles/HelloServiceConsumerWithJsonFilter.groovy", ar -> {
+      if (ar.failed()) {
+        // Will fail anyway.
+        ar.cause().printStackTrace();
+      }
+    });
+
+    await().until(() -> result.get() != null);
+
+    assertThat(result.get().getString("status")).isEqualTo("ok");
+    assertThat(result.get().getString("message")).isEqualTo("stuff vert.x");
+  }
+
+  @Test
   public void testWithJavaScriptConsumer() {
     // Step 1 - register the service
     HelloService svc = new HelloServiceImpl("stuff");
@@ -179,6 +209,65 @@ public class ServiceProxiesTest {
   }
 
   @Test
+  public void testWithRXConsumer() {
+    // Step 1 - register the service
+    HelloService svc = new HelloServiceImpl("stuff");
+    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    Record record = EventBusService.createRecord("Hello", "address", HelloService.class);
+
+    discovery.publish(record, (r) -> {
+    });
+    await().until(() -> record.getRegistration() != null);
+
+    // Step 2 - register a consumer that get the result
+    AtomicReference<JsonObject> result = new AtomicReference<>();
+    vertx.eventBus().<JsonObject>consumer("result", message -> result.set(message.body()));
+
+    // Step 3 - deploy the verticle
+    vertx.deployVerticle(RXHelloServiceConsumer.class.getName(), ar -> {
+      if (ar.failed()) {
+        // Will fail anyway.
+        ar.cause().printStackTrace();
+      }
+    });
+
+    await().until(() -> result.get() != null);
+
+    assertThat(result.get().getString("status")).isEqualTo("ok");
+    assertThat(result.get().getString("message")).isEqualTo("stuff vert.x");
+  }
+
+  @Test
+  public void testWithRubyConsumer() {
+    // Step 1 - register the service
+    HelloService svc = new HelloServiceImpl("stuff");
+    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    Record record = EventBusService.createRecord("Hello", "address", HelloService.class);
+
+    discovery.publish(record, (r) -> {
+    });
+    await().until(() -> record.getRegistration() != null);
+
+    // Step 2 - register a consumer that get the result
+    AtomicReference<JsonObject> result = new AtomicReference<>();
+    vertx.eventBus().<JsonObject>consumer("result", message -> result.set(message.body()));
+
+    // Step 3 - deploy the verticle
+    vertx.deployVerticle("verticles/HelloServiceConsumer.rb", ar -> {
+      if (ar.failed()) {
+        // Will fail anyway.
+        ar.cause().printStackTrace();
+      }
+    });
+
+    await().atMost(1, TimeUnit.MINUTES).until(() -> result.get() != null);
+
+    assertThat(result.get().getString("message")).isEqualTo("stuff vert.x");
+
+
+  }
+
+  @Test
   public void testSeveralCallsToRelease() {
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
@@ -195,7 +284,7 @@ public class ServiceProxiesTest {
 
     await().until(() -> found.get() != null);
 
-    ServiceReference service = discovery.getReference(found.get());
+    ServiceReference<HelloService> service = discovery.getReference(found.get());
     HelloService hello = service.get();
     AtomicReference<String> result = new AtomicReference<>();
     hello.hello(name, ar -> result.set(ar.result()));
