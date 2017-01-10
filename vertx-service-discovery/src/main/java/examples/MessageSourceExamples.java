@@ -50,9 +50,9 @@ public class MessageSourceExamples {
     discovery.getRecord(new JsonObject().put("name", "some-message-source-service"), ar -> {
       if (ar.succeeded() && ar.result() != null) {
         // Retrieve the service reference
-        ServiceReference reference = discovery.getReference(ar.result());
+        ServiceReference<MessageConsumer<JsonObject>> reference = discovery.getReference(ar.result());
         // Retrieve the service object
-        MessageConsumer<JsonObject> consumer = reference.get();
+        MessageConsumer<JsonObject> consumer = reference.getService(MessageConsumer.class);
 
         // Attach a message handler on it
         consumer.handler(message -> {

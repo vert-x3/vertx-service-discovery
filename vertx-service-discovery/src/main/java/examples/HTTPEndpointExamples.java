@@ -56,9 +56,9 @@ public class HTTPEndpointExamples {
     discovery.getRecord(new JsonObject().put("name", "some-http-service"), ar -> {
       if (ar.succeeded()  && ar.result() != null) {
         // Retrieve the service reference
-        ServiceReference reference = discovery.getReference(ar.result());
+        ServiceReference<HttpClient> reference = discovery.getReference(ar.result());
         // Retrieve the service object
-        HttpClient client = reference.get();
+        HttpClient client = reference.getService(HttpClient.class);
 
         // You need to path the complete path
         client.getNow("/api/persons", response -> {

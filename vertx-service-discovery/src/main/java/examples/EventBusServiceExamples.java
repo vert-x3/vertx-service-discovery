@@ -46,9 +46,9 @@ public class EventBusServiceExamples {
     discovery.getRecord(new JsonObject().put("name", "some-eventbus-service"), ar -> {
       if (ar.succeeded() && ar.result() != null) {
         // Retrieve the service reference
-        ServiceReference reference = discovery.getReference(ar.result());
+        ServiceReference<MyService> reference = discovery.getReference(ar.result());
         // Retrieve the service object
-        MyService service = reference.get();
+        MyService service = reference.getService(MyService.class);
 
         // Dont' forget to release the service
         reference.release();
@@ -59,6 +59,20 @@ public class EventBusServiceExamples {
   // Java only
   public void example3(ServiceDiscovery discovery) {
     EventBusService.getProxy(discovery, MyService.class, ar -> {
+      if (ar.succeeded()) {
+        MyService service = ar.result();
+
+        // Dont' forget to release the service
+        ServiceDiscovery.releaseServiceObject(discovery, service);
+      }
+    });
+  }
+
+  public void example31(ServiceDiscovery discovery) {
+    EventBusService.getServiceProxyWithJsonFilter(discovery,
+      new JsonObject().put("service.interface", "org.acme.MyService"), // The java interface
+      MyService.class, // The expect client
+      ar -> {
       if (ar.succeeded()) {
         MyService service = ar.result();
 
