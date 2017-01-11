@@ -30,10 +30,7 @@ import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServicePublisher;
 import io.vertx.servicediscovery.spi.ServiceType;
-import io.vertx.servicediscovery.types.HttpEndpoint;
-import io.vertx.servicediscovery.types.HttpLocation;
-import io.vertx.servicediscovery.types.JDBCDataSource;
-import io.vertx.servicediscovery.types.RedisDataSource;
+import io.vertx.servicediscovery.types.*;
 
 import java.util.List;
 import java.util.Map;
@@ -204,7 +201,7 @@ public class KubernetesServiceImporter implements Watcher<Service>, ServiceImpor
       case HttpEndpoint.TYPE:
         manageHttpService(record, service, labels);
         break;
-      // TODO Add JDBC client and redis
+      // TODO Add JDBC client, redis and mongo
       default:
         manageUnknownService(record, service, type);
         break;
@@ -243,6 +240,11 @@ public class KubernetesServiceImporter implements Watcher<Service>, ServiceImpor
     // Redis
     if (port.getPort() == 6379) {
       return RedisDataSource.TYPE;
+    }
+
+    // Mongo
+    if (port.getPort() == 27017 || port.getPort() == 27018  || port.getPort() == 27019) {
+      return MongoDataSource.TYPE;
     }
 
     return ServiceType.UNKNOWN;
