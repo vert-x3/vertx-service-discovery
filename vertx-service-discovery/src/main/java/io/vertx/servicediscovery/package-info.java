@@ -285,6 +285,9 @@
  * * {@link io.vertx.servicediscovery.types.RedisDataSource} - for Redis data sources, the service object is a
  * {@link io.vertx.redis.RedisClient} (the configuration of the client is computed from the location, metadata and
  * consumer configuration).
+ * * {@link io.vertx.servicediscovery.types.MongoDataSource} - for Mongo data sources, the service object is a
+ * {@link io.vertx.ext.mongo.MongoClient} (the configuration of the client is computed from the location, metadata and
+ * consumer configuration).
  *
  * This section gives details about service types in general and describes how to use the default service types.
  *
@@ -616,7 +619,7 @@
  * The `location` is a simple JSON object that should provide the fields to access the Redis data
  * source (url, port...).
  *
- * ==== Consuming a Redis service
+ * ==== Consuming a Mongo service
  *
  * As stated in the previous section, how to access a data source depends on the data source itself. To build the
  * {@link io.vertx.ext.mongo.MongoClient}, you can merge configuration: the record location, the metadata and a json object
