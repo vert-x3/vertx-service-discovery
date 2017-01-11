@@ -94,12 +94,12 @@ EventBusService.createRecord = function() {
 EventBusService.getServiceProxy = function(discovery, filter, clientClass, resultHandler) {
   var __args = arguments;
   if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && typeof __args[1] === 'function' && typeof __args[2] === 'function' && typeof __args[3] === 'function') {
-    return utils.get_jtype(clientClass).wrap(JEventBusService["getServiceProxy(io.vertx.servicediscovery.ServiceDiscovery,java.util.function.Function,java.lang.Class,io.vertx.core.Handler)"](discovery._jdel, function(jVal) {
+    return utils.get_jtype(__args[2]).wrap(JEventBusService["getServiceProxy(io.vertx.servicediscovery.ServiceDiscovery,java.util.function.Function,java.lang.Class,io.vertx.core.Handler)"](discovery._jdel, function(jVal) {
     var jRet = filter(utils.convReturnDataObject(jVal));
     return jRet;
   }, utils.get_jclass(clientClass), function(ar) {
     if (ar.succeeded()) {
-      resultHandler(utils.get_jtype(clientClass).wrap(ar.result()), null);
+      resultHandler(utils.get_jtype(__args[2]).wrap(ar.result()), null);
     } else {
       resultHandler(null, ar.cause());
     }
@@ -123,9 +123,9 @@ EventBusService.getServiceProxy = function(discovery, filter, clientClass, resul
 EventBusService.getServiceProxyWithJsonFilter = function(discovery, filter, clientClass, resultHandler) {
   var __args = arguments;
   if (__args.length === 4 && typeof __args[0] === 'object' && __args[0]._jdel && (typeof __args[1] === 'object' && __args[1] != null) && typeof __args[2] === 'function' && typeof __args[3] === 'function') {
-    return utils.get_jtype(clientClass).wrap(JEventBusService["getServiceProxyWithJsonFilter(io.vertx.servicediscovery.ServiceDiscovery,io.vertx.core.json.JsonObject,java.lang.Class,io.vertx.core.Handler)"](discovery._jdel, utils.convParamJsonObject(filter), utils.get_jclass(clientClass), function(ar) {
+    return utils.get_jtype(__args[2]).wrap(JEventBusService["getServiceProxyWithJsonFilter(io.vertx.servicediscovery.ServiceDiscovery,io.vertx.core.json.JsonObject,java.lang.Class,io.vertx.core.Handler)"](discovery._jdel, utils.convParamJsonObject(filter), utils.get_jclass(clientClass), function(ar) {
     if (ar.succeeded()) {
-      resultHandler(utils.get_jtype(clientClass).wrap(ar.result()), null);
+      resultHandler(utils.get_jtype(__args[2]).wrap(ar.result()), null);
     } else {
       resultHandler(null, ar.cause());
     }

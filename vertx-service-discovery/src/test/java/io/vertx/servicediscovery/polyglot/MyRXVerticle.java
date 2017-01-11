@@ -6,6 +6,7 @@ import io.vertx.rxjava.core.eventbus.MessageConsumer;
 import io.vertx.rxjava.core.http.HttpClient;
 import io.vertx.core.json.JsonObject;
 import io.vertx.rxjava.ext.jdbc.JDBCClient;
+import io.vertx.rxjava.ext.mongo.MongoClient;
 import io.vertx.rxjava.redis.RedisClient;
 import io.vertx.rxjava.servicediscovery.ServiceDiscovery;
 import io.vertx.rxjava.servicediscovery.ServiceReference;
@@ -143,6 +144,38 @@ public class MyRXVerticle extends AbstractVerticle {
             message.reply("FAIL - no service");
           } else {
             RedisClient client = ar.result();
+            result.put("client", client.toString());
+            message.reply(result);
+          }
+        });
+    });
+
+    eb.consumer("mongo-ref", message ->
+      discovery.getRecord(rec -> rec.getName().equalsIgnoreCase("my-mongo-data-source"), ar -> {
+        if (ar.failed()) {
+          message.reply("FAIL - No service");
+        } else {
+          JsonObject result = new JsonObject();
+          ServiceReference reference = discovery.getReference(ar.result());
+          if (reference == null) {
+            message.reply("FAIL - reference is null");
+          } else {
+            MongoClient client = reference.getAs(MongoClient.class);
+            result.put("client", client.toString());
+            message.reply(result);
+          }
+        }
+      }));
+
+    eb.consumer("mongo-sugar", message -> {
+      JsonObject result = new JsonObject();
+      MongoDataSource.getMongoClient(discovery,
+        record -> record.getName().equalsIgnoreCase("my-mongo-data-source"),
+        ar -> {
+          if (ar.failed()) {
+            message.reply("FAIL - no service");
+          } else {
+            MongoClient client = ar.result();
             result.put("client", client.toString());
             message.reply(result);
           }

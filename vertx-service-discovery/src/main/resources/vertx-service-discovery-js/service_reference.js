@@ -74,7 +74,7 @@ var ServiceReference = function(j_val) {
   this.getAs = function(x) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'function') {
-      return utils.get_jtype(x).wrap(j_serviceReference["getAs(java.lang.Class)"](utils.get_jclass(x)));
+      return utils.get_jtype(__args[0]).wrap(j_serviceReference["getAs(java.lang.Class)"](utils.get_jclass(x)));
     } else throw new TypeError('function invoked with invalid arguments');
   };
 
@@ -89,7 +89,7 @@ var ServiceReference = function(j_val) {
   this.cachedAs = function(x) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'function') {
-      return utils.get_jtype(x).wrap(j_serviceReference["cachedAs(java.lang.Class)"](utils.get_jclass(x)));
+      return utils.get_jtype(__args[0]).wrap(j_serviceReference["cachedAs(java.lang.Class)"](utils.get_jclass(x)));
     } else throw new TypeError('function invoked with invalid arguments');
   };
 

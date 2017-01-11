@@ -6,6 +6,7 @@ import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
+import io.vertx.ext.mongo.MongoClient;
 import io.vertx.redis.RedisClient;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceReference;
@@ -146,6 +147,39 @@ public class MyVerticle extends AbstractVerticle {
             message.reply("FAIL - no service");
           } else {
             RedisClient client = ar.result();
+            result.put("client", client.toString());
+            message.reply(result);
+          }
+        });
+    });
+
+    eb.consumer("mongo-ref", message ->
+      discovery.getRecord(rec -> rec.getName().equalsIgnoreCase("my-mongo-data-source"), ar -> {
+        if (ar.failed()) {
+          message.reply("FAIL - No service");
+        } else {
+          JsonObject result = new JsonObject();
+          ServiceReference reference = discovery.getReference(ar.result());
+          if (reference == null) {
+            message.reply("FAIL - reference is null");
+          } else {
+            MongoClient client = reference.get();
+            result.put("client", client.toString());
+            result.put("direct", reference.get().toString());
+            message.reply(result);
+          }
+        }
+      }));
+
+    eb.consumer("mongo-sugar", message -> {
+      JsonObject result = new JsonObject();
+      MongoDataSource.getMongoClient(discovery,
+        record -> record.getName().equalsIgnoreCase("my-mongo-data-source"),
+        ar -> {
+          if (ar.failed()) {
+            message.reply("FAIL - no service");
+          } else {
+            MongoClient client = ar.result();
             result.put("client", client.toString());
             message.reply(result);
           }
