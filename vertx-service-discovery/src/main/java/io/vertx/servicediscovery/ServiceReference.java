@@ -40,17 +40,36 @@ public interface ServiceReference {
 
   /**
    * Gets the object to access the service. It can be a proxy, a client or whatever object. The type depends on the
-   * service type and the server itself.
+   * service type and the server itself. This method returns the Java version and primary facet of the object, use
+   * {@link #getAs(Class)} to retrieve the polyglot instance of the object or another facet..
    *
-   * @param <T> the type
    * @return the object to access the service
    */
   <T> T get();
 
   /**
+   * Gets the object to access the service. It can be a proxy, a client or whatever object. The type depends on the
+   * service type and the server itself. This method wraps the service object into the desired type.
+   *
+   * @param x   the type of object
+   * @param <X> the type of object
+   * @return the object to access the service wrapped to the given type
+   */
+  <X> X getAs(Class<X> x);
+
+  /**
+   * Gets the service object if already retrieved. It won't try to acquire the service object if not retrieved yet.
+   * Unlike {@link #cached()}, this method return the warpped object to the desired (given) type.
+   *
+   * @param x   the type of object
+   * @param <X> the type of object
+   * @return the object, {@code null} if not yet retrieved
+   */
+  <X> X cachedAs(Class<X> x);
+
+  /**
    * Gets the service object if already retrieved. It won't try to acquire the service object if not retrieved yet.
    *
-   * @param <T> the type
    * @return the object, {@code null} if not yet retrieved
    */
   <T> T cached();
@@ -61,4 +80,11 @@ public interface ServiceReference {
    */
   void release();
 
+  /**
+   * Checks whether or not the service reference has the given service object.
+   *
+   * @param object the service object, must not be {@code null}
+   * @return {@code true} if the service reference service object is equal to the given object, {@code false} otherwise.
+   */
+  boolean isHolding(Object object);
 }

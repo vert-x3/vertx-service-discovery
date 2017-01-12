@@ -20,8 +20,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.AbstractServiceReference;
@@ -64,7 +64,6 @@ public class HttpEndpointImpl implements HttpEndpoint {
       this.config = config;
       this.location = new HttpLocation(record.getLocation());
     }
-
 
     /**
      * Gets a HTTP client to access the service.

@@ -52,7 +52,7 @@ public class JDBCDataSourceExamples {
                 new JsonObject().put("username", "clement").put("password", "*****")); // Some additional metadata
 
             // Retrieve the service object
-            JDBCClient client = reference.get();
+            JDBCClient client = reference.getAs(JDBCClient.class);
 
             // ...
 

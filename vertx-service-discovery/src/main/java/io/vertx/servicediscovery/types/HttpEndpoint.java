@@ -24,7 +24,9 @@ import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
+import io.vertx.servicediscovery.impl.ServiceTypes;
 import io.vertx.servicediscovery.spi.ServiceType;
+import io.vertx.servicediscovery.types.impl.HttpEndpointImpl;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -123,7 +125,7 @@ public interface HttpEndpoint extends ServiceType {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.getReference(ar.result()).get()));
+        resultHandler.handle(Future.succeededFuture(discovery.<HttpClient>getReference(ar.result()).get()));
       }
     });
   }
@@ -144,7 +146,8 @@ public interface HttpEndpoint extends ServiceType {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.getReferenceWithConfiguration(ar.result(), conf).get()));
+        resultHandler.handle(Future.succeededFuture(discovery.<HttpClient>getReferenceWithConfiguration(ar.result(), conf).get
+          ()));
       }
     });
   }
@@ -164,7 +167,7 @@ public interface HttpEndpoint extends ServiceType {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.getReference(ar.result()).get()));
+        resultHandler.handle(Future.succeededFuture(discovery.<HttpClient>getReference(ar.result()).get()));
       }
     });
   }
@@ -180,13 +183,14 @@ public interface HttpEndpoint extends ServiceType {
    * @param resultHandler The result handler
    */
   static void getClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject conf,
-    Handler<AsyncResult<HttpClient>>
-    resultHandler) {
+                        Handler<AsyncResult<HttpClient>>
+                          resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.getReferenceWithConfiguration(ar.result(), conf).get()));
+        resultHandler.handle(Future.succeededFuture(
+          discovery.<HttpClient>getReferenceWithConfiguration(ar.result(), conf).get()));
       }
     });
   }

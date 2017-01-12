@@ -48,7 +48,7 @@ public class EventBusServiceJavaExamples {
         // Retrieve the service reference
         ServiceReference reference = discovery.getReference(ar.result());
         // Retrieve the service object
-        MyService service = reference.get();
+        MyService service = reference.getAs(MyService.class);
 
         // Dont' forget to release the service
         reference.release();

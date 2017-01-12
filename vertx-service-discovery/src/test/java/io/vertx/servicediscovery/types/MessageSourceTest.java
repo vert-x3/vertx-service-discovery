@@ -87,7 +87,7 @@ public class MessageSourceTest {
     consumer.handler(message -> {
       data.add(message.body());
     });
-    await().until(() -> ! data.isEmpty());
+    await().until(() -> !data.isEmpty());
     service.release();
     int size = data.size();
     Thread.sleep(500);

@@ -43,18 +43,29 @@ module VertxServiceDiscovery
     end
     #  Convenient method that looks for a Mongo datasource source and provides the configured {::VertxMongo::MongoClient}. The
     #  async result is marked as failed is there are no matching services, or if the lookup fails.
-    # @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
-    # @param [Hash{String => Object}] filter The filter, optional
-    # @param [Hash{String => Object}] consumerConfiguration the consumer configuration
-    # @yield the result handler
+    # @overload getMongoClient(discovery,filter,resultHandler)
+    #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
+    #   @param [Hash{String => Object}] filter The filter, optional
+    #   @yield The result handler
+    # @overload getMongoClient(discovery,filter,resultHandler)
+    #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
+    #   @param [Proc] filter The filter
+    #   @yield The result handler
+    # @overload getMongoClient(discovery,filter,consumerConfiguration,resultHandler)
+    #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
+    #   @param [Hash{String => Object}] filter The filter, optional
+    #   @param [Hash{String => Object}] consumerConfiguration the consumer configuration
+    #   @yield the result handler
     # @return [void]
-    def self.get_mongo_client(discovery=nil,filter=nil,consumerConfiguration=nil)
-      if discovery.class.method_defined?(:j_del) && filter.class == Hash && block_given? && consumerConfiguration == nil
-        return Java::IoVertxServicediscoveryTypes::MongoDataSource.java_method(:getMongoClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxMongo::MongoClient) : nil) }))
-      elsif discovery.class.method_defined?(:j_del) && filter.class == Hash && consumerConfiguration.class == Hash && block_given?
-        return Java::IoVertxServicediscoveryTypes::MongoDataSource.java_method(:getMongoClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),::Vertx::Util::Utils.to_json_object(consumerConfiguration),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxMongo::MongoClient) : nil) }))
+    def self.get_mongo_client(param_1=nil,param_2=nil,param_3=nil)
+      if param_1.class.method_defined?(:j_del) && param_2.class == Hash && block_given? && param_3 == nil
+        return Java::IoVertxServicediscoveryTypes::MongoDataSource.java_method(:getMongoClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,::Vertx::Util::Utils.to_json_object(param_2),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxMongo::MongoClient) : nil) }))
+      elsif param_1.class.method_defined?(:j_del) && param_2.class == Proc && block_given? && param_3 == nil
+        return Java::IoVertxServicediscoveryTypes::MongoDataSource.java_method(:getMongoClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::JavaUtilFunction::Function.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,(Proc.new { |event| param_2.call(event != nil ? JSON.parse(event.toJson.encode) : nil) }),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxMongo::MongoClient) : nil) }))
+      elsif param_1.class.method_defined?(:j_del) && param_2.class == Hash && param_3.class == Hash && block_given?
+        return Java::IoVertxServicediscoveryTypes::MongoDataSource.java_method(:getMongoClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,::Vertx::Util::Utils.to_json_object(param_2),::Vertx::Util::Utils.to_json_object(param_3),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxMongo::MongoClient) : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling get_mongo_client(#{discovery},#{filter},#{consumerConfiguration})"
+      raise ArgumentError, "Invalid arguments when calling get_mongo_client(#{param_1},#{param_2},#{param_3})"
     end
   end
 end

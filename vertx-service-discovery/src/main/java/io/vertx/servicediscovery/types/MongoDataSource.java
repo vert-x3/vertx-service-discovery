@@ -8,18 +8,18 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
+import io.vertx.servicediscovery.spi.ServiceType;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @VertxGen
-public interface MongoDataSource extends DataSource {
+public interface MongoDataSource extends ServiceType {
 
-  String TYPE = "datasource.mongo";
-
-  String DEFAULT_TYPE = "mongo";
+  String TYPE = "mongo";
 
   /**
    * Convenient method to create a record for a Mongo data source.
@@ -41,8 +41,6 @@ public interface MongoDataSource extends DataSource {
       record.setMetadata(metadata);
     }
 
-    record.setMetadata(new JsonObject().put(DS_TYPE, DEFAULT_TYPE));
-
     return record;
   }
 
@@ -55,7 +53,7 @@ public interface MongoDataSource extends DataSource {
    * @param resultHandler The result handler
    */
   static void getMongoClient(ServiceDiscovery discovery, JsonObject filter,
-                            Handler<AsyncResult<MongoClient>> resultHandler) {
+                             Handler<AsyncResult<MongoClient>> resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
@@ -64,6 +62,27 @@ public interface MongoDataSource extends DataSource {
       }
     });
   }
+
+  /**
+   * Convenient method that looks for a Mongo datasource source and provides the configured
+   * {@link io.vertx.ext.mongo.MongoClient}. The
+   * async result is marked as failed is there are no matching services, or if the lookup fails.
+   *
+   * @param discovery     The service discovery instance
+   * @param filter        The filter
+   * @param resultHandler The result handler
+   */
+  static void getMongoClient(ServiceDiscovery discovery, Function<Record, Boolean> filter,
+                             Handler<AsyncResult<MongoClient>> resultHandler) {
+    discovery.getRecord(filter, ar -> {
+      if (ar.failed() || ar.result() == null) {
+        resultHandler.handle(Future.failedFuture("No matching record"));
+      } else {
+        resultHandler.handle(Future.succeededFuture(discovery.getReference(ar.result()).get()));
+      }
+    });
+  }
+
 
   /**
    * Convenient method that looks for a Mongo datasource source and provides the configured {@link io.vertx.ext.mongo.MongoClient}. The
@@ -75,7 +94,7 @@ public interface MongoDataSource extends DataSource {
    * @param resultHandler         the result handler
    */
   static void getMongoClient(ServiceDiscovery discovery, JsonObject filter, JsonObject consumerConfiguration,
-                            Handler<AsyncResult<MongoClient>> resultHandler) {
+                             Handler<AsyncResult<MongoClient>> resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));

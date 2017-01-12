@@ -24,6 +24,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.impl.DiscoveryImpl;
 import io.vertx.servicediscovery.spi.ServiceExporter;
 import io.vertx.servicediscovery.spi.ServiceImporter;
+import io.vertx.servicediscovery.utils.ClassLoaderUtils;
 
 import java.util.Collection;
 import java.util.List;
@@ -312,7 +313,14 @@ public interface ServiceDiscovery {
   static void releaseServiceObject(ServiceDiscovery discovery, Object svcObject) {
     Objects.requireNonNull(discovery);
     Objects.requireNonNull(svcObject);
+
+    Object svc = ClassLoaderUtils.extractDelegate(svcObject);
+    if (svc == null) {
+      svc = svcObject;
+    }
+
     Collection<ServiceReference> references = discovery.bindings();
-    references.stream().filter(ref -> svcObject.equals(ref.cached())).forEach(discovery::release);
+    Object finalSvc = svc;
+    references.stream().filter(ref -> ref.isHolding(finalSvc)).forEach(ServiceReference::release);
   }
 }

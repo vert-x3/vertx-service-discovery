@@ -44,18 +44,36 @@ module VertxServiceDiscovery
     end
     #  Convenient method that looks for a Redis data source and provides the configured {::VertxRedis::RedisClient}.
     #  The async result is marked as failed is there are no matching services, or if the lookup fails.
-    # @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
-    # @param [Hash{String => Object}] filter The filter, optional
-    # @param [Hash{String => Object}] consumerConfiguration The additional consumer configuration
-    # @yield The result handler
+    # @overload getRedisClient(discovery,filter,resultHandler)
+    #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
+    #   @param [Hash{String => Object}] filter The filter, optional
+    #   @yield The result handler
+    # @overload getRedisClient(discovery,filter,resultHandler)
+    #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
+    #   @param [Proc] filter The filter, cannot be <code>null</code>
+    #   @yield The result handler
+    # @overload getRedisClient(discovery,filter,consumerConfiguration,resultHandler)
+    #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
+    #   @param [Hash{String => Object}] filter The filter, optional
+    #   @param [Hash{String => Object}] consumerConfiguration The additional consumer configuration
+    #   @yield The result handler
+    # @overload getRedisClient(discovery,filter,consumerConfiguration,resultHandler)
+    #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
+    #   @param [Proc] filter The filter, cannot be <code>null</code>
+    #   @param [Hash{String => Object}] consumerConfiguration The additional consumer configuration
+    #   @yield The result handler
     # @return [void]
-    def self.get_redis_client(discovery=nil,filter=nil,consumerConfiguration=nil)
-      if discovery.class.method_defined?(:j_del) && filter.class == Hash && block_given? && consumerConfiguration == nil
-        return Java::IoVertxServicediscoveryTypes::RedisDataSource.java_method(:getRedisClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxRedis::RedisClient) : nil) }))
-      elsif discovery.class.method_defined?(:j_del) && filter.class == Hash && consumerConfiguration.class == Hash && block_given?
-        return Java::IoVertxServicediscoveryTypes::RedisDataSource.java_method(:getRedisClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),::Vertx::Util::Utils.to_json_object(consumerConfiguration),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxRedis::RedisClient) : nil) }))
+    def self.get_redis_client(param_1=nil,param_2=nil,param_3=nil)
+      if param_1.class.method_defined?(:j_del) && param_2.class == Hash && block_given? && param_3 == nil
+        return Java::IoVertxServicediscoveryTypes::RedisDataSource.java_method(:getRedisClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,::Vertx::Util::Utils.to_json_object(param_2),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxRedis::RedisClient) : nil) }))
+      elsif param_1.class.method_defined?(:j_del) && param_2.class == Proc && block_given? && param_3 == nil
+        return Java::IoVertxServicediscoveryTypes::RedisDataSource.java_method(:getRedisClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::JavaUtilFunction::Function.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,(Proc.new { |event| param_2.call(event != nil ? JSON.parse(event.toJson.encode) : nil) }),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxRedis::RedisClient) : nil) }))
+      elsif param_1.class.method_defined?(:j_del) && param_2.class == Hash && param_3.class == Hash && block_given?
+        return Java::IoVertxServicediscoveryTypes::RedisDataSource.java_method(:getRedisClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,::Vertx::Util::Utils.to_json_object(param_2),::Vertx::Util::Utils.to_json_object(param_3),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxRedis::RedisClient) : nil) }))
+      elsif param_1.class.method_defined?(:j_del) && param_2.class == Proc && param_3.class == Hash && block_given?
+        return Java::IoVertxServicediscoveryTypes::RedisDataSource.java_method(:getRedisClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::JavaUtilFunction::Function.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,(Proc.new { |event| param_2.call(event != nil ? JSON.parse(event.toJson.encode) : nil) }),::Vertx::Util::Utils.to_json_object(param_3),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxRedis::RedisClient) : nil) }))
       end
-      raise ArgumentError, "Invalid arguments when calling get_redis_client(#{discovery},#{filter},#{consumerConfiguration})"
+      raise ArgumentError, "Invalid arguments when calling get_redis_client(#{param_1},#{param_2},#{param_3})"
     end
   end
 end

@@ -45,13 +45,34 @@ module VertxServiceDiscovery
       raise ArgumentError, "Invalid arguments when calling record()"
     end
     #  Gets the object to access the service. It can be a proxy, a client or whatever object. The type depends on the
-    #  service type and the server itself.
+    #  service type and the server itself. This method returns the Java version and primary facet of the object, use
+    #  {::VertxServiceDiscovery::ServiceReference#get_as} to retrieve the polyglot instance of the object or another facet..
     # @return [Object] the object to access the service
     def get
       if !block_given?
         return ::Vertx::Util::Utils.from_object(@j_del.java_method(:get, []).call())
       end
       raise ArgumentError, "Invalid arguments when calling get()"
+    end
+    #  Gets the object to access the service. It can be a proxy, a client or whatever object. The type depends on the
+    #  service type and the server itself. This method wraps the service object into the desired type.
+    # @param [Nil] x the type of object
+    # @return [Object] the object to access the service wrapped to the given type
+    def get_as(x=nil)
+      if x.class == Class && !block_given?
+        return ::Vertx::Util::Utils.v_type_of(x).wrap(@j_del.java_method(:getAs, [Java::JavaLang::Class.java_class]).call(::Vertx::Util::Utils.j_class_of(x)))
+      end
+      raise ArgumentError, "Invalid arguments when calling get_as(#{x})"
+    end
+    #  Gets the service object if already retrieved. It won't try to acquire the service object if not retrieved yet.
+    #  Unlike {::VertxServiceDiscovery::ServiceReference#cached}, this method return the warpped object to the desired (given) type.
+    # @param [Nil] x the type of object
+    # @return [Object] the object, <code>null</code> if not yet retrieved
+    def cached_as(x=nil)
+      if x.class == Class && !block_given?
+        return ::Vertx::Util::Utils.v_type_of(x).wrap(@j_del.java_method(:cachedAs, [Java::JavaLang::Class.java_class]).call(::Vertx::Util::Utils.j_class_of(x)))
+      end
+      raise ArgumentError, "Invalid arguments when calling cached_as(#{x})"
     end
     #  Gets the service object if already retrieved. It won't try to acquire the service object if not retrieved yet.
     # @return [Object] the object, <code>null</code> if not yet retrieved
@@ -69,6 +90,15 @@ module VertxServiceDiscovery
         return @j_del.java_method(:release, []).call()
       end
       raise ArgumentError, "Invalid arguments when calling release()"
+    end
+    #  Checks whether or not the service reference has the given service object.
+    # @param [Object] object the service object, must not be <code>null</code>
+    # @return [true,false] <code>true</code> if the service reference service object is equal to the given object, <code>false</code> otherwise.
+    def holding?(object=nil)
+      if ::Vertx::Util::unknown_type.accept?(object) && !block_given?
+        return @j_del.java_method(:isHolding, [Java::java.lang.Object.java_class]).call(::Vertx::Util::Utils.to_object(object))
+      end
+      raise ArgumentError, "Invalid arguments when calling holding?(#{object})"
     end
   end
 end

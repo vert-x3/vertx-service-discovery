@@ -86,14 +86,6 @@
   </dependencies>
 
   <build>
-    <testResources>
-      <testResource>
-        <directory>src/test/resources</directory>
-      </testResource>
-      <testResource>
-        <directory>src/test/groovy</directory>
-      </testResource>
-    </testResources>
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -109,7 +101,7 @@
             <configuration>
               <sources>
                 <source>${project.basedir}/src/test/generated</source>
-                <source>${project.basedir}/src/test/groovy</source>
+                <source>${project.basedir}/target/generated-test-sources/test-annotations</source>
               </sources>
             </configuration>
           </execution>
@@ -117,67 +109,57 @@
       </plugin>
 
       <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-        </configuration>
+        <groupId>org.bsc.maven</groupId>
+        <artifactId>maven-processor-plugin</artifactId>
+        <version>3.2.0</version>
         <executions>
           <execution>
-            <id>default-compile</id>
-            <configuration>
-              <annotationProcessors>
-                <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
-                <annotationProcessor>io.vertx.docgen.JavaDocGenProcessor</annotationProcessor>
-                <annotationProcessor>io.vertx.docgen.DocGenProcessor</annotationProcessor>
-              </annotationProcessors>
-              <generatedSourcesDirectory>src/main/generated</generatedSourcesDirectory>
-              <compilerArgs>
-                <arg>-AoutputDirectory=${project.basedir}/src/main</arg>
-
-                <arg>-Adocgen.output=${asciidoc.dir}/$lang</arg>
-                <arg>-Amaven.groupId=${project.groupId}</arg>
-                <arg>-Amaven.artifactId=${project.artifactId}</arg>
-                <arg>-Amaven.version=${project.version}</arg>
-              </compilerArgs>
-            </configuration>
-          </execution>
-          <execution>
-            <id>compile-groovy-from-tests</id>
-            <phase>process-test-sources</phase>
+            <id>generate-sources</id>
             <goals>
-              <goal>testCompile</goal>
+              <goal>process</goal>
             </goals>
+            <phase>generate-sources</phase>
             <configuration>
-              <compilerId>groovy-eclipse-compiler</compilerId>
+              <systemProperties>
+                <java.util.logging.SimpleFormatter.format>%4$s: %3$s - %5$s %6$s%n</java.util.logging.SimpleFormatter.format>
+              </systemProperties>
+              <processors>
+                <processor>io.vertx.codegen.CodeGenProcessor</processor>
+                <processor>io.vertx.docgen.JavaDocGenProcessor</processor>
+                <processor>io.vertx.docgen.DocGenProcessor</processor>
+              </processors>
+              <optionMap>
+                <outputDirectory>${project.basedir}/src/main</outputDirectory>
+                <!-- $lang is replaced by the docgen processor to the target lang -->
+                <docgen.output>${asciidoc.dir}/$lang</docgen.output>
+                <maven.groupId>${project.groupId}</maven.groupId>
+                <maven.artifactId>${project.artifactId}</maven.artifactId>
+                <maven.version>${project.version}</maven.version>
+              </optionMap>
+              <defaultOutputDirectory>${project.build.directory}/generated-sources/annotations</defaultOutputDirectory>
             </configuration>
           </execution>
+
           <execution>
-            <id>default-testCompile</id>
+            <id>generate-test-sources</id>
+            <goals>
+              <goal>process-test</goal>
+            </goals>
+            <phase>generate-test-sources</phase>
             <configuration>
-              <annotationProcessors>
-                <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
-              </annotationProcessors>
-              <generatedTestSourcesDirectory>src/test/generated</generatedTestSourcesDirectory>
-              <compilerArgs>
-                <arg>-AoutputDirectory=${project.basedir}/src/test</arg>
-              </compilerArgs>
+              <systemProperties>
+                <java.util.logging.SimpleFormatter.format>%4$s: %3$s - %5$s %6$s%n</java.util.logging.SimpleFormatter.format>
+              </systemProperties>
+              <processors>
+                <processor>io.vertx.codegen.CodeGenProcessor</processor>
+              </processors>
+              <optionMap>
+                <outputDirectory>${project.basedir}/src/test</outputDirectory>
+              </optionMap>
+              <defaultOutputDirectory>${project.build.directory}/generated-test-sources/test-annotations</defaultOutputDirectory>
             </configuration>
           </execution>
         </executions>
-        <dependencies>
-          <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-eclipse-compiler</artifactId>
-            <version>2.9.1-01</version>
-          </dependency>
-          <!-- for 2.8.0-01 and later you must have an explicit dependency on groovy-eclipse-batch -->
-          <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-eclipse-batch</artifactId>
-            <version>2.3.7-01</version>
-          </dependency>
-        </dependencies>
       </plugin>
     </plugins>
   </build>

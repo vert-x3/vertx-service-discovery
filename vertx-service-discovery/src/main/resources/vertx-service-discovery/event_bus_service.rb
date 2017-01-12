@@ -40,41 +40,42 @@ module VertxServiceDiscovery
     # @param [Hash{String => Object}] metadata the metadata
     # @return [Hash] the created record
     def self.create_record(name=nil,address=nil,itf=nil,metadata=nil)
-      if name.class == String && address.class == String && itf.class == String && metadata.class == Hash && !block_given?
+      if name.class == String && address.class == String && itf.class == String && !block_given? && metadata == nil
+        return Java::IoVertxServicediscoveryTypes::EventBusService.java_method(:createRecord, [Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::java.lang.String.java_class]).call(name,address,itf) != nil ? JSON.parse(Java::IoVertxServicediscoveryTypes::EventBusService.java_method(:createRecord, [Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::java.lang.String.java_class]).call(name,address,itf).toJson.encode) : nil
+      elsif name.class == String && address.class == String && itf.class == String && metadata.class == Hash && !block_given?
         return Java::IoVertxServicediscoveryTypes::EventBusService.java_method(:createRecord, [Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(name,address,itf,::Vertx::Util::Utils.to_json_object(metadata)) != nil ? JSON.parse(Java::IoVertxServicediscoveryTypes::EventBusService.java_method(:createRecord, [Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::IoVertxCoreJson::JsonObject.java_class]).call(name,address,itf,::Vertx::Util::Utils.to_json_object(metadata)).toJson.encode) : nil
       end
       raise ArgumentError, "Invalid arguments when calling create_record(#{name},#{address},#{itf},#{metadata})"
     end
-    # @overload getProxy(discovery,filter,resultHandler)
-    #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery the service discovery instance
-    #   @param [Hash{String => Object}] filter the filter to select the service
-    #   @yield the result handler
-    # @overload getProxy(discovery,itf,resultHandler)
-    #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery the service discovery instance
-    #   @param [String] itf the service interface
-    #   @yield the result handler
-    # @overload getProxy(discovery,serviceInterface,proxyInterface,resultHandler)
-    #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery 
-    #   @param [String] serviceInterface 
-    #   @param [String] proxyInterface 
-    #   @yield 
-    # @overload getProxy(discovery,filter,proxyClass,resultHandler)
-    #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery 
-    #   @param [Hash{String => Object}] filter 
-    #   @param [String] proxyClass 
-    #   @yield 
-    # @return [void]
-    def self.get_proxy(param_1=nil,param_2=nil,param_3=nil)
-      if param_1.class.method_defined?(:j_del) && param_2.class == Hash && block_given? && param_3 == nil
-        return Java::IoVertxServicediscoveryTypes::EventBusService.java_method(:getProxy, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,::Vertx::Util::Utils.to_json_object(param_2),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.from_object(ar.result) : nil) }))
-      elsif param_1.class.method_defined?(:j_del) && param_2.class == String && block_given? && param_3 == nil
-        return Java::IoVertxServicediscoveryTypes::EventBusService.java_method(:getProxy, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,param_2,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.from_object(ar.result) : nil) }))
-      elsif param_1.class.method_defined?(:j_del) && param_2.class == String && param_3.class == String && block_given?
-        return Java::IoVertxServicediscoveryTypes::EventBusService.java_method(:getProxy, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::java.lang.String.java_class,Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,param_2,param_3,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.from_object(ar.result) : nil) }))
-      elsif param_1.class.method_defined?(:j_del) && param_2.class == Hash && param_3.class == String && block_given?
-        return Java::IoVertxServicediscoveryTypes::EventBusService.java_method(:getProxy, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::java.lang.String.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,::Vertx::Util::Utils.to_json_object(param_2),param_3,(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.from_object(ar.result) : nil) }))
+    #  Lookup for a service record and if found, retrieve it and return the service object (used to consume the service).
+    #  This is a convenient method to avoid explicit lookup and then retrieval of the service. This method requires to
+    #  have the <code>clientClass</code> set with the expected set of client. This is important for usages not using Java so
+    #  you can pass the expected type.
+    # @param [::VertxServiceDiscovery::ServiceDiscovery] discovery the service discovery
+    # @param [Proc] filter the filter
+    # @param [Nil] clientClass the client class
+    # @yield the result handler
+    # @return [Object] <code>null</code> - do not use
+    def self.get_service_proxy(discovery=nil,filter=nil,clientClass=nil)
+      if discovery.class.method_defined?(:j_del) && filter.class == Proc && clientClass.class == Class && block_given?
+        return ::Vertx::Util::Utils.v_type_of(clientClass).wrap(Java::IoVertxServicediscoveryTypes::EventBusService.java_method(:getServiceProxy, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::JavaUtilFunction::Function.java_class,Java::JavaLang::Class.java_class,Java::IoVertxCore::Handler.java_class]).call(discovery.j_del,(Proc.new { |event| filter.call(event != nil ? JSON.parse(event.toJson.encode) : nil) }),::Vertx::Util::Utils.j_class_of(clientClass),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.v_type_of(clientClass).wrap(ar.result) : nil) })))
       end
-      raise ArgumentError, "Invalid arguments when calling get_proxy(#{param_1},#{param_2},#{param_3})"
+      raise ArgumentError, "Invalid arguments when calling get_service_proxy(#{discovery},#{filter},#{clientClass})"
+    end
+    #  Lookup for a service record and if found, retrieve it and return the service object (used to consume the service).
+    #  This is a convenient method to avoid explicit lookup and then retrieval of the service. This method requires to
+    #  have the <code>clientClass</code> set with the expected set of client. This is important for usages not using Java so
+    #  you can pass the expected type.
+    # @param [::VertxServiceDiscovery::ServiceDiscovery] discovery the service discovery
+    # @param [Hash{String => Object}] filter the filter as json object
+    # @param [Nil] clientClass the client class
+    # @yield the result handler
+    # @return [Object] <code>null</code> - do not use
+    def self.get_service_proxy_with_json_filter(discovery=nil,filter=nil,clientClass=nil)
+      if discovery.class.method_defined?(:j_del) && filter.class == Hash && clientClass.class == Class && block_given?
+        return ::Vertx::Util::Utils.v_type_of(clientClass).wrap(Java::IoVertxServicediscoveryTypes::EventBusService.java_method(:getServiceProxyWithJsonFilter, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::JavaLang::Class.java_class,Java::IoVertxCore::Handler.java_class]).call(discovery.j_del,::Vertx::Util::Utils.to_json_object(filter),::Vertx::Util::Utils.j_class_of(clientClass),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.v_type_of(clientClass).wrap(ar.result) : nil) })))
+      end
+      raise ArgumentError, "Invalid arguments when calling get_service_proxy_with_json_filter(#{discovery},#{filter},#{clientClass})"
     end
   end
 end

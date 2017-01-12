@@ -18,13 +18,12 @@ package io.vertx.servicediscovery.types.impl;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.ServiceDiscovery;
+import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.types.AbstractServiceReference;
-import io.vertx.servicediscovery.types.DataSource;
 import io.vertx.servicediscovery.types.JDBCDataSource;
-import io.vertx.ext.jdbc.JDBCClient;
 
 import java.util.Objects;
 
@@ -36,7 +35,7 @@ import java.util.Objects;
 public class JDBCDataSourceImpl implements JDBCDataSource {
   @Override
   public String name() {
-    return DataSource.TYPE;
+    return JDBCDataSource.TYPE;
   }
 
   @Override

@@ -25,8 +25,9 @@ import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.spi.ServicePublisher;
 import io.vertx.servicediscovery.spi.ServiceType;
-import io.vertx.servicediscovery.types.DataSource;
 import io.vertx.servicediscovery.types.HttpEndpoint;
+import io.vertx.servicediscovery.types.JDBCDataSource;
+import io.vertx.servicediscovery.types.MongoDataSource;
 import io.vertx.servicediscovery.types.RedisDataSource;
 import org.junit.Test;
 
@@ -213,7 +214,16 @@ public class KubernetesServiceImporterTest {
     assertThat(KubernetesServiceImporter.discoveryType(service)).isEqualTo(RedisDataSource.TYPE);
 
     port.setPort(3306);
-    assertThat(KubernetesServiceImporter.discoveryType(service)).isEqualTo(DataSource.TYPE);
+    assertThat(KubernetesServiceImporter.discoveryType(service)).isEqualTo(JDBCDataSource.TYPE);
+
+    port.setPort(27017);
+    assertThat(KubernetesServiceImporter.discoveryType(service)).isEqualTo(MongoDataSource.TYPE);
+
+    port.setPort(27018);
+    assertThat(KubernetesServiceImporter.discoveryType(service)).isEqualTo(MongoDataSource.TYPE);
+
+    port.setPort(27019);
+    assertThat(KubernetesServiceImporter.discoveryType(service)).isEqualTo(MongoDataSource.TYPE);
 
   }
 
