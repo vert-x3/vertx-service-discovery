@@ -206,7 +206,7 @@ public interface ServiceDiscovery {
    *
    * @param filter        the filter.
    * @param resultHandler handler called when the lookup has been completed. When there are no matching record, the
-   *                      operation succeed, but the async result has no result.
+   *                      operation succeeds, but the async result has no result ({@code null}).
    */
   void getRecord(JsonObject filter, Handler<AsyncResult<Record>> resultHandler);
 
