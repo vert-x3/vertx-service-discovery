@@ -544,6 +544,62 @@ In this second version, the service object is released using
 `link:../../yardoc/VertxServiceDiscovery/ServiceDiscovery.html#release_service_object-class_method[ServiceDiscovery.releaseServiceObject]`,
 so you don't need to keep the service reference.
 
+Since Vert.x 3.4.0, another client has been provided. This higher-level client, named `link:../../yardoc/VertxWebClient/WebClient.html[WebClient]`
+tends to be easier to use. You can retrieve a `link:../../yardoc/VertxWebClient/WebClient.html[WebClient]` instances using:
+
+[source, ruby]
+----
+require 'vertx-web-client/web_client'
+# Get the record
+discovery.get_record({
+  'name' => "some-http-service"
+}) { |ar_err,ar|
+  if (ar_err == nil && ar != nil)
+    # Retrieve the service reference
+    reference = discovery.get_reference(ar)
+    # Retrieve the service object
+    client = reference.get_as(VertxWebClient::WebClient::class)
+
+    # You need to path the complete path
+    client.get("/api/persons").send() { |response_err,response|
+
+      # ...
+
+      # Dont' forget to release the service
+      reference.release()
+
+    }
+  end
+}
+
+----
+
+And, if you prefer the approach using the service type:
+
+[source, ruby]
+----
+require 'vertx-service-discovery/service_discovery'
+require 'vertx-service-discovery/http_endpoint'
+VertxServiceDiscovery::HttpEndpoint.get_web_client(discovery, {
+  'name' => "some-http-service"
+}) { |ar_err,ar|
+  if (ar_err == nil)
+    client = ar
+
+    # You need to path the complete path
+    client.get("/api/persons").send() { |response_err,response|
+
+      # ...
+
+      # Dont' forget to release the service
+      VertxServiceDiscovery::ServiceDiscovery.release_service_object(discovery, client)
+
+    }
+  end
+}
+
+----
+
 === Event bus services
 
 Event bus services are service proxies. They implement async-RPC services on top of the event bus. When retrieving

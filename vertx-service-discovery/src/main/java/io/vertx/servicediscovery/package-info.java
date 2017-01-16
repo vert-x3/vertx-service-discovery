@@ -368,6 +368,21 @@
  * {@link io.vertx.servicediscovery.ServiceDiscovery#releaseServiceObject(ServiceDiscovery, java.lang.Object)},
  * so you don't need to keep the service reference.
  *
+ * Since Vert.x 3.4.0, another client has been provided. This higher-level client, named {@link io.vertx.webclient.WebClient}
+ * tends to be easier to use. You can retrieve a {@link io.vertx.webclient.WebClient} instances using:
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.HTTPEndpointExamples#example2_webclient(io.vertx.servicediscovery.ServiceDiscovery)}
+ * ----
+ *
+ * And, if you prefer the approach using the service type:
+ *
+ * [source, $lang]
+ * ----
+ * {@link examples.HTTPEndpointExamples#example3_webclient(io.vertx.servicediscovery.ServiceDiscovery)}
+ * ----
+ *
  * === Event bus services
  *
  * Event bus services are service proxies. They implement async-RPC services on top of the event bus. When retrieving

@@ -453,10 +453,10 @@ The next snippet illustrates hot to create a `link:../../apidocs/io/vertx/servic
 [source, java]
 ----
 Record record1 = HttpEndpoint.createRecord(
-    "some-http-service", // The service name
-    "localhost", // The host
-    8433, // the port
-    "/api" // the root of the service
+  "some-http-service", // The service name
+  "localhost", // The host
+  8433, // the port
+  "/api" // the root of the service
 );
 
 discovery.publish(record1, ar -> {
@@ -464,12 +464,12 @@ discovery.publish(record1, ar -> {
 });
 
 Record record2 = HttpEndpoint.createRecord(
-    "some-other-name", // the service name
-    true, // whether or not the service requires HTTPs
-    "localhost", // The host
-    8433, // the port
-    "/api", // the root of the service
-    new JsonObject().put("some-metadata", "some value")
+  "some-other-name", // the service name
+  true, // whether or not the service requires HTTPs
+  "localhost", // The host
+  8433, // the port
+  "/api", // the root of the service
+  new JsonObject().put("some-metadata", "some value")
 );
 ----
 
@@ -484,7 +484,7 @@ Once a HTTP endpoint is published, a consumer can retrieve it. The service objec
 [source, java]
 ----
 discovery.getRecord(new JsonObject().put("name", "some-http-service"), ar -> {
-  if (ar.succeeded()  && ar.result() != null) {
+  if (ar.succeeded() && ar.result() != null) {
     // Retrieve the service reference
     ServiceReference reference = discovery.getReference(ar.result());
     // Retrieve the service object
@@ -529,6 +529,54 @@ HttpEndpoint.getClient(discovery, new JsonObject().put("name", "some-http-servic
 In this second version, the service object is released using
 `link:../../apidocs/io/vertx/servicediscovery/ServiceDiscovery.html#releaseServiceObject-io.vertx.servicediscovery.ServiceDiscovery-java.lang.Object-[ServiceDiscovery.releaseServiceObject]`,
 so you don't need to keep the service reference.
+
+Since Vert.x 3.4.0, another client has been provided. This higher-level client, named `link:../../apidocs/io/vertx/webclient/WebClient.html[WebClient]`
+tends to be easier to use. You can retrieve a `link:../../apidocs/io/vertx/webclient/WebClient.html[WebClient]` instances using:
+
+[source, java]
+----
+discovery.getRecord(new JsonObject().put("name", "some-http-service"), ar -> {
+  if (ar.succeeded() && ar.result() != null) {
+    // Retrieve the service reference
+    ServiceReference reference = discovery.getReference(ar.result());
+    // Retrieve the service object
+    WebClient client = reference.getAs(WebClient.class);
+
+    // You need to path the complete path
+    client.get("/api/persons").send(
+      response -> {
+
+        // ...
+
+        // Dont' forget to release the service
+        reference.release();
+
+      });
+  }
+});
+----
+
+And, if you prefer the approach using the service type:
+
+[source, java]
+----
+HttpEndpoint.getWebClient(discovery, new JsonObject().put("name", "some-http-service"), ar -> {
+  if (ar.succeeded()) {
+    WebClient client = ar.result();
+
+    // You need to path the complete path
+    client.get("/api/persons")
+      .send(response -> {
+
+        // ...
+
+        // Dont' forget to release the service
+        ServiceDiscovery.releaseServiceObject(discovery, client);
+
+      });
+  }
+});
+----
 
 === Event bus services
 

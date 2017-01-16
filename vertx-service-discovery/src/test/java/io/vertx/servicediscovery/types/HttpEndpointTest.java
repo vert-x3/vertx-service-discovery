@@ -17,6 +17,7 @@
 package io.vertx.servicediscovery.types;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
@@ -28,6 +29,8 @@ import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.impl.DiscoveryImpl;
+import io.vertx.webclient.HttpResponse;
+import io.vertx.webclient.WebClient;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
@@ -94,7 +97,7 @@ public class HttpEndpointTest {
         context.assertTrue(found.succeeded());
         context.assertTrue(found.result() != null);
         Record match = found.result();
-        ServiceReference reference = discovery.getReference( match);
+        ServiceReference reference = discovery.getReference(match);
         context.assertEquals(reference.record().getLocation().getString("endpoint"), "http://localhost:8080/foo");
         context.assertFalse(reference.record().getLocation().getBoolean("ssl"));
         HttpClient client = reference.get();
@@ -113,6 +116,45 @@ public class HttpEndpointTest {
             });
           });
         });
+      });
+    });
+  }
+
+  @Test
+  public void testPublicationAndConsumptionAsWebClient(TestContext context) {
+    Async async = context.async();
+
+    // Publish the service
+    Record record = HttpEndpoint.createRecord("hello-service", "localhost", 8080, "/foo");
+    discovery.publish(record, rec -> {
+      Record published = rec.result();
+
+      discovery.getRecord(new JsonObject().put("name", "hello-service"), found -> {
+        context.assertTrue(found.succeeded());
+        context.assertTrue(found.result() != null);
+        Record match = found.result();
+        ServiceReference reference = discovery.getReference(match);
+        context.assertEquals(reference.record().getLocation().getString("endpoint"), "http://localhost:8080/foo");
+        context.assertFalse(reference.record().getLocation().getBoolean("ssl"));
+        WebClient client = reference.getAs(WebClient.class);
+        WebClient client2 = reference.cachedAs(WebClient.class);
+        System.out.println("Client 1: " + client);
+        System.out.println("Client 2: " + client2);
+        context.assertTrue(client == client2);
+
+        client.get("/foo")
+          .send(response -> {
+            if (response.failed()) {
+              context.fail(response.cause());
+            } else {
+              HttpResponse<Buffer> resp = response.result();
+              context.assertEquals(resp.statusCode(), 200);
+              context.assertEquals(resp.body().toString(), "hello");
+              reference.release();
+
+              discovery.unpublish(published.getRegistration(), v -> async.complete());
+            }
+          });
       });
     });
   }
@@ -145,6 +187,37 @@ public class HttpEndpointTest {
   }
 
   @Test
+  public void testPublicationAndConsumptionWithConfigurationAsWebClient(TestContext context) {
+    Async async = context.async();
+
+    // Publish the service
+    Record record = HttpEndpoint.createRecord("hello-service", "localhost", 8080, "/foo");
+    discovery.publish(record, rec -> {
+      Record published = rec.result();
+
+      HttpEndpoint.getWebClient(discovery,
+        new JsonObject().put("name", "hello-service"),
+        new JsonObject().put("keepAlive", false), found -> {
+          context.assertTrue(found.succeeded());
+          context.assertTrue(found.result() != null);
+          WebClient client = found.result();
+          client.get("/foo").send(ar -> {
+            if (ar.failed()) {
+              context.fail(ar.cause());
+            }
+            HttpResponse<Buffer> response = ar.result();
+            context.assertEquals(response.statusCode(), 200);
+            context.assertEquals(response.getHeader("connection"), "close");
+            context.assertEquals(response.body().toString(), "hello");
+
+            ServiceDiscovery.releaseServiceObject(discovery, client);
+            discovery.unpublish(published.getRegistration(), v -> async.complete());
+          });
+        });
+    });
+  }
+
+  @Test
   public void testRecordCreation() {
     Record record = HttpEndpoint.createRecord("some-name", "123.456.789.111", 80, null);
     assertThat(record.getLocation().getString(Record.ENDPOINT)).isEqualTo("http://123.456.789.111:80/");
@@ -160,7 +233,7 @@ public class HttpEndpointTest {
     assertThat(record.getLocation().getString(Record.ENDPOINT)).isEqualTo("http://acme.org:80/");
 
     record = HttpEndpoint.createRecord("http-bin", true, "httpbin.org", 443, "/get", null);
-    ServiceReference reference = discovery.getReference( record);
+    ServiceReference reference = discovery.getReference(record);
 
     HttpClient client = reference.get();
     AtomicReference<JsonObject> resp = new AtomicReference<>();

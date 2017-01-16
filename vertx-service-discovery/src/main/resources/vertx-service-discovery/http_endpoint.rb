@@ -1,4 +1,5 @@
 require 'vertx-service-discovery/service_discovery'
+require 'vertx-web-client/web_client'
 require 'vertx/http_client'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.servicediscovery.types.HttpEndpoint
@@ -101,6 +102,40 @@ module VertxServiceDiscovery
         return Java::IoVertxServicediscoveryTypes::HttpEndpoint.java_method(:getClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::JavaUtilFunction::Function.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,(Proc.new { |event| param_2.call(event != nil ? JSON.parse(event.toJson.encode) : nil) }),::Vertx::Util::Utils.to_json_object(param_3),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::Vertx::HttpClient) : nil) }))
       end
       raise ArgumentError, "Invalid arguments when calling get_client(#{param_1},#{param_2},#{param_3})"
+    end
+    #  Convenient method that looks for a HTTP endpoint and provides the configured . The async result
+    #  is marked as failed is there are no matching services, or if the lookup fails. This method accepts a
+    #  configuration for the HTTP client.
+    # @overload getWebClient(discovery,filter,resultHandler)
+    #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
+    #   @param [Hash{String => Object}] filter The filter, optional
+    #   @yield The result handler
+    # @overload getWebClient(discovery,filter,resultHandler)
+    #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
+    #   @param [Proc] filter The filter
+    #   @yield The result handler
+    # @overload getWebClient(discovery,filter,conf,resultHandler)
+    #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
+    #   @param [Hash{String => Object}] filter The filter, optional
+    #   @param [Hash{String => Object}] conf the configuration of the client
+    #   @yield The result handler
+    # @overload getWebClient(discovery,filter,conf,resultHandler)
+    #   @param [::VertxServiceDiscovery::ServiceDiscovery] discovery The service discovery instance
+    #   @param [Proc] filter The filter
+    #   @param [Hash{String => Object}] conf the configuration of the client
+    #   @yield The result handler
+    # @return [void]
+    def self.get_web_client(param_1=nil,param_2=nil,param_3=nil)
+      if param_1.class.method_defined?(:j_del) && param_2.class == Hash && block_given? && param_3 == nil
+        return Java::IoVertxServicediscoveryTypes::HttpEndpoint.java_method(:getWebClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,::Vertx::Util::Utils.to_json_object(param_2),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxWebClient::WebClient) : nil) }))
+      elsif param_1.class.method_defined?(:j_del) && param_2.class == Proc && block_given? && param_3 == nil
+        return Java::IoVertxServicediscoveryTypes::HttpEndpoint.java_method(:getWebClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::JavaUtilFunction::Function.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,(Proc.new { |event| param_2.call(event != nil ? JSON.parse(event.toJson.encode) : nil) }),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxWebClient::WebClient) : nil) }))
+      elsif param_1.class.method_defined?(:j_del) && param_2.class == Hash && param_3.class == Hash && block_given?
+        return Java::IoVertxServicediscoveryTypes::HttpEndpoint.java_method(:getWebClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,::Vertx::Util::Utils.to_json_object(param_2),::Vertx::Util::Utils.to_json_object(param_3),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxWebClient::WebClient) : nil) }))
+      elsif param_1.class.method_defined?(:j_del) && param_2.class == Proc && param_3.class == Hash && block_given?
+        return Java::IoVertxServicediscoveryTypes::HttpEndpoint.java_method(:getWebClient, [Java::IoVertxServicediscovery::ServiceDiscovery.java_class,Java::JavaUtilFunction::Function.java_class,Java::IoVertxCoreJson::JsonObject.java_class,Java::IoVertxCore::Handler.java_class]).call(param_1.j_del,(Proc.new { |event| param_2.call(event != nil ? JSON.parse(event.toJson.encode) : nil) }),::Vertx::Util::Utils.to_json_object(param_3),(Proc.new { |ar| yield(ar.failed ? ar.cause : nil, ar.succeeded ? ::Vertx::Util::Utils.safe_create(ar.result,::VertxWebClient::WebClient) : nil) }))
+      end
+      raise ArgumentError, "Invalid arguments when calling get_web_client(#{param_1},#{param_2},#{param_3})"
     end
   end
 end

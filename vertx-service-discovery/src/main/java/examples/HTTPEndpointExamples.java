@@ -18,10 +18,11 @@ package examples;
 
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.types.HttpEndpoint;
+import io.vertx.webclient.WebClient;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -30,10 +31,10 @@ public class HTTPEndpointExamples {
 
   public void example1(ServiceDiscovery discovery) {
     Record record1 = HttpEndpoint.createRecord(
-        "some-http-service", // The service name
-        "localhost", // The host
-        8433, // the port
-        "/api" // the root of the service
+      "some-http-service", // The service name
+      "localhost", // The host
+      8433, // the port
+      "/api" // the root of the service
     );
 
     discovery.publish(record1, ar -> {
@@ -41,12 +42,12 @@ public class HTTPEndpointExamples {
     });
 
     Record record2 = HttpEndpoint.createRecord(
-        "some-other-name", // the service name
-        true, // whether or not the service requires HTTPs
-        "localhost", // The host
-        8433, // the port
-        "/api", // the root of the service
-        new JsonObject().put("some-metadata", "some value")
+      "some-other-name", // the service name
+      true, // whether or not the service requires HTTPs
+      "localhost", // The host
+      8433, // the port
+      "/api", // the root of the service
+      new JsonObject().put("some-metadata", "some value")
     );
 
   }
@@ -54,7 +55,7 @@ public class HTTPEndpointExamples {
   public void example2(ServiceDiscovery discovery) {
     // Get the record
     discovery.getRecord(new JsonObject().put("name", "some-http-service"), ar -> {
-      if (ar.succeeded()  && ar.result() != null) {
+      if (ar.succeeded() && ar.result() != null) {
         // Retrieve the service reference
         ServiceReference reference = discovery.getReference(ar.result());
         // Retrieve the service object
@@ -73,6 +74,30 @@ public class HTTPEndpointExamples {
     });
   }
 
+  public void example2_webclient(ServiceDiscovery discovery) {
+    // Get the record
+    discovery.getRecord(new JsonObject().put("name", "some-http-service"), ar -> {
+      if (ar.succeeded() && ar.result() != null) {
+        // Retrieve the service reference
+        ServiceReference reference = discovery.getReference(ar.result());
+        // Retrieve the service object
+        WebClient client = reference.getAs(WebClient.class);
+
+        // You need to path the complete path
+        client.get("/api/persons").send(
+          response -> {
+
+            // ...
+
+            // Dont' forget to release the service
+            reference.release();
+
+          });
+      }
+    });
+  }
+
+
   public void example3(ServiceDiscovery discovery) {
     HttpEndpoint.getClient(discovery, new JsonObject().put("name", "some-http-service"), ar -> {
       if (ar.succeeded()) {
@@ -87,6 +112,25 @@ public class HTTPEndpointExamples {
           ServiceDiscovery.releaseServiceObject(discovery, client);
 
         });
+      }
+    });
+  }
+
+  public void example3_webclient(ServiceDiscovery discovery) {
+    HttpEndpoint.getWebClient(discovery, new JsonObject().put("name", "some-http-service"), ar -> {
+      if (ar.succeeded()) {
+        WebClient client = ar.result();
+
+        // You need to path the complete path
+        client.get("/api/persons")
+          .send(response -> {
+
+            // ...
+
+            // Dont' forget to release the service
+            ServiceDiscovery.releaseServiceObject(discovery, client);
+
+          });
       }
     });
   }

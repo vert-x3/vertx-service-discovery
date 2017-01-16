@@ -1,5 +1,6 @@
 package io.vertx.servicediscovery.polyglot;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.rxjava.core.AbstractVerticle;
 import io.vertx.rxjava.core.eventbus.EventBus;
 import io.vertx.rxjava.core.eventbus.MessageConsumer;
@@ -12,6 +13,7 @@ import io.vertx.rxjava.servicediscovery.ServiceDiscovery;
 import io.vertx.rxjava.servicediscovery.ServiceReference;
 import io.vertx.rxjava.servicediscovery.service.HelloService;
 import io.vertx.rxjava.servicediscovery.types.*;
+import io.vertx.rxjava.webclient.WebClient;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -36,6 +38,8 @@ public class MyRXVerticle extends AbstractVerticle {
           } else {
             HttpClient client = reference.getAs(HttpClient.class);
             result.put("client", client.toString());
+            reference.release();
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         }
@@ -50,6 +54,43 @@ public class MyRXVerticle extends AbstractVerticle {
           } else {
             HttpClient client = ar.result();
             result.put("client", client.toString());
+            ServiceDiscovery.releaseServiceObject(discovery, client);
+            result.put("bindings", getBindings(discovery));
+            message.reply(result);
+          }
+        });
+    });
+
+    eb.consumer("web-ref", message ->
+      discovery.getRecord(rec -> rec.getName().equalsIgnoreCase("my-http-service"), ar -> {
+        if (ar.failed()) {
+          message.reply("FAIL - No service");
+        } else {
+          JsonObject result = new JsonObject();
+          ServiceReference reference = discovery.getReference(ar.result());
+          if (reference == null) {
+            message.reply("FAIL - reference is null");
+          } else {
+            WebClient client = reference.getAs(WebClient.class);
+            result.put("client", client.toString());
+            reference.release();
+            result.put("bindings", getBindings(discovery));
+            message.reply(result);
+          }
+        }
+      }));
+
+    eb.consumer("web-sugar", message -> {
+      JsonObject result = new JsonObject();
+      HttpEndpoint.getWebClient(discovery, record -> record.getName().equalsIgnoreCase("my-http-service"),
+        ar -> {
+          if (ar.failed()) {
+            message.reply("FAIL - no service");
+          } else {
+            WebClient client = ar.result();
+            result.put("client", client.toString());
+            ServiceDiscovery.releaseServiceObject(discovery, client);
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         });
@@ -67,6 +108,8 @@ public class MyRXVerticle extends AbstractVerticle {
           } else {
             HelloService client = reference.getAs(HelloService.class);
             result.put("client", client.toString());
+            reference.release();
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         }
@@ -83,6 +126,8 @@ public class MyRXVerticle extends AbstractVerticle {
           } else {
             HelloService client = ar.result();
             result.put("client", client.toString());
+            ServiceDiscovery.releaseServiceObject(discovery, client);
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         });
@@ -100,6 +145,8 @@ public class MyRXVerticle extends AbstractVerticle {
           } else {
             JDBCClient client = reference.getAs(JDBCClient.class);
             result.put("client", client.toString());
+            reference.release();
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         }
@@ -114,6 +161,8 @@ public class MyRXVerticle extends AbstractVerticle {
           } else {
             JDBCClient client = ar.result();
             result.put("client", client.toString());
+            ServiceDiscovery.releaseServiceObject(discovery, client);
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         });
@@ -131,6 +180,8 @@ public class MyRXVerticle extends AbstractVerticle {
           } else {
             RedisClient client = reference.getAs(RedisClient.class);
             result.put("client", client.toString());
+            reference.release();
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         }
@@ -145,6 +196,8 @@ public class MyRXVerticle extends AbstractVerticle {
           } else {
             RedisClient client = ar.result();
             result.put("client", client.toString());
+            ServiceDiscovery.releaseServiceObject(discovery, client);
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         });
@@ -162,6 +215,8 @@ public class MyRXVerticle extends AbstractVerticle {
           } else {
             MongoClient client = reference.getAs(MongoClient.class);
             result.put("client", client.toString());
+            reference.release();
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         }
@@ -177,6 +232,8 @@ public class MyRXVerticle extends AbstractVerticle {
           } else {
             MongoClient client = ar.result();
             result.put("client", client.toString());
+            ServiceDiscovery.releaseServiceObject(discovery, client);
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         });
@@ -194,6 +251,8 @@ public class MyRXVerticle extends AbstractVerticle {
           } else {
             MessageConsumer<String> client = reference.getAs(MessageConsumer.class);
             result.put("client", client.toString());
+            reference.release();
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         }
@@ -208,11 +267,19 @@ public class MyRXVerticle extends AbstractVerticle {
           } else {
             MessageConsumer client = ar.result();
             result.put("client", client.toString());
+            ServiceDiscovery.releaseServiceObject(discovery, client);
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         });
     });
+  }
 
-
+  private synchronized JsonArray getBindings(ServiceDiscovery discovery) {
+    JsonArray array = new JsonArray();
+    for (ServiceReference ref : discovery.bindings()) {
+      array.add(ref.toString());
+    }
+    return array;
   }
 }
