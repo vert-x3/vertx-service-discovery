@@ -544,6 +544,62 @@ In this second version, the service object is released using
 `link:../../apidocs/io/vertx/servicediscovery/ServiceDiscovery.html#releaseServiceObject-io.vertx.servicediscovery.ServiceDiscovery-java.lang.Object-[ServiceDiscovery.releaseServiceObject]`,
 so you don't need to keep the service reference.
 
+Since Vert.x 3.4.0, another client has been provided. This higher-level client, named `link:../../apidocs/io/vertx/webclient/WebClient.html[WebClient]`
+tends to be easier to use. You can retrieve a `link:../../apidocs/io/vertx/webclient/WebClient.html[WebClient]` instances using:
+
+[source, groovy]
+----
+import io.vertx.webclient.WebClient
+// Get the record
+discovery.getRecord([
+  name:"some-http-service"
+], { ar ->
+  if (ar.succeeded() && ar.result() != null) {
+    // Retrieve the service reference
+    def reference = discovery.getReference(ar.result())
+    // Retrieve the service object
+    def client = reference.getAs(WebClient.class)
+
+    // You need to path the complete path
+    client.get("/api/persons").send({ response ->
+
+      // ...
+
+      // Dont' forget to release the service
+      reference.release()
+
+    })
+  }
+})
+
+----
+
+And, if you prefer the approach using the service type:
+
+[source, groovy]
+----
+import io.vertx.servicediscovery.ServiceDiscovery
+import io.vertx.servicediscovery.types.HttpEndpoint
+HttpEndpoint.getWebClient(discovery, [
+  name:"some-http-service"
+], { ar ->
+  if (ar.succeeded()) {
+    def client = ar.result()
+
+    // You need to path the complete path
+    client.get("/api/persons").send({ response ->
+
+      // ...
+
+      // Dont' forget to release the service
+      ServiceDiscovery.releaseServiceObject(discovery, client)
+
+    })
+  }
+})
+
+----
+
 === Event bus services
 
 Event bus services are service proxies. They implement async-RPC services on top of the event bus. When retrieving

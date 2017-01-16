@@ -544,6 +544,62 @@ In this second version, the service object is released using
 `link:../../jsdoc/module-vertx-service-discovery-js_service_discovery-ServiceDiscovery.html#releaseServiceObject[ServiceDiscovery.releaseServiceObject]`,
 so you don't need to keep the service reference.
 
+Since Vert.x 3.4.0, another client has been provided. This higher-level client, named `link:../../jsdoc/module-vertx-web-client-js_web_client-WebClient.html[WebClient]`
+tends to be easier to use. You can retrieve a `link:../../jsdoc/module-vertx-web-client-js_web_client-WebClient.html[WebClient]` instances using:
+
+[source, js]
+----
+var WebClient = require("vertx-web-client-js/web_client");
+// Get the record
+discovery.getRecord({
+  "name" : "some-http-service"
+}, function (ar, ar_err) {
+  if (ar_err == null && ar !== null) {
+    // Retrieve the service reference
+    var reference = discovery.getReference(ar);
+    // Retrieve the service object
+    var client = reference.getAs(WebClient.class);
+
+    // You need to path the complete path
+    client.get("/api/persons").send(function (response, response_err) {
+
+      // ...
+
+      // Dont' forget to release the service
+      reference.release();
+
+    });
+  }
+});
+
+----
+
+And, if you prefer the approach using the service type:
+
+[source, js]
+----
+var ServiceDiscovery = require("vertx-service-discovery-js/service_discovery");
+var HttpEndpoint = require("vertx-service-discovery-js/http_endpoint");
+HttpEndpoint.getWebClient(discovery, {
+  "name" : "some-http-service"
+}, function (ar, ar_err) {
+  if (ar_err == null) {
+    var client = ar;
+
+    // You need to path the complete path
+    client.get("/api/persons").send(function (response, response_err) {
+
+      // ...
+
+      // Dont' forget to release the service
+      ServiceDiscovery.releaseServiceObject(discovery, client);
+
+    });
+  }
+});
+
+----
+
 === Event bus services
 
 Event bus services are service proxies. They implement async-RPC services on top of the event bus. When retrieving
