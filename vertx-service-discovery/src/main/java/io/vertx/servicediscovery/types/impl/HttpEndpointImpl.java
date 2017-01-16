@@ -121,7 +121,7 @@ public class HttpEndpointImpl implements HttpEndpoint {
         WebClient client = WebClient.wrap((HttpClient) svc);
         if (x.isInstance(client)) {
           retrieved = client;
-          return (X) client;
+          return x.cast(client);
         } else {
           X wrapped = ClassLoaderUtils.createWithDelegate(x, client);
           retrieved = wrapped;
@@ -151,7 +151,7 @@ public class HttpEndpointImpl implements HttpEndpoint {
       }
 
       if (retrieved != null  && x.isInstance(retrieved)) {
-        return (X) retrieved;
+        return x.cast(retrieved);
       }
 
       if (x == null || x.isInstance(svc)) {
