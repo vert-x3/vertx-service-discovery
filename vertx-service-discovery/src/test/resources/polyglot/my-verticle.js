@@ -7,6 +7,7 @@ var RedisDataSource = require("vertx-service-discovery-js/redis_data_source");
 var MongoDataSource = require("vertx-service-discovery-js/mongo_data_source");
 var HelloService = require("test-services-js/hello_service");
 var HttpClient = require("vertx-js/http_client");
+var WebClient = require("vertx-web-client-js/web_client");
 var MessageConsumer = require("vertx-js/message_consumer");
 var RedisClient = require("vertx-redis-js/redis_client");
 var MongoClient = require("vertx-mongo-js/mongo_client");
@@ -20,6 +21,14 @@ var discovery = ServiceDiscovery.create(getVertx());
 
 function getDelegate(obj) {
   return "" + obj._jdel;
+}
+
+function getBindings() {
+  var array = [];
+  for (var i = 0; i < discovery.bindings().length; i++) {
+    array.push("" + discovery.bindings[i]);
+  }
+  return array;
 }
 
 getVertx().eventBus().consumer("http-ref", function (message) {
@@ -41,8 +50,9 @@ getVertx().eventBus().consumer("http-ref", function (message) {
         } else {
           result.client_del = getDelegate(client);
           result.cached_del = getDelegate(reference.cachedAs(HttpClient));
-          message.reply(result);
           reference.release();
+          result.bindings = getBindings();
+          message.reply(result);
         }
       }
     }
@@ -61,6 +71,57 @@ getVertx().eventBus().consumer("http-sugar", function (message) {
         message.reply("FAIL - client is null");
       } else {
         result.client_del = getDelegate(res);
+        ServiceDiscovery.releaseServiceObject(discovery, res);
+        result.bindings = getBindings();
+        message.reply(result);
+      }
+    }
+  });
+});
+
+getVertx().eventBus().consumer("web-ref", function (message) {
+  discovery.getRecord(function (rec) {
+    return rec.name === "my-http-service"
+  }, function (rec, err) {
+    var result = {};
+    if (err) {
+      message.reply("FAIL - no http service");
+    } else {
+      var reference = discovery.getReference(rec);
+      result.ref_del = getDelegate(reference);
+      if (!reference) {
+        message.reply("FAIL - reference is null");
+      } else {
+        var client = reference.getAs(WebClient);
+        if (!client) {
+          message.reply("FAIL - client is null");
+        } else {
+          result.client_del = getDelegate(client);
+          result.cached_del = getDelegate(reference.cachedAs(WebClient));
+          reference.release();
+          result.bindings = getBindings();
+          message.reply(result);
+          reference.release();
+        }
+      }
+    }
+  });
+});
+
+getVertx().eventBus().consumer("web-sugar", function (message) {
+  HttpEndpoint.getWebClient(discovery, function (rec) {
+    return rec.name === "my-http-service"
+  }, function (res, err) {
+    if (err) {
+      message.reply("FAIL - no http service");
+    } else {
+      var result = {};
+      if (!res) {
+        message.reply("FAIL - client is null");
+      } else {
+        result.client_del = getDelegate(res);
+        ServiceDiscovery.releaseServiceObject(discovery, res);
+        result.bindings = getBindings();
         message.reply(result);
       }
     }
@@ -82,6 +143,8 @@ getVertx().eventBus().consumer("service-sugar", function (message) {
         } else {
           result.client = res.toString();
           result.client_del = getDelegate(res);
+          ServiceDiscovery.releaseServiceObject(discovery, res);
+          result.bindings = getBindings();
           message.reply(result)
         }
       }
@@ -101,7 +164,6 @@ getVertx().eventBus().consumer("service-ref", function (message) {
       if (!reference) {
         message.reply("FAIL - reference is null");
       } else {
-        // Must create the object.
         var proxy = reference.getAs(HelloService);
 
         if (!proxy) {
@@ -110,8 +172,9 @@ getVertx().eventBus().consumer("service-ref", function (message) {
           result.client = proxy.toString();
           result.client_del = getDelegate(proxy);
           result.cached_del = getDelegate(reference.cachedAs(HelloService));
-          message.reply(result);
           reference.release();
+          result.bindings = getBindings();
+          message.reply(result);
         }
       }
     }
@@ -138,8 +201,9 @@ getVertx().eventBus().consumer("ds-ref", function (message) {
           message.reply("FAIL - client is null");
         } else {
           result.client_del = getDelegate(client);
-          message.reply(result);
           reference.release();
+          result.bindings = getBindings();
+          message.reply(result);
         }
       }
     }
@@ -158,6 +222,8 @@ getVertx().eventBus().consumer("ds-sugar", function (message) {
         message.reply("FAIL - client is null");
       } else {
         result.client_del = getDelegate(res);
+        ServiceDiscovery.releaseServiceObject(discovery, res);
+        result.bindings = getBindings();
         message.reply(result);
       }
     }
@@ -184,8 +250,9 @@ getVertx().eventBus().consumer("redis-ref", function (message) {
           message.reply("FAIL - client is null");
         } else {
           result.client_del = "" + client._jdel;
-          message.reply(result);
           reference.release();
+          result.bindings = getBindings();
+          message.reply(result);
         }
       }
     }
@@ -204,6 +271,8 @@ getVertx().eventBus().consumer("redis-sugar", function (message) {
         message.reply("FAIL - client is null");
       } else {
         result.client_del = getDelegate(res);
+        ServiceDiscovery.releaseServiceObject(discovery, res);
+        result.bindings = getBindings();
         message.reply(result);
       }
     }
@@ -228,8 +297,9 @@ getVertx().eventBus().consumer("mongo-ref", function (message) {
           message.reply("FAIL - client is null");
         } else {
           result.client_del = "" + client._jdel;
-          message.reply(result);
           reference.release();
+          result.bindings = getBindings();
+          message.reply(result);
         }
       }
     }
@@ -248,6 +318,8 @@ getVertx().eventBus().consumer("mongo-sugar", function (message) {
         message.reply("FAIL - client is null");
       } else {
         result.client_del = getDelegate(res);
+        ServiceDiscovery.releaseServiceObject(discovery, res);
+        result.bindings = getBindings();
         message.reply(result);
       }
     }
@@ -273,8 +345,9 @@ getVertx().eventBus().consumer("source1-ref", function (message) {
           message.reply("FAIL - client is null");
         } else {
           result.client_del = "" + client._jdel;
-          message.reply(result);
           reference.release();
+          result.bindings = getBindings();
+          message.reply(result);
         }
       }
     }
@@ -293,11 +366,10 @@ getVertx().eventBus().consumer("source1-sugar", function (message) {
         message.reply("FAIL - client is null");
       } else {
         result.client_del = res._jdel.toString();
+        ServiceDiscovery.releaseServiceObject(discovery, res);
+        result.bindings = getBindings();
         message.reply(result);
       }
     }
   });
 });
-
-
-

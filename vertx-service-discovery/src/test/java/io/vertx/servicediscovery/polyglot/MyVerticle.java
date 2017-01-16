@@ -4,6 +4,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.http.HttpClient;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.mongo.MongoClient;
@@ -12,6 +13,7 @@ import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.service.HelloService;
 import io.vertx.servicediscovery.types.*;
+import io.vertx.webclient.WebClient;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -37,6 +39,8 @@ public class MyVerticle extends AbstractVerticle {
             HttpClient client = reference.get();
             result.put("client", client.toString());
             result.put("direct", reference.get().toString());
+            reference.release();
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         }
@@ -52,6 +56,45 @@ public class MyVerticle extends AbstractVerticle {
           } else {
             HttpClient client = ar.result();
             result.put("client", client.toString());
+            ServiceDiscovery.releaseServiceObject(discovery, client);
+            result.put("bindings", getBindings(discovery));
+            message.reply(result);
+          }
+        });
+    });
+
+    eb.consumer("web-ref", message ->
+      discovery.getRecord(rec -> rec.getName().equalsIgnoreCase("my-http-service"), ar -> {
+        if (ar.failed()) {
+          message.reply("FAIL - No service");
+        } else {
+          JsonObject result = new JsonObject();
+          ServiceReference reference = discovery.getReference(ar.result());
+          if (reference == null) {
+            message.reply("FAIL - reference is null");
+          } else {
+            WebClient client = reference.getAs(WebClient.class);
+            result.put("client", client.toString());
+            result.put("direct", reference.get().toString());
+            reference.release();
+            result.put("bindings", getBindings(discovery));
+            message.reply(result);
+          }
+        }
+      }));
+
+    eb.consumer("web-sugar", message -> {
+      JsonObject result = new JsonObject();
+      HttpEndpoint.getWebClient(discovery,
+        record -> record.getName().equalsIgnoreCase("my-http-service"),
+        ar -> {
+          if (ar.failed()) {
+            message.reply("FAIL - no service");
+          } else {
+            WebClient client = ar.result();
+            result.put("client", client.toString());
+            ServiceDiscovery.releaseServiceObject(discovery, client);
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         });
@@ -69,6 +112,8 @@ public class MyVerticle extends AbstractVerticle {
           } else {
             HelloService client = reference.get();
             result.put("client", client.toString());
+            reference.release();
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         }
@@ -85,6 +130,8 @@ public class MyVerticle extends AbstractVerticle {
           } else {
             HelloService client = ar.result();
             result.put("client", client.toString());
+            ServiceDiscovery.releaseServiceObject(discovery, client);
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         });
@@ -102,6 +149,8 @@ public class MyVerticle extends AbstractVerticle {
           } else {
             JDBCClient client = reference.get();
             result.put("client", client.toString());
+            reference.release();
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         }
@@ -116,6 +165,8 @@ public class MyVerticle extends AbstractVerticle {
           } else {
             JDBCClient client = ar.result();
             result.put("client", client.toString());
+            ServiceDiscovery.releaseServiceObject(discovery, client);
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         });
@@ -134,6 +185,8 @@ public class MyVerticle extends AbstractVerticle {
             RedisClient client = reference.get();
             result.put("client", client.toString());
             result.put("direct", reference.get().toString());
+            reference.release();
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         }
@@ -148,6 +201,8 @@ public class MyVerticle extends AbstractVerticle {
           } else {
             RedisClient client = ar.result();
             result.put("client", client.toString());
+            ServiceDiscovery.releaseServiceObject(discovery, client);
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         });
@@ -166,6 +221,8 @@ public class MyVerticle extends AbstractVerticle {
             MongoClient client = reference.get();
             result.put("client", client.toString());
             result.put("direct", reference.get().toString());
+            reference.release();
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         }
@@ -181,6 +238,8 @@ public class MyVerticle extends AbstractVerticle {
           } else {
             MongoClient client = ar.result();
             result.put("client", client.toString());
+            ServiceDiscovery.releaseServiceObject(discovery, client);
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         });
@@ -199,6 +258,8 @@ public class MyVerticle extends AbstractVerticle {
             MessageConsumer client = reference.get();
             result.put("client", client.toString());
             result.put("direct", reference.get().toString());
+            reference.release();
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         }
@@ -213,11 +274,21 @@ public class MyVerticle extends AbstractVerticle {
           } else {
             MessageConsumer<String> client = ar.result();
             result.put("client", client.toString());
+            ServiceDiscovery.releaseServiceObject(discovery, client);
+            result.put("bindings", getBindings(discovery));
             message.reply(result);
           }
         });
     });
 
 
+  }
+
+  private synchronized JsonArray getBindings(ServiceDiscovery discovery) {
+    JsonArray array = new JsonArray();
+    for (ServiceReference ref : discovery.bindings()) {
+      array.add(ref.toString());
+    }
+    return array;
   }
 }
