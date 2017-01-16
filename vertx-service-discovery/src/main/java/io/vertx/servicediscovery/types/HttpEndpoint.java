@@ -22,11 +22,10 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.JsonObject;
+import io.vertx.webclient.WebClient;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
-import io.vertx.servicediscovery.impl.ServiceTypes;
 import io.vertx.servicediscovery.spi.ServiceType;
-import io.vertx.servicediscovery.types.impl.HttpEndpointImpl;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -131,6 +130,25 @@ public interface HttpEndpoint extends ServiceType {
   }
 
   /**
+   * Convenient method that looks for a HTTP endpoint and provides the configured {@linkWebClient}. The async result
+   * is marked as failed is there are no matching services, or if the lookup fails.
+   *
+   * @param discovery     The service discovery instance
+   * @param filter        The filter, optional
+   * @param resultHandler The result handler
+   */
+  static void getWebClient(ServiceDiscovery discovery, JsonObject filter, Handler<AsyncResult<WebClient>>
+    resultHandler) {
+    discovery.getRecord(filter, ar -> {
+      if (ar.failed() || ar.result() == null) {
+        resultHandler.handle(Future.failedFuture("No matching record"));
+      } else {
+        resultHandler.handle(Future.succeededFuture(discovery.<HttpClient>getReference(ar.result()).getAs(WebClient.class)));
+      }
+    });
+  }
+
+  /**
    * Convenient method that looks for a HTTP endpoint and provides the configured {@link HttpClient}. The async result
    * is marked as failed is there are no matching services, or if the lookup fails. This method accepts a
    * configuration for the HTTP client
@@ -148,6 +166,28 @@ public interface HttpEndpoint extends ServiceType {
       } else {
         resultHandler.handle(Future.succeededFuture(discovery.<HttpClient>getReferenceWithConfiguration(ar.result(), conf).get
           ()));
+      }
+    });
+  }
+
+  /**
+   * Convenient method that looks for a HTTP endpoint and provides the configured {@link WebClient}. The async result
+   * is marked as failed is there are no matching services, or if the lookup fails. This method accepts a
+   * configuration for the HTTP client
+   *
+   * @param discovery     The service discovery instance
+   * @param filter        The filter, optional
+   * @param conf          the configuration of the client
+   * @param resultHandler The result handler
+   */
+  static void getWebClient(ServiceDiscovery discovery, JsonObject filter, JsonObject conf,
+                         Handler<AsyncResult<WebClient>>  resultHandler) {
+    discovery.getRecord(filter, ar -> {
+      if (ar.failed() || ar.result() == null) {
+        resultHandler.handle(Future.failedFuture("No matching record"));
+      } else {
+        resultHandler.handle(Future.succeededFuture(discovery.<HttpClient>getReferenceWithConfiguration(ar.result(), conf)
+          .getAs(WebClient.class)));
       }
     });
   }
@@ -173,6 +213,25 @@ public interface HttpEndpoint extends ServiceType {
   }
 
   /**
+   * Convenient method that looks for a HTTP endpoint and provides the configured {@link WebClient}. The async result
+   * is marked as failed is there are no matching services, or if the lookup fails.
+   *
+   * @param discovery     The service discovery instance
+   * @param filter        The filter
+   * @param resultHandler The result handler
+   */
+  static void getWebClient(ServiceDiscovery discovery, Function<Record, Boolean> filter,
+                           Handler<AsyncResult<WebClient>> resultHandler) {
+    discovery.getRecord(filter, ar -> {
+      if (ar.failed() || ar.result() == null) {
+        resultHandler.handle(Future.failedFuture("No matching record"));
+      } else {
+        resultHandler.handle(Future.succeededFuture(discovery.<HttpClient>getReference(ar.result()).getAs(WebClient.class)));
+      }
+    });
+  }
+
+  /**
    * Convenient method that looks for a HTTP endpoint and provides the configured {@link HttpClient}. The async result
    * is marked as failed is there are no matching services, or if the lookup fails. This method accepts a
    * configuration for the HTTP client.
@@ -183,14 +242,35 @@ public interface HttpEndpoint extends ServiceType {
    * @param resultHandler The result handler
    */
   static void getClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject conf,
-                        Handler<AsyncResult<HttpClient>>
-                          resultHandler) {
+                        Handler<AsyncResult<HttpClient>> resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
         resultHandler.handle(Future.succeededFuture(
           discovery.<HttpClient>getReferenceWithConfiguration(ar.result(), conf).get()));
+      }
+    });
+  }
+
+  /**
+   * Convenient method that looks for a HTTP endpoint and provides the configured {@link WebClient}. The async result
+   * is marked as failed is there are no matching services, or if the lookup fails. This method accepts a
+   * configuration for the HTTP client.
+   *
+   * @param discovery     The service discovery instance
+   * @param filter        The filter
+   * @param conf          the configuration of the client
+   * @param resultHandler The result handler
+   */
+  static void getWebClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject conf,
+                        Handler<AsyncResult<WebClient>> resultHandler) {
+    discovery.getRecord(filter, ar -> {
+      if (ar.failed() || ar.result() == null) {
+        resultHandler.handle(Future.failedFuture("No matching record"));
+      } else {
+        resultHandler.handle(Future.succeededFuture(
+          discovery.<HttpClient>getReferenceWithConfiguration(ar.result(), conf).getAs(WebClient.class)));
       }
     });
   }

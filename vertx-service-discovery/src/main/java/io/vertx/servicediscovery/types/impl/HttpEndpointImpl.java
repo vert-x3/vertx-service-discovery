@@ -27,6 +27,8 @@ import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.AbstractServiceReference;
 import io.vertx.servicediscovery.types.HttpEndpoint;
 import io.vertx.servicediscovery.types.HttpLocation;
+import io.vertx.servicediscovery.utils.ClassLoaderUtils;
+import io.vertx.webclient.WebClient;
 
 import java.util.Objects;
 
@@ -59,6 +61,8 @@ public class HttpEndpointImpl implements HttpEndpoint {
     private final HttpLocation location;
     private final JsonObject config;
 
+    private Object retrieved;
+
     HttpEndpointReference(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject config) {
       super(vertx, discovery, record);
       this.config = config;
@@ -90,8 +94,78 @@ public class HttpEndpointImpl implements HttpEndpoint {
      * Closes the client.
      */
     @Override
-    public void close() {
+    public synchronized void close() {
       service.close();
+      retrieved = null;
+    }
+
+    /**
+     * Gets the service object.  It can be a proxy, a client or whatever object depending on the service type. Unlike
+     * {@link #get()} this method let you configure the type of object you want to retrieve. This parameter must match
+     * the expected service type, and must pass the "polyglot" version of the class.
+     *
+     * This implementation manages retrieving {@link WebClient} as well as {@link HttpClient}.
+     *
+     * @param x the
+     * @return the object to access the service
+     */
+    @Override
+    public synchronized <X> X getAs(Class<X> x) {
+      Object svc = get();
+
+      if (x == null || x.isInstance(svc)) {
+        retrieved = svc;
+        return (X) svc;
+      } else if (x.getName().contains("WebClient")) {
+        // Inject the Web Client
+        WebClient client = WebClient.wrap((HttpClient) svc);
+        if (x.isInstance(client)) {
+          retrieved = client;
+          return (X) client;
+        } else {
+          X wrapped = ClassLoaderUtils.createWithDelegate(x, client);
+          retrieved = wrapped;
+          return wrapped;
+        }
+      } else {
+        X client = ClassLoaderUtils.createWithDelegate(x, svc);
+        retrieved = client;
+        return client;
+      }
+    }
+
+    /**
+     * GGets the service object if already retrieved. It won't try to acquire the service object if not retrieved yet. Unlike
+     * {@link #cached()} this method let you configure the type of object you want to retrieve. This parameter must match
+     * the expected service type, and must pass the "polyglot" version of the class.
+     *
+     * @param x the
+     * @return the object to access the service
+     */
+    @Override
+    public synchronized <X> X cachedAs(Class<X> x) {
+      Object svc = cached();
+
+      if (svc == null) {
+        return null;
+      }
+
+      if (retrieved != null  && x.isInstance(retrieved)) {
+        return (X) retrieved;
+      }
+
+      if (x == null || x.isInstance(svc)) {
+        return (X) svc;
+      } else {
+        return ClassLoaderUtils.createWithDelegate(x, svc);
+      }
+    }
+
+    @Override
+    public synchronized boolean isHolding(Object object) {
+      // Because some language may use proxy, we compare hashCode and equals
+      return service != null  && (object.hashCode() == service.hashCode()  || object.equals(service))
+        || retrieved != null  && (retrieved.hashCode() == object.hashCode()  || object.equals(retrieved));
     }
   }
 }
