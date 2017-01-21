@@ -1,5 +1,5 @@
-require 'vertx-service-discovery/service_discovery'
 require 'vertx-web-client/web_client'
+require 'vertx-service-discovery/service_discovery'
 require 'vertx/http_client'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.servicediscovery.types.HttpEndpoint

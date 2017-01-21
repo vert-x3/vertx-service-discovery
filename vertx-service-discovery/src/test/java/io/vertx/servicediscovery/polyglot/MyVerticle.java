@@ -13,7 +13,7 @@ import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.service.HelloService;
 import io.vertx.servicediscovery.types.*;
-import io.vertx.webclient.WebClient;
+import io.vertx.ext.web.client.WebClient;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>

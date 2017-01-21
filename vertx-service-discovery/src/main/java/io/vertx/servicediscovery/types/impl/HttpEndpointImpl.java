@@ -28,7 +28,7 @@ import io.vertx.servicediscovery.types.AbstractServiceReference;
 import io.vertx.servicediscovery.types.HttpEndpoint;
 import io.vertx.servicediscovery.types.HttpLocation;
 import io.vertx.servicediscovery.utils.ClassLoaderUtils;
-import io.vertx.webclient.WebClient;
+import io.vertx.ext.web.client.WebClient;
 
 import java.util.Objects;
 
