@@ -62,6 +62,34 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
     this.id = options.getName() != null ? options.getName() : getNodeId(vertx);
     this.options = options;
+
+    if (options.isAutoRegistrationOfImporters()) {
+      autoregisterImporters();
+    }
+  }
+
+  private void autoregisterImporters() {
+    Collection<ServiceImporter> spi = getServiceImporterFromSPI();
+    Map<Future, ServiceImporter> map = new HashMap<>();
+    List<Future> futures = spi.stream().map(imp -> {
+      Future<Void> fut = Future.future();
+      imp.start(vertx, this, new JsonObject(), fut);
+      map.put(fut, imp);
+      return fut;
+    }).collect(Collectors.toList());
+
+    CompositeFuture.join(futures)
+      .setHandler(ar -> {
+        for (Future f : futures) {
+          ServiceImporter serviceImporter = map.get(f);
+          if (f.succeeded()) {
+            LOGGER.info("Auto-registration of importer " + serviceImporter);
+            importers.add(serviceImporter);
+          } else {
+            LOGGER.warn("Failed to register importer " + serviceImporter);
+          }
+        }
+      });
   }
 
   private String getNodeId(Vertx vertx) {
@@ -97,7 +125,22 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     }
 
     throw new IllegalStateException("Cannot find the discovery backend implementation with name " + maybeName + " in " +
-        "the classpath");
+      "the classpath");
+  }
+
+
+  private Collection<ServiceImporter> getServiceImporterFromSPI() {
+    ServiceLoader<ServiceImporter> importers = ServiceLoader.load(ServiceImporter.class);
+    Iterator<ServiceImporter> iterator = importers.iterator();
+
+    List<ServiceImporter> list = new ArrayList<>();
+    // We have a name
+    while (iterator.hasNext()) {
+      ServiceImporter importer = iterator.next();
+      list.add(importer);
+    }
+
+    return list;
   }
 
 
@@ -119,9 +162,9 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
       return;
     }
     vertx.eventBus().publish(usage, new JsonObject()
-        .put("type", "bind")
-        .put("record", reference.record().toJson())
-        .put("id", id));
+      .put("type", "bind")
+      .put("record", reference.record().toJson())
+      .put("id", id));
   }
 
   @Override
@@ -137,9 +180,9 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
       return;
     }
     vertx.eventBus().publish(usage, new JsonObject()
-        .put("type", "release")
-        .put("record", reference.record().toJson())
-        .put("id", id));
+      .put("type", "release")
+      .put("record", reference.record().toJson())
+      .put("id", id));
   }
 
   @Override
@@ -154,21 +197,21 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
     Future<Void> completed = Future.future();
     completed.setHandler(
-        ar -> {
-          if (ar.failed()) {
-            LOGGER.error("Cannot start the service importer " + importer, ar.cause());
-            if (completionHandler != null) {
-              completionHandler.handle(Future.failedFuture(ar.cause()));
-            }
-          } else {
-            importers.add(importer);
-            LOGGER.info("Service importer " + importer + " started");
+      ar -> {
+        if (ar.failed()) {
+          LOGGER.error("Cannot start the service importer " + importer, ar.cause());
+          if (completionHandler != null) {
+            completionHandler.handle(Future.failedFuture(ar.cause()));
+          }
+        } else {
+          importers.add(importer);
+          LOGGER.info("Service importer " + importer + " started");
 
-            if (completionHandler != null) {
-              completionHandler.handle(Future.succeededFuture(null));
-            }
+          if (completionHandler != null) {
+            completionHandler.handle(Future.succeededFuture(null));
           }
         }
+      }
     );
 
     importer.start(vertx, this, conf, completed);
@@ -197,21 +240,21 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
     Future<Void> completed = Future.future();
     completed.setHandler(
-        ar -> {
-          if (ar.failed()) {
-            LOGGER.error("Cannot start the service importer " + exporter, ar.cause());
-            if (completionHandler != null) {
-              completionHandler.handle(Future.failedFuture(ar.cause()));
-            }
-          } else {
-            exporters.add(exporter);
-            LOGGER.info("Service exporter " + exporter + " started");
+      ar -> {
+        if (ar.failed()) {
+          LOGGER.error("Cannot start the service importer " + exporter, ar.cause());
+          if (completionHandler != null) {
+            completionHandler.handle(Future.failedFuture(ar.cause()));
+          }
+        } else {
+          exporters.add(exporter);
+          LOGGER.info("Service exporter " + exporter + " started");
 
-            if (completionHandler != null) {
-              completionHandler.handle(Future.succeededFuture(null));
-            }
+          if (completionHandler != null) {
+            completionHandler.handle(Future.succeededFuture(null));
           }
         }
+      }
     );
 
     exporter.init(vertx, this, conf, completed);
@@ -249,9 +292,9 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
   @Override
   public void publish(Record record, Handler<AsyncResult<Record>> resultHandler) {
     Status status = record.getStatus() != null
-        && record.getStatus() != Status.UNKNOWN
-        && record.getStatus() != Status.DOWN
-        ? record.getStatus() : Status.UP;
+      && record.getStatus() != Status.UNKNOWN
+      && record.getStatus() != Status.DOWN
+      ? record.getStatus() : Status.UP;
 
     backend.store(record.setStatus(status), resultHandler);
     for (ServiceExporter exporter : exporters) {
@@ -259,8 +302,8 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     }
     Record announcedRecord = new Record(record);
     announcedRecord
-        .setRegistration(null)
-        .setStatus(status);
+      .setRegistration(null)
+      .setStatus(status);
     vertx.eventBus().publish(announce, announcedRecord.toJson());
   }
 
@@ -278,8 +321,8 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
       Record announcedRecord = new Record(record.result());
       announcedRecord
-          .setRegistration(null)
-          .setStatus(Status.DOWN);
+        .setRegistration(null)
+        .setStatus(Status.DOWN);
       vertx.eventBus().publish(announce, announcedRecord.toJson());
       resultHandler.handle(Future.succeededFuture());
     });
@@ -308,16 +351,16 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
   @Override
   public void getRecord(Function<Record, Boolean> filter, boolean includeOutOfService, Handler<AsyncResult<Record>>
-      resultHandler) {
+    resultHandler) {
     Objects.requireNonNull(filter);
     backend.getRecords(list -> {
       if (list.failed()) {
         resultHandler.handle(Future.failedFuture(list.cause()));
       } else {
         Optional<Record> any = list.result().stream()
-            .filter(filter::apply)
-            .filter(record -> includeOutOfService || record.getStatus() == Status.UP)
-            .findAny();
+          .filter(filter::apply)
+          .filter(record -> includeOutOfService || record.getStatus() == Status.UP)
+          .findAny();
         if (any.isPresent()) {
           resultHandler.handle(Future.succeededFuture(any.get()));
         } else {
@@ -354,10 +397,10 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
         resultHandler.handle(Future.failedFuture(list.cause()));
       } else {
         resultHandler.handle(Future.succeededFuture(
-            list.result().stream()
-                .filter(filter::apply)
-                .filter(record -> includeOutOfService || record.getStatus() == Status.UP)
-                .collect(Collectors.toList())
+          list.result().stream()
+            .filter(filter::apply)
+            .filter(record -> includeOutOfService || record.getStatus() == Status.UP)
+            .collect(Collectors.toList())
         ));
       }
     });

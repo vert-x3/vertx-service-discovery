@@ -30,11 +30,14 @@ public class ServiceDiscoveryOptions {
 
   public static final String DEFAULT_ANNOUNCE_ADDRESS = "vertx.discovery.announce";
   public static final String DEFAULT_USAGE_ADDRESS = "vertx.discovery.usage";
+  private static final boolean DEFAULT_AUTO_REGISTRATION_IMPORTERS = true;
 
   private String announceAddress = DEFAULT_ANNOUNCE_ADDRESS;
   private JsonObject backendConfiguration = new JsonObject();
   private String name = null;
   private String usageAddress = DEFAULT_USAGE_ADDRESS;
+
+  private boolean autoRegistrationOfImporters = DEFAULT_AUTO_REGISTRATION_IMPORTERS;
 
   /**
    * Creates a new instance of {@link ServiceDiscoveryOptions} using the default values.
@@ -53,6 +56,7 @@ public class ServiceDiscoveryOptions {
     this.backendConfiguration = other.backendConfiguration.copy();
     this.name = other.name;
     this.usageAddress = other.usageAddress;
+    this.autoRegistrationOfImporters = other.autoRegistrationOfImporters;
   }
 
   /**
@@ -156,6 +160,23 @@ public class ServiceDiscoveryOptions {
    */
   public ServiceDiscoveryOptions setUsageAddress(String usageAddress) {
     this.usageAddress = usageAddress;
+    return this;
+  }
+
+  /**
+   * @return whether or not the registration of importers declared as SPI is enabled.
+   */
+  public boolean isAutoRegistrationOfImporters() {
+    return autoRegistrationOfImporters;
+  }
+
+  /**
+   * Sets whether or not the registration of importers declared as SPI is enabled.
+   * @param autoRegistrationOfImporters {@code true} to enable the importation, {@code false} otherwise
+   * @return the current {@link ServiceDiscoveryOptions}
+   */
+  public ServiceDiscoveryOptions setAutoRegistrationOfImporters(boolean autoRegistrationOfImporters) {
+    this.autoRegistrationOfImporters = autoRegistrationOfImporters;
     return this;
   }
 }
