@@ -368,8 +368,8 @@
  * {@link io.vertx.servicediscovery.ServiceDiscovery#releaseServiceObject(ServiceDiscovery, java.lang.Object)},
  * so you don't need to keep the service reference.
  *
- * Since Vert.x 3.4.0, another client has been provided. This higher-level client, named {@link io.vertx.webclient.WebClient}
- * tends to be easier to use. You can retrieve a {@link io.vertx.webclient.WebClient} instances using:
+ * Since Vert.x 3.4.0, another client has been provided. This higher-level client, named {@link io.vertx.ext.web.client.WebClient}
+ * tends to be easier to use. You can retrieve a {@link io.vertx.ext.web.client.WebClient} instances using:
  *
  * [source, $lang]
  * ----

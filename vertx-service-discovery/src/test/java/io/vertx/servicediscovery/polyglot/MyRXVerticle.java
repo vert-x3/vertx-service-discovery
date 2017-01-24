@@ -13,7 +13,7 @@ import io.vertx.rxjava.servicediscovery.ServiceDiscovery;
 import io.vertx.rxjava.servicediscovery.ServiceReference;
 import io.vertx.rxjava.servicediscovery.service.HelloService;
 import io.vertx.rxjava.servicediscovery.types.*;
-import io.vertx.rxjava.webclient.WebClient;
+import io.vertx.rxjava.ext.web.client.WebClient;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>

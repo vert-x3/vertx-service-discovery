@@ -530,8 +530,8 @@ In this second version, the service object is released using
 `link:../../apidocs/io/vertx/servicediscovery/ServiceDiscovery.html#releaseServiceObject-io.vertx.servicediscovery.ServiceDiscovery-java.lang.Object-[ServiceDiscovery.releaseServiceObject]`,
 so you don't need to keep the service reference.
 
-Since Vert.x 3.4.0, another client has been provided. This higher-level client, named `link:../../apidocs/io/vertx/webclient/WebClient.html[WebClient]`
-tends to be easier to use. You can retrieve a `link:../../apidocs/io/vertx/webclient/WebClient.html[WebClient]` instances using:
+Since Vert.x 3.4.0, another client has been provided. This higher-level client, named `link:../../apidocs/io/vertx/ext/web/client/WebClient.html[WebClient]`
+tends to be easier to use. You can retrieve a `link:../../apidocs/io/vertx/ext/web/client/WebClient.html[WebClient]` instances using:
 
 [source, java]
 ----

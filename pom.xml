@@ -23,7 +23,7 @@
   <parent>
     <groupId>io.vertx</groupId>
     <artifactId>vertx-ext-parent</artifactId>
-    <version>23</version>
+    <version>24</version>
   </parent>
 
   <artifactId>vertx-service-discovery-parent</artifactId>
@@ -35,6 +35,7 @@
     <stack.version>3.4.0-SNAPSHOT</stack.version>
     <asciidoc.dir>${project.basedir}/src/main/asciidoc</asciidoc.dir>
     <doc.skip>true</doc.skip>
+    <codegen.rxjava.deprecated>true</codegen.rxjava.deprecated>
   </properties>
 
 

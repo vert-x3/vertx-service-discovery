@@ -168,7 +168,7 @@ module VertxServiceDiscovery
     #  status, if the <code>includeOutOfService</code> parameter is set to <code>true</code>.
     # @overload getRecord(filter,resultHandler)
     #   @param [Hash{String => Object}] filter the filter.
-    #   @yield handler called when the lookup has been completed. When there are no matching record, the operation succeed, but the async result has no result.
+    #   @yield handler called when the lookup has been completed. When there are no matching record, the operation succeeds, but the async result has no result (<code>null</code>).
     # @overload getRecord(filter,resultHandler)
     #   @param [Proc] filter the filter, must not be <code>null</code>. To return all records, use a function accepting all records
     #   @yield the result handler called when the lookup has been completed. When there are no matching record, the operation succeed, but the async result has no result.
