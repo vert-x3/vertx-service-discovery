@@ -92,6 +92,38 @@ public interface ServiceDiscovery {
   }
 
   /**
+   * Creates an instance of {@link ServiceDiscovery}.
+   *
+   * @param vertx             the vert.x instance
+   * @param options           the discovery options
+   * @param completionHandler completion handler called when the service discovery has been initialized. This
+   *                          includes the initialization of the service importer registered from the SPI.
+   * @return the created instance, should not be used to retrieve services before the invocation of the completion
+   * handler.
+   */
+  static ServiceDiscovery create(Vertx vertx, ServiceDiscoveryOptions options, Handler<ServiceDiscovery> completionHandler) {
+    DiscoveryImpl discovery = new DiscoveryImpl(vertx, options);
+    discovery.initialize(completionHandler);
+    return discovery;
+  }
+
+  /**
+   * Creates a new instance of {@link ServiceDiscovery} using the default configuration.
+   *
+   * @param vertx             the vert.x instance
+   * @param completionHandler completion handler called when the service discovery has been initialized. This
+   *                          includes the initialization of the service importer registered from the SPI.
+   * @return the created instance, should not be used to retrieve services before the invocation of the completion
+   * handler.
+   */
+  static ServiceDiscovery create(Vertx vertx, Handler<ServiceDiscovery> completionHandler) {
+    DiscoveryImpl discovery = new DiscoveryImpl(vertx, new ServiceDiscoveryOptions());
+    discovery.initialize(completionHandler);
+    return discovery;
+  }
+
+
+  /**
    * Gets a service reference from the given record.
    *
    * @param record the chosen record
@@ -239,7 +271,7 @@ public interface ServiceDiscovery {
    *                            record, the operation succeed, but the async result has no result.
    */
   void getRecord(Function<Record, Boolean> filter, boolean includeOutOfService, Handler<AsyncResult<Record>>
-      resultHandler);
+    resultHandler);
 
   /**
    * Lookups for a set of records. Unlike {@link #getRecord(JsonObject, Handler)}, this method returns all matching

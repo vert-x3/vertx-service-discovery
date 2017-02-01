@@ -20,9 +20,7 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.*;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -32,6 +30,7 @@ import io.vertx.servicediscovery.spi.ServicePublisher;
 import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -94,20 +93,27 @@ public class KubernetesServiceImporter implements Watcher<Service>, ServiceImpor
               .withTrustCerts(true)
               .build();
           DefaultKubernetesClient kubernetesClient = null;
+          List<Future> futures = new ArrayList<>();
           try {
             kubernetesClient = new DefaultKubernetesClient(config);
             ServiceList list = kubernetesClient.services().inNamespace(namespace).list();
             synchronized (KubernetesServiceImporter.this) {
               watcher = kubernetesClient.services().inNamespace(namespace)
                   .watch(this);
+              LOGGER.info("Kubernetes initial import of " + list.getItems().size() + " services");
               for (Service service : list.getItems()) {
                 Record record = createRecord(service);
                 if (addRecordIfNotContained(record)) {
-                  publishRecord(record);
+                  Future<Record> fut = Future.future();
+                  publishRecord(record, fut.completer());
+                  futures.add(fut);
                 }
               }
             }
-            future.complete(kubernetesClient);
+            DefaultKubernetesClient finalKubernetesClient = kubernetesClient;
+            CompositeFuture.all(futures).setHandler(x -> {
+              future.complete(finalKubernetesClient);
+            });
           } catch (KubernetesClientException e) {
             if (kubernetesClient != null) {
               kubernetesClient.close();
@@ -118,7 +124,7 @@ public class KubernetesServiceImporter implements Watcher<Service>, ServiceImpor
         ar -> {
           if (ar.succeeded()) {
             this.client = ar.result();
-            LOGGER.info("Kubernetes client instantiated");
+            LOGGER.info("Kubernetes client instantiated with " + records.size() + " services imported");
             completion.complete();
           } else {
             LOGGER.error("Error while interacting with kubernetes", ar.cause());
@@ -128,14 +134,17 @@ public class KubernetesServiceImporter implements Watcher<Service>, ServiceImpor
     );
   }
 
-  private void publishRecord(Record record) {
+  private void publishRecord(Record record, Handler<AsyncResult<Record>> completionHandler) {
     publisher.publish(record, ar -> {
+      if (completionHandler != null) {
+        completionHandler.handle(ar);
+      }
       if (ar.succeeded()) {
         LOGGER.info("Kubernetes service published in the vert.x service registry: "
-            + record.toJson());
+          + record.toJson());
       } else {
         LOGGER.error("Kubernetes service not published in the vert.x service registry",
-            ar.cause());
+          ar.cause());
       }
     });
   }
@@ -331,7 +340,7 @@ public class KubernetesServiceImporter implements Watcher<Service>, ServiceImpor
         // new service
         Record record = createRecord(service);
         if (addRecordIfNotContained(record)) {
-          publishRecord(record);
+          publishRecord(record, null);
         }
         break;
       case DELETED:
@@ -347,7 +356,7 @@ public class KubernetesServiceImporter implements Watcher<Service>, ServiceImpor
         record = createRecord(service);
         storedRecord = removeRecordIfContained(record);
         if (storedRecord != null) {
-          publishRecord(record);
+          publishRecord(record, null);
         }
     }
 

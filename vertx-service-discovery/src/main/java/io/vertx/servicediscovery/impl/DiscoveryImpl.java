@@ -62,13 +62,10 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
     this.id = options.getName() != null ? options.getName() : getNodeId(vertx);
     this.options = options;
-
-    if (options.isAutoRegistrationOfImporters()) {
-      autoregisterImporters();
-    }
   }
 
-  private void autoregisterImporters() {
+
+  public void initialize(Handler<ServiceDiscovery> completionHandler) {
     Collection<ServiceImporter> spi = getServiceImporterFromSPI();
     Map<Future, ServiceImporter> map = new HashMap<>();
     List<Future> futures = spi.stream().map(imp -> {
@@ -89,6 +86,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
             LOGGER.warn("Failed to register importer " + serviceImporter);
           }
         }
+        completionHandler.handle(this);
       });
   }
 
