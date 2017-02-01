@@ -66,12 +66,17 @@ module VertxServiceDiscovery
     #  Creates an instance of {::VertxServiceDiscovery::ServiceDiscovery}.
     # @param [::Vertx::Vertx] vertx the vert.x instance
     # @param [Hash] options the discovery options
-    # @return [::VertxServiceDiscovery::ServiceDiscovery] the created service discovery instance.
+    # @yield completion handler called when the service discovery has been initialized. This includes the initialization of the service importer registered from the SPI.
+    # @return [::VertxServiceDiscovery::ServiceDiscovery] the created instance, should not be used to retrieve services before the invocation of the completion handler.
     def self.create(vertx=nil,options=nil)
       if vertx.class.method_defined?(:j_del) && !block_given? && options == nil
         return ::Vertx::Util::Utils.safe_create(Java::IoVertxServicediscovery::ServiceDiscovery.java_method(:create, [Java::IoVertxCore::Vertx.java_class]).call(vertx.j_del),::VertxServiceDiscovery::ServiceDiscovery)
       elsif vertx.class.method_defined?(:j_del) && options.class == Hash && !block_given?
         return ::Vertx::Util::Utils.safe_create(Java::IoVertxServicediscovery::ServiceDiscovery.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxServicediscovery::ServiceDiscoveryOptions.java_class]).call(vertx.j_del,Java::IoVertxServicediscovery::ServiceDiscoveryOptions.new(::Vertx::Util::Utils.to_json_object(options))),::VertxServiceDiscovery::ServiceDiscovery)
+      elsif vertx.class.method_defined?(:j_del) && block_given? && options == nil
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxServicediscovery::ServiceDiscovery.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxCore::Handler.java_class]).call(vertx.j_del,(Proc.new { |event| yield(::Vertx::Util::Utils.safe_create(event,::VertxServiceDiscovery::ServiceDiscovery)) })),::VertxServiceDiscovery::ServiceDiscovery)
+      elsif vertx.class.method_defined?(:j_del) && options.class == Hash && block_given?
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxServicediscovery::ServiceDiscovery.java_method(:create, [Java::IoVertxCore::Vertx.java_class,Java::IoVertxServicediscovery::ServiceDiscoveryOptions.java_class,Java::IoVertxCore::Handler.java_class]).call(vertx.j_del,Java::IoVertxServicediscovery::ServiceDiscoveryOptions.new(::Vertx::Util::Utils.to_json_object(options)),(Proc.new { |event| yield(::Vertx::Util::Utils.safe_create(event,::VertxServiceDiscovery::ServiceDiscovery)) })),::VertxServiceDiscovery::ServiceDiscovery)
       end
       raise ArgumentError, "Invalid arguments when calling create(#{vertx},#{options})"
     end

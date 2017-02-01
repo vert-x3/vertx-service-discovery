@@ -22,8 +22,8 @@ var HttpClient = require('vertx-js/http_client');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JHttpEndpoint = io.vertx.servicediscovery.types.HttpEndpoint;
-var Record = io.vertx.servicediscovery.Record;
+var JHttpEndpoint = Java.type('io.vertx.servicediscovery.types.HttpEndpoint');
+var Record = Java.type('io.vertx.servicediscovery.Record');
 
 /**
 

@@ -19,7 +19,7 @@ var utils = require('vertx-js/util/utils');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JHelloService = io.vertx.servicediscovery.service.HelloService;
+var JHelloService = Java.type('io.vertx.servicediscovery.service.HelloService');
 
 /**
 
