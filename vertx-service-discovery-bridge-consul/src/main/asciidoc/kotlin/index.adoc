@@ -41,7 +41,11 @@ Then, when creating the service discovery registers this bridge as follows:
 
 [source, kotlin]
 ----
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
 import io.vertx.kotlin.core.json.*
+=======
+import io.vertx.kotlin.common.json.*
+>>>>>>> Don't generate deprecated Observable methods
 import io.vertx.servicediscovery.ServiceDiscovery
 
 ServiceDiscovery.create(vertx).registerServiceImporter(io.vertx.servicediscovery.consul.ConsulServiceImporter(), json {

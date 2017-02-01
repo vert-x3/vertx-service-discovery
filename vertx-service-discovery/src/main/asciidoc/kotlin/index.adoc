@@ -141,9 +141,14 @@ instance to use the discovery infrastructure:
 
 [source,kotlin]
 ----
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
 import io.vertx.kotlin.servicediscovery.*
 import io.vertx.servicediscovery.ServiceDiscovery
 import io.vertx.servicediscovery.ServiceDiscoveryOptions
+=======
+import io.vertx.kotlin.common.json.*
+import io.vertx.servicediscovery.ServiceDiscovery
+>>>>>>> Don't generate deprecated Observable methods
 
 // Use default configuration
 var discovery = ServiceDiscovery.create(vertx)
@@ -180,9 +185,13 @@ from the service types.
 
 [source,kotlin]
 ----
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
 import io.vertx.kotlin.core.json.*
 import io.vertx.kotlin.servicediscovery.*
 import io.vertx.servicediscovery.Record
+=======
+import io.vertx.kotlin.common.json.*
+>>>>>>> Don't generate deprecated Observable methods
 import io.vertx.servicediscovery.types.HttpEndpoint
 
 // Manual record creation
@@ -376,6 +385,10 @@ Once you have chosen the `link:../../apidocs/io/vertx/servicediscovery/Record.ht
 ----
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.http.HttpClient
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
+=======
+import io.vertx.kotlin.common.json.*
+>>>>>>> Don't generate deprecated Observable methods
 
 var reference1 = discovery.getReference(record1)
 var reference2 = discovery.getReference(record2)
@@ -403,6 +416,10 @@ configuration, some require configuration (as data sources):
 [source,kotlin]
 ----
 import io.vertx.ext.jdbc.JDBCClient
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
+=======
+import io.vertx.kotlin.common.json.*
+>>>>>>> Don't generate deprecated Observable methods
 
 var reference = discovery.getReferenceWithConfiguration(record, conf)
 
@@ -473,7 +490,11 @@ The next snippet illustrates hot to create a `link:../../apidocs/io/vertx/servic
 
 [source, kotlin]
 ----
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
 import io.vertx.kotlin.core.json.*
+=======
+import io.vertx.kotlin.common.json.*
+>>>>>>> Don't generate deprecated Observable methods
 import io.vertx.servicediscovery.types.HttpEndpoint
 
 var record1 = HttpEndpoint.createRecord("some-http-service", "localhost", 8433, "/api")
@@ -500,7 +521,11 @@ Once a HTTP endpoint is published, a consumer can retrieve it. The service objec
 [source, kotlin]
 ----
 import io.vertx.core.http.HttpClient
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
 import io.vertx.kotlin.core.json.*
+=======
+import io.vertx.kotlin.common.json.*
+>>>>>>> Don't generate deprecated Observable methods
 
 // Get the record
 discovery.getRecord(json {
@@ -532,7 +557,11 @@ method to combine lookup and service retrieval in one call:
 
 [source, kotlin]
 ----
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
 import io.vertx.kotlin.core.json.*
+=======
+import io.vertx.kotlin.common.json.*
+>>>>>>> Don't generate deprecated Observable methods
 import io.vertx.servicediscovery.ServiceDiscovery
 import io.vertx.servicediscovery.types.HttpEndpoint
 
@@ -566,7 +595,11 @@ tends to be easier to use. You can retrieve a `link:../../apidocs/io/vertx/ext/w
 [source, kotlin]
 ----
 import io.vertx.ext.web.client.WebClient
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
 import io.vertx.kotlin.core.json.*
+=======
+import io.vertx.kotlin.common.json.*
+>>>>>>> Don't generate deprecated Observable methods
 
 // Get the record
 discovery.getRecord(json {
@@ -596,7 +629,11 @@ And, if you prefer the approach using the service type:
 
 [source, kotlin]
 ----
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
 import io.vertx.kotlin.core.json.*
+=======
+import io.vertx.kotlin.common.json.*
+>>>>>>> Don't generate deprecated Observable methods
 import io.vertx.servicediscovery.ServiceDiscovery
 import io.vertx.servicediscovery.types.HttpEndpoint
 
@@ -634,7 +671,11 @@ To publish an event bus service, you need to create a `link:../../apidocs/io/ver
 
 [source, kotlin]
 ----
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
 import io.vertx.kotlin.core.json.*
+=======
+import io.vertx.kotlin.common.json.*
+>>>>>>> Don't generate deprecated Observable methods
 import io.vertx.servicediscovery.types.EventBusService
 
 var record = EventBusService.createRecord("some-eventbus-service", "address", "examples.MyService", json {
@@ -678,6 +719,10 @@ As for the other service types, publishing a message source is a 2-step process:
 
 [source, kotlin]
 ----
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
+=======
+import io.vertx.kotlin.common.json.*
+>>>>>>> Don't generate deprecated Observable methods
 import io.vertx.servicediscovery.types.MessageSource
 
 var record = MessageSource.createRecord("some-message-source-service", "some-address")
@@ -704,7 +749,11 @@ With the first approach, the code is the following:
 [source, kotlin]
 ----
 import io.vertx.core.eventbus.MessageConsumer
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
 import io.vertx.kotlin.core.json.*
+=======
+import io.vertx.kotlin.common.json.*
+>>>>>>> Don't generate deprecated Observable methods
 
 // Get the record
 discovery.getRecord(json {
@@ -734,7 +783,11 @@ When, using `link:../../apidocs/io/vertx/servicediscovery/types/MessageSource.ht
 
 [source, kotlin]
 ----
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
 import io.vertx.kotlin.core.json.*
+=======
+import io.vertx.kotlin.common.json.*
+>>>>>>> Don't generate deprecated Observable methods
 import io.vertx.servicediscovery.ServiceDiscovery
 import io.vertx.servicediscovery.types.MessageSource
 
@@ -773,7 +826,11 @@ As for the other service types, publishing a JDBC data source is a 2-step proces
 
 [source, kotlin]
 ----
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
 import io.vertx.kotlin.core.json.*
+=======
+import io.vertx.kotlin.common.json.*
+>>>>>>> Don't generate deprecated Observable methods
 import io.vertx.servicediscovery.types.JDBCDataSource
 
 var record = JDBCDataSource.createRecord("some-data-source-service", json {
@@ -802,7 +859,11 @@ the consumer:
 [source, kotlin]
 ----
 import io.vertx.ext.jdbc.JDBCClient
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
 import io.vertx.kotlin.core.json.*
+=======
+import io.vertx.kotlin.common.json.*
+>>>>>>> Don't generate deprecated Observable methods
 
 // Get the record
 discovery.getRecord(json {
@@ -833,7 +894,11 @@ You can also use the `link:../../apidocs/io/vertx/ext/jdbc/JDBCClient.html[JDBCC
 
 [source, kotlin]
 ----
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
 import io.vertx.kotlin.core.json.*
+=======
+import io.vertx.kotlin.common.json.*
+>>>>>>> Don't generate deprecated Observable methods
 import io.vertx.servicediscovery.ServiceDiscovery
 import io.vertx.servicediscovery.types.JDBCDataSource
 
@@ -872,7 +937,11 @@ Publishing a Redis data source is a 2-step process:
 
 [source, kotlin]
 ----
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
 import io.vertx.kotlin.core.json.*
+=======
+import io.vertx.kotlin.common.json.*
+>>>>>>> Don't generate deprecated Observable methods
 import io.vertx.servicediscovery.types.RedisDataSource
 
 var record = RedisDataSource.createRecord("some-redis-data-source-service", json {
@@ -898,7 +967,11 @@ the consumer:
 
 [source, kotlin]
 ----
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
 import io.vertx.kotlin.core.json.*
+=======
+import io.vertx.kotlin.common.json.*
+>>>>>>> Don't generate deprecated Observable methods
 import io.vertx.redis.RedisClient
 
 // Get the record
@@ -925,7 +998,11 @@ You can also use the `link:../../apidocs/io/vertx/servicediscovery/types/RedisDa
 
 [source, kotlin]
 ----
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
 import io.vertx.kotlin.core.json.*
+=======
+import io.vertx.kotlin.common.json.*
+>>>>>>> Don't generate deprecated Observable methods
 import io.vertx.servicediscovery.ServiceDiscovery
 import io.vertx.servicediscovery.types.RedisDataSource
 
@@ -959,7 +1036,11 @@ Publishing a Mongo data source is a 2-step process:
 
 [source, kotlin]
 ----
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
 import io.vertx.kotlin.core.json.*
+=======
+import io.vertx.kotlin.common.json.*
+>>>>>>> Don't generate deprecated Observable methods
 import io.vertx.servicediscovery.types.MongoDataSource
 
 var record = MongoDataSource.createRecord("some-data-source-service", json {
@@ -1016,7 +1097,11 @@ You can also use the `link:../../apidocs/io/vertx/servicediscovery/types/MongoDa
 
 [source, kotlin]
 ----
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
 import io.vertx.kotlin.core.json.*
+=======
+import io.vertx.kotlin.common.json.*
+>>>>>>> Don't generate deprecated Observable methods
 import io.vertx.servicediscovery.ServiceDiscovery
 import io.vertx.servicediscovery.types.MongoDataSource
 

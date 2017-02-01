@@ -39,10 +39,15 @@ Here is an example:
 
 [source,kotlin]
 ----
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
 import io.vertx.kotlin.core.json.*
 import io.vertx.kotlin.servicediscovery.*
 import io.vertx.servicediscovery.ServiceDiscovery
 import io.vertx.servicediscovery.ServiceDiscoveryOptions
+=======
+import io.vertx.kotlin.common.json.*
+import io.vertx.servicediscovery.ServiceDiscovery
+>>>>>>> Don't generate deprecated Observable methods
 
 ServiceDiscovery.create(vertx, ServiceDiscoveryOptions(
   backendConfiguration = json {
@@ -65,10 +70,15 @@ https://zookeeper.apache.org/doc/r3.4.5/zookeeperOver.html#Nodes+and+ephemeral+n
 
 [source,kotlin]
 ----
+<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
 import io.vertx.kotlin.core.json.*
 import io.vertx.kotlin.servicediscovery.*
 import io.vertx.servicediscovery.ServiceDiscovery
 import io.vertx.servicediscovery.ServiceDiscoveryOptions
+=======
+import io.vertx.kotlin.common.json.*
+import io.vertx.servicediscovery.ServiceDiscovery
+>>>>>>> Don't generate deprecated Observable methods
 
 ServiceDiscovery.create(vertx, ServiceDiscoveryOptions(
   backendConfiguration = json {

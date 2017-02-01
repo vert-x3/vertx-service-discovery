@@ -35,7 +35,6 @@
     <stack.version>3.4.0-SNAPSHOT</stack.version>
     <asciidoc.dir>${project.basedir}/src/main/asciidoc</asciidoc.dir>
     <doc.skip>true</doc.skip>
-    <codegen.rxjava.deprecated>true</codegen.rxjava.deprecated>
   </properties>
 
 
