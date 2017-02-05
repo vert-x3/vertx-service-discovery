@@ -17,7 +17,7 @@ descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-service-discovery-backend-zookeeper</artifactId>
-  <version>3.4.0-SNAPSHOT</version>
+  <version>3.4.0.Beta1</version>
 </dependency>
 ----
 
@@ -25,7 +25,7 @@ descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-discovery-backend-zookeeper:3.4.0-SNAPSHOT'
+compile 'io.vertx:vertx-service-discovery-backend-zookeeper:3.4.0.Beta1'
 ----
 
 Be aware that you can have only a single implementation of the SPI in your _classpath_. If none,
@@ -39,10 +39,12 @@ Here is an example:
 
 [source,kotlin]
 ----
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
+import io.vertx.kotlin.servicediscovery.*
 import io.vertx.servicediscovery.ServiceDiscovery
+import io.vertx.servicediscovery.ServiceDiscoveryOptions
 
-ServiceDiscovery.create(vertx, io.vertx.servicediscovery.ServiceDiscoveryOptions(
+ServiceDiscovery.create(vertx, ServiceDiscoveryOptions(
   backendConfiguration = json {
     obj("connection" to "127.0.0.1:2181")
   }))
@@ -63,10 +65,12 @@ https://zookeeper.apache.org/doc/r3.4.5/zookeeperOver.html#Nodes+and+ephemeral+n
 
 [source,kotlin]
 ----
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
+import io.vertx.kotlin.servicediscovery.*
 import io.vertx.servicediscovery.ServiceDiscovery
+import io.vertx.servicediscovery.ServiceDiscoveryOptions
 
-ServiceDiscovery.create(vertx, io.vertx.servicediscovery.ServiceDiscoveryOptions(
+ServiceDiscovery.create(vertx, ServiceDiscoveryOptions(
   backendConfiguration = json {
     obj(
       "connection" to "127.0.0.1:2181",

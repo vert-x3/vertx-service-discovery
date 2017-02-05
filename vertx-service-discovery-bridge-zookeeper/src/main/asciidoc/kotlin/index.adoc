@@ -20,7 +20,7 @@ descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-service-discovery-bridge-zookeeper</artifactId>
-  <version>3.4.0-SNAPSHOT</version>
+  <version>3.4.0.Beta1</version>
 </dependency>
 ----
 
@@ -28,14 +28,14 @@ descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-discovery-bridge-zookeeper:3.4.0-SNAPSHOT'
+compile 'io.vertx:vertx-service-discovery-bridge-zookeeper:3.4.0.Beta1'
 ----
 
 Then, when creating the service discovery registers this bridge as follows:
 
 [source, kotlin]
 ----
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
 import io.vertx.servicediscovery.ServiceDiscovery
 
 ServiceDiscovery.create(vertx).registerServiceImporter(io.vertx.servicediscovery.zookeeper.ZookeeperServiceImporter(), json {
@@ -57,7 +57,7 @@ In addition you can configure:
 
 [source,kotlin]
 ----
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
 import io.vertx.servicediscovery.ServiceDiscovery
 
 ServiceDiscovery.create(vertx).registerServiceImporter(io.vertx.servicediscovery.zookeeper.ZookeeperServiceImporter(), json {

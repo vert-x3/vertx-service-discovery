@@ -53,7 +53,7 @@ descriptor:
 <dependency>
 <groupId>io.vertx</groupId>
 <artifactId>vertx-service-discovery</artifactId>
-<version>3.4.0-SNAPSHOT</version>
+<version>3.4.0.Beta1</version>
 </dependency>
 ----
 
@@ -61,7 +61,7 @@ descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-discovery:3.4.0-SNAPSHOT'
+compile 'io.vertx:vertx-service-discovery:3.4.0.Beta1'
 ----
 
 == Overall concepts
@@ -268,7 +268,7 @@ discovery.getRecord(function (r) {
   true;
 }, function (ar, ar_err) {
   if (ar_err == null) {
-    if (ar !== null &&ar !== undefined) {
+    if ((ar !== null && ar !== undefined)) {
       // we have a record
     } else {
       // the lookup succeeded, but no matching service
@@ -280,7 +280,7 @@ discovery.getRecord(function (r) {
 
 discovery.getRecord(null, function (ar, ar_err) {
   if (ar_err == null) {
-    if (ar !== null &&ar !== undefined) {
+    if ((ar !== null && ar !== undefined)) {
       // we have a record
     } else {
       // the lookup succeeded, but no matching service
@@ -296,7 +296,7 @@ discovery.getRecord(function (r) {
   r.name == "some-name";
 }, function (ar, ar_err) {
   if (ar_err == null) {
-    if (ar !== null &&ar !== undefined) {
+    if ((ar !== null && ar !== undefined)) {
       // we have a record
     } else {
       // the lookup succeeded, but no matching service
@@ -310,7 +310,7 @@ discovery.getRecord({
   "name" : "some-service"
 }, function (ar, ar_err) {
   if (ar_err == null) {
-    if (ar !== null &&ar !== undefined) {
+    if ((ar !== null && ar !== undefined)) {
       // we have a record
     } else {
       // the lookup succeeded, but no matching service
@@ -492,7 +492,7 @@ var HttpClient = require("vertx-js/http_client");
 discovery.getRecord({
   "name" : "some-http-service"
 }, function (ar, ar_err) {
-  if (ar_err == null && ar !== null &&ar !== undefined) {
+  if (ar_err == null && (ar !== null && ar !== undefined)) {
     // Retrieve the service reference
     var reference = discovery.getReference(ar);
     // Retrieve the service object
@@ -554,7 +554,7 @@ var WebClient = require("vertx-web-client-js/web_client");
 discovery.getRecord({
   "name" : "some-http-service"
 }, function (ar, ar_err) {
-  if (ar_err == null && ar !== null &&ar !== undefined) {
+  if (ar_err == null && (ar !== null && ar !== undefined)) {
     // Retrieve the service reference
     var reference = discovery.getReference(ar);
     // Retrieve the service object
@@ -704,7 +704,7 @@ var MessageConsumer = require("vertx-js/message_consumer");
 discovery.getRecord({
   "name" : "some-message-source-service"
 }, function (ar, ar_err) {
-  if (ar_err == null && ar !== null &&ar !== undefined) {
+  if (ar_err == null && (ar !== null && ar !== undefined)) {
     // Retrieve the service reference
     var reference = discovery.getReference(ar);
     // Retrieve the service object
@@ -796,7 +796,7 @@ var JDBCClient = require("vertx-jdbc-js/jdbc_client");
 discovery.getRecord({
   "name" : "some-data-source-service"
 }, function (ar, ar_err) {
-  if (ar_err == null && ar !== null &&ar !== undefined) {
+  if (ar_err == null && (ar !== null && ar !== undefined)) {
     // Retrieve the service reference
     var reference = discovery.getReferenceWithConfiguration(ar, {
       "username" : "clement",
@@ -883,7 +883,7 @@ var RedisClient = require("vertx-redis-js/redis_client");
 discovery.getRecord({
   "name" : "some-redis-data-source-service"
 }, function (ar, ar_err) {
-  if (ar_err == null && ar !== null &&ar !== undefined) {
+  if (ar_err == null && (ar !== null && ar !== undefined)) {
     // Retrieve the service reference
     var reference = discovery.getReference(ar);
 
@@ -963,7 +963,7 @@ provided by the consumer:
 discovery.getRecord({
   "name" : "some-data-source-service"
 }, function (ar, ar_err) {
-  if (ar_err == null && ar !== null &&ar !== undefined) {
+  if (ar_err == null && (ar !== null && ar !== undefined)) {
     // Retrieve the service reference
     var reference = discovery.getReferenceWithConfiguration(ar, {
       "username" : "clement",

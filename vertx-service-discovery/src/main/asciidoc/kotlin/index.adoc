@@ -53,7 +53,7 @@ descriptor:
 <dependency>
 <groupId>io.vertx</groupId>
 <artifactId>vertx-service-discovery</artifactId>
-<version>3.4.0-SNAPSHOT</version>
+<version>3.4.0.Beta1</version>
 </dependency>
 ----
 
@@ -61,7 +61,7 @@ descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-discovery:3.4.0-SNAPSHOT'
+compile 'io.vertx:vertx-service-discovery:3.4.0.Beta1'
 ----
 
 == Overall concepts
@@ -141,14 +141,15 @@ instance to use the discovery infrastructure:
 
 [source,kotlin]
 ----
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.servicediscovery.*
 import io.vertx.servicediscovery.ServiceDiscovery
+import io.vertx.servicediscovery.ServiceDiscoveryOptions
 
 // Use default configuration
 var discovery = ServiceDiscovery.create(vertx)
 
 // Customize the configuration
-discovery = ServiceDiscovery.create(vertx, io.vertx.servicediscovery.ServiceDiscoveryOptions(
+discovery = ServiceDiscovery.create(vertx, ServiceDiscoveryOptions(
   announceAddress = "service-announce",
   name = "my-name"))
 
@@ -179,11 +180,13 @@ from the service types.
 
 [source,kotlin]
 ----
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
+import io.vertx.kotlin.servicediscovery.*
+import io.vertx.servicediscovery.Record
 import io.vertx.servicediscovery.types.HttpEndpoint
 
 // Manual record creation
-var record = io.vertx.servicediscovery.Record(
+var record = Record(
   type = "eventbus-service-proxy",
   location = json {
     obj("endpoint" to "the-service-address")
@@ -223,7 +226,6 @@ To withdraw (un-publish) a record, use:
 
 [source,kotlin]
 ----
-import io.vertx.kotlin.common.json.*
 
 
 discovery.unpublish(record.registration, { ar ->
@@ -267,7 +269,7 @@ Here are some examples:
 
 [source,kotlin]
 ----
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
 
 // Get any record
 discovery.getRecord({ r ->
@@ -374,16 +376,15 @@ Once you have chosen the `link:../../apidocs/io/vertx/servicediscovery/Record.ht
 ----
 import io.vertx.core.eventbus.MessageConsumer
 import io.vertx.core.http.HttpClient
-import io.vertx.kotlin.common.json.*
 
 var reference1 = discovery.getReference(record1)
 var reference2 = discovery.getReference(record2)
 
 // Then, gets the service object, the returned type depends on the service type:
 // For http endpoint:
-var client = reference1.getAs<Any>(HttpClient.`class`)
+var client = reference1.getAs(HttpClient.`class`)
 // For message source
-var consumer = reference2.getAs<Any>(MessageConsumer.`class`)
+var consumer = reference2.getAs(MessageConsumer.`class`)
 
 // When done with the service
 reference1.release()
@@ -402,13 +403,12 @@ configuration, some require configuration (as data sources):
 [source,kotlin]
 ----
 import io.vertx.ext.jdbc.JDBCClient
-import io.vertx.kotlin.common.json.*
 
 var reference = discovery.getReferenceWithConfiguration(record, conf)
 
 // Then, gets the service object, the returned type depends on the service type:
 // For http endpoint:
-var client = reference.getAs<Any>(JDBCClient.`class`)
+var client = reference.getAs(JDBCClient.`class`)
 
 // Do something with the client...
 
@@ -473,7 +473,7 @@ The next snippet illustrates hot to create a `link:../../apidocs/io/vertx/servic
 
 [source, kotlin]
 ----
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
 import io.vertx.servicediscovery.types.HttpEndpoint
 
 var record1 = HttpEndpoint.createRecord("some-http-service", "localhost", 8433, "/api")
@@ -500,7 +500,7 @@ Once a HTTP endpoint is published, a consumer can retrieve it. The service objec
 [source, kotlin]
 ----
 import io.vertx.core.http.HttpClient
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
 
 // Get the record
 discovery.getRecord(json {
@@ -510,7 +510,7 @@ discovery.getRecord(json {
     // Retrieve the service reference
     var reference = discovery.getReference(ar.result())
     // Retrieve the service object
-    var client = reference.getAs<Any>(HttpClient.`class`)
+    var client = reference.getAs(HttpClient.`class`)
 
     // You need to path the complete path
     client.getNow("/api/persons", { response ->
@@ -532,7 +532,7 @@ method to combine lookup and service retrieval in one call:
 
 [source, kotlin]
 ----
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
 import io.vertx.servicediscovery.ServiceDiscovery
 import io.vertx.servicediscovery.types.HttpEndpoint
 
@@ -566,7 +566,7 @@ tends to be easier to use. You can retrieve a `link:../../apidocs/io/vertx/ext/w
 [source, kotlin]
 ----
 import io.vertx.ext.web.client.WebClient
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
 
 // Get the record
 discovery.getRecord(json {
@@ -576,7 +576,7 @@ discovery.getRecord(json {
     // Retrieve the service reference
     var reference = discovery.getReference(ar.result())
     // Retrieve the service object
-    var client = reference.getAs<Any>(WebClient.`class`)
+    var client = reference.getAs(WebClient.`class`)
 
     // You need to path the complete path
     client.get("/api/persons").send({ response ->
@@ -596,7 +596,7 @@ And, if you prefer the approach using the service type:
 
 [source, kotlin]
 ----
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
 import io.vertx.servicediscovery.ServiceDiscovery
 import io.vertx.servicediscovery.types.HttpEndpoint
 
@@ -634,7 +634,7 @@ To publish an event bus service, you need to create a `link:../../apidocs/io/ver
 
 [source, kotlin]
 ----
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
 import io.vertx.servicediscovery.types.EventBusService
 
 var record = EventBusService.createRecord("some-eventbus-service", "address", "examples.MyService", json {
@@ -678,7 +678,6 @@ As for the other service types, publishing a message source is a 2-step process:
 
 [source, kotlin]
 ----
-import io.vertx.kotlin.common.json.*
 import io.vertx.servicediscovery.types.MessageSource
 
 var record = MessageSource.createRecord("some-message-source-service", "some-address")
@@ -705,7 +704,7 @@ With the first approach, the code is the following:
 [source, kotlin]
 ----
 import io.vertx.core.eventbus.MessageConsumer
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
 
 // Get the record
 discovery.getRecord(json {
@@ -715,7 +714,7 @@ discovery.getRecord(json {
     // Retrieve the service reference
     var reference = discovery.getReference(ar.result())
     // Retrieve the service object
-    var consumer = reference.getAs<Any>(MessageConsumer.`class`)
+    var consumer = reference.getAs(MessageConsumer.`class`)
 
     // Attach a message handler on it
     consumer.handler({ message ->
@@ -735,7 +734,7 @@ When, using `link:../../apidocs/io/vertx/servicediscovery/types/MessageSource.ht
 
 [source, kotlin]
 ----
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
 import io.vertx.servicediscovery.ServiceDiscovery
 import io.vertx.servicediscovery.types.MessageSource
 
@@ -774,7 +773,7 @@ As for the other service types, publishing a JDBC data source is a 2-step proces
 
 [source, kotlin]
 ----
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
 import io.vertx.servicediscovery.types.JDBCDataSource
 
 var record = JDBCDataSource.createRecord("some-data-source-service", json {
@@ -803,7 +802,7 @@ the consumer:
 [source, kotlin]
 ----
 import io.vertx.ext.jdbc.JDBCClient
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
 
 // Get the record
 discovery.getRecord(json {
@@ -819,7 +818,7 @@ discovery.getRecord(json {
     })
 
     // Retrieve the service object
-    var client = reference.getAs<Any>(JDBCClient.`class`)
+    var client = reference.getAs(JDBCClient.`class`)
 
     // ...
 
@@ -834,7 +833,7 @@ You can also use the `link:../../apidocs/io/vertx/ext/jdbc/JDBCClient.html[JDBCC
 
 [source, kotlin]
 ----
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
 import io.vertx.servicediscovery.ServiceDiscovery
 import io.vertx.servicediscovery.types.JDBCDataSource
 
@@ -873,7 +872,7 @@ Publishing a Redis data source is a 2-step process:
 
 [source, kotlin]
 ----
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
 import io.vertx.servicediscovery.types.RedisDataSource
 
 var record = RedisDataSource.createRecord("some-redis-data-source-service", json {
@@ -899,7 +898,7 @@ the consumer:
 
 [source, kotlin]
 ----
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
 import io.vertx.redis.RedisClient
 
 // Get the record
@@ -911,7 +910,7 @@ discovery.getRecord(json {
     var reference = discovery.getReference(ar.result())
 
     // Retrieve the service instance
-    var client = reference.getAs<Any>(RedisClient.`class`)
+    var client = reference.getAs(RedisClient.`class`)
 
     // ...
 
@@ -926,7 +925,7 @@ You can also use the `link:../../apidocs/io/vertx/servicediscovery/types/RedisDa
 
 [source, kotlin]
 ----
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
 import io.vertx.servicediscovery.ServiceDiscovery
 import io.vertx.servicediscovery.types.RedisDataSource
 
@@ -960,7 +959,7 @@ Publishing a Mongo data source is a 2-step process:
 
 [source, kotlin]
 ----
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
 import io.vertx.servicediscovery.types.MongoDataSource
 
 var record = MongoDataSource.createRecord("some-data-source-service", json {
@@ -986,7 +985,7 @@ provided by the consumer:
 
 [source, kotlin]
 ----
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
 
 // Get the record
 discovery.getRecord(json {
@@ -1017,7 +1016,7 @@ You can also use the `link:../../apidocs/io/vertx/servicediscovery/types/MongoDa
 
 [source, kotlin]
 ----
-import io.vertx.kotlin.common.json.*
+import io.vertx.kotlin.core.json.*
 import io.vertx.servicediscovery.ServiceDiscovery
 import io.vertx.servicediscovery.types.MongoDataSource
 
