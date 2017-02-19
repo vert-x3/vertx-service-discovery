@@ -1,4 +1,0 @@
-moduleName = vertx-service-discovery-docker-links-module
-moduleVersion = 1.0
-extensionClasses = io.vertx.groovy.servicediscovery.docker.GroovyExtension
-staticExtensionClasses = io.vertx.groovy.servicediscovery.docker.GroovyStaticExtension

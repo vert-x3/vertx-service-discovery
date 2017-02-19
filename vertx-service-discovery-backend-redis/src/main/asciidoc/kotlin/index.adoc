@@ -17,7 +17,7 @@ descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-service-discovery-backend-redis</artifactId>
-  <version>3.4.0.Beta1</version>
+  <version>3.4.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -25,7 +25,7 @@ descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-discovery-backend-redis:3.4.0.Beta1'
+compile 'io.vertx:vertx-service-discovery-backend-redis:3.4.0-SNAPSHOT'
 ----
 
 Be aware that you can have only a single implementation of the SPI in your _classpath_. If none,
@@ -41,16 +41,6 @@ Here is an example:
 
 [source,kotlin]
 ----
-<<<<<<< a89e02b5fcadc28e56cf842afa8eccfb3d44b6b7
-import io.vertx.kotlin.core.json.*
-import io.vertx.kotlin.servicediscovery.*
-import io.vertx.servicediscovery.ServiceDiscovery
-import io.vertx.servicediscovery.ServiceDiscoveryOptions
-=======
-import io.vertx.kotlin.common.json.*
-import io.vertx.servicediscovery.ServiceDiscovery
->>>>>>> Don't generate deprecated Observable methods
-
 ServiceDiscovery.create(vertx, ServiceDiscoveryOptions(
   backendConfiguration = json {
     obj(
