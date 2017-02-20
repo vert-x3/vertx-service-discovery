@@ -27,3 +27,4 @@ buildNumber.properties
 .mvn/timing.properties
 .yardoc
 .vertx
+.settings
