@@ -15,7 +15,7 @@
  */
 
 /**
- * = Vert.x Discovery Bridge - Consul
+ * === Consul bridge
  *
  * This discovery bridge imports services from http://consul.io[Consul] into the Vert.x service discovery. The bridge
  * connects to a Consul agent (server) and periodically scan for services:
@@ -29,7 +29,7 @@
  * If not, the service is imported as `unknown`. Only `http-endpoint` is supported for now.
  *
  *
- * == Using the bridge
+ * ==== Using the bridge
  *
  * To use this Vert.x discovery bridge, add the following dependency to the _dependencies_ section of your build
  * descriptor:
@@ -67,7 +67,7 @@
  *
  */
 @ModuleGen(name = "vertx-service-discovery-consul", groupPackage = "io.vertx")
-@Document(fileName = "index.adoc")
+@Document(fileName = "consul-bridge.adoc")
 package io.vertx.servicediscovery.consul;
 
 import io.vertx.codegen.annotations.ModuleGen;

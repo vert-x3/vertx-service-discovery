@@ -1,4 +1,4 @@
-= Vert.x Discovery Bridge - Consul
+=== Consul bridge
 
 This discovery bridge imports services from http://consul.io[Consul] into the Vert.x service discovery.
 
@@ -14,7 +14,7 @@ The service type is deduced from `tags`. If a `tag` matches a known service type
 If not, the service is imported as `unknown`. Only `http-endpoint` is supported for now.
 
 
-== Using the bridge
+==== Using the bridge
 
 To use this Vert.x discovery bridge, add the following dependency to the _dependencies_ section of your build
 descriptor:
@@ -39,13 +39,14 @@ compile 'io.vertx:vertx-service-discovery-bridge-consul:3.4.0-SNAPSHOT'
 
 Then, when creating the service discovery registers this bridge as follows:
 
-[source, groovy]
+[source, ruby]
 ----
-ServiceDiscovery.create(vertx).registerServiceImporter(new io.vertx.servicediscovery.consul.ConsulServiceImporter(), [
-  host:"localhost",
-  port:8500,
-  'scan-period':2000
-])
+require 'vertx-service-discovery/service_discovery'
+VertxServiceDiscovery::ServiceDiscovery.create(vertx).register_service_importer(Java::IoVertxServicediscoveryConsul::ConsulServiceImporter.new(), {
+  'host' => "localhost",
+  'port' => 8500,
+  'scan-period' => 2000
+})
 
 ----
 

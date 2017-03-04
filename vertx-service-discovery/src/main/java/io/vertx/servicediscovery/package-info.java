@@ -709,6 +709,27 @@
  * method must complete the given {@link io.vertx.core.Future} to notify the caller of the completion.
  *
  * Notice than in a cluster, only one member needs to register the bridge as the records are accessible by all members.
+ *
+ * == Additional bridges
+ *
+ * In addition of the bridges supported by this library, Vert.x Service Discovery provides additional
+ * bridges you can use in your application.
+ *
+ * include::consul-bridge.adoc[]
+ *
+ * include::kubernetes-bridge.adoc[]
+ *
+ * include::zookeeper-bridge.adoc[]
+ *
+ * include::docker-links-bridge.adoc[]
+ *
+ * == Additional backends
+ *
+ * In addition of the backend supported by this library, Vert.x Service Discovery provides additional
+ * backends you can use in your application.
+ *
+ * include::redis-backend.adoc[]
+ *
  */
 @ModuleGen(name = "vertx-service-discovery", groupPackage = "io.vertx")
 @Document(fileName = "index.adoc")

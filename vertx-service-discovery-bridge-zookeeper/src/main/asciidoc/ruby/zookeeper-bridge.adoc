@@ -1,4 +1,4 @@
-= Vert.x Discovery Bridge - Zookeeper
+=== Zookeeper bridge
 
 This discovery bridge imports services from https://zookeeper.apache.org/[Apache Zookeeper] into the Vert.x service
 discovery.
@@ -8,7 +8,7 @@ The bridge uses the http://curator.apache.org/curator-x-discovery/[Curator exten
 Service description are read as JSON Object (merged in the Vert.x service record metadata). The service type is
 deduced from this description by reading the `service-type`.
 
-== Using the bridge
+==== Using the bridge
 
 To use this Vert.x discovery bridge, add the following dependency to the _dependencies_ section of your build
 descriptor:
@@ -33,12 +33,13 @@ compile 'io.vertx:vertx-service-discovery-bridge-zookeeper:3.4.0-SNAPSHOT'
 
 Then, when creating the service discovery registers this bridge as follows:
 
-[source, java]
+[source, ruby]
 ----
-ServiceDiscovery.create(vertx)
-    .registerServiceImporter(new ZookeeperServiceImporter(),
-        new JsonObject()
-            .put("connection", "127.0.0.1:2181"));
+require 'vertx-service-discovery/service_discovery'
+VertxServiceDiscovery::ServiceDiscovery.create(vertx).register_service_importer(Java::IoVertxServicediscoveryZookeeper::ZookeeperServiceImporter.new(), {
+  'connection' => "127.0.0.1:2181"
+})
+
 ----
 
 Only the `connection` configuration is mandatory. It's the connection _string_ of the Zookeeper server.
@@ -52,14 +53,14 @@ In addition you can configure:
 * `connectionTimeoutMs`: the connection timeout in milliseconds. Defaults to 1000.
 * `canBeReadOnly` : whether or not the backend support the _read-only_ mode (defaults to true)
 
-[source,java]
+[source,ruby]
 ----
-ServiceDiscovery.create(vertx)
-    .registerServiceImporter(new ZookeeperServiceImporter(),
-        new JsonObject()
-            .put("connection", "127.0.0.1:2181")
-            .put("maxRetries", 5)
-            .put("baseSleepTimeBetweenRetries", 2000)
-            .put("basePath", "/services")
-    );
+require 'vertx-service-discovery/service_discovery'
+VertxServiceDiscovery::ServiceDiscovery.create(vertx).register_service_importer(Java::IoVertxServicediscoveryZookeeper::ZookeeperServiceImporter.new(), {
+  'connection' => "127.0.0.1:2181",
+  'maxRetries' => 5,
+  'baseSleepTimeBetweenRetries' => 2000,
+  'basePath' => "/services"
+})
+
 ----

@@ -15,7 +15,7 @@
  */
 
 /**
- * = Vert.x Discovery Bridge - Zookeeper
+ * === Zookeeper bridge
  *
  * This discovery bridge imports services from https://zookeeper.apache.org/[Apache Zookeeper] into the Vert.x service
  * discovery. The bridge uses the http://curator.apache.org/curator-x-discovery/[Curator extension for service discovery].
@@ -23,7 +23,7 @@
  * Service description are read as JSON Object (merged in the Vert.x service record metadata). The service type is
  * deduced from this description by reading the `service-type`.
  *
- * == Using the bridge
+ * ==== Using the bridge
  *
  * To use this Vert.x discovery bridge, add the following dependency to the _dependencies_ section of your build
  * descriptor:
@@ -71,7 +71,7 @@
  *
  */
 @ModuleGen(name = "vertx-service-discovery-zookeeper", groupPackage = "io.vertx")
-@Document(fileName = "index.adoc")
+@Document(fileName = "zookeeper-bridge.adoc")
 package io.vertx.servicediscovery.zookeeper;
 
 import io.vertx.codegen.annotations.ModuleGen;

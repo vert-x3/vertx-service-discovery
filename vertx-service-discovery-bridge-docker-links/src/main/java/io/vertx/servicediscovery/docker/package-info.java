@@ -15,7 +15,7 @@
  */
 
 /**
- * = Vert.x Discovery Bridge - Docker Links
+ * === Docker Links bridge
  *
  * This discovery bridge imports services from Docker Links into the Vert.x service discovery. When you link a Docker
  * container to another Docker container, Docker injects a set of environment variables. This bridge analyzes these
@@ -25,7 +25,7 @@
  * As the links are created when the container starts, the imported records are created when the bridge starts and
  * do not change afterwards.
  *
- * == Using the bridge
+ * ==== Using the bridge
  *
  * To use this Vert.x discovery bridge, add the following dependency to the _dependencies_ section of your build
  * descriptor:
@@ -58,7 +58,7 @@
  * The bridge does not need any further configuration.
  *
  */
-@Document(fileName = "index.adoc")
+@Document(fileName = "docker-links-bridge.adoc")
 @ModuleGen(name = "vertx-service-discovery-docker-links", groupPackage = "io.vertx")
 package io.vertx.servicediscovery.docker;
 

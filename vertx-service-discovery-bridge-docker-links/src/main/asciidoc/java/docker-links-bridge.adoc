@@ -1,4 +1,4 @@
-= Vert.x Discovery Bridge - Docker Links
+=== Docker Links bridge
 
 This discovery bridge imports services from Docker Links into the Vert.x service discovery.
 
@@ -10,7 +10,7 @@ label. If not set, the service is imported as `unknown`. Only `http-endpoint` ar
 As the links are created when the container starts, the imported records are created when the bridge starts and
 do not change afterwards.
 
-== Using the bridge
+==== Using the bridge
 
 To use this Vert.x discovery bridge, add the following dependency to the _dependencies_ section of your build
 descriptor:
@@ -35,12 +35,10 @@ compile 'io.vertx:vertx-service-discovery-bridge-docker-links:3.4.0-SNAPSHOT'
 
 Then, when creating the service discovery, registers this bridge as follows:
 
-[source, kotlin]
+[source, java]
 ----
-ServiceDiscovery.create(vertx).registerServiceImporter(io.vertx.servicediscovery.docker.DockerLinksServiceImporter(), json {
-  obj()
-})
-
+ServiceDiscovery.create(vertx)
+    .registerServiceImporter(new DockerLinksServiceImporter(), new JsonObject());
 ----
 
 The bridge does not need any further configuration.
