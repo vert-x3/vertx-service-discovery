@@ -20,7 +20,7 @@
  * The service discovery has a plug-able backend using the {@link io.vertx.servicediscovery.spi.ServiceDiscoveryBackend} SPI. This is an implementation of the SPI based
  * on Redis.
  *
- * === Using the Redis backend
+ * ==== Using the Redis backend
  *
  * To use the Redis backend, add the following dependency to the _dependencies_ section of your build
  * descriptor:
@@ -46,7 +46,7 @@
  * Be aware that you can have only a single implementation of the SPI in your _classpath_. If none,
  * the default backend is used.
  *
- * === Configuration
+ * ==== Configuration
  *
  * The backend is based on the http://vertx.io/docs/vertx-redis-client/java[vertx-redis-client].
  * The configuration is the client configuration as well as `key` indicating in which _key_ on Redis
