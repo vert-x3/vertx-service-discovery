@@ -19,18 +19,22 @@ package io.vertx.servicediscovery.types;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.net.SelfSignedCertificate;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.client.HttpResponse;
+import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.impl.DiscoveryImpl;
-import io.vertx.ext.web.client.HttpResponse;
-import io.vertx.ext.web.client.WebClient;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
@@ -38,11 +42,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
-import static com.jayway.awaitility.Awaitility.await;
+import static com.jayway.awaitility.Awaitility.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.Is.*;
+import static org.junit.Assert.*;
 
 /**
  * Test the publication and the consumption of the HTTP services.
@@ -218,7 +222,7 @@ public class HttpEndpointTest {
   }
 
   @Test
-  public void testRecordCreation() {
+  public void testRecordCreation(TestContext testContext) {
     Record record = HttpEndpoint.createRecord("some-name", "123.456.789.111", 80, null);
     assertThat(record.getLocation().getString(Record.ENDPOINT)).isEqualTo("http://123.456.789.111:80/");
 
@@ -232,18 +236,26 @@ public class HttpEndpointTest {
     record = HttpEndpoint.createRecord("some-name", "acme.org");
     assertThat(record.getLocation().getString(Record.ENDPOINT)).isEqualTo("http://acme.org:80/");
 
-    record = HttpEndpoint.createRecord("http-bin", true, "httpbin.org", 443, "/get", null);
-    ServiceReference reference = discovery.getReference(record);
+    SelfSignedCertificate selfSignedCertificate = SelfSignedCertificate.create();
+    vertx.createHttpServer(new HttpServerOptions()
+      .setHost("127.0.0.1")
+      .setSsl(true)
+      .setKeyCertOptions(selfSignedCertificate.keyCertOptions())
+    ).requestHandler(request -> {
+      request.response().end(new JsonObject().put("url", request.absoluteURI()).encode());
+    }).listen(0, testContext.asyncAssertSuccess(server -> {
 
-    HttpClient client = reference.get();
-    AtomicReference<JsonObject> resp = new AtomicReference<>();
-    client.getNow("/get", response -> {
-      response.bodyHandler(body -> {
-        resp.set(body.toJsonObject());
-      });
-    });
+      Record sslRecord = HttpEndpoint.createRecord("http-bin", true, "127.0.0.1", server.actualPort(), "/get", null);
+      ServiceReference reference = discovery.getReferenceWithConfiguration(sslRecord, new HttpClientOptions()
+        .setSsl(true)
+        .setTrustAll(true)
+        .setVerifyHost(false)
+        .toJson());
 
-    await().until(() -> resp.get() != null);
-    assertThat(resp.get().getString("url")).isEqualTo("https://httpbin.org/get");
+      WebClient webClient = WebClient.wrap(reference.get());
+      webClient.get("/get").as(BodyCodec.jsonObject()).send(testContext.asyncAssertSuccess(resp -> {
+        assertEquals("https://127.0.0.1:" + server.actualPort() + "/get", resp.body().getString("url"));
+      }));
+    }));
   }
 }
