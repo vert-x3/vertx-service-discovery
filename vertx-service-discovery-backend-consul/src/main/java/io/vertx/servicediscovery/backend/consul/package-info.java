@@ -20,7 +20,7 @@
  * The service discovery has a plug-able backend using the {@link io.vertx.servicediscovery.spi.ServiceDiscoveryBackend} SPI. This is an implementation of the SPI based
  * on Consul.
  * <p>
- * ==== Using the Redis backend
+ * ==== Using the Consul backend
  * <p>
  * To use the Consul backend, add the following dependency to the _dependencies_ section of your build
  * descriptor:
