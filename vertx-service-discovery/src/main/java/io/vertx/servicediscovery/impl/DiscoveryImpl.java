@@ -64,6 +64,17 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     this.options = options;
   }
 
+  DiscoveryImpl(Vertx vertx, ServiceDiscoveryOptions options, ServiceDiscoveryBackend backend) {
+    this.vertx = vertx;
+    this.announce = options.getAnnounceAddress();
+    this.usage = options.getUsageAddress();
+
+    this.backend = backend;
+    this.backend.init(vertx, options.getBackendConfiguration());
+
+    this.id = options.getName() != null ? options.getName() : getNodeId(vertx);
+    this.options = options;
+  }
 
   public void initialize(Handler<ServiceDiscovery> completionHandler) {
     Collection<ServiceImporter> spi = getServiceImporterFromSPI();
@@ -303,6 +314,30 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
       .setRegistration(null)
       .setStatus(status);
     vertx.eventBus().publish(announce, announcedRecord.toJson());
+  }
+
+  public void publishFixed(Record record, Handler<AsyncResult<Record>> resultHandler) {
+    Status status = record.getStatus() != null
+      && record.getStatus() != Status.UNKNOWN
+      && record.getStatus() != Status.DOWN
+      ? record.getStatus() : Status.UP;
+
+    backend.store(record.setStatus(status), ar -> {
+      if (ar.failed()) {
+        resultHandler.handle(Future.failedFuture(ar.cause()));
+        return;
+      }
+
+      for (ServiceExporter exporter : exporters) {
+        exporter.onPublish(new Record(ar.result()));
+      }
+      Record announcedRecord = new Record(ar.result());
+      announcedRecord
+        .setRegistration(null)
+        .setStatus(status);
+      vertx.eventBus().publish(announce, announcedRecord.toJson());
+      resultHandler.handle(Future.succeededFuture(ar.result()));
+    });
   }
 
   @Override
