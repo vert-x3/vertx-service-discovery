@@ -107,6 +107,7 @@
             <configuration>
               <sources>
                 <source>${project.basedir}/src/test/generated</source>
+                <source>${project.basedir}/target/generated-sources/annotations</source>
                 <source>${project.basedir}/target/generated-test-sources/test-annotations</source>
               </sources>
             </configuration>
