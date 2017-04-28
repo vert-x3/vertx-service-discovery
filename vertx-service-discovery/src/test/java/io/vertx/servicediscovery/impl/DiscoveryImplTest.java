@@ -16,6 +16,7 @@
 
 package io.vertx.servicediscovery.impl;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -23,6 +24,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.*;
 import io.vertx.servicediscovery.service.HelloService;
 import io.vertx.servicediscovery.service.HelloServiceImpl;
+import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend;
 import io.vertx.servicediscovery.spi.ServiceExporter;
 import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServicePublisher;
@@ -34,11 +36,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -210,6 +208,102 @@ public class DiscoveryImplTest {
 
     await().until(() -> announces.size() == 3);
     assertThat(announces.get(2).getStatus()).isEqualTo(Status.DOWN);
+  }
+
+  @Test
+  public void testAnnouncementComesAfterPublishIsComplete() {
+    ServiceDiscoveryBackend slowBackend = new ServiceDiscoveryBackend() {
+
+      private AsyncMap<String, String> registry;
+
+      @Override
+      public String name() {
+        return "slow-backend";
+      }
+
+      @Override
+      public void init(Vertx vertx, JsonObject config) {
+        this.registry = new AsyncMap<>(vertx, "service.registry");
+      }
+
+      @Override
+      public void store(Record record, Handler<AsyncResult<Record>> resultHandler) {
+        String uuid = UUID.randomUUID().toString();
+        if (record.getRegistration() != null) {
+          throw new IllegalArgumentException("The record has already been registered");
+        }
+
+        record.setRegistration(uuid);
+        registry.put(uuid, record.toJson().encode(), ar -> {
+          // Put takes some time to complete
+          try {
+            Thread.sleep(2000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
+
+          if (ar.succeeded()) {
+            resultHandler.handle(Future.succeededFuture(record));
+          } else {
+            resultHandler.handle(Future.failedFuture(ar.cause()));
+          }
+        });
+      }
+
+      @Override
+      public void remove(Record record, Handler<AsyncResult<Record>> resultHandler) {
+
+      }
+
+      @Override
+      public void remove(String uuid, Handler<AsyncResult<Record>> resultHandler) {
+
+      }
+
+      @Override
+      public void update(Record record, Handler<AsyncResult<Void>> resultHandler) {
+
+      }
+
+      @Override
+      public void getRecords(Handler<AsyncResult<List<Record>>> resultHandler) {
+
+      }
+
+      @Override
+      public void getRecord(String uuid, Handler<AsyncResult<Record>> resultHandler) {
+
+      }
+    };
+
+    ServiceDiscovery discovery = new DiscoveryImpl(vertx,
+      new ServiceDiscoveryOptions().setBackendConfiguration(
+        new JsonObject().put("backend-name", "slow-backend")), slowBackend);
+
+    List<Record> announces = new ArrayList<>();
+
+    vertx.eventBus().consumer(ServiceDiscoveryOptions.DEFAULT_ANNOUNCE_ADDRESS,
+      msg -> announces.add(new Record((JsonObject) msg.body())));
+
+    HelloService svc = new HelloServiceImpl("stuff");
+    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    Record record = new Record()
+      .setName("Hello")
+      .setMetadata(new JsonObject().put("key", "A"))
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
+
+    // Publish
+    AtomicBoolean done = new AtomicBoolean();
+    done.set(false);
+    discovery.publish(record, r -> {
+      done.set(r.succeeded());
+    });
+
+    // When publication announced
+    await().until(() -> announces.size() == 1);
+
+    // Asset record publication complete
+    assertThat(done.get()).isTrue();
   }
 
   @Test

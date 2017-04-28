@@ -53,11 +53,22 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
 
   public DiscoveryImpl(Vertx vertx, ServiceDiscoveryOptions options) {
+    this(vertx, options, getBackend(options.getBackendConfiguration().getString("backend-name", null)));
+  }
+
+  /**
+   * Creates a new instance of {@link DiscoveryImpl}
+   *
+   * @param vertx   the vert.x instance
+   * @param options the options
+   * @param backend the backend service
+   */
+  DiscoveryImpl(Vertx vertx, ServiceDiscoveryOptions options, ServiceDiscoveryBackend backend) {
     this.vertx = vertx;
     this.announce = options.getAnnounceAddress();
     this.usage = options.getUsageAddress();
 
-    this.backend = getBackend(options.getBackendConfiguration().getString("backend-name", null));
+    this.backend = backend;
     this.backend.init(vertx, options.getBackendConfiguration());
 
     this.id = options.getName() != null ? options.getName() : getNodeId(vertx);
@@ -98,7 +109,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     }
   }
 
-  private ServiceDiscoveryBackend getBackend(String maybeName) {
+  private static ServiceDiscoveryBackend getBackend(String maybeName) {
     ServiceLoader<ServiceDiscoveryBackend> backends = ServiceLoader.load(ServiceDiscoveryBackend.class);
     Iterator<ServiceDiscoveryBackend> iterator = backends.iterator();
 
@@ -294,15 +305,22 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
       && record.getStatus() != Status.DOWN
       ? record.getStatus() : Status.UP;
 
-    backend.store(record.setStatus(status), resultHandler);
-    for (ServiceExporter exporter : exporters) {
-      exporter.onPublish(new Record(record));
-    }
-    Record announcedRecord = new Record(record);
-    announcedRecord
-      .setRegistration(null)
-      .setStatus(status);
-    vertx.eventBus().publish(announce, announcedRecord.toJson());
+    backend.store(record.setStatus(status), ar -> {
+      if (ar.failed()) {
+        resultHandler.handle(Future.failedFuture(ar.cause()));
+        return;
+      }
+
+      for (ServiceExporter exporter : exporters) {
+        exporter.onPublish(new Record(ar.result()));
+      }
+      Record announcedRecord = new Record(ar.result());
+      announcedRecord
+        .setRegistration(null)
+        .setStatus(status);
+      vertx.eventBus().publish(announce, announcedRecord.toJson());
+      resultHandler.handle(Future.succeededFuture(ar.result()));
+    });
   }
 
   @Override
