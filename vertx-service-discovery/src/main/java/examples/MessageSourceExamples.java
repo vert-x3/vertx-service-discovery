@@ -59,10 +59,6 @@ public class MessageSourceExamples {
           // message handler
           JsonObject payload = message.body();
         });
-
-        // ...
-        // when done
-        reference.release();
       }
     });
   }
@@ -78,10 +74,6 @@ public class MessageSourceExamples {
           JsonObject payload = message.body();
         });
         // ...
-
-        // Dont' forget to release the service
-        ServiceDiscovery.releaseServiceObject(discovery, consumer);
-
       }
     });
   }

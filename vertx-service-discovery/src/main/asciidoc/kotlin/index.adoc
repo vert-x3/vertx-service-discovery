@@ -679,10 +679,6 @@ discovery.getRecord(json {
       // message handler
       var payload = message.body()
     })
-
-    // ...
-    // when done
-    reference.release()
   }
 })
 
@@ -704,10 +700,6 @@ MessageSource.getConsumer<JsonObject>(discovery, json {
       var payload = message.body()
     })
     // ...
-
-    // Dont' forget to release the service
-    ServiceDiscovery.releaseServiceObject(discovery, consumer)
-
   }
 })
 

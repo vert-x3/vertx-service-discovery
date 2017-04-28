@@ -697,10 +697,6 @@ discovery.getRecord([
       // message handler
       def payload = message.body()
     })
-
-    // ...
-    // when done
-    reference.release()
   }
 })
 
@@ -722,10 +718,6 @@ MessageSource.getConsumer(discovery, [
       def payload = message.body()
     })
     // ...
-
-    // Dont' forget to release the service
-    ServiceDiscovery.releaseServiceObject(discovery, consumer)
-
   }
 })
 

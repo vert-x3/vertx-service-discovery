@@ -714,10 +714,6 @@ discovery.get_record({
       # message handler
       payload = message.body()
     }
-
-    # ...
-    # when done
-    reference.release()
   end
 }
 
@@ -727,7 +723,6 @@ When, using `link:../../yardoc/VertxServiceDiscovery/MessageSource.html[MessageS
 
 [source, ruby]
 ----
-require 'vertx-service-discovery/service_discovery'
 require 'vertx-service-discovery/message_source'
 VertxServiceDiscovery::MessageSource.get_consumer(discovery, {
   'name' => "some-message-source-service"
@@ -741,10 +736,6 @@ VertxServiceDiscovery::MessageSource.get_consumer(discovery, {
       payload = message.body()
     }
     # ...
-
-    # Dont' forget to release the service
-    VertxServiceDiscovery::ServiceDiscovery.release_service_object(discovery, consumer)
-
   end
 }
 
