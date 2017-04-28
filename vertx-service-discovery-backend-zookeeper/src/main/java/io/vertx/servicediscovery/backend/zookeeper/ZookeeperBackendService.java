@@ -236,7 +236,6 @@ public class ZookeeperBackendService implements ServiceDiscoveryBackend, Connect
                         .setHandler(
                             ar -> runOnContextIfPossible(context, () -> {
                               if (ar.failed()) {
-                                ar.cause().printStackTrace();
                                 resultHandler.handle(Future.failedFuture(ar.cause()));
                               } else {
                                 List<Record> records = new ArrayList<>();
