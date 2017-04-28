@@ -30,7 +30,7 @@ import io.vertx.codegen.annotations.VertxGen;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 @VertxGen
-public interface ServiceReference {
+public interface ServiceReference extends AutoCloseable {
 
   /**
    * @return the service record.

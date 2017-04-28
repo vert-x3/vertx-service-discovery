@@ -43,10 +43,10 @@ import org.junit.runner.RunWith;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.jayway.awaitility.Awaitility.*;
+import static com.jayway.awaitility.Awaitility.await;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.core.Is.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test the publication and the consumption of the HTTP services.
@@ -159,6 +159,35 @@ public class HttpEndpointTest {
               discovery.unpublish(published.getRegistration(), v -> async.complete());
             }
           });
+      });
+    });
+  }
+
+  @Test
+  public void testAutoCloseable(TestContext context) {
+    Async async = context.async();
+
+    // Publish the service
+    Record record = HttpEndpoint.createRecord("hello-service", "localhost", 8080, "/foo");
+    discovery.publish(record, rec -> {
+      Record published = rec.result();
+
+      discovery.getRecord(new JsonObject().put("name", "hello-service"), found -> {
+        context.assertTrue(found.succeeded());
+        context.assertTrue(found.result() != null);
+        Record match = found.result();
+
+        try (ServiceReference reference = discovery.getReference(match)) {
+          context.assertEquals(reference.record().getLocation().getString("endpoint"), "http://localhost:8080/foo");
+          context.assertFalse(reference.record().getLocation().getBoolean("ssl"));
+          WebClient client = reference.getAs(WebClient.class);
+          WebClient client2 = reference.cachedAs(WebClient.class);
+          context.assertTrue(client == client2);
+        } catch (Exception e) {
+          context.fail(e);
+        }
+
+        discovery.unpublish(published.getRegistration(), v -> async.complete());
       });
     });
   }

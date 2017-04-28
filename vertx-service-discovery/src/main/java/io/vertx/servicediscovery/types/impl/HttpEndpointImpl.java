@@ -94,7 +94,7 @@ public class HttpEndpointImpl implements HttpEndpoint {
      * Closes the client.
      */
     @Override
-    public synchronized void close() {
+    public synchronized void onClose() {
       service.close();
       retrieved = null;
     }

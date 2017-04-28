@@ -77,7 +77,7 @@ public class RedisDataSourceImpl implements RedisDataSource {
     }
 
     @Override
-    protected void close() {
+    protected void onClose() {
       service.close(ar -> {
       });
     }

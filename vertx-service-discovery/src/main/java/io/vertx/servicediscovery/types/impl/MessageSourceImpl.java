@@ -71,7 +71,7 @@ public class MessageSourceImpl implements MessageSource {
     }
 
     @Override
-    protected void close() {
+    protected void onClose() {
       service.unregister();
     }
   }

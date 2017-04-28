@@ -75,7 +75,7 @@ public class JDBCDataSourceImpl implements JDBCDataSource {
     }
 
     @Override
-    protected void close() {
+    protected void onClose() {
       service.close();
     }
   }

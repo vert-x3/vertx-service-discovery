@@ -61,7 +61,7 @@ public class MongoDataSourceImpl implements MongoDataSource {
     }
 
     @Override
-    protected void close() {
+    protected void onClose() {
       service.close();
     }
   }

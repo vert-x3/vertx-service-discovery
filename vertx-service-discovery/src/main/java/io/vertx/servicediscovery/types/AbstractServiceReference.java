@@ -85,10 +85,10 @@ public abstract class AbstractServiceReference<T> implements ServiceReference {
    * @return the object to access the service
    */
   @Override
-  public  <X> X getAs(Class<X> x) {
+  public <X> X getAs(Class<X> x) {
     Object svc = get();
 
-    if (x == null  || x.isInstance(svc)) {
+    if (x == null || x.isInstance(svc)) {
       return (X) svc;
     } else {
       return ClassLoaderUtils.createWithDelegate(x, svc);
@@ -104,14 +104,14 @@ public abstract class AbstractServiceReference<T> implements ServiceReference {
    * @return the object to access the service
    */
   @Override
-  public  <X> X cachedAs(Class<X> x) {
+  public <X> X cachedAs(Class<X> x) {
     Object svc = cached();
 
     if (svc == null) {
       return null;
     }
 
-    if (x == null  || x.isInstance(svc)) {
+    if (x == null || x.isInstance(svc)) {
       return (X) svc;
     } else {
       return ClassLoaderUtils.createWithDelegate(x, svc);
@@ -130,7 +130,7 @@ public abstract class AbstractServiceReference<T> implements ServiceReference {
    * Callback that let you cleanup the service object. This callback is only called if the service objects has been
    * retrieved.
    */
-  protected void close() {
+  protected void onClose() {
     // Do nothing by default.
   }
 
@@ -140,20 +140,29 @@ public abstract class AbstractServiceReference<T> implements ServiceReference {
   }
 
   /**
-   * If the service object has been retrieved, calls {@link #close} and release the reference. Otherwise, does nothing.
+   * If the service object has been retrieved, calls {@link #onClose} and release the reference. Otherwise, does nothing.
    */
   @Override
   public synchronized void release() {
     ((DiscoveryImpl) discovery).unbind(this);
     if (service != null) {
-      close();
+      onClose();
       service = null;
     }
+  }
+
+
+  /**
+   * Same as {@link #release()}, here to implement {@link AutoCloseable}.
+   */
+  @Override
+  public void close() {
+    release();
   }
 
   @Override
   public synchronized boolean isHolding(Object object) {
     // Because some language may use proxy, we compare hashCode and equals
-    return service != null  && (object.hashCode() == service.hashCode()  || object.equals(service));
+    return service != null && (object.hashCode() == service.hashCode() || object.equals(service));
   }
 }
