@@ -16,37 +16,47 @@
 
 package io.vertx.servicediscovery.impl;
 
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.*;
+import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceDiscovery;
+import io.vertx.servicediscovery.ServiceDiscoveryOptions;
+import io.vertx.servicediscovery.ServiceReference;
+import io.vertx.servicediscovery.Status;
 import io.vertx.servicediscovery.service.HelloService;
 import io.vertx.servicediscovery.service.HelloServiceImpl;
+import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend;
 import io.vertx.servicediscovery.spi.ServiceExporter;
 import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServicePublisher;
 import io.vertx.servicediscovery.types.EventBusService;
 import io.vertx.servicediscovery.types.HttpEndpoint;
 import io.vertx.serviceproxy.ProxyHelper;
-import org.assertj.core.api.Assertions;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.assertj.core.api.Assertions;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -78,10 +88,10 @@ public class DiscoveryImplTest {
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
     Record record = new Record()
-        .setName("Hello")
-        .setType(EventBusService.TYPE)
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "address"))
-        .setMetadata(new JsonObject().put("service.interface", HelloService.class.getName()));
+      .setName("Hello")
+      .setType(EventBusService.TYPE)
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address"))
+      .setMetadata(new JsonObject().put("service.interface", HelloService.class.getName()));
 
     discovery.publish(record, (r) -> {
     });
@@ -128,13 +138,13 @@ public class DiscoveryImplTest {
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
     Record record = new Record()
-        .setName("Hello")
-        .setMetadata(new JsonObject().put("key", "A"))
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
+      .setName("Hello")
+      .setMetadata(new JsonObject().put("key", "A"))
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
     Record record2 = new Record()
-        .setName("Hello-2")
-        .setMetadata(new JsonObject().put("key", "B"))
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "address2"));
+      .setName("Hello-2")
+      .setMetadata(new JsonObject().put("key", "B"))
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address2"));
     discovery.publish(record, (r) -> {
     });
     discovery.publish(record2, (r) -> {
@@ -180,18 +190,18 @@ public class DiscoveryImplTest {
     List<Record> announces = new ArrayList<>();
 
     vertx.eventBus().consumer(ServiceDiscoveryOptions.DEFAULT_ANNOUNCE_ADDRESS,
-        msg -> announces.add(new Record((JsonObject) msg.body())));
+      msg -> announces.add(new Record((JsonObject) msg.body())));
 
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
     Record record = new Record()
-        .setName("Hello")
-        .setMetadata(new JsonObject().put("key", "A"))
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
+      .setName("Hello")
+      .setMetadata(new JsonObject().put("key", "A"))
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
     Record record2 = new Record()
-        .setName("Hello-2")
-        .setMetadata(new JsonObject().put("key", "B"))
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "address2"));
+      .setName("Hello-2")
+      .setMetadata(new JsonObject().put("key", "B"))
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address2"));
     discovery.publish(record, (r) -> {
     });
     discovery.publish(record2, (r) -> {
@@ -213,23 +223,118 @@ public class DiscoveryImplTest {
   }
 
   @Test
+  public void testAnnouncementComesAfterPublishIsComplete() {
+    ServiceDiscoveryBackend slowBackend = new ServiceDiscoveryBackend() {
+
+      private AsyncMap<String, String> registry;
+
+      @Override
+      public String name() {
+        return "slow-backend";
+      }
+
+      @Override
+      public void init(Vertx vertx, JsonObject config) {
+        this.registry = new AsyncMap<>(vertx, "service.registry");
+      }
+
+      @Override
+      public void store(Record record, Handler<AsyncResult<Record>> resultHandler) {
+        String uuid = UUID.randomUUID().toString();
+        if (record.getRegistration() != null) {
+          throw new IllegalArgumentException("The record has already been registered");
+        }
+
+        record.setRegistration(uuid);
+        registry.put(uuid, record.toJson().encode(), ar -> {
+          // Put takes some time to complete
+          try {
+            Thread.sleep(2000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
+
+          if (ar.succeeded()) {
+            resultHandler.handle(Future.succeededFuture(record));
+          } else {
+            resultHandler.handle(Future.failedFuture(ar.cause()));
+          }
+        });
+      }
+
+      @Override
+      public void remove(Record record, Handler<AsyncResult<Record>> resultHandler) {
+
+      }
+
+      @Override
+      public void remove(String uuid, Handler<AsyncResult<Record>> resultHandler) {
+
+      }
+
+      @Override
+      public void update(Record record, Handler<AsyncResult<Void>> resultHandler) {
+
+      }
+
+      @Override
+      public void getRecords(Handler<AsyncResult<List<Record>>> resultHandler) {
+
+      }
+
+      @Override
+      public void getRecord(String uuid, Handler<AsyncResult<Record>> resultHandler) {
+
+      }
+    };
+
+    ServiceDiscovery discovery = new DiscoveryImpl(vertx,
+      new ServiceDiscoveryOptions().setBackendConfiguration(new JsonObject().put("backend-name", "slow-backend")), slowBackend);
+
+    List<Record> announces = new ArrayList<>();
+
+    vertx.eventBus().consumer(ServiceDiscoveryOptions.DEFAULT_ANNOUNCE_ADDRESS,
+      msg -> announces.add(new Record((JsonObject) msg.body())));
+
+    HelloService svc = new HelloServiceImpl("stuff");
+    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    Record record = new Record()
+      .setName("Hello")
+      .setMetadata(new JsonObject().put("key", "A"))
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
+
+    // Publish
+    AtomicBoolean done = new AtomicBoolean();
+    done.set(false);
+    discovery.publish(record, r -> {
+      done.set(r.succeeded());
+    });
+
+    // When publication announced
+    await().until(() -> announces.size() == 1);
+
+    // Asset record publication complete
+    assertThat(done.get()).isTrue();
+  }
+
+  @Test
   public void testServiceUsage() throws InterruptedException {
     List<JsonObject> usages = new ArrayList<>();
 
 
     vertx.eventBus().<JsonObject>consumer(ServiceDiscoveryOptions.DEFAULT_USAGE_ADDRESS,
-        msg -> usages.add(msg.body()));
+      msg -> usages.add(msg.body()));
 
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
 
     Record record = new Record()
-        .setName("Hello")
-        .setMetadata(new JsonObject()
-            .put("key", "A")
-            .put("service.interface", HelloService.class.getName()))
-        .setType(EventBusService.TYPE)
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
+      .setName("Hello")
+      .setMetadata(new JsonObject()
+        .put("key", "A")
+        .put("service.interface", HelloService.class.getName()))
+      .setType(EventBusService.TYPE)
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
     discovery.publish(record, (r) -> {
     });
     await().until(() -> record.getRegistration() != null);
@@ -238,7 +343,7 @@ public class DiscoveryImplTest {
     await().until(() -> usages.size() == 1);
 
     assertThat(usages.get(0).getJsonObject("record").getJsonObject("location").getString(Record.ENDPOINT))
-        .isEqualToIgnoringCase("address");
+      .isEqualToIgnoringCase("address");
     assertThat(usages.get(0).getString("type")).isEqualTo("bind");
     assertThat(usages.get(0).getString("id")).isNotNull().isNotEmpty();
 
@@ -250,7 +355,7 @@ public class DiscoveryImplTest {
     Assertions.assertThat(discovery.bindings()).isEmpty();
     await().until(() -> usages.size() == 2);
     assertThat(usages.get(1).getJsonObject("record").getJsonObject("location").getString(Record.ENDPOINT))
-        .isEqualToIgnoringCase("address");
+      .isEqualToIgnoringCase("address");
     assertThat(usages.get(1).getString("type")).isEqualTo("release");
     assertThat(usages.get(1).getString("id")).isNotNull().isNotEmpty();
 
@@ -271,10 +376,10 @@ public class DiscoveryImplTest {
         Record rec1 = HttpEndpoint.createRecord("static-record-1", "acme.org");
         Record rec2 = HttpEndpoint.createRecord("static-record-2", "example.com");
         publisher.publish(rec1,
-            ar -> publisher.publish(rec2, ar2 -> {
-              registered.set(true);
-              future.complete();
-            }));
+          ar -> publisher.publish(rec2, ar2 -> {
+            registered.set(true);
+            future.complete();
+          }));
       }
 
       @Override
@@ -349,15 +454,16 @@ public class DiscoveryImplTest {
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
     Record record = new Record()
-        .setName("Hello")
-        .setType(EventBusService.TYPE)
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "address"))
-        .setMetadata(new JsonObject().put("foo", "foo_value_1"));
+      .setName("Hello")
+      .setType(EventBusService.TYPE)
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address"))
+      .setMetadata(new JsonObject().put("foo", "foo_value_1"));
 
     TestServiceExporter exporter = new TestServiceExporter();
     discovery.registerServiceExporter(exporter, new JsonObject());
 
-    discovery.publish(record, (r) -> {});
+    discovery.publish(record, (r) -> {
+    });
     await().until(() -> exporter.state.size() > 0);
     String id = exporter.state.keySet().iterator().next();
     assertNotNull(id);
