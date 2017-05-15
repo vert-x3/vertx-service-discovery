@@ -28,7 +28,7 @@
   <artifactId>vertx-service-discovery-bridge-kubernetes</artifactId>
 
   <properties>
-    <kubernetes-client.version>1.4.34</kubernetes-client.version>
+    <kubernetes-client.version>1.4.35</kubernetes-client.version>
     <jackson.version>2.7.4</jackson.version>
     <doc.skip>false</doc.skip>
   </properties>
