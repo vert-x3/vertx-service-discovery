@@ -44,7 +44,7 @@
       <!-- version aligned with the rest of the stack -->
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>20.0</version>
+      <version>19.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
