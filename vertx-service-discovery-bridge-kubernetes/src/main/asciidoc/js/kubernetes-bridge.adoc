@@ -2,10 +2,10 @@
 
 This discovery bridge imports services from Kubernetes (or Openshift v3) into the Vert.x service discovery.
 
-Kubernetes services are mapped to `link:../../null/dataobjects.html#Record[Record]`. This bridge only
+Kubernetes services are mapped to `link:../../vertx-service-discovery/dataobjects.html#Record[Record]`. This bridge only
 supports the importation of services from kubernetes in vert.x (and not the opposite).
 
-`link:../../null/dataobjects.html#Record[Record]` are created from Kubernetes Service. The service type is deduced from the `service.type` label. If
+`link:../../vertx-service-discovery/dataobjects.html#Record[Record]` are created from Kubernetes Service. The service type is deduced from the `service.type` label. If
 not set, the service is imported as `unknown`. Only `http-endpoint` are supported for now.
 
 ==== Using the bridge
@@ -20,7 +20,7 @@ descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-service-discovery-bridge-kubernetes</artifactId>
-  <version>3.4.2-SNAPSHOT</version>
+  <version>3.4.2</version>
 </dependency>
 ----
 
@@ -28,7 +28,7 @@ descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-discovery-bridge-kubernetes:3.4.2-SNAPSHOT'
+compile 'io.vertx:vertx-service-discovery-bridge-kubernetes:3.4.2'
 ----
 
 ==== Configuring the bridge

@@ -13,9 +13,7 @@
   ~      http://www.opensource.org/licenses/apache2.0.php
   ~
   ~ You may elect to redistribute this code under either of these licenses.
-  -->
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -25,12 +23,12 @@
   </parent>
 
   <artifactId>vertx-service-discovery-parent</artifactId>
-  <version>3.4.2-SNAPSHOT</version>
+  <version>3.4.2</version>
 
   <packaging>pom</packaging>
 
   <properties>
-    <stack.version>3.4.2-SNAPSHOT</stack.version>
+    <stack.version>3.4.2</stack.version>
     <asciidoc.dir>${project.basedir}/src/main/asciidoc</asciidoc.dir>
     <doc.skip>true</doc.skip>
   </properties>
