@@ -685,7 +685,7 @@
  *
  * == Service discovery bridges
  *
- * Bridges let you import and export services from / to other discovery mechanism such as Docker, Kubernates, Consul...
+ * Bridges let you import and export services from / to other discovery mechanism such as Docker, Kubernetes, Consul...
  * Each bridge decides how the services are imported and exported. It does not have to be bi-directional.
  *
  * You can provide your own bridge by implementing the {@link io.vertx.servicediscovery.spi.ServiceImporter} interface and
