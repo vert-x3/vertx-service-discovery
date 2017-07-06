@@ -56,12 +56,8 @@ public class AsyncMap<K, V> {
   }
 
   public void getAll(Handler<AsyncResult<Map<K, V>>> asyncResultHandler) {
-    vertx.<Map<K, V>>executeBlocking(
-        future -> {
-          Map<K, V> map = new LinkedHashMap<>();
-          syncMap.entrySet().stream().forEach(entry -> map.put(entry.getKey(), entry.getValue()));
-          future.complete(map);
-        },
+    vertx.executeBlocking(
+        future -> future.complete(new LinkedHashMap<>(syncMap)),
         asyncResultHandler
     );
   }
