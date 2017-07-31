@@ -169,7 +169,7 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
       if (record.getLocation().containsKey("host")) {
         serviceOptions.setAddress(record.getLocation().getString("host"));
       }
-      if (record.getLocation().containsKey("post")) {
+      if (record.getLocation().containsKey("port")) {
         serviceOptions.setPort(record.getLocation().getInteger("port"));
       }
       //add location object to the tags, so it can be retrieved
