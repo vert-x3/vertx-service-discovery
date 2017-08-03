@@ -37,4 +37,12 @@ public class Examples {
         ));
   }
 
+  public void configuration2(Vertx vertx) {
+    ServiceDiscovery.create(vertx,
+      new ServiceDiscoveryOptions(new JsonObject()
+        .put("backendConfiguration",
+          new JsonObject().put("host", "localhost").put("port", 1234).put("key", "my-records")
+    )));
+  }
+
 }

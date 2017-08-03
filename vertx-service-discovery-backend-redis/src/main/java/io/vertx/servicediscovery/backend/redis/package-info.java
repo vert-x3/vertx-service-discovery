@@ -59,6 +59,14 @@
  * {@link examples.Examples#configuration1(io.vertx.core.Vertx)}
  * ----
  *
+ * It's important to note that the backend configuration is passed in the `setBackendConfiguration` method (or
+ * `backendConfiguration` entry if you use JSON):
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.Examples#configuration2(io.vertx.core.Vertx)}
+ * ----
+ *
  */
 @ModuleGen(name = "vertx-service-discovery-backend-redis", groupPackage = "io.vertx")
 @Document(fileName = "redis-backend.adoc")
