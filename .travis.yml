@@ -1,0 +1,28 @@
+sudo: required
+language: java
+notifications:
+  email:
+  - vertx3-ci@googlegroups.com
+jdk:
+- oraclejdk8
+branches:
+  only:
+  - master
+env:
+  global:
+  - secure: h/+qh4ettSXklrOCVp2oAU4ifiNEFZ7dyZwwJd8Tw+9+uD/osgUmHBFH8/q+EHzhYg2umSvrgkuxmj4ygJBPiBmWXk1/Tsr1HZqz6LJqg/g9csj1RQjgn+FDkFGJg7OD6ldiW4yuZwPcrjn8PkqxgrTmlf54rFJtGrXOfHxLgdh/IinBhTor2pldLT+QRPki5vQH5jk0HQIv2XC1N7R/5BjX54A/QghoMxIYYL4aRuHt2IlaRsmp8c49zo+6Z6BagP/MpxTEcm6gf+Cr9ZxMOT7qErHzXTQV7LE6JA0YeYuZpiDrlX23IItLQG55U4l+UAGxq0c2PGR05BsIRPsoxKQvprI4fW16kIemMv1ipM3ZbFH0+9kvn6rjF4YpUD+ZCVTEP1orYIy0WsZiAVOWIxRFvpurAP8ajWv5BFeSy4MzchieDZdV6yL9pgLVf/xDaNq86VovRJiRB1NCRk+UMyQsg+u+jINrfCR7lu6w1Kp0Jwit2hSaJL5tnIx95z/tZw8wWC1o73Jy6aTsfPBbVW1/f6yJZe75zEyQxzCfaDIJCm9DkD1uw4NBavxq57emNYxL+XX+voUAgNA9ePmivrHAiXQXaBbTkIOcoQkWSSjmgMeg30FC4/BIl5WmS+uHIouo0Nf0OUa3TX0BLscL2bx6yGKMS4e2hc3G788nLv8=
+  - secure: VWgQgma2q8NClzbKA/jbV8AG0++fvy15P/qbQcN9kW+T7AklNyWOu6OhsseOOgLGR43P0/uVOizwi9yYJgHO4rm7Q7dvPrrycoZjyHDq7HtRUFfu66GlfWfoKrLCjZ6AbGO8bWKi+K+nigil5Cnqno4VGXfjLUjuwL4OIV8qGjTUyrdvbSY86h4bpYYhp9YMbKLdpW8yaaIFRFmAUnr7RP7R7vs6kZm1Eslgit1oSXdchrHNRfaqXvSL+GD1h1B+Q7Ebs7VbcY1ZLw0rqZ+FHnXbdNbb7H2alNH/NwqQGGY3B1AiqCQ0dfoAhFsPTfiSpG8r3RTsKH4sOGmIk+yWKxxCm+tdpJKeaPBo2S+RQZD0txS+1Mb1lNO9rObaW08KDIL5k6SFL8gZoiqkQqnL7OE1ylKP+ceNVocnmlfuFI+GqhzwOwg0YyMihnkn7vkLIrqFMNfgFrct1ENfgWRouRnZUg31YKKjrYZfG9yYpq9KmKFHI+d3v6Hfp1J5MLBCPPOs5/JoXAUwAVgzRq9fKFLd2MmGtjhYguMRWzWaveswRt+xI0lmxabxQpkMvd7zX7sLBpoX4IP7/PTCMZp7I1fhhel9WjLqFVGzleKx2VdBfrv/0NuGyu6aJvO36gd0eATBXzC/bAai6097UWg3NiufzLNkotdWttEn6B5qP0A=
+cache:
+  directories:
+  - "$HOME/.m2/repository"
+  - "$HOME/apache-maven-3.5.0"
+before_install:
+  - export M2_HOME=$HOME/apache-maven-3.5.0
+  - if [ ! -d $M2_HOME/bin ]; then curl https://archive.apache.org/dist/maven/maven-3/3.5.0/binaries/apache-maven-3.5.0-bin.tar.gz | tar zxf - -C $HOME; fi
+  - export PATH=$M2_HOME/bin:$PATH
+  - cp .travis.maven.settings.xml $HOME/.m2/settings.xml
+install: true
+script:
+- set -e
+- travis_wait 30 mvn -q -Dmaven.test.redirectTestOutputToFile clean verify -B
+- bash .travis.deploy.artifacts.sh
