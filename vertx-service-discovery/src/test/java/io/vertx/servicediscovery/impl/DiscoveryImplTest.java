@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static com.jayway.awaitility.Awaitility.await;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
-
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.*;
 
 /**
@@ -76,10 +76,10 @@ public class DiscoveryImplTest {
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
     Record record = new Record()
-        .setName("Hello")
-        .setType(EventBusService.TYPE)
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "address"))
-        .setMetadata(new JsonObject().put("service.interface", HelloService.class.getName()));
+      .setName("Hello")
+      .setType(EventBusService.TYPE)
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address"))
+      .setMetadata(new JsonObject().put("service.interface", HelloService.class.getName()));
 
     discovery.publish(record, (r) -> {
     });
@@ -126,13 +126,13 @@ public class DiscoveryImplTest {
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
     Record record = new Record()
-        .setName("Hello")
-        .setMetadata(new JsonObject().put("key", "A"))
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
+      .setName("Hello")
+      .setMetadata(new JsonObject().put("key", "A"))
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
     Record record2 = new Record()
-        .setName("Hello-2")
-        .setMetadata(new JsonObject().put("key", "B"))
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "address2"));
+      .setName("Hello-2")
+      .setMetadata(new JsonObject().put("key", "B"))
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address2"));
     discovery.publish(record, (r) -> {
     });
     discovery.publish(record2, (r) -> {
@@ -178,18 +178,18 @@ public class DiscoveryImplTest {
     List<Record> announces = new ArrayList<>();
 
     vertx.eventBus().consumer(ServiceDiscoveryOptions.DEFAULT_ANNOUNCE_ADDRESS,
-        msg -> announces.add(new Record((JsonObject) msg.body())));
+      msg -> announces.add(new Record((JsonObject) msg.body())));
 
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
     Record record = new Record()
-        .setName("Hello")
-        .setMetadata(new JsonObject().put("key", "A"))
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
+      .setName("Hello")
+      .setMetadata(new JsonObject().put("key", "A"))
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
     Record record2 = new Record()
-        .setName("Hello-2")
-        .setMetadata(new JsonObject().put("key", "B"))
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "address2"));
+      .setName("Hello-2")
+      .setMetadata(new JsonObject().put("key", "B"))
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address2"));
     discovery.publish(record, (r) -> {
     });
     discovery.publish(record2, (r) -> {
@@ -312,18 +312,18 @@ public class DiscoveryImplTest {
 
 
     vertx.eventBus().<JsonObject>consumer(ServiceDiscoveryOptions.DEFAULT_USAGE_ADDRESS,
-        msg -> usages.add(msg.body()));
+      msg -> usages.add(msg.body()));
 
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
 
     Record record = new Record()
-        .setName("Hello")
-        .setMetadata(new JsonObject()
-            .put("key", "A")
-            .put("service.interface", HelloService.class.getName()))
-        .setType(EventBusService.TYPE)
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
+      .setName("Hello")
+      .setMetadata(new JsonObject()
+        .put("key", "A")
+        .put("service.interface", HelloService.class.getName()))
+      .setType(EventBusService.TYPE)
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
     discovery.publish(record, (r) -> {
     });
     await().until(() -> record.getRegistration() != null);
@@ -332,7 +332,7 @@ public class DiscoveryImplTest {
     await().until(() -> usages.size() == 1);
 
     assertThat(usages.get(0).getJsonObject("record").getJsonObject("location").getString(Record.ENDPOINT))
-        .isEqualToIgnoringCase("address");
+      .isEqualToIgnoringCase("address");
     assertThat(usages.get(0).getString("type")).isEqualTo("bind");
     assertThat(usages.get(0).getString("id")).isNotNull().isNotEmpty();
 
@@ -344,7 +344,7 @@ public class DiscoveryImplTest {
     Assertions.assertThat(discovery.bindings()).isEmpty();
     await().until(() -> usages.size() == 2);
     assertThat(usages.get(1).getJsonObject("record").getJsonObject("location").getString(Record.ENDPOINT))
-        .isEqualToIgnoringCase("address");
+      .isEqualToIgnoringCase("address");
     assertThat(usages.get(1).getString("type")).isEqualTo("release");
     assertThat(usages.get(1).getString("id")).isNotNull().isNotEmpty();
 
@@ -365,10 +365,10 @@ public class DiscoveryImplTest {
         Record rec1 = HttpEndpoint.createRecord("static-record-1", "acme.org");
         Record rec2 = HttpEndpoint.createRecord("static-record-2", "example.com");
         publisher.publish(rec1,
-            ar -> publisher.publish(rec2, ar2 -> {
-              registered.set(true);
-              future.complete();
-            }));
+          ar -> publisher.publish(rec2, ar2 -> {
+            registered.set(true);
+            future.complete();
+          }));
       }
 
       @Override
@@ -443,15 +443,16 @@ public class DiscoveryImplTest {
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
     Record record = new Record()
-        .setName("Hello")
-        .setType(EventBusService.TYPE)
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "address"))
-        .setMetadata(new JsonObject().put("foo", "foo_value_1"));
+      .setName("Hello")
+      .setType(EventBusService.TYPE)
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address"))
+      .setMetadata(new JsonObject().put("foo", "foo_value_1"));
 
     TestServiceExporter exporter = new TestServiceExporter();
     discovery.registerServiceExporter(exporter, new JsonObject());
 
-    discovery.publish(record, (r) -> {});
+    discovery.publish(record, (r) -> {
+    });
     await().until(() -> exporter.state.size() > 0);
     String id = exporter.state.keySet().iterator().next();
     assertNotNull(id);
@@ -481,4 +482,76 @@ public class DiscoveryImplTest {
     discovery.close();
     assertTrue(exporter.closed);
   }
+
+  @Test
+  public void testPublicationWithoutStatus() {
+    AtomicReference<Record> ref = new AtomicReference<>();
+    Record record = HttpEndpoint.createRecord("some-service", "localhost");
+    discovery.publish(record, ar -> {
+      ref.set(ar.result());
+    });
+
+    await().untilAtomic(ref, is(notNullValue()));
+
+    assertThat(ref.get().getRegistration()).isNotNull();
+    assertThat(ref.get().getStatus()).isEqualTo(Status.UP);
+  }
+
+  @Test
+  public void testPublicationWithStatusUp() {
+    AtomicReference<Record> ref = new AtomicReference<>();
+    Record record = HttpEndpoint.createRecord("some-service", "localhost").setStatus(Status.UP);
+    discovery.publish(record, ar -> {
+      ref.set(ar.result());
+    });
+
+    await().untilAtomic(ref, is(notNullValue()));
+
+    assertThat(ref.get().getRegistration()).isNotNull();
+    assertThat(ref.get().getStatus()).isEqualTo(Status.UP);
+  }
+
+  @Test
+  public void testPublicationWithStatusUnknown() {
+    AtomicReference<Record> ref = new AtomicReference<>();
+    Record record = HttpEndpoint.createRecord("some-service", "localhost").setStatus(Status.UNKNOWN);
+    discovery.publish(record, ar -> {
+      ref.set(ar.result());
+    });
+
+    await().untilAtomic(ref, is(notNullValue()));
+
+    assertThat(ref.get().getRegistration()).isNotNull();
+    assertThat(ref.get().getStatus()).isEqualTo(Status.UP);
+  }
+
+  @Test
+  public void testPublicationWithStatusDown() {
+    AtomicReference<Record> ref = new AtomicReference<>();
+    Record record = HttpEndpoint.createRecord("some-service", "localhost").setStatus(Status.DOWN);
+    discovery.publish(record, ar -> {
+      ref.set(ar.result());
+    });
+
+    await().untilAtomic(ref, is(notNullValue()));
+
+    assertThat(ref.get().getRegistration()).isNotNull();
+    assertThat(ref.get().getStatus()).isEqualTo(Status.DOWN);
+  }
+
+  @Test
+  public void testPublicationWithStatusOutOfService() {
+    AtomicReference<Record> ref = new AtomicReference<>();
+    Record record = HttpEndpoint.createRecord("some-service", "localhost").setStatus(Status.OUT_OF_SERVICE);
+    discovery.publish(record, ar -> {
+      ref.set(ar.result());
+    });
+
+    await().untilAtomic(ref, is(notNullValue()));
+
+    assertThat(ref.get().getRegistration()).isNotNull();
+    assertThat(ref.get().getStatus()).isEqualTo(Status.OUT_OF_SERVICE);
+  }
+
+
 }
