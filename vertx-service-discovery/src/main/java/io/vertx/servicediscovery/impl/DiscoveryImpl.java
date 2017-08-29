@@ -300,10 +300,8 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
   @Override
   public void publish(Record record, Handler<AsyncResult<Record>> resultHandler) {
-    Status status = record.getStatus() != null
-      && record.getStatus() != Status.UNKNOWN
-      && record.getStatus() != Status.DOWN
-      ? record.getStatus() : Status.UP;
+    Status status = record.getStatus() == null || record.getStatus() == Status.UNKNOWN
+      ? Status.UP : record.getStatus();
 
     backend.store(record.setStatus(status), ar -> {
       if (ar.failed()) {
