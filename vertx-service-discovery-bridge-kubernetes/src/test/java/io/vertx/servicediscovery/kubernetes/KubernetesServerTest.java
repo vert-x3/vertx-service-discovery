@@ -1,0 +1,191 @@
+package io.vertx.servicediscovery.kubernetes;
+
+import io.fabric8.kubernetes.api.model.*;
+import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
+import io.fabric8.kubernetes.client.server.mock.KubernetesMockServer;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceDiscovery;
+import io.vertx.servicediscovery.ServiceDiscoveryOptions;
+import org.jetbrains.annotations.NotNull;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+import java.util.concurrent.CountDownLatch;
+
+import static com.jayway.awaitility.Awaitility.await;
+
+/**
+ * @author <a href="http://escoffier.me">Clement Escoffier</a>
+ */
+@RunWith(VertxUnitRunner.class)
+public class KubernetesServerTest {
+
+  private Vertx vertx;
+  private KubernetesMockServer server;
+  private NamespacedKubernetesClient client;
+  private int port;
+
+  @Before
+  public void setUp(TestContext tc) throws MalformedURLException {
+    vertx = Vertx.vertx();
+    vertx.exceptionHandler(tc.exceptionHandler());
+
+    Service svc1 = getSimpleService();
+    Service svc2 = getHttpService();
+    Service svc3 = getSimpleService();
+    svc3.getMetadata().setName("service3");
+    svc3.getMetadata().setUid("uid-3");
+
+    server = getServer();
+
+
+    server.expect().get().withPath("/api/v1/namespaces/default/services").andReturn(200, new ServiceListBuilder()
+      .addToItems(svc1, svc2).withNewMetadata("1234", "/self").build()).always();
+
+    server.expect().get().withPath("/api/v1/namespaces/default/services?watch=true&resourceVersion=1234")
+      .andReturnChunked(200,
+        new WatchEvent(svc3, "ADDED"), "\n",
+        new WatchEvent(svc1, "DELETED"), "\n",
+        new WatchEvent(getUpdatedHttpService(), "MODIFIED"), "\n").once();
+
+    server.init();
+    client = server.createClient();
+    port = new URL(client.getConfiguration().getMasterUrl()).getPort();
+  }
+
+  public KubernetesMockServer getServer() {
+    return new KubernetesMockServer(false);
+  }
+
+  private JsonObject config() {
+    return new JsonObject()
+      .put("token", client.getConfiguration().getOauthToken())
+      .put("host", "localhost")
+      .put("ssl", false)
+      .put("port", port);
+  }
+
+  @Test
+  public void testInitialRetrieval(TestContext tc) {
+    Async async = tc.async();
+    ServiceDiscovery discovery = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions().setAutoRegistrationOfImporters(false));
+    discovery.registerServiceImporter(new KubernetesServiceImporter(), config().copy().put("namespace", "default"),
+      ar -> {
+        if (ar.failed()) {
+          tc.fail(ar.cause());
+        } else {
+          discovery.getRecords(s -> true, res -> {
+            if (res.failed()) {
+              tc.fail(res.cause());
+            } else {
+              tc.assertEquals(2, res.result().size());
+              async.complete();
+            }
+          });
+        }
+      });
+  }
+
+  @Test
+  public void testWatch() {
+    ServiceDiscovery discovery = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions().setAutoRegistrationOfImporters(false));
+    discovery.registerServiceImporter(new KubernetesServiceImporter(), config().copy().put("namespace", "default"),
+      ar -> {  });
+
+    await().until(() -> {
+      List<Record> records = getRecordsBlocking(discovery);
+      assertThatListContains(records, "service3");
+      assertThatListDoesNotContain(records, "my-service");
+      assertThatListContains(records, "my-http-service");
+    });
+  }
+
+  private void assertThatListContains(List<Record> records, String name) {
+    for (Record rec: records) {
+      if (rec.getName().equalsIgnoreCase(name)) {
+        return;
+      }
+    }
+    throw new AssertionError("Cannot find service '" + name + "' in the list");
+  }
+
+  private void assertThatListDoesNotContain(List<Record> records, String name) {
+    for (Record rec: records) {
+      if (rec.getName().equalsIgnoreCase(name)) {
+        throw new AssertionError("Found service '" + name + "' in the list");
+      }
+    }
+  }
+
+  private KubernetesResource getUpdatedHttpService() {
+    Service service = getHttpService();
+    service.getMetadata().getLabels().put("foo", "bar");
+    return service;
+  }
+
+  private List<Record> getRecordsBlocking(ServiceDiscovery discovery) {
+    CountDownLatch latch = new CountDownLatch(1);
+
+    List<Record> records = new ArrayList<>();
+    discovery.getRecords(s -> true, ar -> {
+      records.addAll(ar.result());
+      latch.countDown();
+    });
+
+    try {
+      latch.await();
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
+    return records;
+  }
+
+  private Service getSimpleService() {
+    ObjectMeta metadata = new ObjectMeta();
+    metadata.setName("my-service");
+    metadata.setUid("uuid-2");
+    metadata.setNamespace("my-project");
+
+    ServiceSpec spec = new ServiceSpec();
+    ServicePort port = new ServicePort();
+    port.setTargetPort(new IntOrString(8080));
+    port.setPort(1524);
+    spec.setPorts(Collections.singletonList(port));
+
+    Service service = new Service();
+    service.setMetadata(metadata);
+    service.setSpec(spec);
+    return service;
+  }
+
+  private Service getHttpService() {
+    Map<String, String> labels = new LinkedHashMap<>();
+    labels.put("service-type", "http-endpoint");
+
+    ObjectMeta metadata = new ObjectMeta();
+    metadata.setName("my-http-service");
+    metadata.setUid("uuid-1");
+    metadata.setNamespace("my-project");
+    metadata.setLabels(labels);
+
+    ServiceSpec spec = new ServiceSpec();
+    ServicePort port = new ServicePort();
+    port.setTargetPort(new IntOrString(80));
+    port.setPort(8080);
+    spec.setPorts(Collections.singletonList(port));
+
+    Service service = new Service();
+    service.setMetadata(metadata);
+    service.setSpec(spec);
+    return service;
+  }
+}

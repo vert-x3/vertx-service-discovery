@@ -16,14 +16,17 @@
 
 package io.vertx.servicediscovery.kubernetes;
 
-import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServiceList;
-import io.fabric8.kubernetes.api.model.ServicePort;
-import io.fabric8.kubernetes.client.*;
 import io.vertx.core.*;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.streams.WriteStream;
+import io.vertx.ext.web.client.HttpResponse;
+import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.client.WebClientOptions;
+import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServicePublisher;
@@ -31,8 +34,8 @@ import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -51,15 +54,16 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class KubernetesServiceImporter implements Watcher<Service>, ServiceImporter {
+public class KubernetesServiceImporter implements ServiceImporter {
 
   private final static Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceImporter.class.getName());
 
-  private KubernetesClient client;
   private ServicePublisher publisher;
   private String namespace;
   private List<Record> records = new CopyOnWriteArrayList<>();
-  private Watch watcher;
+  private WebClient client;
+
+  private static final String OPENSHIFT_KUBERNETES_TOKEN_FILE = "/var/run/secrets/kubernetes.io/serviceaccount/token";
 
   @Override
   public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration,
@@ -73,65 +77,202 @@ public class KubernetesServiceImporter implements Watcher<Service>, ServiceImpor
       conf = configuration;
     }
 
+    int port = conf.getInteger("port", 0);
+    if (port == 0) {
+      if (conf.getBoolean("ssl", true)) {
+        port = 443;
+      } else {
+        port = 80;
+      }
+    }
+
+    String p = System.getenv("KUBERNETES_SERVICE_PORT");
+    if (p != null) {
+      port = Integer.valueOf(p);
+    }
+
+    String host = conf.getString("host");
+    String h = System.getenv("KUBERNETES_SERVICE_HOST");
+    if (h != null) {
+      host = h;
+    }
+
+    client = WebClient.create(vertx,
+      new WebClientOptions()
+        .setTrustAll(true)
+        .setSsl(conf.getBoolean("ssl", true))
+        .setDefaultHost(host)
+        .setDefaultPort(port)
+        .setFollowRedirects(true)
+    );
+
+    // Retrieve token
+    Future<String> retrieveTokenFuture = getToken(vertx, conf);
+
     // 1) get kubernetes auth info
     this.namespace = conf.getString("namespace", getNamespaceOrDefault());
     LOGGER.info("Kubernetes discovery configured for namespace: " + namespace);
-    String master = conf.getString("master",
-        KubernetesUtils.getDefaultKubernetesMasterUrl());
-    LOGGER.info("Kubernetes url: " + master);
-    vertx.<KubernetesClient>executeBlocking(
-        future -> {
-          String accountToken = conf.getString("token");
-          if (accountToken == null) {
-            accountToken = KubernetesUtils.getTokenFromFile();
-          }
-          LOGGER.info("Kubernetes discovery: Bearer Token { " + accountToken + " }");
+    LOGGER.info("Kubernetes master url: http" + (conf.getBoolean("ssl", true) ? "s" : "") + "//" + host + ":" + port);
 
-          Config config = new ConfigBuilder()
-              .withOauthToken(accountToken)
-              .withMasterUrl(master)
-              .withTrustCerts(true)
-              .build();
-          DefaultKubernetesClient kubernetesClient = null;
-          List<Future> futures = new ArrayList<>();
-          try {
-            kubernetesClient = new DefaultKubernetesClient(config);
-            ServiceList list = kubernetesClient.services().inNamespace(namespace).list();
-            synchronized (KubernetesServiceImporter.this) {
-              watcher = kubernetesClient.services().inNamespace(namespace)
-                  .watch(this);
-              LOGGER.info("Kubernetes initial import of " + list.getItems().size() + " services");
-              for (Service service : list.getItems()) {
-                Record record = createRecord(service);
-                if (addRecordIfNotContained(record)) {
-                  Future<Record> fut = Future.future();
-                  publishRecord(record, fut.completer());
-                  futures.add(fut);
-                }
-              }
-            }
-            DefaultKubernetesClient finalKubernetesClient = kubernetesClient;
-            CompositeFuture.all(futures).setHandler(x -> {
-              future.complete(finalKubernetesClient);
-            });
-          } catch (KubernetesClientException e) {
-            if (kubernetesClient != null) {
-              kubernetesClient.close();
-            }
-            future.fail(e);
+    retrieveTokenFuture
+      .map(t -> {
+        LOGGER.info("Kubernetes discovery: Bearer Token { " + t + " }");
+        return t;
+      })
+      .compose(this::retrieveServices)
+      .map(list -> {
+        LOGGER.info("Kubernetes initial import of " + list.size() + " services");
+        List<Future> publications = new ArrayList<>();
+        list.forEach(s -> {
+          JsonObject svc = ((JsonObject) s);
+          Record record = createRecord(svc);
+          if (addRecordIfNotContained(record)) {
+            Future<Record> fut = Future.future();
+            publishRecord(record, fut.completer());
+            publications.add(fut);
           }
-        },
-        ar -> {
-          if (ar.succeeded()) {
-            this.client = ar.result();
-            LOGGER.info("Kubernetes client instantiated with " + records.size() + " services imported");
-            completion.complete();
+        });
+        return publications;
+      })
+      .compose(CompositeFuture::all)
+      .setHandler(ar -> {
+        if (ar.succeeded()) {
+          LOGGER.info("Kubernetes importer instantiated with " + records.size() + " services imported");
+          completion.complete();
+        } else {
+          LOGGER.error("Error while interacting with kubernetes", ar.cause());
+          completion.fail(ar.cause());
+        }
+      });
+  }
+
+  private Future<JsonArray> retrieveServices(String token) {
+    Future<JsonArray> future = Future.future();
+    String path = "/api/v1/namespaces/" + namespace + "/services";
+    client.get(path)
+      .putHeader("Authorization", "Bearer " + token)
+      .send(resp -> {
+        if (resp.failed()) {
+          future.fail(resp.cause());
+        } else if (resp.result().statusCode() != 200) {
+          future.fail("Unable to retrieve services from namespace " + namespace + ", status code: "
+            + resp.result().statusCode() + ", content: " + resp.result().bodyAsString());
+        } else {
+          HttpResponse<Buffer> response = resp.result();
+          JsonArray items = response.bodyAsJsonObject().getJsonArray("items");
+          if (items == null) {
+            future.fail("Unable to retrieve services from namespace " + namespace + " - no items");
           } else {
-            LOGGER.error("Error while interacting with kubernetes", ar.cause());
-            completion.fail(ar.cause());
+            future.complete(items);
+            watch(client, token, response.bodyAsJsonObject().getJsonObject("metadata").getString("resourceVersion"));
           }
         }
-    );
+      });
+    return future;
+  }
+
+  private void watch(WebClient client, String token, String resourceVersion) {
+    String path = "/api/v1/namespaces/" + namespace + "/services";
+    client.get(path)
+      .addQueryParam("watch", "true")
+      .addQueryParam("resourceVersion", resourceVersion)
+      .as(BodyCodec.pipe(new WriteStream<Buffer>() {
+        @Override
+        public WriteStream<Buffer> exceptionHandler(Handler<Throwable> handler) {
+          return this;
+        }
+
+        @Override
+        public WriteStream<Buffer> write(Buffer data) {
+          String[] chunks = data.toString().split("\n");
+          Arrays.stream(chunks).forEach(c -> onChunk(new JsonObject(c)));
+          return this;
+        }
+
+        @Override
+        public void end() {
+
+        }
+
+        @Override
+        public WriteStream<Buffer> setWriteQueueMaxSize(int maxSize) {
+          return this;
+        }
+
+        @Override
+        public boolean writeQueueFull() {
+          return false;
+        }
+
+        @Override
+        public WriteStream<Buffer> drainHandler(Handler<Void> handler) {
+          return this;
+        }
+      }))
+      .putHeader("Authorization", "Bearer " + token)
+      .send(ar -> {
+        if (ar.failed()) {
+          LOGGER.error("Unable to setup the watcher on the service list", ar.cause());
+        } else {
+          LOGGER.info("Watching services from namespace " + namespace);
+        }
+      });
+  }
+
+  private void onChunk(JsonObject json) {
+    String type = json.getString("type");
+    if (type == null) {
+      return;
+    }
+    JsonObject service = json.getJsonObject("object");
+    switch (type) {
+      case "ADDED":
+        // new service
+        Record record = createRecord(service);
+        if (addRecordIfNotContained(record)) {
+          LOGGER.info("Adding service "  + record.getName());
+          publishRecord(record, null);
+        }
+        break;
+      case "DELETED":
+      case "ERROR":
+        // remove service
+        record = createRecord(service);
+        LOGGER.info("Removing service "  + record.getName());
+        Record storedRecord = removeRecordIfContained(record);
+        if (storedRecord != null) {
+          unpublishRecord(storedRecord);
+        }
+        break;
+      case "MODIFIED":
+        record = createRecord(service);
+        LOGGER.info("Modifying service "  + record.getName());
+        storedRecord = removeRecordIfContained(record);
+        if (storedRecord != null) {
+          publishRecord(record, null);
+        }
+    }
+  }
+
+  private Future<String> getToken(Vertx vertx, JsonObject conf) {
+    Future<String> result = Future.future();
+
+    String token = conf.getString("token");
+    if (token != null && !token.trim().isEmpty()) {
+      result.complete(token);
+      return result;
+    }
+
+    // Read from file
+    vertx.fileSystem().readFile(OPENSHIFT_KUBERNETES_TOKEN_FILE, ar -> {
+      if (ar.failed()) {
+        result.tryFail(ar.cause());
+      } else {
+        result.tryComplete(ar.result().toString());
+      }
+    });
+
+    return result;
   }
 
   private void publishRecord(Record record, Handler<AsyncResult<Record>> completionHandler) {
@@ -181,34 +322,31 @@ public class KubernetesServiceImporter implements Watcher<Service>, ServiceImpor
     return uuid.equals(uuid2) && endpoint.equals(endpoint2);
   }
 
-  static Record createRecord(Service service) {
+  static Record createRecord(JsonObject service) {
+    JsonObject metadata = service.getJsonObject("metadata");
     Record record = new Record()
-        .setName(service.getMetadata().getName());
+      .setName(metadata.getString("name"));
 
-    Map<String, String> labels = service.getMetadata().getLabels();
-    if (labels != null) {
-      for (Map.Entry<String, String> entry : labels.entrySet()) {
-        record.getMetadata().put(entry.getKey(), entry.getValue());
-      }
-    }
-
-    record.getMetadata().put("kubernetes.namespace", service.getMetadata().getNamespace());
-    record.getMetadata().put("kubernetes.name", service.getMetadata().getName());
-    record.getMetadata().put("kubernetes.uuid", service.getMetadata().getUid());
-
-    String type = null;
+    JsonObject labels = metadata.getJsonObject("labels");
 
     if (labels != null) {
-      type = labels.get("service-type");
+      labels.forEach(entry -> record.getMetadata().put(entry.getKey(), entry.getValue().toString()));
     }
+
+    record.getMetadata().put("kubernetes.namespace", metadata.getString("namespace"));
+    record.getMetadata().put("kubernetes.name", metadata.getString("name"));
+    record.getMetadata().put("kubernetes.uuid", metadata.getString("uid"));
+
+    String type = record.getMetadata().getString("service-type");
+
     // If not set, try to discovery it
     if (type == null) {
-      type = discoveryType(service);
+      type = discoveryType(service, record);
     }
 
     switch (type) {
       case HttpEndpoint.TYPE:
-        manageHttpService(record, service, labels);
+        manageHttpService(record, service);
         break;
       // TODO Add JDBC client, redis and mongo
       default:
@@ -219,104 +357,108 @@ public class KubernetesServiceImporter implements Watcher<Service>, ServiceImpor
     return record;
   }
 
-  static String discoveryType(Service service) {
-    List<ServicePort> ports = service.getSpec().getPorts();
-    if (ports == null  || ports.isEmpty()) {
+  static String discoveryType(JsonObject service, Record record) {
+    JsonObject spec = service.getJsonObject("spec");
+    JsonArray ports = spec.getJsonArray("ports");
+    if (ports == null || ports.isEmpty()) {
       return ServiceType.UNKNOWN;
     }
+
     if (ports.size() > 1) {
-      LOGGER.warn("More than one ports has been found for " + service.getMetadata().getName() + " - taking the " +
+      LOGGER.warn("More than one ports has been found for " + record.getName() + " - taking the " +
         "first one to build the record location");
     }
 
-    ServicePort port = ports.get(0);
+    JsonObject port = ports.getJsonObject(0);
+    int p = port.getInteger("port");
 
     // Http
-    if (port.getPort() == 80 || port.getPort() == 443 || port.getPort() >= 8080  && port.getPort() <= 9000) {
+    if (p == 80 || p == 443 || p >= 8080 && p <= 9000) {
       return HttpEndpoint.TYPE;
     }
 
     // Postgres
-    if (port.getPort() == 5432  || port.getPort() == 5433) {
+    if (p == 5432 || p == 5433) {
       return JDBCDataSource.TYPE;
     }
 
     // MySQL
-    if (port.getPort() == 3306 || port.getPort() == 13306) {
+    if (p == 3306 || p == 13306) {
       return JDBCDataSource.TYPE;
     }
 
     // Redis
-    if (port.getPort() == 6379) {
+    if (p == 6379) {
       return RedisDataSource.TYPE;
     }
 
     // Mongo
-    if (port.getPort() == 27017 || port.getPort() == 27018  || port.getPort() == 27019) {
+    if (p == 27017 || p == 27018 || p == 27019) {
       return MongoDataSource.TYPE;
     }
 
     return ServiceType.UNKNOWN;
   }
 
-  private static void manageUnknownService(Record record, Service service, String type) {
-    List<ServicePort> ports = service.getSpec().getPorts();
+  private static void manageUnknownService(Record record, JsonObject service, String type) {
+    JsonObject spec = service.getJsonObject("spec");
+    JsonArray ports = spec.getJsonArray("ports");
     if (ports != null && !ports.isEmpty()) {
       if (ports.size() > 1) {
-        LOGGER.warn("More than one ports has been found for " + service.getMetadata().getName() + " - taking the " +
-            "first one to build the record location");
+        LOGGER.warn("More than one ports has been found for " + record.getName() + " - taking the " +
+          "first one to build the record location");
       }
-      ServicePort port = ports.get(0);
-      JsonObject location = new JsonObject();
-      if (port.getTargetPort().getIntVal() != null) {
-        location.put("internal-port", port.getTargetPort().getIntVal());
+      JsonObject port = ports.getJsonObject(0);
+      JsonObject location = port.copy();
+
+      //Number or name of the port to access on the pods targeted by the service.
+      Object targetPort = port.getValue("targetPort");
+      if (targetPort instanceof Integer) {
+        location.put("internal-port", (Integer) targetPort);
       }
-      location.put("port", port.getPort());
-      location.put("name", port.getName());
-      location.put("protocol", port.getProtocol());
-      location.put("host", service.getSpec().getClusterIP());
+
+      location.put("host", spec.getString("clusterIP"));
 
       record.setLocation(location).setType(type);
     } else {
-      throw new IllegalStateException("Cannot extract the location from the service " + service.getMetadata()
-          .getName() + " - no port");
+      throw new IllegalStateException("Cannot extract the location from the service " + record + " - no port");
     }
   }
 
-  private static void manageHttpService(Record record, Service service, Map<String, String> labels) {
-    List<ServicePort> ports = service.getSpec().getPorts();
-    if (ports != null && !ports.isEmpty()) {
+  private static void manageHttpService(Record record, JsonObject service) {
+    JsonObject spec = service.getJsonObject("spec");
+    JsonArray ports = spec.getJsonArray("ports");
 
+    if (ports != null && !ports.isEmpty()) {
       if (ports.size() > 1) {
-        LOGGER.warn("More than one port has been found for " + service.getMetadata().getName() + " - taking the first" +
-            " one to extract the HTTP endpoint location");
+        LOGGER.warn("More than one port has been found for " + record.getName() + " - taking the first" +
+          " one to extract the HTTP endpoint location");
       }
 
-      ServicePort port = ports.get(0);
-      record.setType(HttpEndpoint.TYPE);
-      HttpLocation location = new HttpLocation()
-          .setHost(service.getSpec().getClusterIP())
-          .setPort(port.getPort());
+      JsonObject port = ports.getJsonObject(0);
+      Integer p = port.getInteger("port");
 
-      if (isTrue(labels, "ssl") || port.getPort() != null && port.getPort() == 443) {
+      record.setType(HttpEndpoint.TYPE);
+      HttpLocation location = new HttpLocation(port.copy())
+        .setHost(spec.getString("clusterIP"));
+
+      if (isTrue(record.getMetadata().getString("ssl")) || p != null && p == 443) {
         location.setSsl(true);
       }
       record.setLocation(location.toJson());
     } else {
-      throw new IllegalStateException("Cannot extract the HTTP URL from the service " + service.getMetadata()
-          .getName() + " - no port");
+      throw new IllegalStateException("Cannot extract the HTTP URL from the service " + record + " - no port");
     }
+  }
+
+  private static boolean isTrue(String ssl) {
+    return ssl != null && "true" .equalsIgnoreCase(ssl);
   }
 
 
   @Override
   public void close(Handler<Void> completionHandler) {
     synchronized (this) {
-      if (watcher != null) {
-        watcher.close();
-        watcher = null;
-      }
-
       if (client != null) {
         client.close();
         client = null;
@@ -326,40 +468,6 @@ public class KubernetesServiceImporter implements Watcher<Service>, ServiceImpor
     if (completionHandler != null) {
       completionHandler.handle(null);
     }
-  }
-
-  private static boolean isTrue(Map<String, String> labels, String key) {
-    return labels != null && "true".equalsIgnoreCase(labels.get(key));
-  }
-
-
-  @Override
-  public synchronized void eventReceived(Action action, Service service) {
-    switch (action) {
-      case ADDED:
-        // new service
-        Record record = createRecord(service);
-        if (addRecordIfNotContained(record)) {
-          publishRecord(record, null);
-        }
-        break;
-      case DELETED:
-      case ERROR:
-        // remove service
-        record = createRecord(service);
-        Record storedRecord = removeRecordIfContained(record);
-        if (storedRecord != null) {
-          unpublishRecord(storedRecord);
-        }
-        break;
-      case MODIFIED:
-        record = createRecord(service);
-        storedRecord = removeRecordIfContained(record);
-        if (storedRecord != null) {
-          publishRecord(record, null);
-        }
-    }
-
   }
 
   private void unpublishRecord(Record record) {
@@ -380,11 +488,5 @@ public class KubernetesServiceImporter implements Watcher<Service>, ServiceImpor
       }
     }
     return null;
-  }
-
-  @Override
-  public void onClose(KubernetesClientException e) {
-    // rather bad, un-publish all the services
-    records.forEach(this::unpublishRecord);
   }
 }
