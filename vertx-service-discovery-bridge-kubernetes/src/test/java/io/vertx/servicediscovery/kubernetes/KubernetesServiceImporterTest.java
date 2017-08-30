@@ -124,7 +124,7 @@ public class KubernetesServiceImporterTest {
     service.setMetadata(metadata);
     service.setSpec(spec);
 
-    Record record = KubernetesServiceImporter.createRecord(new JsonObject(Json.encodeToBuffer(service)));
+    Record record = KubernetesServiceImporter.createRecord(Json.encodeToBuffer(service).toJsonObject());
     assertThat(record).isNotNull();
     assertThat(record.getName()).isEqualTo("my-service");
     assertThat(record.getMetadata().getString("kubernetes.name")).isEqualTo("my-service");
