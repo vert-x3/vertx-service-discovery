@@ -72,7 +72,7 @@ public class KubernetesServerTest {
       token = "some-token";
     }
     return new JsonObject()
-      .put("token", client.getConfiguration().getOauthToken())
+      .put("token", token)
       .put("host", "localhost")
       .put("ssl", false)
       .put("port", port);
