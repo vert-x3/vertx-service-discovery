@@ -142,8 +142,6 @@ public class HttpEndpointTest {
         context.assertFalse(reference.record().getLocation().getBoolean("ssl"));
         WebClient client = reference.getAs(WebClient.class);
         WebClient client2 = reference.cachedAs(WebClient.class);
-        System.out.println("Client 1: " + client);
-        System.out.println("Client 2: " + client2);
         context.assertTrue(client == client2);
 
         client.get("/foo")

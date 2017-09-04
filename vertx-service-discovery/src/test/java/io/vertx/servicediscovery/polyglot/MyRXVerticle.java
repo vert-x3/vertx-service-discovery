@@ -37,7 +37,7 @@ public class MyRXVerticle extends AbstractVerticle {
             message.reply("FAIL - reference is null");
           } else {
             HttpClient client = reference.getAs(HttpClient.class);
-            result.put("client", client.toString());
+            result.put("client", client.getClass().toString());
             reference.release();
             result.put("bindings", getBindings(discovery));
             message.reply(result);
@@ -53,7 +53,7 @@ public class MyRXVerticle extends AbstractVerticle {
             message.reply("FAIL - no service");
           } else {
             HttpClient client = ar.result();
-            result.put("client", client.toString());
+            result.put("client", client.getClass().toString());
             ServiceDiscovery.releaseServiceObject(discovery, client);
             result.put("bindings", getBindings(discovery));
             message.reply(result);
@@ -72,7 +72,7 @@ public class MyRXVerticle extends AbstractVerticle {
             message.reply("FAIL - reference is null");
           } else {
             WebClient client = reference.getAs(WebClient.class);
-            result.put("client", client.toString());
+            result.put("client", client.getClass().toString());
             reference.release();
             result.put("bindings", getBindings(discovery));
             message.reply(result);
@@ -88,7 +88,7 @@ public class MyRXVerticle extends AbstractVerticle {
             message.reply("FAIL - no service");
           } else {
             WebClient client = ar.result();
-            result.put("client", client.toString());
+            result.put("client", client.getClass().toString());
             ServiceDiscovery.releaseServiceObject(discovery, client);
             result.put("bindings", getBindings(discovery));
             message.reply(result);
@@ -107,7 +107,7 @@ public class MyRXVerticle extends AbstractVerticle {
             message.reply("FAIL - reference is null");
           } else {
             HelloService client = reference.getAs(HelloService.class);
-            result.put("client", client.toString());
+            result.put("client", client.getClass().toString());
             reference.release();
             result.put("bindings", getBindings(discovery));
             message.reply(result);
@@ -125,7 +125,7 @@ public class MyRXVerticle extends AbstractVerticle {
             message.reply("FAIL - no service");
           } else {
             HelloService client = ar.result();
-            result.put("client", client.toString());
+            result.put("client", client.getClass().toString());
             ServiceDiscovery.releaseServiceObject(discovery, client);
             result.put("bindings", getBindings(discovery));
             message.reply(result);
@@ -144,7 +144,7 @@ public class MyRXVerticle extends AbstractVerticle {
             message.reply("FAIL - reference is null");
           } else {
             JDBCClient client = reference.getAs(JDBCClient.class);
-            result.put("client", client.toString());
+            result.put("client", client.getClass().toString());
             reference.release();
             result.put("bindings", getBindings(discovery));
             message.reply(result);
@@ -160,7 +160,7 @@ public class MyRXVerticle extends AbstractVerticle {
             message.reply("FAIL - no service");
           } else {
             JDBCClient client = ar.result();
-            result.put("client", client.toString());
+            result.put("client", client.getClass().toString());
             ServiceDiscovery.releaseServiceObject(discovery, client);
             result.put("bindings", getBindings(discovery));
             message.reply(result);
@@ -179,7 +179,7 @@ public class MyRXVerticle extends AbstractVerticle {
             message.reply("FAIL - reference is null");
           } else {
             RedisClient client = reference.getAs(RedisClient.class);
-            result.put("client", client.toString());
+            result.put("client", client.getClass().toString());
             reference.release();
             result.put("bindings", getBindings(discovery));
             message.reply(result);
@@ -195,7 +195,7 @@ public class MyRXVerticle extends AbstractVerticle {
             message.reply("FAIL - no service");
           } else {
             RedisClient client = ar.result();
-            result.put("client", client.toString());
+            result.put("client", client.getClass().toString());
             ServiceDiscovery.releaseServiceObject(discovery, client);
             result.put("bindings", getBindings(discovery));
             message.reply(result);
@@ -214,7 +214,7 @@ public class MyRXVerticle extends AbstractVerticle {
             message.reply("FAIL - reference is null");
           } else {
             MongoClient client = reference.getAs(MongoClient.class);
-            result.put("client", client.toString());
+            result.put("client", client.getClass().toString());
             reference.release();
             result.put("bindings", getBindings(discovery));
             message.reply(result);
@@ -231,7 +231,7 @@ public class MyRXVerticle extends AbstractVerticle {
             message.reply("FAIL - no service");
           } else {
             MongoClient client = ar.result();
-            result.put("client", client.toString());
+            result.put("client", client.getClass().toString());
             ServiceDiscovery.releaseServiceObject(discovery, client);
             result.put("bindings", getBindings(discovery));
             message.reply(result);
@@ -250,7 +250,7 @@ public class MyRXVerticle extends AbstractVerticle {
             message.reply("FAIL - reference is null");
           } else {
             MessageConsumer<String> client = reference.getAs(MessageConsumer.class);
-            result.put("client", client.toString());
+            result.put("client", client.getClass().toString());
             reference.release();
             result.put("bindings", getBindings(discovery));
             message.reply(result);
@@ -266,7 +266,7 @@ public class MyRXVerticle extends AbstractVerticle {
             message.reply("FAIL - no service");
           } else {
             MessageConsumer client = ar.result();
-            result.put("client", client.toString());
+            result.put("client", client.getClass().toString());
             ServiceDiscovery.releaseServiceObject(discovery, client);
             result.put("bindings", getBindings(discovery));
             message.reply(result);
