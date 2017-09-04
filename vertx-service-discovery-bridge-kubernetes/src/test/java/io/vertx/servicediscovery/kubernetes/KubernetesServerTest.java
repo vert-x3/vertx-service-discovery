@@ -67,6 +67,10 @@ public class KubernetesServerTest {
   }
 
   private JsonObject config() {
+    String token = client.getConfiguration().getOauthToken();
+    if (token == null) {
+      token = "some-token";
+    }
     return new JsonObject()
       .put("token", client.getConfiguration().getOauthToken())
       .put("host", "localhost")
