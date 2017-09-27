@@ -20,7 +20,6 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.AsyncMap;
 import io.vertx.servicediscovery.Record;
@@ -36,12 +35,12 @@ import java.util.stream.Collectors;
  */
 public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
   private AsyncMap<String, String> registry;
-  private VertxInternal vertx;
+  private Vertx vertx;
 
   @Override
   public void init(Vertx vertx, JsonObject config) {
-    this.vertx = ((VertxInternal) vertx);
-    if (! vertx.isClustered()) {
+    this.vertx = vertx;
+    if (!vertx.isClustered()) {
       registry = new LocalAsyncMap<>(vertx.sharedData().getLocalMap("service.registry"));
     }
   }
@@ -54,8 +53,8 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
     }
     record.setRegistration(uuid);
     retrieveRegistry(registry -> {
-      if (registry == null) {
-        resultHandler.handle(Future.failedFuture("Unable to retrieve the registry"));
+      if (registry.failed()) {
+        resultHandler.handle(failure(registry.cause()));
       } else {
         registry.result().put(uuid, record.toJson().encode(), ar -> {
           if (ar.succeeded()) {
@@ -72,7 +71,7 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
     if (registry != null) {
       handler.handle(Future.succeededFuture(registry));
     } else {
-      vertx.getClusterManager().<String, String>getAsyncMap("service.registry", ar -> {
+      vertx.sharedData().<String, String>getClusterWideMap("service.registry", ar -> {
         synchronized (DefaultServiceDiscoveryBackend.class) {
           if (ar.failed()) {
             handler.handle(ar);
@@ -91,12 +90,16 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
     remove(record.getRegistration(), resultHandler);
   }
 
+  private static <T> Future<T> failure(Throwable e) {
+    return Future.failedFuture(new Exception("Unable to retrieve the registry", e));
+  }
+
   @Override
   public void remove(String uuid, Handler<AsyncResult<Record>> resultHandler) {
     Objects.requireNonNull(uuid, "No registration id in the record");
     retrieveRegistry(registry -> {
         if (registry.failed()) {
-          resultHandler.handle(Future.failedFuture("Unable to retrieve the registry"));
+          resultHandler.handle(failure(registry.cause()));
         } else {
           registry.result().remove(uuid, ar -> {
             if (ar.succeeded()) {
@@ -120,8 +123,8 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
   public void update(Record record, Handler<AsyncResult<Void>> resultHandler) {
     Objects.requireNonNull(record.getRegistration(), "No registration id in the record");
     retrieveRegistry(registry -> {
-        if (registry == null) {
-          resultHandler.handle(Future.failedFuture("Unable to retrieve the registry"));
+        if (registry.failed()) {
+          resultHandler.handle(failure(registry.cause()));
         } else {
           registry.result().put(record.getRegistration(), record.toJson().encode(), ar -> {
             if (ar.succeeded()) {
@@ -138,8 +141,8 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
   @Override
   public void getRecords(Handler<AsyncResult<List<Record>>> resultHandler) {
     retrieveRegistry(registry -> {
-        if (registry == null) {
-          resultHandler.handle(Future.failedFuture("Unable to retrieve the registry"));
+        if (registry.failed()) {
+          resultHandler.handle(failure(registry.cause()));
         } else {
           registry.result().entries(ar -> {
             if (ar.succeeded()) {
@@ -158,8 +161,8 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
   @Override
   public void getRecord(String uuid, Handler<AsyncResult<Record>> resultHandler) {
     retrieveRegistry(registry -> {
-      if (registry == null) {
-        resultHandler.handle(Future.failedFuture("Unable to retrieve the registry"));
+      if (registry.failed()) {
+        resultHandler.handle(failure(registry.cause()));
       } else {
         registry.result().get(uuid, ar -> {
           if (ar.succeeded()) {
