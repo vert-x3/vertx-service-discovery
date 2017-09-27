@@ -21,6 +21,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.shareddata.AsyncMap;
 import io.vertx.servicediscovery.*;
 import io.vertx.servicediscovery.service.HelloService;
 import io.vertx.servicediscovery.service.HelloServiceImpl;
@@ -223,7 +224,7 @@ public class DiscoveryImplTest {
 
       @Override
       public void init(Vertx vertx, JsonObject config) {
-        this.registry = new AsyncMap<>(vertx, "service.registry");
+        this.registry = new LocalAsyncMap<>(vertx.sharedData().getLocalMap("service.registry"));
       }
 
       @Override

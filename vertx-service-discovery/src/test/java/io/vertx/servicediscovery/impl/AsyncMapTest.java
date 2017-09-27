@@ -17,6 +17,7 @@
 package io.vertx.servicediscovery.impl;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.shareddata.AsyncMap;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -42,7 +43,7 @@ public class AsyncMapTest {
   @Before
   public void setUp() {
     vertx = Vertx.vertx();
-    map = new AsyncMap<>(vertx, "some-name");
+    map = new LocalAsyncMap<>(vertx.sharedData().getLocalMap("some-name"));
   }
 
   @After
@@ -89,7 +90,7 @@ public class AsyncMapTest {
   public void testKeySetAndValues(TestContext context) {
     Async async = context.async();
 
-    map.keySet(set -> {
+    map.keys(set -> {
       context.assertTrue(set.succeeded());
       context.assertEquals(set.result().size(), 0);
 
@@ -99,7 +100,7 @@ public class AsyncMapTest {
 
         map.put("k1", "v1", v ->
             map.put("k2", "v2", v2 ->
-                map.keySet(set2 -> {
+                map.keys(set2 -> {
                   context.assertTrue(set2.succeeded());
                   context.assertEquals(set2.result().size(), 2);
 
@@ -107,7 +108,7 @@ public class AsyncMapTest {
                     context.assertTrue(list2.succeeded());
                     context.assertEquals(list2.result().size(), 2);
 
-                    map.getAll(map -> {
+                    map.entries(map -> {
                       context.assertTrue(map.succeeded());
                       context.assertEquals(map.result().size(), 2);
 
