@@ -18,6 +18,7 @@ package io.vertx.servicediscovery.impl;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -33,8 +34,12 @@ import static com.jayway.awaitility.Awaitility.await;
 public class ClusteredAsyncMapTest extends AsyncMapTest {
   @Before
   public void setUp() {
-    Vertx.clusteredVertx(new VertxOptions(), ar -> vertx = ar.result());
+    Vertx.clusteredVertx(new VertxOptions(), ar -> {
+      ((VertxInternal) ar.result()).getClusterManager().<String, String>getAsyncMap("some-name", x -> {
+        map = x.result();
+        vertx = ar.result();
+      });
+    });
     await().until(() -> vertx != null);
-    map = new AsyncMap<>(vertx, "some-name");
   }
 }

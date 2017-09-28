@@ -21,6 +21,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.shareddata.AsyncMap;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend;
 
@@ -34,10 +35,14 @@ import java.util.stream.Collectors;
  */
 public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
   private AsyncMap<String, String> registry;
+  private Vertx vertx;
 
   @Override
   public void init(Vertx vertx, JsonObject config) {
-    this.registry = new AsyncMap<>(vertx, "service.registry");
+    this.vertx = vertx;
+    if (!vertx.isClustered()) {
+      registry = new LocalAsyncMap<>(vertx.sharedData().getLocalMap("service.registry"));
+    }
   }
 
   @Override
@@ -46,15 +51,37 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
     if (record.getRegistration() != null) {
       throw new IllegalArgumentException("The record has already been registered");
     }
-
     record.setRegistration(uuid);
-    registry.put(uuid, record.toJson().encode(), ar -> {
-      if (ar.succeeded()) {
-        resultHandler.handle(Future.succeededFuture(record));
+    retrieveRegistry(registry -> {
+      if (registry.failed()) {
+        resultHandler.handle(failure(registry.cause()));
       } else {
-        resultHandler.handle(Future.failedFuture(ar.cause()));
+        registry.result().put(uuid, record.toJson().encode(), ar -> {
+          if (ar.succeeded()) {
+            resultHandler.handle(Future.succeededFuture(record));
+          } else {
+            resultHandler.handle(Future.failedFuture(ar.cause()));
+          }
+        });
       }
     });
+  }
+
+  private synchronized void retrieveRegistry(Handler<AsyncResult<AsyncMap<String, String>>> handler) {
+    if (registry != null) {
+      handler.handle(Future.succeededFuture(registry));
+    } else {
+      vertx.sharedData().<String, String>getClusterWideMap("service.registry", ar -> {
+        synchronized (DefaultServiceDiscoveryBackend.class) {
+          if (ar.failed()) {
+            handler.handle(ar);
+          } else {
+            registry = ar.result();
+            handler.handle(Future.succeededFuture(registry));
+          }
+        }
+      });
+    }
   }
 
   @Override
@@ -63,60 +90,91 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
     remove(record.getRegistration(), resultHandler);
   }
 
+  private static <T> Future<T> failure(Throwable e) {
+    return Future.failedFuture(new Exception("Unable to retrieve the registry", e));
+  }
+
   @Override
   public void remove(String uuid, Handler<AsyncResult<Record>> resultHandler) {
     Objects.requireNonNull(uuid, "No registration id in the record");
-    registry.remove(uuid, ar -> {
-      if (ar.succeeded()) {
-        if (ar.result() == null) {
-          // Not found
-          resultHandler.handle(Future.failedFuture("Record '" + uuid + "' not found"));
+    retrieveRegistry(registry -> {
+        if (registry.failed()) {
+          resultHandler.handle(failure(registry.cause()));
         } else {
-          resultHandler.handle(Future.succeededFuture(
-              new Record(new JsonObject(ar.result()))));
+          registry.result().remove(uuid, ar -> {
+            if (ar.succeeded()) {
+              if (ar.result() == null) {
+                // Not found
+                resultHandler.handle(Future.failedFuture("Record '" + uuid + "' not found"));
+              } else {
+                resultHandler.handle(Future.succeededFuture(
+                  new Record(new JsonObject(ar.result()))));
+              }
+            } else {
+              resultHandler.handle(Future.failedFuture(ar.cause()));
+            }
+          });
         }
-      } else {
-        resultHandler.handle(Future.failedFuture(ar.cause()));
       }
-    });
+    );
   }
 
   @Override
   public void update(Record record, Handler<AsyncResult<Void>> resultHandler) {
     Objects.requireNonNull(record.getRegistration(), "No registration id in the record");
-    registry.put(record.getRegistration(), record.toJson().encode(), ar -> {
-      if (ar.succeeded()) {
-        resultHandler.handle(Future.succeededFuture());
-      } else {
-        resultHandler.handle(Future.failedFuture(ar.cause()));
+    retrieveRegistry(registry -> {
+        if (registry.failed()) {
+          resultHandler.handle(failure(registry.cause()));
+        } else {
+          registry.result().put(record.getRegistration(), record.toJson().encode(), ar -> {
+            if (ar.succeeded()) {
+              resultHandler.handle(Future.succeededFuture());
+            } else {
+              resultHandler.handle(Future.failedFuture(ar.cause()));
+            }
+          });
+        }
       }
-    });
+    );
   }
 
   @Override
   public void getRecords(Handler<AsyncResult<List<Record>>> resultHandler) {
-    registry.getAll(ar -> {
-      if (ar.succeeded()) {
-        resultHandler.handle(Future.succeededFuture(ar.result().values().stream()
-            .map(s -> new Record(new JsonObject(s)))
-            .collect(Collectors.toList())));
-      } else {
-        resultHandler.handle(Future.failedFuture(ar.cause()));
+    retrieveRegistry(registry -> {
+        if (registry.failed()) {
+          resultHandler.handle(failure(registry.cause()));
+        } else {
+          registry.result().entries(ar -> {
+            if (ar.succeeded()) {
+              resultHandler.handle(Future.succeededFuture(ar.result().values().stream()
+                .map(s -> new Record(new JsonObject(s)))
+                .collect(Collectors.toList())));
+            } else {
+              resultHandler.handle(Future.failedFuture(ar.cause()));
+            }
+          });
+        }
       }
-    });
+    );
   }
 
   @Override
   public void getRecord(String uuid, Handler<AsyncResult<Record>> resultHandler) {
-    registry.get(uuid, ar -> {
-      if (ar.succeeded()) {
-        if (ar.result() != null) {
-          resultHandler.handle(Future.succeededFuture(new Record(new JsonObject(ar.result()))));
-        } else {
-          resultHandler.handle(Future.succeededFuture(null));
-        }
+    retrieveRegistry(registry -> {
+      if (registry.failed()) {
+        resultHandler.handle(failure(registry.cause()));
       } else {
-        resultHandler.handle(Future.failedFuture(ar.cause()));
+        registry.result().get(uuid, ar -> {
+          if (ar.succeeded()) {
+            if (ar.result() != null) {
+              resultHandler.handle(Future.succeededFuture(new Record(new JsonObject(ar.result()))));
+            } else {
+              resultHandler.handle(Future.succeededFuture(null));
+            }
+          } else {
+            resultHandler.handle(Future.failedFuture(ar.cause()));
+          }
+        });
       }
     });
   }

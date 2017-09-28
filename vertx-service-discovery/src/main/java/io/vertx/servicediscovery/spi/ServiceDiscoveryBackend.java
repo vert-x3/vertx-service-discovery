@@ -46,8 +46,8 @@ public interface ServiceDiscoveryBackend {
   /**
    * Initializes the backend.
    *
-   * @param vertx  the vert.x instance
-   * @param config the configuration if any.
+   * @param vertx             the vert.x instance
+   * @param config            the configuration if any.
    */
   void init(Vertx vertx, JsonObject config);
 

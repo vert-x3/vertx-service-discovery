@@ -70,7 +70,6 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
     this.backend = backend;
     this.backend.init(vertx, options.getBackendConfiguration());
-
     this.id = options.getName() != null ? options.getName() : getNodeId(vertx);
     this.options = options;
   }
@@ -316,6 +315,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
       announcedRecord
         .setRegistration(null)
         .setStatus(status);
+
       vertx.eventBus().publish(announce, announcedRecord.toJson());
       resultHandler.handle(Future.succeededFuture(ar.result()));
     });
@@ -337,6 +337,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
       announcedRecord
         .setRegistration(null)
         .setStatus(Status.DOWN);
+
       vertx.eventBus().publish(announce, announcedRecord.toJson());
       resultHandler.handle(Future.succeededFuture());
     });
