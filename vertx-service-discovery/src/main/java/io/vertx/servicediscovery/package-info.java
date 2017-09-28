@@ -147,7 +147,9 @@
  * implementation based on Redis.
  *
  * Notice that the discovery does not require Vert.x clustering. In single-node mode, the structure is local. It can
- * be populated with {@link io.vertx.servicediscovery.spi.ServiceImporter}s.
+ * be populated with {@link io.vertx.servicediscovery.spi.ServiceImporter}s. Since 3.5.0, you can use a local
+ * structure even in clustered mode by setting the system property `vertx-service-discovery-backend-local` to `true` (or
+ * the environment variable `VERTX-SERVICE-DISCOVERY-BACKEND-LOCAL` to `true`).
  *
  * == Creating a service discovery instance
  *
