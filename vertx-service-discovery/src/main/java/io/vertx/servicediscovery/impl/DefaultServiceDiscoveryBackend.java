@@ -40,9 +40,21 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
   @Override
   public void init(Vertx vertx, JsonObject config) {
     this.vertx = vertx;
-    if (!vertx.isClustered()) {
+    if (!vertx.isClustered() || useLocalBackend()) {
       registry = new LocalAsyncMap<>(vertx.sharedData().getLocalMap("service.registry"));
     }
+  }
+
+  /**
+   * @return whether we should use a local backend even in clustered mode.
+   */
+  private boolean useLocalBackend() {
+    String property = System.getProperty("vertx-service-discovery-backend-local");
+    if (property != null) {
+      return "true".equalsIgnoreCase(property);
+    }
+    property = System.getenv("VERTX-SERVICE-DISCOVERY-BACKEND-LOCAL");
+    return property != null && "true".equalsIgnoreCase(property);
   }
 
   @Override
