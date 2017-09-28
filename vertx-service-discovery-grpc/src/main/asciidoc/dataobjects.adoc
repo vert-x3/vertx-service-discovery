@@ -15,8 +15,8 @@
 ^|Name | Type ^| Description
 |[[endpoint]]`endpoint`|`String`|
 +++
-Sets the endpoint, which is the URL of the service. The endpoint is automatically computed when you use the
- other `setX` method.
+Sets the endpoint, which is the URL of the service. The endpoint is automatically
+ computed when you use the other `setX` method.
 +++
 |[[host]]`host`|`String`|
 +++

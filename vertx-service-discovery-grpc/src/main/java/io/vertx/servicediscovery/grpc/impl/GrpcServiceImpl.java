@@ -47,9 +47,9 @@ public class GrpcServiceImpl<T> implements GrpcService {
     /**
      * Creates a new instance of {@link GrpcServiceReference}.
      *
-     * @param vertx the vert.x instance, must not be {@code null}
-     * @param discovery the service discovery instance, must not be {@code null}
-     * @param record the service record, must not be {@code null}
+     * @param vertx      the vert.x instance, must not be {@code null}
+     * @param discovery  the service discovery instance, must not be {@code null}
+     * @param record     the service record, must not be {@code null}
      * @param customizer the method used to customize the GRPC channel
      */
     GrpcServiceReference(Vertx vertx, ServiceDiscovery discovery, Record record,
@@ -96,9 +96,15 @@ public class GrpcServiceImpl<T> implements GrpcService {
 
         Class[] args = new Class[]{io.grpc.Channel.class};
         try {
-          Constructor<T> constructor = itf.getDeclaredConstructor(args);
-          if (!constructor.isAccessible()) {
-            constructor.setAccessible(true);
+          Constructor<T> constructor;
+          try {
+            constructor = itf.getConstructor(args);
+          } catch (NoSuchMethodException ignore) {
+            // Try to find the private version of the constructor.
+            constructor = itf.getDeclaredConstructor(args);
+            if (!constructor.isAccessible()) {
+              constructor.setAccessible(true);
+            }
           }
           return constructor.newInstance(channel);
         } catch (Exception e) {

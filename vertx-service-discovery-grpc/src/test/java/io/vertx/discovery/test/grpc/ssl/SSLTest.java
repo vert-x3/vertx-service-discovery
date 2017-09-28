@@ -96,7 +96,13 @@ public class SSLTest {
           assertThat(rec.succeeded()).isTrue();
           ServiceReference reference = discovery.getReference(rec.result());
           GreeterGrpc.GreeterVertxStub stub =
-            GrpcService.customize(reference, builder -> builder.usePlaintext(true)).get();
+            GrpcService.customize(reference, builder ->
+              builder.useSsl(options -> options.setSsl(true)
+                .setUseAlpn(true)
+                .setTrustStoreOptions(new JksOptions()
+                  .setPath("client-truststore.jks")
+                  .setPassword("wibble"))))
+              .get();
           assertService(tc, async, stub);
         });
     });
