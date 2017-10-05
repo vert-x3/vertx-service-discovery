@@ -38,6 +38,11 @@
       <version>${curator.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.zookeeper</groupId>
+      <artifactId>zookeeper</artifactId>
+      <version>3.4.9</version>
+    </dependency>
 
   </dependencies>
 
