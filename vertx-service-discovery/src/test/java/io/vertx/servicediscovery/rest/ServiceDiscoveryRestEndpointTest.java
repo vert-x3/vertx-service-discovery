@@ -16,16 +16,12 @@
 
 package io.vertx.servicediscovery.rest;
 
-import com.jayway.restassured.response.Response;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
-import io.vertx.servicediscovery.Record;
-import io.vertx.servicediscovery.ServiceDiscovery;
-import io.vertx.servicediscovery.ServiceDiscoveryOptions;
-import io.vertx.servicediscovery.Status;
+import io.vertx.servicediscovery.*;
 import io.vertx.servicediscovery.impl.DiscoveryImpl;
 import io.vertx.servicediscovery.service.HelloService;
 import io.vertx.servicediscovery.service.HelloServiceImpl;
@@ -40,7 +36,7 @@ import java.net.URLEncoder;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jayway.awaitility.Awaitility.await;
-import static com.jayway.restassured.RestAssured.*;
+import static io.vertx.servicediscovery.Restafari.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.not;
@@ -64,9 +60,8 @@ public class ServiceDiscoveryRestEndpointTest {
     ServiceDiscoveryRestEndpoint.create(router, discovery);
 
     AtomicBoolean done = new AtomicBoolean();
-    http = vertx.createHttpServer().requestHandler(router::accept).listen(8080, ar -> {
-      done.set(ar.succeeded());
-    });
+    http = vertx.createHttpServer().requestHandler(router::accept)
+      .listen(8080, ar -> done.set(ar.succeeded()));
 
     await().untilAtomic(done, is(true));
   }
@@ -89,14 +84,14 @@ public class ServiceDiscoveryRestEndpointTest {
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
     Record record = new Record()
-        .setName("Hello")
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
+      .setName("Hello")
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
 
     discovery.publish(record, (r) -> {
     });
     await().until(() -> record.getRegistration() != null);
 
-    Response response = get("/discovery");
+    Restafari.Response response = get("/discovery");
     JsonArray services = new JsonArray(response.asString());
 
     assertThat(services.size()).isEqualTo(1);
@@ -122,9 +117,9 @@ public class ServiceDiscoveryRestEndpointTest {
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
 
     Record record1 = EventBusService.createRecord("Hello", "address", HelloService.class,
-        new JsonObject().put("key", "foo"));
+      new JsonObject().put("key", "foo"));
     Record record2 = EventBusService.createRecord("Hello-2", "address", HelloService.class,
-        new JsonObject().put("key", "bar"));
+      new JsonObject().put("key", "bar"));
 
     discovery.publish(record1, (r) -> {
     });
@@ -134,7 +129,7 @@ public class ServiceDiscoveryRestEndpointTest {
     await().until(() -> record1.getRegistration() != null);
     await().until(() -> record2.getRegistration() != null);
 
-    Response response = get("/discovery");
+    Restafari.Response response = get("/discovery");
     JsonArray services = new JsonArray(response.asString());
 
     assertThat(services.size()).isEqualTo(2);
@@ -155,15 +150,15 @@ public class ServiceDiscoveryRestEndpointTest {
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
     Record record = new Record()
-        .setName("Hello")
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
+      .setName("Hello")
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
 
-    Response response1 = given().request().body(record.toJson().toString()).post("/discovery");
+    Restafari.Response response1 = given().request().body(record.toJson().toString()).post("/discovery");
     assertThat(response1.getStatusCode()).isEqualTo(201);
     String reg = new JsonObject(response1.asString()).getString("registration");
     assertThat(reg).isNotNull();
 
-    Response response = get("/discovery");
+    Restafari.Response response = get("/discovery");
     JsonArray services = new JsonArray(response.asString());
 
     assertThat(services.size()).isEqualTo(1);
@@ -172,8 +167,8 @@ public class ServiceDiscoveryRestEndpointTest {
     assertThat(rec.getRegistration()).isEqualTo(reg);
     assertThat(rec.getName()).isEqualTo("Hello");
 
-    Response response2 = delete("/discovery/" + reg);
-    assertThat(response2.statusCode()).isEqualTo(204);
+    Restafari.Response response2 = delete("/discovery/" + reg);
+    assertThat(response2.getStatusCode()).isEqualTo(204);
 
     response = get("/discovery");
     services = new JsonArray(response.asString());
@@ -182,7 +177,7 @@ public class ServiceDiscoveryRestEndpointTest {
 
     // Missing...
     response2 = delete("/discovery/" + reg);
-    assertThat(response2.statusCode()).isEqualTo(500);
+    assertThat(response2.getStatusCode()).isEqualTo(500);
   }
 
   @Test
@@ -190,8 +185,8 @@ public class ServiceDiscoveryRestEndpointTest {
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
     Record record = new Record()
-        .setName("Hello")
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
+      .setName("Hello")
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
 
     discovery.publish(record, (r) -> {
     });
@@ -202,7 +197,8 @@ public class ServiceDiscoveryRestEndpointTest {
 
     retrieved.setStatus(Status.OUT_OF_SERVICE).getMetadata().put("foo", "bar");
 
-    Response response = given().body(retrieved.toJson().toString()).put("/discovery/" + record.getRegistration());
+    Restafari.Response response = given().body(retrieved.toJson().toString())
+      .put("/discovery/" + record.getRegistration());
     assertThat(response.getStatusCode()).isEqualTo(200);
     retrieved = new Record(new JsonObject(response.asString()));
 
@@ -214,9 +210,11 @@ public class ServiceDiscoveryRestEndpointTest {
     JsonArray services = new JsonArray(response.asString());
     assertThat(services.size()).isEqualTo(0);
 
-    String encoded = URLEncoder.encode("{\"status\":\"*\"}", "UTF-8");
-    response = get("/discovery/?query=" + encoded);
-    services = new JsonArray(response.asString());
+    services = given()
+      .param("query", "{\"status\":\"*\"}")
+      .get("/discovery")
+      .asJsonArray();
+
     assertThat(services.size()).isEqualTo(1);
   }
 
@@ -226,9 +224,9 @@ public class ServiceDiscoveryRestEndpointTest {
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
 
     Record record1 = EventBusService.createRecord("Hello", "address", HelloService.class,
-        new JsonObject().put("key", "foo"));
+      new JsonObject().put("key", "foo"));
     Record record2 = EventBusService.createRecord("Hello-2", "address", HelloService.class,
-        new JsonObject().put("key", "bar"));
+      new JsonObject().put("key", "bar"));
 
     discovery.publish(record1, (r) -> {
     });
@@ -238,9 +236,12 @@ public class ServiceDiscoveryRestEndpointTest {
     await().until(() -> record1.getRegistration() != null);
     await().until(() -> record2.getRegistration() != null);
 
-    String encoded = URLEncoder.encode("{\"name\":\"Hello\"}", "UTF-8");
-    Response response = get("/discovery?query=" + encoded);
-    JsonArray services = new JsonArray(response.asString());
+
+    JsonArray services =
+      given()
+        .param("query", "{\"name\":\"Hello\"}")
+        .get("/discovery")
+        .asJsonArray();
 
     assertThat(services.size()).isEqualTo(1);
   }
@@ -251,9 +252,9 @@ public class ServiceDiscoveryRestEndpointTest {
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
 
     Record record1 = EventBusService.createRecord("Hello", "address", HelloService.class,
-        new JsonObject().put("key", "foo"));
+      new JsonObject().put("key", "foo"));
     Record record2 = EventBusService.createRecord("Hello-2", "address", HelloService.class,
-        new JsonObject().put("key", "bar"));
+      new JsonObject().put("key", "bar"));
 
     discovery.publish(record1, (r) -> {
     });
@@ -263,9 +264,10 @@ public class ServiceDiscoveryRestEndpointTest {
     await().until(() -> record1.getRegistration() != null);
     await().until(() -> record2.getRegistration() != null);
 
-    String encoded = URLEncoder.encode("{\"stuff\":\"*\"}", "UTF-8");
-    Response response = get("/discovery?query=" + encoded);
-    JsonArray services = new JsonArray(response.asString());
+    JsonArray services = given()
+      .param("query", "{\"stuff\":\"*\"}")
+      .get("/discovery")
+      .asJsonArray();
 
     assertThat(services.size()).isEqualTo(0);
   }
@@ -275,11 +277,11 @@ public class ServiceDiscoveryRestEndpointTest {
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
     Record record = new Record()
-        .setName("Hello")
-        .setRegistration("this-is-not-allowed")
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
+      .setName("Hello")
+      .setRegistration("this-is-not-allowed")
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
 
-    Response response = given().request().body(record.toJson().toString()).post("/discovery");
+    Restafari.Response response = given().request().body(record.toJson().toString()).post("/discovery");
     assertThat(response.getStatusCode()).isEqualTo(500);
   }
 
@@ -288,8 +290,8 @@ public class ServiceDiscoveryRestEndpointTest {
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
     Record record = new Record()
-        .setName("Hello")
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
+      .setName("Hello")
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
 
     discovery.publish(record, (r) -> {
     });
@@ -299,10 +301,10 @@ public class ServiceDiscoveryRestEndpointTest {
     assertThat(retrieved.getStatus()).isEqualTo(Status.UP);
 
     // Unregister it
-    Response response2 = delete("/discovery/" + record.getRegistration());
-    assertThat(response2.statusCode()).isEqualTo(204);
+    Restafari.Response response2 = delete("/discovery/" + record.getRegistration());
+    assertThat(response2.getStatusCode()).isEqualTo(204);
 
-    Response response = get("/discovery/" + record.getRegistration());
+    Restafari.Response response = get("/discovery/" + record.getRegistration());
     assertThat(response.getStatusCode()).isEqualTo(404);
   }
 
@@ -311,8 +313,8 @@ public class ServiceDiscoveryRestEndpointTest {
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
     Record record = new Record()
-        .setName("Hello")
-        .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
+      .setName("Hello")
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
 
     discovery.publish(record, (r) -> {
     });
@@ -323,7 +325,8 @@ public class ServiceDiscoveryRestEndpointTest {
 
     retrieved.setStatus(Status.OUT_OF_SERVICE).setRegistration("not-the-right-one").getMetadata().put("foo", "bar");
 
-    Response response = given().body(retrieved.toJson().toString()).put("/discovery/" + record.getRegistration());
+    Restafari.Response response = given().body(retrieved.toJson().toString())
+      .put("/discovery/" + record.getRegistration());
     assertThat(response.getStatusCode()).isEqualTo(400);
   }
 
