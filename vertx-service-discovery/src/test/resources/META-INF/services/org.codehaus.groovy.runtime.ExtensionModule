@@ -1,4 +1,0 @@
-moduleName = io.vertx.servicediscovery.service.HelloService-module
-moduleVersion = 1.0
-extensionClasses = io.vertx.groovy.servicediscovery.service.HelloService_GroovyExtension
-staticExtensionClasses = 
