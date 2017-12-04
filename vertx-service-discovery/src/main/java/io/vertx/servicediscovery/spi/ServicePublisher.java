@@ -30,4 +30,14 @@ public interface ServicePublisher {
    */
   void unpublish(String id, Handler<AsyncResult<Void>> resultHandler);
 
+
+  /**
+   * Updates an existing record.
+   *
+   * @param record        the record
+   * @param resultHandler handler called when the operation has completed (successfully or not). In case of success,
+   *                      the passed record has a registration id required to modify and un-register the service.
+   */
+  void update(Record record, Handler<AsyncResult<Record>> resultHandler);
+
 }
