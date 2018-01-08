@@ -176,7 +176,7 @@ public class ConsulServiceImporter implements ServiceImporter {
             }
           });
 
-          List<ImportedConsulService> toRemove = new ArrayList<ImportedConsulService>();
+          List<ImportedConsulService> toRemove = new ArrayList<>();
           imports.forEach(svc -> {
             if (!retrievedIds.contains(svc.id())) {
               LOGGER.info("Unregistering " + svc.id());
