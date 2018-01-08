@@ -320,7 +320,7 @@ public class ConsulServiceImporter implements ServiceImporter {
     });
 
     CompositeFuture.all(list).setHandler(ar -> {
-      imports.clear();
+      clearImportedServices();
       if (ar.succeeded()) {
         LOGGER.info("Successfully closed the service importer " + this);
       } else {
@@ -330,5 +330,9 @@ public class ConsulServiceImporter implements ServiceImporter {
         completionHandler.handle(null);
       }
     });
+  }
+
+  private synchronized void clearImportedServices(){
+    imports.clear();
   }
 }
