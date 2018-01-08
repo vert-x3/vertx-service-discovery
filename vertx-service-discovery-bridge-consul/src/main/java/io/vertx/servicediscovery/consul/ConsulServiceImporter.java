@@ -176,13 +176,16 @@ public class ConsulServiceImporter implements ServiceImporter {
             }
           });
 
+          List<ImportedConsulService> toRemove = new ArrayList<ImportedConsulService>();
           imports.forEach(svc -> {
             if (!retrievedIds.contains(svc.id())) {
               LOGGER.info("Unregistering " + svc.id());
-              imports.remove(svc);
+              toRemove.add(svc);
               svc.unregister(publisher, null);
             }
           });
+
+          imports.removeAll(toRemove);
         }
       }
 
