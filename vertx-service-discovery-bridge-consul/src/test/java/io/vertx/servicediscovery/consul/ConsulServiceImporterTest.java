@@ -62,12 +62,12 @@ public class ConsulServiceImporterTest {
             JsonObject result = new JsonObject();
             services.forEach(object ->
                 result.put(object.getString("ServiceName"), object.getJsonArray("tags", new JsonArray())));
-            request.response().end(result.encodePrettily());
+            request.response().putHeader("X-Consul-Index", "42").end(result.encodePrettily());
           } else if (request.path().startsWith("/v1/catalog/service/")) {
             String service = request.path().substring("/v1/catalog/service/".length());
             JsonArray value = find(service);
             if (value != null) {
-              request.response().end(value.encodePrettily());
+              request.response().putHeader("X-Consul-Index", "42").end(value.encodePrettily());
             } else {
               request.response().setStatusCode(404).end();
             }
@@ -113,6 +113,13 @@ public class ConsulServiceImporterTest {
     List<Record> list = getAllRecordsBlocking();
 
     assertThat(list).hasSize(1);
+
+    Record record = list.get(0);
+    assertThat(record.getLocation().getString("host")).isEqualTo("10.1.10.12");
+    assertThat(record.getLocation().getInteger("port")).isEqualTo(8000);
+    assertThat(record.getLocation().getString("path")).isEmpty();
+    assertThat(record.getName()).isEqualTo("redis");
+    assertThat(record.getRegistration()).isNotEmpty();
   }
 
   @Test
