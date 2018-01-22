@@ -431,7 +431,7 @@ type. The name must match the `type` field of the `link:../../apidocs/io/vertx/s
 the class with the type of service object your are going to return. You must implement
 `AbstractServiceReference#retrieve()` that creates the service object. This
 method is only called once. If your service object needs cleanup, also override
-`AbstractServiceReference#close()`.
+`AbstractServiceReference#onClose()`.
 4. Create a `META-INF/services/io.vertx.servicediscovery.spi.ServiceType` file that is packaged in your jar. In this
 file, just indicate the fully qualified name of the class created at step 2.
 5. Creates a jar containing the service type interface (step 1), the implementation (step 2 and 3) and the
