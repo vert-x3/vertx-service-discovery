@@ -132,9 +132,9 @@ public class ConsulServiceImporter implements ServiceImporter {
 
       Future<List<ImportedConsulService>> future = Future.future();
       Handler<Throwable> error = getErrorHandler(future);
-      String path = "/v1/catalog/service/" + name;
+      String path = "/v1/health/service/" + name + "?passing=true";
       if (dc != null) {
-        path += "?dc=" + dc;
+        path += "&dc=" + dc;
       }
 
       client.get(path)
@@ -206,9 +206,9 @@ public class ConsulServiceImporter implements ServiceImporter {
       for (int i = 0; i < array.size(); i++) {
         Future<Void> registration = Future.future();
 
-        JsonObject jsonObject = array.getJsonObject(i);
-        String id = jsonObject.getString("ServiceID");
-        String name = jsonObject.getString("ServiceName");
+        JsonObject jsonObject = array.getJsonObject(i).getJsonObject("Service");
+        String id = jsonObject.getString("ID");
+        String name = jsonObject.getString("Service");
         Record record = createRecord(jsonObject, name);
 
         // the id must be unique, so check if the service has already being imported
@@ -245,13 +245,12 @@ public class ConsulServiceImporter implements ServiceImporter {
   private Record createRecord(JsonObject jsonObject, String name) {
     String address = jsonObject.getString("Address");
 
-    JsonArray tags = jsonObject.getJsonArray("ServiceTags");
+    JsonArray tags = jsonObject.getJsonArray("Tags");
     if (tags == null) {
       tags = new JsonArray();
     }
 
-    String path = jsonObject.getString("ServiceAddress");
-    int port = jsonObject.getInteger("ServicePort");
+    int port = jsonObject.getInteger("Port");
 
     JsonObject metadata = jsonObject.copy();
     tags.stream().forEach(tag -> metadata.put((String) tag, true));
@@ -271,15 +270,10 @@ public class ConsulServiceImporter implements ServiceImporter {
     JsonObject location = new JsonObject();
     location.put("host", address);
     location.put("port", port);
-    if (path != null) {
-      location.put("path", path);
-    }
+
 
     // Manage HTTP endpoint
     if (record.getType().equals("http-endpoint")) {
-      if (path != null) {
-        location.put("root", path);
-      }
       if (metadata.getBoolean("ssl", false)) {
         location.put("ssl", true);
       }

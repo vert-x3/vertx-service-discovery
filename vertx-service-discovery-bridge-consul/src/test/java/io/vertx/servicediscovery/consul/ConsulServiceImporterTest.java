@@ -61,10 +61,11 @@ public class ConsulServiceImporterTest {
           if (request.path().equals("/v1/catalog/services")) {
             JsonObject result = new JsonObject();
             services.forEach(object ->
-                result.put(object.getString("ServiceName"), object.getJsonArray("tags", new JsonArray())));
+                result.put(object.getJsonObject("Service").getString("Service"), object.getJsonArray("tags", new JsonArray()))
+            );
             request.response().end(result.encodePrettily());
-          } else if (request.path().startsWith("/v1/catalog/service/")) {
-            String service = request.path().substring("/v1/catalog/service/".length());
+          } else if (request.path().startsWith("/v1/health/service/")) {
+            String service = request.path().substring("/v1/health/service/".length());
             JsonArray value = find(service);
             if (value != null) {
               request.response().end(value.encodePrettily());
@@ -93,17 +94,35 @@ public class ConsulServiceImporterTest {
     await().untilAtomic(done, is(true));
   }
 
+  private JsonObject buildService() {
+    return buildService("10.1.10.12", "redis", "redis", null, 8000);
+  }
+
+  private JsonObject buildService(String address, String id, String name, String[] tags, int port){
+
+    String tagString = "null";
+    if (tags != null && tags.length > 0){
+      tagString = "";
+      for (String tag : tags){
+        tagString += ",\"" + tag + "\"";
+      }
+      tagString = "[" + tagString.substring(1) + "]";
+    }
+    return new JsonObject( "  {\n" +
+      "    \"Node\": { },\n" +
+      "    \"Service\": {" +
+      "      \"Address\": \"" + address + "\",\n" +
+      "      \"ID\": \"" + id + "\",\n" +
+      "      \"Service\": \"" + name + "\",\n" +
+      "      \"Tags\": " + tagString + ",\n" +
+      "      \"Port\": " + Integer.toString(port) + "\n" +
+      "    }\n" +
+      "  }");
+  }
+
   @Test
   public void testBasicImport() throws InterruptedException {
-    services.add(new JsonObject("  {\n" +
-        "    \"Node\": \"foobar\",\n" +
-        "    \"Address\": \"10.1.10.12\",\n" +
-        "    \"ServiceID\": \"redis\",\n" +
-        "    \"ServiceName\": \"redis\",\n" +
-        "    \"ServiceTags\": null,\n" +
-        "    \"ServiceAddress\": \"\",\n" +
-        "    \"ServicePort\": 8000\n" +
-        "  }"));
+    services.add(buildService());
 
     discovery = ServiceDiscovery.create(vertx)
         .registerServiceImporter(new ConsulServiceImporter(),
@@ -117,15 +136,9 @@ public class ConsulServiceImporterTest {
 
   @Test
   public void testHttpImport() throws InterruptedException {
-    services.add(new JsonObject("{\n" +
-        "  \"Node\" : \"node1\",\n" +
-        "  \"Address\" : \"172.17.0.2\",\n" +
-        "  \"ServiceID\" : \"web\",\n" +
-        "  \"ServiceName\" : \"web\",\n" +
-        "  \"ServiceTags\" : [ \"rails\", \"http-endpoint\" ],\n" +
-        "  \"ServiceAddress\" : \"\",\n" +
-        "  \"ServicePort\" : 80\n" +
-        "}"));
+    services.add (
+      buildService("172.17.0.2","web","web",new String[]{"rails","http-endpoint"},80)
+    );
 
     discovery = ServiceDiscovery.create(vertx)
         .registerServiceImporter(new ConsulServiceImporter(),
@@ -137,20 +150,12 @@ public class ConsulServiceImporterTest {
     assertThat(list).hasSize(1);
 
     assertThat(list.get(0).getType()).isEqualTo(HttpEndpoint.TYPE);
-    assertThat(list.get(0).getLocation().getString("endpoint")).isEqualTo("http://172.17.0.2:80/");
+    assertThat(list.get(0).getLocation().getString("endpoint")).isEqualTo("http://172.17.0.2:80");
   }
 
   @Test
   public void testDeparture() throws InterruptedException {
-    services.add(new JsonObject("  {\n" +
-        "    \"Node\": \"foobar\",\n" +
-        "    \"Address\": \"10.1.10.12\",\n" +
-        "    \"ServiceID\": \"redis\",\n" +
-        "    \"ServiceName\": \"redis\",\n" +
-        "    \"ServiceTags\": null,\n" +
-        "    \"ServiceAddress\": \"\",\n" +
-        "    \"ServicePort\": 8000\n" +
-        "  }"));
+    services.add(buildService());
 
     AtomicBoolean initialized = new AtomicBoolean();
     vertx.runOnContext(v ->
@@ -177,25 +182,9 @@ public class ConsulServiceImporterTest {
 
   @Test
   public void testArrivalFollowedByADeparture() throws InterruptedException {
-    JsonObject service = new JsonObject("{\n" +
-        "  \"Node\" : \"node1\",\n" +
-        "  \"Address\" : \"172.17.0.2\",\n" +
-        "  \"ServiceID\" : \"web\",\n" +
-        "  \"ServiceName\" : \"web\",\n" +
-        "  \"ServiceTags\" : [ \"rails\", \"http-endpoint\" ],\n" +
-        "  \"ServiceAddress\" : \"\",\n" +
-        "  \"ServicePort\" : 80\n" +
-        "}");
+    JsonObject service = buildService("172.17.0.2","web","web",new String[]{"rails","http-endpoint"},80);
 
-    services.add(new JsonObject("  {\n" +
-        "    \"Node\": \"foobar\",\n" +
-        "    \"Address\": \"10.1.10.12\",\n" +
-        "    \"ServiceID\": \"redis\",\n" +
-        "    \"ServiceName\": \"redis\",\n" +
-        "    \"ServiceTags\": null,\n" +
-        "    \"ServiceAddress\": \"\",\n" +
-        "    \"ServicePort\": 8000\n" +
-        "  }"));
+    services.add(buildService());
 
     AtomicBoolean initialized = new AtomicBoolean();
     vertx.runOnContext(v ->
@@ -223,12 +212,13 @@ public class ConsulServiceImporterTest {
 
   @Test
   public void testAServiceBeingTwiceInConsul() throws InterruptedException {
-    services.add(new JsonObject("{\"Node\":\"ubuntu221\",\"Address\":\"10.4.7.221\"," +
-        "\"ServiceID\":\"ubuntu221:mysql:3306\",\"ServiceName\":\"db\"," +
-        "\"ServiceTags\":[\"master\",\"backups\"],\"ServiceAddress\":\"\",\"ServicePort\":32769}"));
-    services.add(new JsonObject("{\"Node\":\"ubuntu220\",\"Address\":\"10.4.7.220\"," +
-        "\"ServiceID\":\"ubuntu220:mysql:3306\",\"ServiceName\":\"db\",\"ServiceTags\":[\"master\",\"backups\"]," +
-        "\"ServiceAddress\":\"\",\"ServicePort\":32771}"));
+    services.add(
+      buildService("10.4.7.221","ubuntu221:mysql:3306","db",new String[]{"master","backups"},32769)
+    );
+
+    services.add(
+      buildService("10.4.7.220","ubuntu220:mysql:3306","db",new String[]{"master","backups"},32771)
+    );
 
     discovery = ServiceDiscovery.create(vertx)
         .registerServiceImporter(new ConsulServiceImporter(),
@@ -242,7 +232,7 @@ public class ConsulServiceImporterTest {
 
   private JsonArray find(String service) {
     JsonArray array = new JsonArray();
-    services.stream().filter(json -> json.getString("ServiceName").equalsIgnoreCase(service)).forEach(array::add);
+    services.stream().filter(json -> json.getJsonObject("Service").getString("Service").equalsIgnoreCase(service)).forEach(array::add);
     if (! array.isEmpty()) {
       return array;
     }
