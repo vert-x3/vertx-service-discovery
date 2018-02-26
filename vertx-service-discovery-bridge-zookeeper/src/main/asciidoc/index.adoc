@@ -1,9 +1,7 @@
 === Zookeeper bridge
 
 This discovery bridge imports services from https://zookeeper.apache.org/[Apache Zookeeper] into the Vert.x service
-discovery.
-
-The bridge uses the http://curator.apache.org/curator-x-discovery/[Curator extension for service discovery].
+discovery. The bridge uses the http://curator.apache.org/curator-x-discovery/[Curator extension for service discovery].
 
 Service description are read as JSON Object (merged in the Vert.x service record metadata). The service type is
 deduced from this description by reading the `service-type`.
@@ -18,9 +16,9 @@ descriptor:
 [source,xml,subs="+attributes"]
 ----
 <dependency>
-  <groupId>io.vertx</groupId>
-  <artifactId>vertx-service-discovery-bridge-zookeeper</artifactId>
-  <version>3.5.1</version>
+  <groupId>${maven.groupId}</groupId>
+  <artifactId>${maven.artifactId}</artifactId>
+  <version>${maven.version}</version>
 </dependency>
 ----
 
@@ -28,17 +26,14 @@ descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-discovery-bridge-zookeeper:3.5.1'
+compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
 ----
 
 Then, when creating the service discovery registers this bridge as follows:
 
-[source, groovy]
+[source, $lang]
 ----
-ServiceDiscovery.create(vertx).registerServiceImporter(new io.vertx.servicediscovery.zookeeper.ZookeeperServiceImporter(), [
-  connection:"127.0.0.1:2181"
-])
-
+{@link examples.Examples#register(io.vertx.core.Vertx)}
 ----
 
 Only the `connection` configuration is mandatory. It's the connection _string_ of the Zookeeper server.
@@ -52,13 +47,7 @@ In addition you can configure:
 * `connectionTimeoutMs`: the connection timeout in milliseconds. Defaults to 1000.
 * `canBeReadOnly` : whether or not the backend support the _read-only_ mode (defaults to true)
 
-[source,groovy]
+[source,$lang]
 ----
-ServiceDiscovery.create(vertx).registerServiceImporter(new io.vertx.servicediscovery.zookeeper.ZookeeperServiceImporter(), [
-  connection:"127.0.0.1:2181",
-  maxRetries:5,
-  baseSleepTimeBetweenRetries:2000,
-  basePath:"/services"
-])
-
+{@link examples.Examples#register2(io.vertx.core.Vertx)}
 ----

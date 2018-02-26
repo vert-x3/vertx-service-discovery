@@ -1,8 +1,6 @@
 == Vert.x Discovery Backend - Zookeeper
 
-The service discovery has a plug-able backend using the `ServiceDiscoveryBackend` SPI.
-
-This is an implementation of the SPI based
+The service discovery has a plug-able backend using the {@link io.vertx.servicediscovery.spi.ServiceDiscoveryBackend} SPI. This is an implementation of the SPI based
 on Apache Zookeeper.
 
 == Using the Zookeeper backend
@@ -15,9 +13,9 @@ descriptor:
 [source,xml,subs="+attributes"]
 ----
 <dependency>
-  <groupId>io.vertx</groupId>
-  <artifactId>vertx-service-discovery-backend-zookeeper</artifactId>
-  <version>3.5.1</version>
+  <groupId>${maven.groupId}</groupId>
+  <artifactId>${maven.artifactId}</artifactId>
+  <version>${maven.version}</version>
 </dependency>
 ----
 
@@ -25,7 +23,7 @@ descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-discovery-backend-zookeeper:3.5.1'
+compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
 ----
 
 Be aware that you can have only a single implementation of the SPI in your _classpath_. If none,
@@ -37,15 +35,9 @@ There is a single mandatory configuration attribute: `connection`. Connection is
 
 Here is an example:
 
-[source,js]
+[source,$lang]
 ----
-var ServiceDiscovery = require("vertx-service-discovery-js/service_discovery");
-ServiceDiscovery.create(vertx, {
-  "backendConfiguration" : {
-    "connection" : "127.0.0.1:2181"
-  }
-});
-
+{@link examples.Examples#configuration1(io.vertx.core.Vertx)}
 ----
 
 Additionally you can configure:
@@ -60,18 +52,9 @@ Additionally you can configure:
 https://zookeeper.apache.org/doc/r3.4.5/zookeeperOver.html#Nodes+and+ephemeral+nodes). `false` by default
 * `guaranteed`: whether or not to guarantee the node deletion even in case of failure. `false` by default
 
-[source,js]
+[source,$lang]
 ----
-var ServiceDiscovery = require("vertx-service-discovery-js/service_discovery");
-ServiceDiscovery.create(vertx, {
-  "backendConfiguration" : {
-    "connection" : "127.0.0.1:2181",
-    "ephemeral" : true,
-    "guaranteed" : true,
-    "basePath" : "/services/my-backend"
-  }
-});
-
+{@link examples.Examples#configuration2(io.vertx.core.Vertx)}
 ----
 
 == How are stored the records

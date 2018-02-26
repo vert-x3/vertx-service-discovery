@@ -1,8 +1,6 @@
 === Consul bridge
 
-This discovery bridge imports services from http://consul.io[Consul] into the Vert.x service discovery.
-
-The bridge
+This discovery bridge imports services from http://consul.io[Consul] into the Vert.x service discovery. The bridge
 connects to a Consul agent (server) and periodically scan for services:
 
 * new services are imported
@@ -24,9 +22,9 @@ descriptor:
 [source,xml,subs="+attributes"]
 ----
 <dependency>
-  <groupId>io.vertx</groupId>
-  <artifactId>vertx-service-discovery-bridge-consul</artifactId>
-  <version>3.5.1</version>
+  <groupId>${maven.groupId}</groupId>
+  <artifactId>${maven.artifactId}</artifactId>
+  <version>${maven.version}</version>
 </dependency>
 ----
 
@@ -34,21 +32,14 @@ descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-discovery-bridge-consul:3.5.1'
+compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
 ----
 
 Then, when creating the service discovery registers this bridge as follows:
 
-[source, kotlin]
+[source, $lang]
 ----
-ServiceDiscovery.create(vertx).registerServiceImporter(io.vertx.servicediscovery.consul.ConsulServiceImporter(), json {
-  obj(
-    "host" to "localhost",
-    "port" to 8500,
-    "scan-period" to 2000
-  )
-})
-
+{@link examples.Examples#register(io.vertx.core.Vertx)}
 ----
 
 You can configure the:

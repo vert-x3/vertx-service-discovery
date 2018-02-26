@@ -1,8 +1,6 @@
 === Redis backend
 
-The service discovery has a plug-able backend using the `link:../../apidocs/io/vertx/servicediscovery/spi/ServiceDiscoveryBackend.html[ServiceDiscoveryBackend]` SPI.
-
-This is an implementation of the SPI based
+The service discovery has a plug-able backend using the {@link io.vertx.servicediscovery.spi.ServiceDiscoveryBackend} SPI. This is an implementation of the SPI based
 on Redis.
 
 ==== Using the Redis backend
@@ -15,9 +13,9 @@ descriptor:
 [source,xml,subs="+attributes"]
 ----
 <dependency>
-  <groupId>io.vertx</groupId>
-  <artifactId>vertx-service-discovery-backend-redis</artifactId>
-  <version>3.5.1</version>
+  <groupId>${maven.groupId}</groupId>
+  <artifactId>${maven.artifactId}</artifactId>
+  <version>${maven.version}</version>
 </dependency>
 ----
 
@@ -25,7 +23,7 @@ descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-discovery-backend-redis:3.5.1'
+compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
 ----
 
 Be aware that you can have only a single implementation of the SPI in your _classpath_. If none,
@@ -39,22 +37,15 @@ the records are stored.
 
 Here is an example:
 
-[source,kotlin]
+[source,$lang]
 ----
-ServiceDiscovery.create(vertx, ServiceDiscoveryOptions(
-  backendConfiguration = json {
-    obj(
-      "host" to "127.0.0.1",
-      "key" to "records"
-    )
-  }))
-
+{@link examples.Examples#configuration1(io.vertx.core.Vertx)}
 ----
 
 It's important to note that the backend configuration is passed in the `setBackendConfiguration` method (or
 `backendConfiguration` entry if you use JSON):
 
-[source,kotlin]
+[source,$lang]
 ----
-Code not translatable
+{@link examples.Examples#configuration2(io.vertx.core.Vertx)}
 ----

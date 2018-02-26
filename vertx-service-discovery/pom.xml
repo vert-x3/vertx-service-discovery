@@ -138,7 +138,8 @@
               <optionMap>
                 <outputDirectory>${project.basedir}/src/main</outputDirectory>
                 <!-- $lang is replaced by the docgen processor to the target lang -->
-                <docgen.output>${asciidoc.dir}/$lang</docgen.output>
+                <docgen.source>${asciidoc.dir}/*.adoc</docgen.source>
+                <docgen.output>${project.build.directory}/asciidoc/$lang</docgen.output>
                 <maven.groupId>${project.groupId}</maven.groupId>
                 <maven.artifactId>${project.artifactId}</maven.artifactId>
                 <maven.version>${project.version}</maven.version>
