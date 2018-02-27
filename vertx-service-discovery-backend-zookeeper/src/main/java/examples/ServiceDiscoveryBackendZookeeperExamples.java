@@ -6,7 +6,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 
-public class Examples {
+public class ServiceDiscoveryBackendZookeeperExamples {
 
   public void configuration1(Vertx vertx) {
     ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions()

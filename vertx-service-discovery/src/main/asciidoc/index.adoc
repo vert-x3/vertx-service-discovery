@@ -141,7 +141,7 @@ instance to use the discovery infrastructure:
 
 [source,$lang]
 ----
-{@link examples.Examples#example1(io.vertx.core.Vertx)}
+{@link examples.ServiceDiscoveryExamples#example1(io.vertx.core.Vertx)}
 ----
 
 By default, the announce address (the event bus address on which service events are sent is: `vertx.discovery
@@ -165,7 +165,7 @@ from the service types.
 
 [source,$lang]
 ----
-{@link examples.Examples#example2(ServiceDiscovery)}
+{@link examples.ServiceDiscoveryExamples#example2(ServiceDiscovery)}
 ----
 
 It is important to keep a reference on the returned records, as this record has been extended by a `registration id`.
@@ -176,7 +176,7 @@ To withdraw (un-publish) a record, use:
 
 [source,$lang]
 ----
-{@link examples.Examples#example3(ServiceDiscovery, Record)}
+{@link examples.ServiceDiscoveryExamples#example3(ServiceDiscovery, Record)}
 ----
 
 == Looking for services
@@ -210,7 +210,7 @@ Here are some examples:
 
 [source,$lang]
 ----
-{@link examples.Examples#example4(ServiceDiscovery)}
+{@link examples.ServiceDiscoveryExamples#example4(ServiceDiscovery)}
 ----
 
 You can retrieve a single record or all matching records with
@@ -229,7 +229,7 @@ Once you have chosen the {@link io.vertx.servicediscovery.Record}, you can retri
 
 [source,$lang]
 ----
-{@link examples.Examples#example5(ServiceDiscovery, Record, Record)}
+{@link examples.ServiceDiscoveryExamples#example5(ServiceDiscovery, Record, Record)}
 ----
 
 Don't forget to release the reference once done.
@@ -242,7 +242,7 @@ configuration, some require configuration (as data sources):
 
 [source,$lang]
 ----
-{@link examples.Examples#example51(ServiceDiscovery, Record, io.vertx.core.json.JsonObject)}
+{@link examples.ServiceDiscoveryExamples#example51(ServiceDiscovery, Record, io.vertx.core.json.JsonObject)}
 ----
 
 In the previous examples, the code uses

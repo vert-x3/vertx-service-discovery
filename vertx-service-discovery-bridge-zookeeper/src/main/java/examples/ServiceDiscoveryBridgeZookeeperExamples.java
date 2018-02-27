@@ -19,19 +19,29 @@ package examples;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.ServiceDiscovery;
-import io.vertx.servicediscovery.consul.ConsulServiceImporter;
+import io.vertx.servicediscovery.zookeeper.ZookeeperServiceImporter;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class Examples {
+public class ServiceDiscoveryBridgeZookeeperExamples {
 
   public void register(Vertx vertx) {
     ServiceDiscovery.create(vertx)
-        .registerServiceImporter(new ConsulServiceImporter(),
+        .registerServiceImporter(new ZookeeperServiceImporter(),
             new JsonObject()
-                .put("host", "localhost")
-                .put("port", 8500)
-                .put("scan-period", 2000));
+                .put("connection", "127.0.0.1:2181"));
+  }
+
+
+  public void register2(Vertx vertx) {
+    ServiceDiscovery.create(vertx)
+        .registerServiceImporter(new ZookeeperServiceImporter(),
+            new JsonObject()
+                .put("connection", "127.0.0.1:2181")
+                .put("maxRetries", 5)
+                .put("baseSleepTimeBetweenRetries", 2000)
+                .put("basePath", "/services")
+        );
   }
 }

@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class Examples {
+public class ServiceDiscoveryExamples {
 
   public void example1(Vertx vertx) {
     // Use default configuration

@@ -19,15 +19,19 @@ package examples;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.ServiceDiscovery;
-import io.vertx.servicediscovery.docker.DockerLinksServiceImporter;
+import io.vertx.servicediscovery.consul.ConsulServiceImporter;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class Examples {
+public class ServiceDiscoveryBridgeConsulExamples {
 
   public void register(Vertx vertx) {
     ServiceDiscovery.create(vertx)
-        .registerServiceImporter(new DockerLinksServiceImporter(), new JsonObject());
+        .registerServiceImporter(new ConsulServiceImporter(),
+            new JsonObject()
+                .put("host", "localhost")
+                .put("port", 8500)
+                .put("scan-period", 2000));
   }
 }

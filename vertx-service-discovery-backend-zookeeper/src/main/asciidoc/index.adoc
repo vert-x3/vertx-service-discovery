@@ -37,7 +37,7 @@ Here is an example:
 
 [source,$lang]
 ----
-{@link examples.Examples#configuration1(io.vertx.core.Vertx)}
+{@link examples.ServiceDiscoveryBackendZookeeperExamples#configuration1(io.vertx.core.Vertx)}
 ----
 
 Additionally you can configure:
@@ -54,7 +54,7 @@ https://zookeeper.apache.org/doc/r3.4.5/zookeeperOver.html#Nodes+and+ephemeral+n
 
 [source,$lang]
 ----
-{@link examples.Examples#configuration2(io.vertx.core.Vertx)}
+{@link examples.ServiceDiscoveryBackendZookeeperExamples#configuration2(io.vertx.core.Vertx)}
 ----
 
 == How are stored the records

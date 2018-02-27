@@ -38,5 +38,5 @@ Here is an example:
 <p>
 [source,$lang]
 ----
-{@link examples.Examples#configuration1(io.vertx.core.Vertx)}
+{@link examples.ServiceDiscoveryBackendConsulExamples#configuration1(io.vertx.core.Vertx)}
 ----

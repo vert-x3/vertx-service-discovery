@@ -19,29 +19,30 @@ package examples;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.ServiceDiscovery;
-import io.vertx.servicediscovery.zookeeper.ZookeeperServiceImporter;
+import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 
 /**
+ * Examples for documentation.
+ *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class Examples {
+public class ServiceDiscoveryBackendRedisExamples {
 
-  public void register(Vertx vertx) {
-    ServiceDiscovery.create(vertx)
-        .registerServiceImporter(new ZookeeperServiceImporter(),
+  public void configuration1(Vertx vertx) {
+    ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions()
+        .setBackendConfiguration(
             new JsonObject()
-                .put("connection", "127.0.0.1:2181"));
+                .put("host", "127.0.0.1")
+                .put("key", "records")
+        ));
   }
 
-
-  public void register2(Vertx vertx) {
-    ServiceDiscovery.create(vertx)
-        .registerServiceImporter(new ZookeeperServiceImporter(),
-            new JsonObject()
-                .put("connection", "127.0.0.1:2181")
-                .put("maxRetries", 5)
-                .put("baseSleepTimeBetweenRetries", 2000)
-                .put("basePath", "/services")
-        );
+  public void configuration2(Vertx vertx) {
+    ServiceDiscovery.create(vertx,
+      new ServiceDiscoveryOptions(new JsonObject()
+        .put("backendConfiguration",
+          new JsonObject().put("host", "localhost").put("port", 1234).put("key", "my-records")
+    )));
   }
+
 }

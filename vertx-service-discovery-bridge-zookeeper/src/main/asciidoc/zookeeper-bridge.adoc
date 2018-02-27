@@ -33,7 +33,7 @@ Then, when creating the service discovery registers this bridge as follows:
 
 [source, $lang]
 ----
-{@link examples.Examples#register(io.vertx.core.Vertx)}
+{@link examples.ServiceDiscoveryBridgeZookeeperExamples#register(io.vertx.core.Vertx)}
 ----
 
 Only the `connection` configuration is mandatory. It's the connection _string_ of the Zookeeper server.
@@ -49,5 +49,5 @@ In addition you can configure:
 
 [source,$lang]
 ----
-{@link examples.Examples#register2(io.vertx.core.Vertx)}
+{@link examples.ServiceDiscoveryBridgeZookeeperExamples#register2(io.vertx.core.Vertx)}
 ----

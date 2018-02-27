@@ -35,7 +35,7 @@ Then, when creating the service discovery, registers this bridge as follows:
 
 [source, $lang]
 ----
-{@link examples.Examples#register(io.vertx.core.Vertx)}
+{@link examples.ServiceDiscoveryBridgeDockerLinksExamples#register(io.vertx.core.Vertx)}
 ----
 
 The bridge does not need any further configuration.

@@ -39,7 +39,7 @@ Here is an example:
 
 [source,$lang]
 ----
-{@link examples.Examples#configuration1(io.vertx.core.Vertx)}
+{@link examples.ServiceDiscoveryBackendRedisExamples#configuration1(io.vertx.core.Vertx)}
 ----
 
 It's important to note that the backend configuration is passed in the `setBackendConfiguration` method (or
@@ -47,5 +47,5 @@ It's important to note that the backend configuration is passed in the `setBacke
 
 [source,$lang]
 ----
-{@link examples.Examples#configuration2(io.vertx.core.Vertx)}
+{@link examples.ServiceDiscoveryBackendRedisExamples#configuration2(io.vertx.core.Vertx)}
 ----

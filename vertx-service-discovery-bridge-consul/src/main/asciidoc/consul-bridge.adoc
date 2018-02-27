@@ -39,7 +39,7 @@ Then, when creating the service discovery registers this bridge as follows:
 
 [source, $lang]
 ----
-{@link examples.Examples#register(io.vertx.core.Vertx)}
+{@link examples.ServiceDiscoveryBridgeConsulExamples#register(io.vertx.core.Vertx)}
 ----
 
 You can configure the:
