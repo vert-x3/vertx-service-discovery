@@ -16,6 +16,7 @@
 
 package io.vertx.servicediscovery;
 
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -240,7 +241,7 @@ public interface ServiceDiscovery {
    * @param resultHandler handler called when the lookup has been completed. When there are no matching record, the
    *                      operation succeeds, but the async result has no result ({@code null}).
    */
-  void getRecord(JsonObject filter, Handler<AsyncResult<Record>> resultHandler);
+  void getRecord(JsonObject filter, Handler<AsyncResult<@Nullable Record>> resultHandler);
 
   /**
    * Lookups for a single record.
@@ -254,7 +255,7 @@ public interface ServiceDiscovery {
    * @param resultHandler the result handler called when the lookup has been completed. When there are no matching
    *                      record, the operation succeed, but the async result has no result.
    */
-  void getRecord(Function<Record, Boolean> filter, Handler<AsyncResult<Record>> resultHandler);
+  void getRecord(Function<Record, Boolean> filter, Handler<AsyncResult<@Nullable Record>> resultHandler);
 
   /**
    * Lookups for a single record.
@@ -270,8 +271,7 @@ public interface ServiceDiscovery {
    * @param resultHandler       the result handler called when the lookup has been completed. When there are no matching
    *                            record, the operation succeed, but the async result has no result.
    */
-  void getRecord(Function<Record, Boolean> filter, boolean includeOutOfService, Handler<AsyncResult<Record>>
-    resultHandler);
+  void getRecord(Function<Record, Boolean> filter, boolean includeOutOfService, Handler<AsyncResult<@Nullable Record>> resultHandler);
 
   /**
    * Lookups for a set of records. Unlike {@link #getRecord(JsonObject, Handler)}, this method returns all matching
