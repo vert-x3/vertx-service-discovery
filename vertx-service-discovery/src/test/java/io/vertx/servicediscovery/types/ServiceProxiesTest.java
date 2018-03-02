@@ -121,35 +121,6 @@ public class ServiceProxiesTest {
   }
 
   @Test
-  public void testWithJavaScriptConsumer() {
-    // Step 1 - register the service
-    HelloService svc = new HelloServiceImpl("stuff");
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
-    Record record = EventBusService.createRecord("Hello", "address", HelloService.class);
-
-    discovery.publish(record, (r) -> {
-    });
-    await().until(() -> record.getRegistration() != null);
-
-    // Step 2 - register a consumer that get the result
-    AtomicReference<JsonObject> result = new AtomicReference<>();
-    vertx.eventBus().<JsonObject>consumer("result", message -> result.set(message.body()));
-
-    // Step 3 - deploy the verticle
-    vertx.deployVerticle("verticles/HelloServiceConsumer.js", ar -> {
-      if (ar.failed()) {
-        // Will fail anyway.
-        ar.cause().printStackTrace();
-      }
-    });
-
-    await().until(() -> result.get() != null);
-
-    assertThat(result.get().getString("status")).isEqualTo("ok");
-    assertThat(result.get().getString("message")).isEqualTo("stuff vert.x");
-  }
-
-  @Test
   public void testWithRXConsumer() {
     // Step 1 - register the service
     HelloService svc = new HelloServiceImpl("stuff");
