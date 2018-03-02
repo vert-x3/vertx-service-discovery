@@ -150,36 +150,6 @@ public class ServiceProxiesTest {
   }
 
   @Test
-  public void testWithRubyConsumer() {
-    // Step 1 - register the service
-    HelloService svc = new HelloServiceImpl("stuff");
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
-    Record record = EventBusService.createRecord("Hello", "address", HelloService.class);
-
-    discovery.publish(record, (r) -> {
-    });
-    await().until(() -> record.getRegistration() != null);
-
-    // Step 2 - register a consumer that get the result
-    AtomicReference<JsonObject> result = new AtomicReference<>();
-    vertx.eventBus().<JsonObject>consumer("result", message -> result.set(message.body()));
-
-    // Step 3 - deploy the verticle
-    vertx.deployVerticle("verticles/HelloServiceConsumer.rb", ar -> {
-      if (ar.failed()) {
-        // Will fail anyway.
-        ar.cause().printStackTrace();
-      }
-    });
-
-    await().atMost(1, TimeUnit.MINUTES).until(() -> result.get() != null);
-
-    assertThat(result.get().getString("message")).isEqualTo("stuff vert.x");
-
-
-  }
-
-  @Test
   public void testSeveralCallsToRelease() {
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
