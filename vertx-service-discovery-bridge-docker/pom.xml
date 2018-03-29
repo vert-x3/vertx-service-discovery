@@ -30,7 +30,7 @@
 
   <properties>
     <doc.skip>true</doc.skip>
-    <jackson.version>2.7.4</jackson.version>
+    <jackson.version>2.9.5</jackson.version>
   </properties>
 
   <dependencies>
@@ -49,7 +49,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
-      <version>2.9.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
