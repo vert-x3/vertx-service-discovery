@@ -49,7 +49,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * <p>
  * Be aware that the application must have access to Kubernetes and must be able to read the chosen namespace.
  * <p>
- * {@link Record} are created from Kubernetes Service. The service type is deduced from the `service.type` label. If
+ * {@link Record} are created from Kubernetes Service. The service type is deduced from the `service-type` label. If
  * not set, the service is imported as `unknown`. Only `http-endpoint` are supported for now.
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -377,7 +377,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
       return HttpEndpoint.TYPE;
     }
 
-    // Postgres
+    // PostGreSQL
     if (p == 5432 || p == 5433) {
       return JDBCDataSource.TYPE;
     }
