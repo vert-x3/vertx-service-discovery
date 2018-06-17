@@ -61,10 +61,10 @@ public class ConsulServiceImporterTest {
           if (request.path().equals("/v1/catalog/services")) {
             JsonObject result = new JsonObject();
             services.forEach(object ->
-                result.put(object.getString("ServiceName"), object.getJsonArray("tags", new JsonArray())));
+                result.put(object.getJsonObject("Service").getString("Service"), object.getJsonArray("tags", new JsonArray())));
             request.response().putHeader("X-Consul-Index", "42").end(result.encodePrettily());
-          } else if (request.path().startsWith("/v1/catalog/service/")) {
-            String service = request.path().substring("/v1/catalog/service/".length());
+          } else if (request.path().startsWith("/v1/health/service/") && "1".equals(request.getParam("passing"))) {
+            String service = request.path().substring("/v1/health/service/".length());
             JsonArray value = find(service);
             if (value != null) {
               request.response().putHeader("X-Consul-Index", "42").end(value.encodePrettily());
@@ -94,7 +94,7 @@ public class ConsulServiceImporterTest {
   }
 
   @Test
-  public void testBasicImport() throws InterruptedException {
+  public void testBasicImport() {
     services.add(buildService("10.1.10.12", "redis", "redis", null, 8000));
 
     discovery = ServiceDiscovery.create(vertx)
@@ -109,13 +109,13 @@ public class ConsulServiceImporterTest {
     Record record = list.get(0);
     assertThat(record.getLocation().getString("host")).isEqualTo("10.1.10.12");
     assertThat(record.getLocation().getInteger("port")).isEqualTo(8000);
-    assertThat(record.getLocation().getString("path")).isEmpty();
+    assertThat(record.getLocation().getString("path")).isNull();
     assertThat(record.getName()).isEqualTo("redis");
     assertThat(record.getRegistration()).isNotEmpty();
   }
 
   @Test
-  public void testHttpImport() throws InterruptedException {
+  public void testHttpImport() {
     services.add(buildService("172.17.0.2", "web", "web", new String[]{"rails", "http-endpoint"}, 80));
 
     discovery = ServiceDiscovery.create(vertx)
@@ -128,11 +128,11 @@ public class ConsulServiceImporterTest {
     assertThat(list).hasSize(1);
 
     assertThat(list.get(0).getType()).isEqualTo(HttpEndpoint.TYPE);
-    assertThat(list.get(0).getLocation().getString("endpoint")).isEqualTo("http://172.17.0.2:80/");
+    assertThat(list.get(0).getLocation().getString("endpoint")).isEqualTo("http://172.17.0.2:80");
   }
 
   @Test
-  public void testDeparture() throws InterruptedException {
+  public void testDeparture() {
     services.add(buildService("10.1.10.12", "redis", "redis", null, 8000));
 
     AtomicBoolean initialized = new AtomicBoolean();
@@ -159,7 +159,7 @@ public class ConsulServiceImporterTest {
   }
 
   @Test
-  public void testArrivalFollowedByADeparture() throws InterruptedException {
+  public void testArrivalFollowedByADeparture() {
     JsonObject service = buildService("172.17.0.2", "web", "web", new String[]{"rails", "http-endpoint"}, 80);
     services.add(buildService("10.1.10.12", "redis", "redis", null, 8000));
 
@@ -188,7 +188,7 @@ public class ConsulServiceImporterTest {
   }
 
   @Test
-  public void testAServiceBeingTwiceInConsul() throws InterruptedException {
+  public void testAServiceBeingTwiceInConsul() {
     services.add(buildService("10.4.7.221", "ubuntu221:mysql:3306", "db", new String[] {"master", "backups"}, 32769));
     services.add(buildService("10.4.7.220", "ubuntu220:mysql:3306", "db", new String[] {"master", "backups"}, 32771));
 
@@ -204,7 +204,7 @@ public class ConsulServiceImporterTest {
 
   private JsonArray find(String service) {
     JsonArray array = new JsonArray();
-    services.stream().filter(json -> json.getString("ServiceName").equalsIgnoreCase(service)).forEach(array::add);
+    services.stream().filter(json -> json.getJsonObject("Service").getString("Service").equalsIgnoreCase(service)).forEach(array::add);
     if (! array.isEmpty()) {
       return array;
     }
@@ -237,16 +237,31 @@ public class ConsulServiceImporterTest {
       }
       tagString = "[" + tagBuilder.substring(1) + "]";
     }
+
     return new JsonObject( "  {\n" +
-      "    \"Node\": { },\n" +
+      "    \"Node\": " + aNodeJson(address) + ",\n" +
       "    \"Service\": {" +
       "      \"Address\": \"" + address + "\",\n" +
       "      \"ID\": \"" + id + "\",\n" +
       "      \"Service\": \"" + name + "\",\n" +
       "      \"Tags\": " + tagString + ",\n" +
       "      \"Port\": " + Integer.toString(port) + "\n" +
-      "    }\n" +
+      "    },\n" +
+      "    \"Checks\":[]\n" +
       "  }");
+  }
+
+  private String aNodeJson(String address){
+    return "{" +
+      "\"ID\": \"0e95f792-357d-1901-d2d4-b6ae8bd3e881\",\n" +
+      "\"Node\": \"6c3429f04f15\",\n" +
+      "\"Address\": \"" + address + "\",\n" +
+      "\"Datacenter\": \"dc1\",\n" +
+      "\"TaggedAddresses\": {\n" +
+      "  \"lan\": \"" + address + "\",\n" +
+      "  \"wan\": \"" + address + "\"\n" +
+      "}\n" +
+      "}";
   }
 
 }
