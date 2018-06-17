@@ -95,15 +95,7 @@ public class ConsulServiceImporterTest {
 
   @Test
   public void testBasicImport() throws InterruptedException {
-    services.add(new JsonObject("  {\n" +
-        "    \"Node\": \"foobar\",\n" +
-        "    \"Address\": \"10.1.10.12\",\n" +
-        "    \"ServiceID\": \"redis\",\n" +
-        "    \"ServiceName\": \"redis\",\n" +
-        "    \"ServiceTags\": null,\n" +
-        "    \"ServiceAddress\": \"\",\n" +
-        "    \"ServicePort\": 8000\n" +
-        "  }"));
+    services.add(buildService("10.1.10.12", "redis", "redis", null, 8000));
 
     discovery = ServiceDiscovery.create(vertx)
         .registerServiceImporter(new ConsulServiceImporter(),
@@ -124,15 +116,7 @@ public class ConsulServiceImporterTest {
 
   @Test
   public void testHttpImport() throws InterruptedException {
-    services.add(new JsonObject("{\n" +
-        "  \"Node\" : \"node1\",\n" +
-        "  \"Address\" : \"172.17.0.2\",\n" +
-        "  \"ServiceID\" : \"web\",\n" +
-        "  \"ServiceName\" : \"web\",\n" +
-        "  \"ServiceTags\" : [ \"rails\", \"http-endpoint\" ],\n" +
-        "  \"ServiceAddress\" : \"\",\n" +
-        "  \"ServicePort\" : 80\n" +
-        "}"));
+    services.add(buildService("172.17.0.2", "web", "web", new String[]{"rails", "http-endpoint"}, 80));
 
     discovery = ServiceDiscovery.create(vertx)
         .registerServiceImporter(new ConsulServiceImporter(),
@@ -149,15 +133,7 @@ public class ConsulServiceImporterTest {
 
   @Test
   public void testDeparture() throws InterruptedException {
-    services.add(new JsonObject("  {\n" +
-        "    \"Node\": \"foobar\",\n" +
-        "    \"Address\": \"10.1.10.12\",\n" +
-        "    \"ServiceID\": \"redis\",\n" +
-        "    \"ServiceName\": \"redis\",\n" +
-        "    \"ServiceTags\": null,\n" +
-        "    \"ServiceAddress\": \"\",\n" +
-        "    \"ServicePort\": 8000\n" +
-        "  }"));
+    services.add(buildService("10.1.10.12", "redis", "redis", null, 8000));
 
     AtomicBoolean initialized = new AtomicBoolean();
     vertx.runOnContext(v ->
@@ -184,25 +160,8 @@ public class ConsulServiceImporterTest {
 
   @Test
   public void testArrivalFollowedByADeparture() throws InterruptedException {
-    JsonObject service = new JsonObject("{\n" +
-        "  \"Node\" : \"node1\",\n" +
-        "  \"Address\" : \"172.17.0.2\",\n" +
-        "  \"ServiceID\" : \"web\",\n" +
-        "  \"ServiceName\" : \"web\",\n" +
-        "  \"ServiceTags\" : [ \"rails\", \"http-endpoint\" ],\n" +
-        "  \"ServiceAddress\" : \"\",\n" +
-        "  \"ServicePort\" : 80\n" +
-        "}");
-
-    services.add(new JsonObject("  {\n" +
-        "    \"Node\": \"foobar\",\n" +
-        "    \"Address\": \"10.1.10.12\",\n" +
-        "    \"ServiceID\": \"redis\",\n" +
-        "    \"ServiceName\": \"redis\",\n" +
-        "    \"ServiceTags\": null,\n" +
-        "    \"ServiceAddress\": \"\",\n" +
-        "    \"ServicePort\": 8000\n" +
-        "  }"));
+    JsonObject service = buildService("172.17.0.2", "web", "web", new String[]{"rails", "http-endpoint"}, 80);
+    services.add(buildService("10.1.10.12", "redis", "redis", null, 8000));
 
     AtomicBoolean initialized = new AtomicBoolean();
     vertx.runOnContext(v ->
@@ -230,12 +189,8 @@ public class ConsulServiceImporterTest {
 
   @Test
   public void testAServiceBeingTwiceInConsul() throws InterruptedException {
-    services.add(new JsonObject("{\"Node\":\"ubuntu221\",\"Address\":\"10.4.7.221\"," +
-        "\"ServiceID\":\"ubuntu221:mysql:3306\",\"ServiceName\":\"db\"," +
-        "\"ServiceTags\":[\"master\",\"backups\"],\"ServiceAddress\":\"\",\"ServicePort\":32769}"));
-    services.add(new JsonObject("{\"Node\":\"ubuntu220\",\"Address\":\"10.4.7.220\"," +
-        "\"ServiceID\":\"ubuntu220:mysql:3306\",\"ServiceName\":\"db\",\"ServiceTags\":[\"master\",\"backups\"]," +
-        "\"ServiceAddress\":\"\",\"ServicePort\":32771}"));
+    services.add(buildService("10.4.7.221", "ubuntu221:mysql:3306", "db", new String[] {"master", "backups"}, 32769));
+    services.add(buildService("10.4.7.220", "ubuntu220:mysql:3306", "db", new String[] {"master", "backups"}, 32771));
 
     discovery = ServiceDiscovery.create(vertx)
         .registerServiceImporter(new ConsulServiceImporter(),
@@ -273,5 +228,25 @@ public class ConsulServiceImporterTest {
     return list;
   }
 
+  private JsonObject buildService(String address, String id, String name, String[] tags, int port){
+    String tagString = "null";
+    if (tags != null && tags.length > 0){
+      StringBuilder tagBuilder = new StringBuilder();
+      for (String tag : tags){
+        tagBuilder.append(",\"").append(tag).append("\"");
+      }
+      tagString = "[" + tagBuilder.substring(1) + "]";
+    }
+    return new JsonObject( "  {\n" +
+      "    \"Node\": { },\n" +
+      "    \"Service\": {" +
+      "      \"Address\": \"" + address + "\",\n" +
+      "      \"ID\": \"" + id + "\",\n" +
+      "      \"Service\": \"" + name + "\",\n" +
+      "      \"Tags\": " + tagString + ",\n" +
+      "      \"Port\": " + Integer.toString(port) + "\n" +
+      "    }\n" +
+      "  }");
+  }
 
 }
