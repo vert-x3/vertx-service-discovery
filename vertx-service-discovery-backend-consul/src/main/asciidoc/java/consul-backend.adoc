@@ -16,7 +16,7 @@ descriptor:
 <dependency>
 <groupId>io.vertx</groupId>
 <artifactId>vertx-service-discovery-backend-consul</artifactId>
-<version>3.5.2</version>
+<version>3.5.3.CR1</version>
 </dependency>
 ----
 <p>
@@ -24,7 +24,7 @@ descriptor:
 <p>
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-discovery-backend-consul:3.5.2'
+compile 'io.vertx:vertx-service-discovery-backend-consul:3.5.3.CR1'
 ----
 <p>
 Be aware that you can have only a single implementation of the SPI in your _classpath_. If none,
