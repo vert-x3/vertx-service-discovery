@@ -20,7 +20,6 @@ import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -52,11 +51,13 @@ public class ConsulServiceImporter implements ServiceImporter {
   private final List<ImportedConsulService> imports = new ArrayList<>();
   private long scanTask = -1;
   private Vertx vertx;
+  private String upThreshold;
 
   @Override
   public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Future<Void> completion) {
     this.vertx = vertx;
     this.publisher = publisher;
+    this.upThreshold = configuration.getString("up_threshold", "passing");
 
     ConsulClientOptions opts = new ConsulClientOptions()
       .setHost(configuration.getString("host", "localhost"))
@@ -115,12 +116,22 @@ public class ConsulServiceImporter implements ServiceImporter {
     });
   }
 
+  private boolean isCheckOK(CheckStatus checkStatus){
+    if (this.upThreshold.equals("passing")){
+      return checkStatus.equals(CheckStatus.PASSING);
+    }
+    if (this.upThreshold.equals("warning")) {
+      return checkStatus.equals(CheckStatus.WARNING) || checkStatus.equals(CheckStatus.PASSING);
+    }
+    return true;
+  }
+
   private void retrieveIndividualServices(ServiceList list, Future<List<ImportedConsulService>> completed) {
     List<Future> futures = new ArrayList<>();
     list.getList().forEach(service -> {
 
       Future<List<ImportedConsulService>> future = Future.future();
-      client.healthServiceNodes(service.getName(),true, ar -> {
+      client.healthServiceNodes(service.getName(),false, ar -> {
         if (ar.succeeded()) {
           importService(ar.result().getList(), future);
         } else {
@@ -182,12 +193,19 @@ public class ConsulServiceImporter implements ServiceImporter {
     if (list.isEmpty()) {
       future.fail("no service with the given name");
     } else {
+      List<ServiceEntry> serviceEntries = list.stream()
+        .filter(serviceEntry ->
+          serviceEntry.getChecks().stream().allMatch(check -> isCheckOK(check.getStatus()))
+        )
+        .collect(Collectors.toList());
+
       List<ImportedConsulService> importedServices = new ArrayList<>();
+
       List<Future> registrations = new ArrayList<>();
-      for (int i = 0; i < list.size(); i++) {
+      for (int i = 0; i < serviceEntries.size(); i++) {
         Future<Void> registration = Future.future();
 
-        ServiceEntry consulService = list.get(i);
+        ServiceEntry consulService = serviceEntries.get(i);
         String id = consulService.getService().getId();
         String name = consulService.getService().getName();
         Record record = createRecord(consulService.getService());

@@ -63,7 +63,7 @@ public class ConsulServiceImporterTest {
             services.forEach(object ->
                 result.put(object.getJsonObject("Service").getString("Service"), object.getJsonArray("tags", new JsonArray())));
             request.response().putHeader("X-Consul-Index", "42").end(result.encodePrettily());
-          } else if (request.path().startsWith("/v1/health/service/") && "1".equals(request.getParam("passing"))) {
+          } else if (request.path().startsWith("/v1/health/service/")) {
             String service = request.path().substring("/v1/health/service/".length());
             JsonArray value = find(service);
             if (value != null) {
@@ -95,7 +95,7 @@ public class ConsulServiceImporterTest {
 
   @Test
   public void testBasicImport() {
-    services.add(buildService("10.1.10.12", "redis", "redis", null, 8000));
+    services.add(buildService("10.1.10.12", "redis", "redis", null, 8000, "passing"));
 
     discovery = ServiceDiscovery.create(vertx)
         .registerServiceImporter(new ConsulServiceImporter(),
@@ -115,8 +115,39 @@ public class ConsulServiceImporterTest {
   }
 
   @Test
+  public void testDoesNotImportServicesWithWarningStatus() {
+    // add 2 services so we can await on 1 being added below
+    services.add(buildService("10.1.10.12", "redis", "redis", null, 8000, "passing"));
+    services.add(buildService("10.1.10.12", "warning", "warning", null, 8001, "warning"));
+
+    discovery = ServiceDiscovery.create(vertx)
+      .registerServiceImporter(new ConsulServiceImporter(),
+        new JsonObject().put("host", "localhost").put("port", 5601));
+
+    await().until(() -> getAllRecordsBlocking().size() > 0);
+    List<Record> list = getAllRecordsBlocking();
+
+    assertThat(list).hasSize(1);
+  }
+
+  @Test
+  public void testImportServicesWithWarningStatusThreshold() {
+    services.add(buildService("10.1.10.12", "redis", "redis", null, 8000, "passing"));
+    services.add(buildService("10.1.10.12", "warning", "warning", null, 8001, "warning"));
+
+    discovery = ServiceDiscovery.create(vertx)
+      .registerServiceImporter(new ConsulServiceImporter(),
+        new JsonObject().put("host", "localhost").put("port", 5601).put("up_threshold", "warning"));
+
+    await().until(() -> getAllRecordsBlocking().size() > 0);
+    List<Record> list = getAllRecordsBlocking();
+
+    assertThat(list).hasSize(2);
+  }
+
+  @Test
   public void testHttpImport() {
-    services.add(buildService("172.17.0.2", "web", "web", new String[]{"rails", "http-endpoint"}, 80));
+    services.add(buildService("172.17.0.2", "web", "web", new String[]{"rails", "http-endpoint"}, 80, "passing"));
 
     discovery = ServiceDiscovery.create(vertx)
         .registerServiceImporter(new ConsulServiceImporter(),
@@ -133,7 +164,7 @@ public class ConsulServiceImporterTest {
 
   @Test
   public void testDeparture() {
-    services.add(buildService("10.1.10.12", "redis", "redis", null, 8000));
+    services.add(buildService("10.1.10.12", "redis", "redis", null, 8000, "passing"));
 
     AtomicBoolean initialized = new AtomicBoolean();
     vertx.runOnContext(v ->
@@ -160,8 +191,8 @@ public class ConsulServiceImporterTest {
 
   @Test
   public void testArrivalFollowedByADeparture() {
-    JsonObject service = buildService("172.17.0.2", "web", "web", new String[]{"rails", "http-endpoint"}, 80);
-    services.add(buildService("10.1.10.12", "redis", "redis", null, 8000));
+    JsonObject service = buildService("172.17.0.2", "web", "web", new String[]{"rails", "http-endpoint"}, 80,"passing");
+    services.add(buildService("10.1.10.12", "redis", "redis", null, 8000,"passing"));
 
     AtomicBoolean initialized = new AtomicBoolean();
     vertx.runOnContext(v ->
@@ -189,8 +220,8 @@ public class ConsulServiceImporterTest {
 
   @Test
   public void testAServiceBeingTwiceInConsul() {
-    services.add(buildService("10.4.7.221", "ubuntu221:mysql:3306", "db", new String[] {"master", "backups"}, 32769));
-    services.add(buildService("10.4.7.220", "ubuntu220:mysql:3306", "db", new String[] {"master", "backups"}, 32771));
+    services.add(buildService("10.4.7.221", "ubuntu221:mysql:3306", "db", new String[] {"master", "backups"}, 32769, "passing"));
+    services.add(buildService("10.4.7.220", "ubuntu220:mysql:3306", "db", new String[] {"master", "backups"}, 32771, "passing"));
 
     discovery = ServiceDiscovery.create(vertx)
         .registerServiceImporter(new ConsulServiceImporter(),
@@ -228,7 +259,7 @@ public class ConsulServiceImporterTest {
     return list;
   }
 
-  private JsonObject buildService(String address, String id, String name, String[] tags, int port){
+  private JsonObject buildService(String address, String id, String name, String[] tags, int port, String status){
     String tagString = "null";
     if (tags != null && tags.length > 0){
       StringBuilder tagBuilder = new StringBuilder();
@@ -247,7 +278,10 @@ public class ConsulServiceImporterTest {
       "      \"Tags\": " + tagString + ",\n" +
       "      \"Port\": " + Integer.toString(port) + "\n" +
       "    },\n" +
-      "    \"Checks\":[]\n" +
+      "    \"Checks\":[\n" +
+              aCheckJson(name, id, tagString, status) + "," +
+              aCheckJson(name, "","[]", "passing") +
+      "     ]\n" +
       "  }");
   }
 
@@ -261,6 +295,20 @@ public class ConsulServiceImporterTest {
       "  \"lan\": \"" + address + "\",\n" +
       "  \"wan\": \"" + address + "\"\n" +
       "}\n" +
+      "}";
+  }
+
+  private String aCheckJson(String serviceName, String id, String tags, String status){
+    return "{\n" +
+      "        \"Node\": \"6c3429f04f15\",\n" +
+      "        \"CheckID\": \"service:" + serviceName + "\",\n" +
+      "        \"Name\": \"Service check\",\n" +
+      "        \"Status\": \"" + status + "\",\n" +
+      "        \"Notes\": \"\",\n" +
+      "        \"Output\": \"\",\n" +
+      "        \"ServiceID\": \"" + id + "\",\n" +
+      "        \"ServiceName\": \"" + serviceName + "\",\n" +
+      "        \"ServiceTags\": " + tags + "\n" +
       "}";
   }
 
