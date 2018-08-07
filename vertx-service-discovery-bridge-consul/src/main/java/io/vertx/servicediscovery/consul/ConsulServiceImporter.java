@@ -20,14 +20,10 @@ import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.consul.ConsulClient;
-import io.vertx.ext.consul.ConsulClientOptions;
-import io.vertx.ext.consul.Service;
-import io.vertx.ext.consul.ServiceList;
+import io.vertx.ext.consul.*;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.impl.ServiceTypes;
 import io.vertx.servicediscovery.spi.ServiceImporter;
@@ -55,11 +51,13 @@ public class ConsulServiceImporter implements ServiceImporter {
   private final List<ImportedConsulService> imports = new ArrayList<>();
   private long scanTask = -1;
   private Vertx vertx;
+  private String upThreshold;
 
   @Override
   public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Future<Void> completion) {
     this.vertx = vertx;
     this.publisher = publisher;
+    this.upThreshold = configuration.getString("up_threshold", "passing");
 
     ConsulClientOptions opts = new ConsulClientOptions()
       .setHost(configuration.getString("host", "localhost"))
@@ -118,12 +116,22 @@ public class ConsulServiceImporter implements ServiceImporter {
     });
   }
 
+  private boolean isCheckOK(CheckStatus checkStatus){
+    if (this.upThreshold.equals("passing")){
+      return checkStatus.equals(CheckStatus.PASSING);
+    }
+    if (this.upThreshold.equals("warning")) {
+      return checkStatus.equals(CheckStatus.WARNING) || checkStatus.equals(CheckStatus.PASSING);
+    }
+    return true;
+  }
+
   private void retrieveIndividualServices(ServiceList list, Future<List<ImportedConsulService>> completed) {
     List<Future> futures = new ArrayList<>();
     list.getList().forEach(service -> {
 
       Future<List<ImportedConsulService>> future = Future.future();
-      client.catalogServiceNodes(service.getName(), ar -> {
+      client.healthServiceNodes(service.getName(),false, ar -> {
         if (ar.succeeded()) {
           importService(ar.result().getList(), future);
         } else {
@@ -181,19 +189,26 @@ public class ConsulServiceImporter implements ServiceImporter {
     });
   }
 
-  private void importService(List<Service> list, Future<List<ImportedConsulService>> future) {
+  private void importService(List<ServiceEntry> list, Future<List<ImportedConsulService>> future) {
     if (list.isEmpty()) {
       future.fail("no service with the given name");
     } else {
+      List<ServiceEntry> serviceEntries = list.stream()
+        .filter(serviceEntry ->
+          serviceEntry.getChecks().stream().allMatch(check -> isCheckOK(check.getStatus()))
+        )
+        .collect(Collectors.toList());
+
       List<ImportedConsulService> importedServices = new ArrayList<>();
+
       List<Future> registrations = new ArrayList<>();
-      for (int i = 0; i < list.size(); i++) {
+      for (int i = 0; i < serviceEntries.size(); i++) {
         Future<Void> registration = Future.future();
 
-        Service consulService = list.get(i);
-        String id = consulService.getId();
-        String name = consulService.getName();
-        Record record = createRecord(consulService);
+        ServiceEntry consulService = serviceEntries.get(i);
+        String id = consulService.getService().getId();
+        String name = consulService.getService().getName();
+        Record record = createRecord(consulService.getService());
 
         // the id must be unique, so check if the service has already being imported
         ImportedConsulService imported = getImportedServiceById(id);
@@ -227,8 +242,7 @@ public class ConsulServiceImporter implements ServiceImporter {
   }
 
   private Record createRecord(Service service) {
-    String address = service.getNodeAddress();
-    String path = service.getAddress();
+    String address = service.getAddress();
     int port = service.getPort();
 
     JsonObject metadata = service.toJson();
@@ -251,15 +265,9 @@ public class ConsulServiceImporter implements ServiceImporter {
     JsonObject location = new JsonObject();
     location.put("host", address);
     location.put("port", port);
-    if (path != null) {
-      location.put("path", path);
-    }
 
     // Manage HTTP endpoint
     if (record.getType().equals("http-endpoint")) {
-      if (path != null) {
-        location.put("root", path);
-      }
       if (metadata.getBoolean("ssl", false)) {
         location.put("ssl", true);
       }
