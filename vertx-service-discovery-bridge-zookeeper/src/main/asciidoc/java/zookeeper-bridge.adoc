@@ -20,7 +20,7 @@ descriptor:
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-service-discovery-bridge-zookeeper</artifactId>
-  <version>3.5.3</version>
+  <version>3.5.4</version>
 </dependency>
 ----
 
@@ -28,7 +28,7 @@ descriptor:
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-service-discovery-bridge-zookeeper:3.5.3'
+compile 'io.vertx:vertx-service-discovery-bridge-zookeeper:3.5.4'
 ----
 
 Then, when creating the service discovery registers this bridge as follows:
