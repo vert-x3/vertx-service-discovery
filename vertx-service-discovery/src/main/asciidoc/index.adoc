@@ -681,7 +681,7 @@ The second parameter can provide an optional configuration for the bridge.
 
 When the bridge is registered the
 
-{@link io.vertx.servicediscovery.spi.ServiceImporter#start)}
+{@link io.vertx.servicediscovery.spi.ServiceImporter#start(io.vertx.core.Vertx, ServicePublisher, io.vertx.core.json.JsonObject, io.vertx.core.Future)}
 method is called. It lets you configure the bridge. When the bridge is configured, ready and has imported /
 exported the initial services, it must complete the given {@link io.vertx.core.Future}. If the bridge starts
 method is blocking, it must use an
