@@ -465,7 +465,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
   }
 
   private static boolean isTrue(String ssl) {
-    return ssl != null && "true" .equalsIgnoreCase(ssl);
+    return "true".equalsIgnoreCase(ssl);
   }
 
 
