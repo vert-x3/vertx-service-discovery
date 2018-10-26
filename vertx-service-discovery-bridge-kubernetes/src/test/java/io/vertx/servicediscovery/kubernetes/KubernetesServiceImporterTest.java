@@ -204,4 +204,84 @@ public class KubernetesServiceImporterTest {
 
   }
 
+  @Test
+  public void testHttpExternalServiceRecordCreation() {
+
+    int servicePort = 8080;
+    Service service = getExternalService(servicePort);
+
+    Record record = KubernetesServiceImporter.createRecord(new JsonObject(Json.encodeToBuffer(service)));
+    assertThat(record).isNotNull();
+    assertThat(record.getName()).isEqualTo("my-service");
+    assertThat(record.getMetadata().getString("kubernetes.name")).isEqualTo("my-service");
+    assertThat(record.getMetadata().getString("kubernetes.namespace")).isEqualTo("my-project");
+    assertThat(record.getMetadata().getString("kubernetes.uuid")).isEqualTo("uuid");
+    assertThat(record.getType()).isEqualTo(HttpEndpoint.TYPE);
+    assertThat(record.getLocation().getString("host")).isEqualTo("my-external-service");
+    assertThat(record.getLocation().getInteger("port")).isEqualTo(servicePort);
+    assertThat(record.getLocation().getBoolean("ssl")).isFalse();
+    assertThat(record.getLocation().getString("endpoint")).isEqualTo("http://my-external-service:" + servicePort);
+
+  }
+
+  @Test
+  public void testHttpWithSSLExternalServiceRecordCreation() {
+
+    int servicePort = 443;
+    Service service = getExternalService(servicePort);
+
+    Record record = KubernetesServiceImporter.createRecord(new JsonObject(Json.encodeToBuffer(service)));
+    assertThat(record).isNotNull();
+    assertThat(record.getName()).isEqualTo("my-service");
+    assertThat(record.getMetadata().getString("kubernetes.name")).isEqualTo("my-service");
+    assertThat(record.getMetadata().getString("kubernetes.namespace")).isEqualTo("my-project");
+    assertThat(record.getMetadata().getString("kubernetes.uuid")).isEqualTo("uuid");
+    assertThat(record.getType()).isEqualTo(HttpEndpoint.TYPE);
+    assertThat(record.getLocation().getString("host")).isEqualTo("my-external-service");
+    assertThat(record.getLocation().getInteger("port")).isEqualTo(servicePort);
+    assertThat(record.getLocation().getBoolean("ssl")).isTrue();
+    assertThat(record.getLocation().getString("endpoint")).isEqualTo("https://my-external-service:" + servicePort);
+
+  }
+
+  @Test
+  public void testUnknownExternalServiceRecordCreation() {
+
+    // JDBC Example
+    int servicePort = 5432;
+    Service service = getExternalService(servicePort);
+
+    Record record = KubernetesServiceImporter.createRecord(new JsonObject(Json.encodeToBuffer(service)));
+    assertThat(record).isNotNull();
+    assertThat(record.getName()).isEqualTo("my-service");
+    assertThat(record.getMetadata().getString("kubernetes.name")).isEqualTo("my-service");
+    assertThat(record.getMetadata().getString("kubernetes.namespace")).isEqualTo("my-project");
+    assertThat(record.getMetadata().getString("kubernetes.uuid")).isEqualTo("uuid");
+    assertThat(record.getType()).isEqualTo(JDBCDataSource.TYPE);
+    assertThat(record.getLocation().getString("host")).isEqualTo("my-external-service");
+    assertThat(record.getLocation().getInteger("port")).isEqualTo(servicePort);
+
+  }
+
+  private Service getExternalService(int port) {
+
+    ObjectMeta metadata = new ObjectMeta();
+    metadata.setName("my-service");
+    metadata.setUid("uuid");
+    metadata.setNamespace("my-project");
+
+    ServiceSpec serviceSpec = new ServiceSpec();
+    ServicePort servicePort = new ServicePort();
+    servicePort.setPort(port);
+    serviceSpec.setType("ExternalName");
+    serviceSpec.setExternalName("my-external-service");
+    serviceSpec.setPorts(Collections.singletonList(servicePort));
+
+    Service service = new Service();
+    service.setMetadata(metadata);
+    service.setSpec(serviceSpec);
+    return service;
+
+  }
+
 }

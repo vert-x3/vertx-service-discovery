@@ -411,13 +411,16 @@ public class KubernetesServiceImporter implements ServiceImporter {
       JsonObject port = ports.getJsonObject(0);
       JsonObject location = port.copy();
 
-      //Number or name of the port to access on the pods targeted by the service.
-      Object targetPort = port.getValue("targetPort");
-      if (targetPort instanceof Integer) {
-        location.put("internal-port", (Integer) targetPort);
+      if (isExternalService(service)) {
+        location.put("host", spec.getString("externalName"));
+      } else {
+        //Number or name of the port to access on the pods targeted by the service.
+        Object targetPort = port.getValue("targetPort");
+        if (targetPort instanceof Integer) {
+          location.put("internal-port", (Integer) targetPort);
+        }
+        location.put("host", spec.getString("clusterIP"));
       }
-
-      location.put("host", spec.getString("clusterIP"));
 
       record.setLocation(location).setType(type);
     } else {
@@ -439,8 +442,14 @@ public class KubernetesServiceImporter implements ServiceImporter {
       Integer p = port.getInteger("port");
 
       record.setType(HttpEndpoint.TYPE);
-      HttpLocation location = new HttpLocation(port.copy())
-        .setHost(spec.getString("clusterIP"));
+
+      HttpLocation location = new HttpLocation(port.copy());
+
+      if (isExternalService(service)) {
+        location.setHost(spec.getString("externalName"));
+      } else {
+        location.setHost(spec.getString("clusterIP"));
+      }
 
       if (isTrue(record.getMetadata().getString("ssl")) || p != null && p == 443) {
         location.setSsl(true);
@@ -449,6 +458,10 @@ public class KubernetesServiceImporter implements ServiceImporter {
     } else {
       throw new IllegalStateException("Cannot extract the HTTP URL from the service " + record + " - no port");
     }
+  }
+
+  private static boolean isExternalService(JsonObject service) {
+    return service.containsKey("spec") && service.getJsonObject("spec").containsKey("type") && service.getJsonObject("spec").getString("type").equals("ExternalName");
   }
 
   private static boolean isTrue(String ssl) {
