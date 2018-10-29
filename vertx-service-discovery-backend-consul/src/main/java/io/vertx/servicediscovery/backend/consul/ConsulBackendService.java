@@ -202,7 +202,7 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
         //retrieve the metadata object
         tags.stream().filter(t -> t.startsWith("metadata:")).map(s -> s.substring("metadata:".length())).map(JsonObject::new).forEach(json -> record.getMetadata().mergeIn(json));
         //retrieve the location object
-        tags.stream().filter(t -> t.startsWith("location:")).map(s -> s.substring("location:".length())).map(JsonObject::new).forEach(json -> json.mergeIn(record.getMetadata()));
+        tags.stream().filter(t -> t.startsWith("location:")).map(s -> s.substring("location:".length())).map(JsonObject::new).forEach(json -> record.getLocation().mergeIn(json));
         record.getMetadata().put("tags", new JsonArray(tags.stream().filter(t -> !t.startsWith("metadata:") && !t.startsWith("location:")).collect(Collectors.toList())));
         return record;
       });
