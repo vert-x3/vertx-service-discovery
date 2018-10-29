@@ -7,11 +7,15 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.Repeat;
+import io.vertx.ext.unit.junit.RepeatRule;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
+import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -19,8 +23,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jayway.awaitility.Awaitility.await;
+import static org.hamcrest.core.Is.is;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -32,6 +38,9 @@ public class KubernetesServerTest {
   private KubernetesMockServer server;
   private NamespacedKubernetesClient client;
   private int port;
+
+  @Rule
+  public RepeatRule repeatRule = new RepeatRule();
 
   @Before
   public void setUp(TestContext tc) throws MalformedURLException {
@@ -59,6 +68,12 @@ public class KubernetesServerTest {
     server.init();
     client = server.createClient();
     port = new URL(client.getConfiguration().getMasterUrl()).getPort();
+  }
+
+  @After
+  public void tearDown() {
+    server.destroy();
+    vertx.close();
   }
 
   public KubernetesMockServer getServer() {
@@ -99,10 +114,14 @@ public class KubernetesServerTest {
   }
 
   @Test
+  @Repeat(25)
   public void testWatch() {
+    AtomicBoolean done = new AtomicBoolean();
     ServiceDiscovery discovery = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions().setAutoRegistrationOfImporters(false));
     discovery.registerServiceImporter(new KubernetesServiceImporter(), config().copy().put("namespace", "default"),
-      ar -> {  });
+      ar -> done.set(ar.succeeded()));
+
+    await().untilAtomic(done, is(true));
 
     await().until(() -> {
       List<Record> records = getRecordsBlocking(discovery);
@@ -113,7 +132,7 @@ public class KubernetesServerTest {
   }
 
   private void assertThatListContains(List<Record> records, String name) {
-    for (Record rec: records) {
+    for (Record rec : records) {
       if (rec.getName().equalsIgnoreCase(name)) {
         return;
       }
@@ -122,7 +141,7 @@ public class KubernetesServerTest {
   }
 
   private void assertThatListDoesNotContain(List<Record> records, String name) {
-    for (Record rec: records) {
+    for (Record rec : records) {
       if (rec.getName().equalsIgnoreCase(name)) {
         throw new AssertionError("Found service '" + name + "' in the list");
       }
