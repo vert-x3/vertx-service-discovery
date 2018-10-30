@@ -51,10 +51,10 @@ public class ZookeeperBridgeTest {
     cli.start();
 
     discovery = ServiceDiscoveryBuilder.builder(String.class)
-        .client(cli)
-        .basePath("/discovery")
-        .watchInstances(true)
-        .build();
+      .client(cli)
+      .basePath("/discovery")
+      .watchInstances(true)
+      .build();
 
     discovery.start();
     vertx = Vertx.vertx();
@@ -76,33 +76,33 @@ public class ZookeeperBridgeTest {
 
     UriSpec uriSpec = new UriSpec("{scheme}://foo.com:{port}");
     ServiceInstance<String> instance = ServiceInstance.<String>builder()
-        .name("foo-service")
-        .payload(new JsonObject().put("foo", "bar").encodePrettily())
-        .port((int) (65535 * Math.random()))
-        .uriSpec(uriSpec)
-        .build();
+      .name("foo-service")
+      .payload(new JsonObject().put("foo", "bar").encodePrettily())
+      .port((int) (65535 * Math.random()))
+      .uriSpec(uriSpec)
+      .build();
 
     discovery.registerService(instance);
     sd.registerServiceImporter(
-        new ZookeeperServiceImporter(),
-        new JsonObject().put("connection", zkTestServer.getConnectString()),
-        v -> {
-          if (v.failed()) {
-            v.cause().printStackTrace();
+      new ZookeeperServiceImporter(),
+      new JsonObject().put("connection", zkTestServer.getConnectString()),
+      v -> {
+        if (v.failed()) {
+          v.cause().printStackTrace();
+        }
+        tc.assertTrue(v.succeeded());
+
+        sd.getRecords(x -> true, l -> {
+          if (l.failed()) {
+            l.cause().printStackTrace();
           }
-          tc.assertTrue(v.succeeded());
-
-          sd.getRecords(x -> true, l -> {
-            if (l.failed()) {
-              l.cause().printStackTrace();
-            }
-            tc.assertTrue(l.succeeded());
-            tc.assertTrue(l.result().size() == 1);
-            tc.assertEquals("foo-service", l.result().get(0).getName());
-            async.complete();
-          });
-
+          tc.assertTrue(l.succeeded());
+          tc.assertTrue(l.result().size() == 1);
+          tc.assertEquals("foo-service", l.result().get(0).getName());
+          async.complete();
         });
+
+      });
   }
 
   @Test
@@ -111,37 +111,37 @@ public class ZookeeperBridgeTest {
 
     UriSpec uriSpec = new UriSpec("{scheme}://foo.com:{port}");
     ServiceInstance<String> instance = ServiceInstance.<String>builder()
-        .name("foo-service")
-        .payload(new JsonObject().put("foo", "bar").encodePrettily())
-        .port(8080)
-        .uriSpec(uriSpec)
-        .build();
+      .name("foo-service")
+      .payload(new JsonObject().put("foo", "bar").encodePrettily())
+      .port(8080)
+      .uriSpec(uriSpec)
+      .build();
 
     sd.registerServiceImporter(
-        new ZookeeperServiceImporter(),
-        new JsonObject().put("connection", zkTestServer.getConnectString()),
-        v -> {
-          tc.assertTrue(v.succeeded());
-          sd.getRecords(x -> true, l -> {
-            tc.assertTrue(l.succeeded());
-            tc.assertTrue(l.result().size() == 0);
+      new ZookeeperServiceImporter(),
+      new JsonObject().put("connection", zkTestServer.getConnectString()),
+      v -> {
+        tc.assertTrue(v.succeeded());
+        sd.getRecords(x -> true, l -> {
+          tc.assertTrue(l.succeeded());
+          tc.assertTrue(l.result().size() == 0);
 
-            vertx.executeBlocking(future -> {
-              try {
-                this.discovery.registerService(instance);
-                future.complete();
-              } catch (Exception e) {
-                future.fail(e);
-              }
-            }, ar -> {
-              tc.assertTrue(ar.succeeded());
-              waitUntil(() -> serviceLookup(sd, 1), lookup -> {
-                tc.assertTrue(lookup.succeeded());
-                async.complete();
-              });
+          vertx.executeBlocking(future -> {
+            try {
+              this.discovery.registerService(instance);
+              future.complete();
+            } catch (Exception e) {
+              future.fail(e);
+            }
+          }, ar -> {
+            tc.assertTrue(ar.succeeded());
+            waitUntil(() -> serviceLookup(sd, 1), lookup -> {
+              tc.assertTrue(lookup.succeeded());
+              async.complete();
             });
           });
         });
+      });
   }
 
   @Test
@@ -150,56 +150,55 @@ public class ZookeeperBridgeTest {
 
     UriSpec uriSpec = new UriSpec("{scheme}://foo.com:{port}");
     ServiceInstance<String> instance = ServiceInstance.<String>builder()
-        .name("foo-service")
-        .payload(new JsonObject().put("foo", "bar").encodePrettily())
-        .port(8080)
-        .uriSpec(uriSpec)
-        .build();
+      .name("foo-service")
+      .payload(new JsonObject().put("foo", "bar").encodePrettily())
+      .port(8080)
+      .uriSpec(uriSpec)
+      .build();
 
     sd.registerServiceImporter(
-        new ZookeeperServiceImporter(),
-        new JsonObject().put("connection", zkTestServer.getConnectString()),
-        v -> {
-          tc.assertTrue(v.succeeded());
-          sd.getRecords(x -> true, l -> {
-            tc.assertTrue(l.succeeded());
-            tc.assertTrue(l.result().size() == 0);
+      new ZookeeperServiceImporter(),
+      new JsonObject().put("connection", zkTestServer.getConnectString()),
+      v -> {
+        tc.assertTrue(v.succeeded());
+        sd.getRecords(x -> true, l -> {
+          tc.assertTrue(l.succeeded());
+          tc.assertTrue(l.result().size() == 0);
 
-            vertx.executeBlocking(future -> {
-              try {
-                this.discovery.registerService(instance);
-                future.complete();
-              } catch (Exception e) {
-                future.fail(e);
-              }
-            }, ar -> {
-              tc.assertTrue(ar.succeeded());
-              waitUntil(() -> serviceLookup(sd, 1), lookup -> {
-                tc.assertTrue(lookup.succeeded());
+          vertx.executeBlocking(future -> {
+            try {
+              this.discovery.registerService(instance);
+              future.complete();
+            } catch (Exception e) {
+              future.fail(e);
+            }
+          }, ar -> {
+            tc.assertTrue(ar.succeeded());
+            waitUntil(() -> serviceLookup(sd, 1), lookup -> {
+              tc.assertTrue(lookup.succeeded());
 
-                // Leave
-                vertx.executeBlocking(future2 -> {
-                  try {
-                    this.discovery.unregisterService(instance);
-                    future2.complete();
-                  } catch (Exception e) {
-                    future2.fail(e);
-                  }
-                }, ar2 -> {
-                  waitUntil(() -> serviceLookup(sd, 0), lookup2 -> {
-                    tc.assertTrue(lookup2.succeeded());
-                    vertx.executeBlocking(future3 -> {
-                      try {
-                        this.discovery.registerService(instance);
-                        future3.complete();
-                      } catch (Exception e) {
-                        future3.fail(e);
-                      }
-                    }, ar3 -> {
-                      waitUntil(() -> serviceLookup(sd, 1), ar4 -> {
-                        tc.assertTrue(ar4.succeeded());
-                        async.complete();
-                      });
+              // Leave
+              vertx.executeBlocking(future2 -> {
+                try {
+                  this.discovery.unregisterService(instance);
+                  future2.complete();
+                } catch (Exception e) {
+                  future2.fail(e);
+                }
+              }, ar2 -> {
+                waitUntil(() -> serviceLookup(sd, 0), lookup2 -> {
+                  tc.assertTrue(lookup2.succeeded());
+                  vertx.executeBlocking(future3 -> {
+                    try {
+                      this.discovery.registerService(instance);
+                      future3.complete();
+                    } catch (Exception e) {
+                      future3.fail(e);
+                    }
+                  }, ar3 -> {
+                    waitUntil(() -> serviceLookup(sd, 1), ar4 -> {
+                      tc.assertTrue(ar4.succeeded());
+                      async.complete();
                     });
                   });
                 });
@@ -207,6 +206,7 @@ public class ZookeeperBridgeTest {
             });
           });
         });
+      });
   }
 
   private Future<List<Record>> serviceLookup(io.vertx.servicediscovery.ServiceDiscovery discovery, int expected) {
@@ -228,50 +228,61 @@ public class ZookeeperBridgeTest {
 
     UriSpec uriSpec = new UriSpec("{scheme}://foo.com:{port}");
     ServiceInstance<String> instance1 = ServiceInstance.<String>builder()
-        .name("foo-service")
-        .payload(new JsonObject().put("foo", "bar").encodePrettily())
-        .port(8080)
-        .uriSpec(uriSpec)
-        .build();
+      .name("foo-service")
+      .payload(new JsonObject().put("foo", "bar").encodePrettily())
+      .port(8080)
+      .uriSpec(uriSpec)
+      .build();
 
     ServiceInstance<String> instance2 = ServiceInstance.<String>builder()
-        .name("foo-service")
-        .payload(new JsonObject().put("foo", "bar2").encodePrettily())
-        .port(8081)
-        .uriSpec(uriSpec)
-        .build();
+      .name("foo-service")
+      .payload(new JsonObject().put("foo", "bar2").encodePrettily())
+      .port(8081)
+      .uriSpec(uriSpec)
+      .build();
 
     discovery.registerService(instance1);
 
 
     sd.registerServiceImporter(
-        new ZookeeperServiceImporter(),
-        new JsonObject().put("connection", zkTestServer.getConnectString()),
-        v -> {
-          tc.assertTrue(v.succeeded());
-          sd.getRecords(x -> true, l -> {
-            tc.assertTrue(l.succeeded());
-            tc.assertTrue(l.result().size() == 1);
-            tc.assertEquals(l.result().get(0).getName(), "foo-service");
+      new ZookeeperServiceImporter(),
+      new JsonObject().put("connection", zkTestServer.getConnectString()),
+      v -> {
+        tc.assertTrue(v.succeeded());
+        sd.getRecords(x -> true, l -> {
+          tc.assertTrue(l.succeeded());
+          tc.assertTrue(l.result().size() == 1);
+          tc.assertEquals(l.result().get(0).getName(), "foo-service");
 
-            vertx.executeBlocking(future -> {
-              try {
-                this.discovery.registerService(instance2);
-                future.complete();
-              } catch (Exception e) {
-                future.fail(e);
-              }
-            }, ar -> {
-              tc.assertTrue(ar.succeeded());
-              waitUntil(() -> serviceLookup(sd, 2), lookup -> {
-                tc.assertTrue(lookup.succeeded());
-                tc.assertEquals(lookup.result().get(0).getName(), "foo-service");
-                tc.assertEquals(lookup.result().get(1).getName(), "foo-service");
-                async.complete();
-              });
+          vertx.executeBlocking(future -> {
+            try {
+              this.discovery.registerService(instance2);
+              future.complete();
+            } catch (Exception e) {
+              future.fail(e);
+            }
+          }, ar -> {
+            tc.assertTrue(ar.succeeded());
+            waitUntil(() -> serviceLookup(sd, 2), lookup -> {
+              tc.assertTrue(lookup.succeeded());
+              tc.assertEquals(lookup.result().get(0).getName(), "foo-service");
+              tc.assertEquals(lookup.result().get(1).getName(), "foo-service");
+              async.complete();
             });
           });
         });
+      });
+  }
+
+  private void fetchRecords(AtomicBoolean marker, TestContext tc) {
+    sd.getRecords(x -> true, l -> {
+      if (l.succeeded() && l.result().size() == 1) {
+        tc.assertEquals("foo-service", l.result().get(0).getName());
+        marker.set(true);
+      } else {
+        vertx.setTimer(100, x -> fetchRecords(marker, tc));
+      }
+    });
   }
 
 
@@ -279,42 +290,38 @@ public class ZookeeperBridgeTest {
   public void testReconnection(TestContext tc) throws Exception {
     UriSpec uriSpec = new UriSpec("{scheme}://foo.com:{port}");
     ServiceInstance<String> instance = ServiceInstance.<String>builder()
-        .name("foo-service")
-        .payload(new JsonObject().put("foo", "bar").encodePrettily())
-        .port((int) (65535 * Math.random()))
-        .uriSpec(uriSpec)
-        .build();
+      .name("foo-service")
+      .payload(new JsonObject().put("foo", "bar").encodePrettily())
+      .port((int) (65535 * Math.random()))
+      .uriSpec(uriSpec)
+      .build();
 
     discovery.registerService(instance);
 
 
     AtomicBoolean importDone = new AtomicBoolean();
     sd.registerServiceImporter(
-        new ZookeeperServiceImporter(),
-        new JsonObject()
-            .put("connection", zkTestServer.getConnectString())
-            .put("connectionTimeoutMs", 10)
-            .put("baseSleepTimeBetweenRetries", 10)
-            .put("maxRetries", 3),
-        v -> {
-          if (v.failed()) {
-            v.cause().printStackTrace();
-          }
-          tc.assertTrue(v.succeeded());
+      new ZookeeperServiceImporter(),
+      new JsonObject()
+        .put("connection", zkTestServer.getConnectString())
+        .put("connectionTimeoutMs", 10)
+        .put("baseSleepTimeBetweenRetries", 10)
+        .put("maxRetries", 3),
+      v -> {
+        if (v.failed()) {
+          v.cause().printStackTrace();
+          tc.fail(v.cause());
+          return;
+        }
+        tc.assertTrue(v.succeeded());
 
-          sd.getRecords(x -> true, l -> {
-            if (l.failed()) {
-              l.cause().printStackTrace();
-            }
-            tc.assertTrue(l.succeeded());
-            tc.assertTrue(l.result().size() == 1);
-            tc.assertEquals("foo-service", l.result().get(0).getName());
+        // The registration of the service in ZK can take some time,
+        // So we must be sure the service is there
+        // We retries until it's done. There is a timeout set at 10 seconds.
+        fetchRecords(importDone, tc);
+      });
 
-            importDone.set(true);
-          });
-        });
-
-    await().untilAtomic(importDone, is(true));
+    await().untilTrue(importDone);
 
     // Stop the server
     zkTestServer.stop();
