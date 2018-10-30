@@ -18,6 +18,7 @@ package io.vertx.servicediscovery.kubernetes;
 
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -36,6 +37,7 @@ import io.vertx.servicediscovery.types.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -185,7 +187,18 @@ public class KubernetesServiceImporter implements ServiceImporter {
         @Override
         public WriteStream<Buffer> write(Buffer data) {
           String[] chunks = data.toString().split("\n");
-          Arrays.stream(chunks).forEach(c -> onChunk(new JsonObject(c)));
+
+          Buffer current = Buffer.buffer();
+
+          for (String chunk: chunks) {
+            Optional<JsonObject> maybeJson = maybeJson(current, chunk);
+            if (maybeJson.isPresent()) {
+              current = Buffer.buffer();
+              onChunk(maybeJson.get());
+            } else {
+              current.appendString(chunk);
+            }
+          }
           return this;
         }
 
@@ -217,6 +230,22 @@ public class KubernetesServiceImporter implements ServiceImporter {
           LOGGER.info("Watching services from namespace " + namespace);
         }
       });
+  }
+
+  /**
+   * Checks whether or not the given buffer + chunk is a valid JSON object.
+   * @param buffer the current, may be empty, must not be {@code null}
+   * @param chunk the chunk, may be empty, must not be {@code null}
+   * @return an Optional wrapping the JSON object on success.
+   */
+  private Optional<JsonObject> maybeJson(Buffer buffer, String chunk) {
+    Buffer buff = buffer.copy().appendString(chunk);
+    try {
+      return Optional.of(buff.toJsonObject());
+    } catch (DecodeException e) {
+      // Not a valid JSON, waiting for the next chunk
+      return Optional.empty();
+    }
   }
 
   private void onChunk(JsonObject json) {
