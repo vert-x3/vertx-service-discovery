@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static org.hamcrest.core.Is.is;
@@ -118,6 +119,7 @@ public class KubernetesServerTest {
 
     await().until(() -> {
       List<Record> records = getRecordsBlocking(discovery);
+      System.out.println("Records: " + records.stream().map(r -> r.toJson().encode() + "\n").collect(Collectors.toList()));
       try {
         assertThatListContains(records, "service3");
         assertThatListDoesNotContain(records, "my-service");
