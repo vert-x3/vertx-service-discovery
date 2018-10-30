@@ -50,7 +50,6 @@ public class KubernetesServerTest {
 
     server = getServer();
 
-
     server.expect().get().withPath("/api/v1/namespaces/default/services").andReturn(200, new ServiceListBuilder()
       .addToItems(svc1, svc2).withNewMetadata("1234", "/self").build()).always();
 

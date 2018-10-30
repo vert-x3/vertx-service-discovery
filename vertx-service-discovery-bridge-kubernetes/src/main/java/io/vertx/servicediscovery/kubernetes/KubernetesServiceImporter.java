@@ -23,6 +23,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.parsetools.JsonParser;
 import io.vertx.core.streams.WriteStream;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
@@ -58,7 +59,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class KubernetesServiceImporter implements ServiceImporter {
 
-  private final static Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceImporter.class.getName());
+  private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceImporter.class.getName());
 
   private ServicePublisher publisher;
   private String namespace;
@@ -175,6 +176,9 @@ public class KubernetesServiceImporter implements ServiceImporter {
 
   private void watch(WebClient client, String token, String resourceVersion) {
     String path = "/api/v1/namespaces/" + namespace + "/services";
+    JsonParser parser = JsonParser.newParser().objectValueMode()
+      .handler(event -> onChunk(event.objectValue()));
+
     client.get(path)
       .addQueryParam("watch", "true")
       .addQueryParam("resourceVersion", resourceVersion)
@@ -186,25 +190,13 @@ public class KubernetesServiceImporter implements ServiceImporter {
 
         @Override
         public WriteStream<Buffer> write(Buffer data) {
-          String[] chunks = data.toString().split("\n");
-
-          Buffer current = Buffer.buffer();
-
-          for (String chunk: chunks) {
-            Optional<JsonObject> maybeJson = maybeJson(current, chunk);
-            if (maybeJson.isPresent()) {
-              current = Buffer.buffer();
-              onChunk(maybeJson.get());
-            } else {
-              current.appendString(chunk);
-            }
-          }
+          parser.write(data);
           return this;
         }
 
         @Override
         public void end() {
-
+          parser.end();
         }
 
         @Override
