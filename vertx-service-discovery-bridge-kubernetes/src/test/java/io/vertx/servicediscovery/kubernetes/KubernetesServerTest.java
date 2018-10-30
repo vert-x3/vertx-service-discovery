@@ -118,7 +118,6 @@ public class KubernetesServerTest {
 
     await().until(() -> {
       List<Record> records = getRecordsBlocking(discovery);
-      System.out.println("Records: " + records.stream().map(r -> r.toJson().encode() + "\n").collect(Collectors.toList()));
       try {
         assertThatListContains(records, "service3");
         assertThatListDoesNotContain(records, "my-service");
