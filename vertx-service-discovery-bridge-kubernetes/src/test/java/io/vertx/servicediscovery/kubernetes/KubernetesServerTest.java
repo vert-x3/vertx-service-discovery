@@ -125,9 +125,14 @@ public class KubernetesServerTest {
 
     await().until(() -> {
       List<Record> records = getRecordsBlocking(discovery);
-      assertThatListContains(records, "service3");
-      assertThatListDoesNotContain(records, "my-service");
-      assertThatListContains(records, "my-http-service");
+      try {
+        assertThatListContains(records, "service3");
+        assertThatListDoesNotContain(records, "my-service");
+        assertThatListContains(records, "my-http-service");
+        return true;
+      } catch (Throwable e) {
+        return false;
+      }
     });
   }
 
