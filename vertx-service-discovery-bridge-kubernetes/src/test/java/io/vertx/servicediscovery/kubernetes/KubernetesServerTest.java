@@ -7,15 +7,12 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.Repeat;
-import io.vertx.ext.unit.junit.RepeatRule;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -38,9 +35,6 @@ public class KubernetesServerTest {
   private KubernetesMockServer server;
   private NamespacedKubernetesClient client;
   private int port;
-
-  @Rule
-  public RepeatRule repeatRule = new RepeatRule();
 
   @Before
   public void setUp(TestContext tc) throws MalformedURLException {
@@ -114,7 +108,6 @@ public class KubernetesServerTest {
   }
 
   @Test
-  @Repeat(25)
   public void testWatch() {
     AtomicBoolean done = new AtomicBoolean();
     ServiceDiscovery discovery = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions().setAutoRegistrationOfImporters(false));
