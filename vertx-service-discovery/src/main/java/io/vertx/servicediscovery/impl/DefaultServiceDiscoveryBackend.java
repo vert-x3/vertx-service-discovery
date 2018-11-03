@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
+  private static final String MESSAGE_NO_REG_ID = "No registration id in the record";
   private AsyncMap<String, String> registry;
   private Vertx vertx;
 
@@ -54,7 +55,7 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
       return "true".equalsIgnoreCase(property);
     }
     property = System.getenv("VERTX-SERVICE-DISCOVERY-BACKEND-LOCAL");
-    return property != null && "true".equalsIgnoreCase(property);
+    return "true".equalsIgnoreCase(property);
   }
 
   @Override
@@ -64,11 +65,11 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
       throw new IllegalArgumentException("The record has already been registered");
     }
     record.setRegistration(uuid);
-    retrieveRegistry(registry -> {
-      if (registry.failed()) {
-        resultHandler.handle(failure(registry.cause()));
+    retrieveRegistry(reg -> {
+      if (reg.failed()) {
+        resultHandler.handle(failure(reg.cause()));
       } else {
-        registry.result().put(uuid, record.toJson().encode(), ar -> {
+        reg.result().put(uuid, record.toJson().encode(), ar -> {
           if (ar.succeeded()) {
             resultHandler.handle(Future.succeededFuture(record));
           } else {
@@ -98,7 +99,7 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
 
   @Override
   public void remove(Record record, Handler<AsyncResult<Record>> resultHandler) {
-    Objects.requireNonNull(record.getRegistration(), "No registration id in the record");
+    Objects.requireNonNull(record.getRegistration(), MESSAGE_NO_REG_ID);
     remove(record.getRegistration(), resultHandler);
   }
 
@@ -108,12 +109,12 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
 
   @Override
   public void remove(String uuid, Handler<AsyncResult<Record>> resultHandler) {
-    Objects.requireNonNull(uuid, "No registration id in the record");
-    retrieveRegistry(registry -> {
-        if (registry.failed()) {
-          resultHandler.handle(failure(registry.cause()));
+    Objects.requireNonNull(uuid, MESSAGE_NO_REG_ID);
+    retrieveRegistry(reg -> {
+        if (reg.failed()) {
+          resultHandler.handle(failure(reg.cause()));
         } else {
-          registry.result().remove(uuid, ar -> {
+          reg.result().remove(uuid, ar -> {
             if (ar.succeeded()) {
               if (ar.result() == null) {
                 // Not found
@@ -133,12 +134,12 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
 
   @Override
   public void update(Record record, Handler<AsyncResult<Void>> resultHandler) {
-    Objects.requireNonNull(record.getRegistration(), "No registration id in the record");
-    retrieveRegistry(registry -> {
-        if (registry.failed()) {
-          resultHandler.handle(failure(registry.cause()));
+    Objects.requireNonNull(record.getRegistration(), MESSAGE_NO_REG_ID);
+    retrieveRegistry(reg -> {
+        if (reg.failed()) {
+          resultHandler.handle(failure(reg.cause()));
         } else {
-          registry.result().put(record.getRegistration(), record.toJson().encode(), ar -> {
+          reg.result().put(record.getRegistration(), record.toJson().encode(), ar -> {
             if (ar.succeeded()) {
               resultHandler.handle(Future.succeededFuture());
             } else {
@@ -152,11 +153,11 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
 
   @Override
   public void getRecords(Handler<AsyncResult<List<Record>>> resultHandler) {
-    retrieveRegistry(registry -> {
-        if (registry.failed()) {
-          resultHandler.handle(failure(registry.cause()));
+    retrieveRegistry(reg -> {
+        if (reg.failed()) {
+          resultHandler.handle(failure(reg.cause()));
         } else {
-          registry.result().entries(ar -> {
+          reg.result().entries(ar -> {
             if (ar.succeeded()) {
               resultHandler.handle(Future.succeededFuture(ar.result().values().stream()
                 .map(s -> new Record(new JsonObject(s)))
@@ -172,11 +173,11 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
 
   @Override
   public void getRecord(String uuid, Handler<AsyncResult<Record>> resultHandler) {
-    retrieveRegistry(registry -> {
-      if (registry.failed()) {
-        resultHandler.handle(failure(registry.cause()));
+    retrieveRegistry(reg -> {
+      if (reg.failed()) {
+        resultHandler.handle(failure(reg.cause()));
       } else {
-        registry.result().get(uuid, ar -> {
+        reg.result().get(uuid, ar -> {
           if (ar.succeeded()) {
             if (ar.result() != null) {
               resultHandler.handle(Future.succeededFuture(new Record(new JsonObject(ar.result()))));
