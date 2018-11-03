@@ -36,7 +36,6 @@ import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -226,8 +225,9 @@ public class KubernetesServiceImporter implements ServiceImporter {
 
   /**
    * Checks whether or not the given buffer + chunk is a valid JSON object.
+   *
    * @param buffer the current, may be empty, must not be {@code null}
-   * @param chunk the chunk, may be empty, must not be {@code null}
+   * @param chunk  the chunk, may be empty, must not be {@code null}
    * @return an Optional wrapping the JSON object on success.
    */
   private Optional<JsonObject> maybeJson(Buffer buffer, String chunk) {
@@ -251,7 +251,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
         // new service
         Record record = createRecord(service);
         if (addRecordIfNotContained(record)) {
-          LOGGER.info("Adding service "  + record.getName());
+          LOGGER.info("Adding service " + record.getName());
           publishRecord(record, null);
         }
         break;
@@ -259,18 +259,18 @@ public class KubernetesServiceImporter implements ServiceImporter {
       case "ERROR":
         // remove service
         record = createRecord(service);
-        LOGGER.info("Removing service "  + record.getName());
+        LOGGER.info("Removing service " + record.getName());
         Record storedRecord = removeRecordIfContained(record);
         if (storedRecord != null) {
-          unpublishRecord(storedRecord);
+          unpublishRecord(storedRecord, null);
         }
         break;
       case "MODIFIED":
         record = createRecord(service);
-        LOGGER.info("Modifying service "  + record.getName());
-        storedRecord = removeRecordIfContained(record);
+        LOGGER.info("Modifying service " + record.getName());
+        storedRecord = replaceRecordIfContained(record);
         if (storedRecord != null) {
-          publishRecord(record, null);
+          unpublishRecord(storedRecord, x -> publishRecord(record, null));
         }
     }
   }
@@ -504,12 +504,15 @@ public class KubernetesServiceImporter implements ServiceImporter {
     }
   }
 
-  private void unpublishRecord(Record record) {
+  private void unpublishRecord(Record record, Handler<Void> completionHandler) {
     publisher.unpublish(record.getRegistration(), ar -> {
       if (ar.failed()) {
         LOGGER.error("Cannot unregister kubernetes service", ar.cause());
       } else {
         LOGGER.info("Kubernetes service unregistered from the vert.x registry: " + record.toJson());
+        if (completionHandler != null) {
+          completionHandler.handle(null);
+        }
       }
     });
   }
@@ -518,6 +521,17 @@ public class KubernetesServiceImporter implements ServiceImporter {
     for (Record rec : records) {
       if (areTheSameService(rec, record)) {
         records.remove(rec);
+        return rec;
+      }
+    }
+    return null;
+  }
+
+  private Record replaceRecordIfContained(Record record) {
+    for (Record rec : records) {
+      if (areTheSameService(rec, record)) {
+        records.remove(rec);
+        records.add(record);
         return rec;
       }
     }

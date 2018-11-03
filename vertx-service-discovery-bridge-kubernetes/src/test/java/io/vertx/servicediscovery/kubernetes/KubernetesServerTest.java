@@ -59,6 +59,15 @@ public class KubernetesServerTest {
         new WatchEvent(svc1, "DELETED"), "\n",
         new WatchEvent(getUpdatedHttpService(), "MODIFIED"), "\n").once();
 
+    Service svc96 = getService96();
+    server.expect().get().withPath("/api/v1/namespaces/issue96/services").andReturn(200, new ServiceListBuilder()
+      .addToItems(svc96)
+      .withNewMetadata("1235", "/self").build()).always();
+    server.expect().get().withPath("/api/v1/namespaces/issue96/services?watch=true&resourceVersion=1235")
+      .andReturnChunked(200,
+        new WatchEvent(getUpdatedService96(), "MODIFIED"), "\n",
+        new WatchEvent(getUpdatedService96(), "DELETED"), "\n").once();
+
     server.init();
     client = server.createClient();
     port = new URL(client.getConfiguration().getMasterUrl()).getPort();
@@ -122,6 +131,29 @@ public class KubernetesServerTest {
         assertThatListContains(records, "service3");
         assertThatListDoesNotContain(records, "my-service");
         assertThatListContains(records, "my-http-service");
+        return true;
+      } catch (Throwable e) {
+        return false;
+      }
+    });
+  }
+
+  /**
+   * Reproduce issue https://github.com/vert-x3/vertx-service-discovery/issues/96.
+   */
+  @Test
+  public void testWatchWithDeletion() {
+    AtomicBoolean done = new AtomicBoolean();
+    ServiceDiscovery discovery = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions().setAutoRegistrationOfImporters(false));
+    discovery.registerServiceImporter(new KubernetesServiceImporter(), config().copy().put("namespace", "issue96"),
+      ar -> done.set(ar.succeeded()));
+
+    await().untilAtomic(done, is(true));
+
+    await().until(() -> {
+      List<Record> records = getRecordsBlocking(discovery);
+      try {
+        assertThatListDoesNotContain(records, "hello-minikube");
         return true;
       } catch (Throwable e) {
         return false;
@@ -207,5 +239,32 @@ public class KubernetesServerTest {
     service.setMetadata(metadata);
     service.setSpec(spec);
     return service;
+  }
+
+  private Service getService96() {
+    Map<String, String> labels = new LinkedHashMap<>();
+    labels.put("service-type", "http-endpoint");
+
+    ObjectMeta metadata = new ObjectMeta();
+    metadata.setName("hello-minikube");
+    metadata.setUid("37c57c1e-deb0-11e8-a8ee-0800274f8294");
+    metadata.setNamespace("issue96");
+    metadata.setLabels(labels);
+    metadata.getAdditionalProperties().put("run", "hello-minikube");
+
+    ServiceSpec spec = new ServiceSpec();
+    ServicePort port = new ServicePort();
+    port.setTargetPort(new IntOrString(80));
+    port.setPort(8080);
+    spec.setPorts(Collections.singletonList(port));
+
+    Service service = new Service();
+    service.setMetadata(metadata);
+    service.setSpec(spec);
+    return service;
+  }
+
+  private Service getUpdatedService96() {
+    return getService96();
   }
 }
