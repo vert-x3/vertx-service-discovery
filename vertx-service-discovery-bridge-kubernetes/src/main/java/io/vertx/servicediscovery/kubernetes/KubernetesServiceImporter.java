@@ -18,7 +18,6 @@ package io.vertx.servicediscovery.kubernetes;
 
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -36,9 +35,7 @@ import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -60,6 +57,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class KubernetesServiceImporter implements ServiceImporter {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceImporter.class.getName());
+  public static final String KUBERNETES_UUID = "kubernetes.uuid";
 
   private ServicePublisher publisher;
   private String namespace;
@@ -224,22 +222,6 @@ public class KubernetesServiceImporter implements ServiceImporter {
       });
   }
 
-  /**
-   * Checks whether or not the given buffer + chunk is a valid JSON object.
-   * @param buffer the current, may be empty, must not be {@code null}
-   * @param chunk the chunk, may be empty, must not be {@code null}
-   * @return an Optional wrapping the JSON object on success.
-   */
-  private Optional<JsonObject> maybeJson(Buffer buffer, String chunk) {
-    Buffer buff = buffer.copy().appendString(chunk);
-    try {
-      return Optional.of(buff.toJsonObject());
-    } catch (DecodeException e) {
-      // Not a valid JSON, waiting for the next chunk
-      return Optional.empty();
-    }
-  }
-
   private void onChunk(JsonObject json) {
     String type = json.getString("type");
     if (type == null) {
@@ -251,7 +233,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
         // new service
         Record record = createRecord(service);
         if (addRecordIfNotContained(record)) {
-          LOGGER.info("Adding service "  + record.getName());
+          LOGGER.info("Adding service " + record.getName());
           publishRecord(record, null);
         }
         break;
@@ -259,18 +241,18 @@ public class KubernetesServiceImporter implements ServiceImporter {
       case "ERROR":
         // remove service
         record = createRecord(service);
-        LOGGER.info("Removing service "  + record.getName());
+        LOGGER.info("Removing service " + record.getName());
         Record storedRecord = removeRecordIfContained(record);
         if (storedRecord != null) {
-          unpublishRecord(storedRecord);
+          unpublishRecord(storedRecord, null);
         }
         break;
       case "MODIFIED":
         record = createRecord(service);
-        LOGGER.info("Modifying service "  + record.getName());
-        storedRecord = removeRecordIfContained(record);
+        LOGGER.info("Modifying service " + record.getName());
+        storedRecord = replaceRecordIfContained(record);
         if (storedRecord != null) {
-          publishRecord(record, null);
+          unpublishRecord(storedRecord, x -> publishRecord(record, null));
         }
     }
   }
@@ -322,20 +304,20 @@ public class KubernetesServiceImporter implements ServiceImporter {
 
   private String getNamespaceOrDefault() {
     // Kubernetes with Fabric8 build
-    String namespace = System.getenv("KUBERNETES_NAMESPACE");
-    if (namespace == null) {
+    String ns = System.getenv("KUBERNETES_NAMESPACE");
+    if (ns == null) {
       // oc / docker build
-      namespace = System.getenv("OPENSHIFT_BUILD_NAMESPACE");
-      if (namespace == null) {
-        namespace = "default";
+      ns = System.getenv("OPENSHIFT_BUILD_NAMESPACE");
+      if (ns == null) {
+        ns = "default";
       }
     }
-    return namespace;
+    return ns;
   }
 
   private boolean areTheSameService(Record record1, Record record2) {
-    String uuid = record1.getMetadata().getString("kubernetes.uuid", "");
-    String uuid2 = record2.getMetadata().getString("kubernetes.uuid", "");
+    String uuid = record1.getMetadata().getString(KUBERNETES_UUID, "");
+    String uuid2 = record2.getMetadata().getString(KUBERNETES_UUID, "");
     String endpoint = record1.getLocation().getString(Record.ENDPOINT, "");
     String endpoint2 = record2.getLocation().getString(Record.ENDPOINT, "");
 
@@ -356,7 +338,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
 
     record.getMetadata().put("kubernetes.namespace", metadata.getString("namespace"));
     record.getMetadata().put("kubernetes.name", metadata.getString("name"));
-    record.getMetadata().put("kubernetes.uuid", metadata.getString("uid"));
+    record.getMetadata().put(KUBERNETES_UUID, metadata.getString("uid"));
 
     String type = record.getMetadata().getString("service-type");
 
@@ -504,12 +486,15 @@ public class KubernetesServiceImporter implements ServiceImporter {
     }
   }
 
-  private void unpublishRecord(Record record) {
+  private void unpublishRecord(Record record, Handler<Void> completionHandler) {
     publisher.unpublish(record.getRegistration(), ar -> {
       if (ar.failed()) {
         LOGGER.error("Cannot unregister kubernetes service", ar.cause());
       } else {
         LOGGER.info("Kubernetes service unregistered from the vert.x registry: " + record.toJson());
+        if (completionHandler != null) {
+          completionHandler.handle(null);
+        }
       }
     });
   }
@@ -518,6 +503,17 @@ public class KubernetesServiceImporter implements ServiceImporter {
     for (Record rec : records) {
       if (areTheSameService(rec, record)) {
         records.remove(rec);
+        return rec;
+      }
+    }
+    return null;
+  }
+
+  private Record replaceRecordIfContained(Record record) {
+    for (Record rec : records) {
+      if (areTheSameService(rec, record)) {
+        records.remove(rec);
+        records.add(record);
         return rec;
       }
     }
