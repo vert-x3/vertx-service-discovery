@@ -7,6 +7,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.Repeat;
+import io.vertx.ext.unit.junit.RepeatRule;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.servicediscovery.Record;
 import org.apache.curator.framework.CuratorFramework;
@@ -19,6 +21,7 @@ import org.apache.curator.x.discovery.ServiceInstance;
 import org.apache.curator.x.discovery.UriSpec;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -37,6 +40,9 @@ import static org.hamcrest.Matchers.is;
 @RunWith(VertxUnitRunner.class)
 public class ZookeeperBridgeTest {
 
+
+  @Rule
+  public RepeatRule rule = new RepeatRule();
 
   private TestingServer zkTestServer;
   private CuratorFramework cli;
@@ -223,6 +229,7 @@ public class ZookeeperBridgeTest {
 
   // 1 here, import 1, second arrive, both imported
   @Test
+  @Repeat(10)
   public void testServiceArrivalWithSameName(TestContext tc) throws Exception {
     Async async = tc.async();
 
@@ -243,17 +250,15 @@ public class ZookeeperBridgeTest {
 
     discovery.registerService(instance1);
 
-
     sd.registerServiceImporter(
       new ZookeeperServiceImporter(),
       new JsonObject().put("connection", zkTestServer.getConnectString()),
       v -> {
         tc.assertTrue(v.succeeded());
-        sd.getRecords(x -> true, l -> {
-          tc.assertTrue(l.succeeded());
-          tc.assertTrue(l.result().size() == 1);
-          tc.assertEquals(l.result().get(0).getName(), "foo-service");
 
+        waitUntil(() -> serviceLookup(sd, 1), list -> {
+          tc.assertTrue(list.succeeded());
+          tc.assertEquals(list.result().get(0).getName(), "foo-service");
           vertx.executeBlocking(future -> {
             try {
               this.discovery.registerService(instance2);
