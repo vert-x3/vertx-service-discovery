@@ -203,7 +203,7 @@ Let's see an example of a JSON filter:
 { "color" = "red", "name" = "a"} => only matches records with name set to "a", and color set to "red"
 ----
 
-If the JSON filter is not set ({@code null} or empty), it accepts all records. When using functions, to accept all
+If the JSON filter is not set (`null` or empty), it accepts all records. When using functions, to accept all
 records, you must return _true_ regardless the record.
 
 Here are some examples:
