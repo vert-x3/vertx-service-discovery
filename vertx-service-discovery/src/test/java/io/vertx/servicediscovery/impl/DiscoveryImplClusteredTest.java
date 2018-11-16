@@ -19,6 +19,7 @@ package io.vertx.servicediscovery.impl;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
+import io.vertx.test.fakecluster.FakeClusterManager;
 import org.junit.Before;
 
 import static com.jayway.awaitility.Awaitility.await;
@@ -26,11 +27,15 @@ import static com.jayway.awaitility.Awaitility.await;
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class DiscoveryImplClusteredTest extends DiscoveryImplTest {
+public class DiscoveryImplClusteredTest extends DiscoveryImplTestBase {
 
   @Before
   public void setUp() {
-    Vertx.clusteredVertx(new VertxOptions().setClusterHost("127.0.0.1"), ar -> {
+    FakeClusterManager.reset();
+    VertxOptions options = new VertxOptions()
+      .setClusterManager(new FakeClusterManager())
+      .setClusterHost("127.0.0.1");
+    Vertx.clusteredVertx(options, ar -> {
       vertx = ar.result();
     });
     await().until(() -> vertx != null);
