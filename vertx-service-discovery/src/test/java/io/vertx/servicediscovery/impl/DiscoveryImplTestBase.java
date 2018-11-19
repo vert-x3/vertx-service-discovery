@@ -34,7 +34,6 @@ import io.vertx.servicediscovery.types.HttpEndpoint;
 import io.vertx.serviceproxy.ProxyHelper;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.*;
@@ -50,17 +49,11 @@ import static org.junit.Assert.*;
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-public class DiscoveryImplTest {
+public abstract class DiscoveryImplTestBase {
 
 
   protected Vertx vertx;
   protected ServiceDiscovery discovery;
-
-  @Before
-  public void setUp() {
-    vertx = Vertx.vertx();
-    discovery = new DiscoveryImpl(vertx, new ServiceDiscoveryOptions());
-  }
 
   @After
   public void tearDown() {
