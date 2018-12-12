@@ -46,6 +46,12 @@
       <artifactId>guava</artifactId>
       <version>20.0</version>
     </dependency>
+    <!-- dependency alignment with the rest of the stack -->
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.11</version>
+    </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
