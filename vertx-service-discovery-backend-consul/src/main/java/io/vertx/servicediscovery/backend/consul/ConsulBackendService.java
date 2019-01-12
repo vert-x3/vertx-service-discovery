@@ -110,9 +110,13 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
         l.forEach(s -> {
           if (!"consul".equals(s.getName())) {
             ServiceQueryOptions opt = new ServiceQueryOptions();
-            if (!s.getTags().isEmpty()) {
-              opt.setTag(s.getTags().get(0));
+            List<String> tags = s.getTags().stream()
+              .filter(tag -> !tag.equals("http-endpoint") && !tag.contains("metadata:") && !tag.contains("location:"))
+              .collect(Collectors.toList());
+            if (!tags.isEmpty()) {
+              opt.setTag(tags.get(0));
             }
+
             Future<ServiceList> serviceList = Future.future();
             client.catalogServiceNodesWithOptions(s.getName(), opt, serviceList);
             recordFutureList.add(serviceList);
