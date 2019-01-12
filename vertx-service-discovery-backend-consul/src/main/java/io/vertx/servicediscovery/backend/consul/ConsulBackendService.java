@@ -184,7 +184,9 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
     //use the checks to set the record status
     Future<CheckList> checkListFuture = Future.future();
     client.healthChecks(service.getName(), checkListFuture);
-    return checkListFuture.map(cl -> cl.getList().stream().map(Check::getStatus).allMatch(CheckStatus.PASSING::equals))
+    return checkListFuture.map(cl -> cl.getList().stream()
+      .filter(check -> check.getId().equals(service.getId()))
+      .map(Check::getStatus).allMatch(CheckStatus.PASSING::equals))
       .map(st -> st ? new Record().setStatus(Status.UP) : new Record().setStatus(Status.DOWN))
       .map(record -> {
         record.setMetadata(new JsonObject());
