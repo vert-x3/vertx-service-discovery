@@ -129,7 +129,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
           Record record = createRecord(svc);
           if (addRecordIfNotContained(record)) {
             Future<Record> fut = Future.future();
-            publishRecord(record, fut.completer());
+            publishRecord(record, fut);
             publications.add(fut);
           }
         });
