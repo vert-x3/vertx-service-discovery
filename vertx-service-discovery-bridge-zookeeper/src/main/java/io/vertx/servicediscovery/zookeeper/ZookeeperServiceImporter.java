@@ -242,7 +242,7 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
 
     new HashSet<>(registrations).forEach(reg -> {
       Future<Void> unreg = Future.future();
-      publisher.unpublish(reg.record().getRegistration(), unreg.completer());
+      publisher.unpublish(reg.record().getRegistration(), unreg);
     });
     registrations.clear();
 
