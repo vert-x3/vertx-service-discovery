@@ -2,7 +2,9 @@ package io.vertx.servicediscovery.types;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.redis.RedisClient;
+import io.vertx.redis.client.Command;
+import io.vertx.redis.client.Redis;
+import io.vertx.redis.client.Request;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
@@ -79,12 +81,16 @@ public class RedisDataSourceTest {
 
     await().until(() -> found.get() != null);
     ServiceReference service = discovery.getReference(found.get());
-    RedisClient client = service.get();
+    Redis client = service.get();
     AtomicBoolean success = new AtomicBoolean();
-    client.ping(ar -> {
-      if (ar.succeeded()) {
-        client.close(ar2 ->
-          success.set(ar2.succeeded()));
+    client.connect(connect -> {
+      if (connect.succeeded()) {
+        client.send(Request.cmd(Command.PING), ar -> {
+          if (ar.succeeded()) {
+            client.close();
+            success.set(ar.succeeded());
+          }
+        });
       }
     });
 
@@ -121,11 +127,15 @@ public class RedisDataSourceTest {
     AtomicBoolean success = new AtomicBoolean();
     RedisDataSource.getRedisClient(discovery,
       new JsonObject().put("name", "some-redis-data-source"), ar -> {
-        RedisClient client = ar.result();
-        client.ping(ar1 -> {
-          if (ar1.succeeded()) {
-            client.close(ar2 ->
-              success.set(ar2.succeeded()));
+        Redis client = ar.result();
+        client.connect(connect -> {
+          if (connect.succeeded()) {
+            client.send(Request.cmd(Command.PING), ar1 -> {
+              if (ar1.succeeded()) {
+                client.close();
+                success.set(ar.succeeded());
+              }
+            });
           }
         });
       });

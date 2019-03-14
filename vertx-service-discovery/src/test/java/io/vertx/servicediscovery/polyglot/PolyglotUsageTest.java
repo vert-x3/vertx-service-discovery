@@ -208,14 +208,15 @@ public class PolyglotUsageTest {
 
       vertx.eventBus().<JsonObject>send("redis-sugar", "", reply -> {
         tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("RedisClientImpl"));
+        tc.assertTrue(reply.result().body().getString("client").contains("RedisClient"));
         tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
         redis_sugar.complete();
       });
 
       vertx.eventBus().<JsonObject>send("redis-ref", "", reply -> {
         tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("RedisClientImpl"));
+        System.out.println(reply.result().body());
+        tc.assertTrue(reply.result().body().getString("client").contains("RedisClient"));
         tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
         redis_ref.complete();
       });
