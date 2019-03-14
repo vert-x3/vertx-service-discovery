@@ -8,7 +8,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.mongo.MongoClient;
-import io.vertx.redis.RedisClient;
+import io.vertx.redis.client.Redis;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.service.HelloService;
@@ -182,7 +182,7 @@ public class MyVerticle extends AbstractVerticle {
           if (reference == null) {
             message.reply("FAIL - reference is null");
           } else {
-            RedisClient client = reference.get();
+            Redis client = reference.get();
             result.put("client", client.toString());
             result.put("direct", reference.get().toString());
             reference.release();
@@ -199,7 +199,7 @@ public class MyVerticle extends AbstractVerticle {
           if (ar.failed()) {
             message.reply("FAIL - no service");
           } else {
-            RedisClient client = ar.result();
+            Redis client = ar.result();
             result.put("client", client.toString());
             ServiceDiscovery.releaseServiceObject(discovery, client);
             result.put("bindings", getBindings(discovery));
