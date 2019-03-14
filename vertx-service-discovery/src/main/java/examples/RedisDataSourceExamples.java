@@ -17,7 +17,7 @@
 package examples;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.redis.RedisClient;
+import io.vertx.redis.client.Redis;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceReference;
@@ -49,7 +49,7 @@ public class RedisDataSourceExamples {
           ServiceReference reference = discovery.getReference(ar.result());
 
           // Retrieve the service instance
-          RedisClient client = reference.getAs(RedisClient.class);
+          Redis client = reference.getAs(Redis.class);
 
           // ...
 
@@ -64,7 +64,7 @@ public class RedisDataSourceExamples {
       new JsonObject().put("name", "some-redis-data-source-service"),
       ar -> {
         if (ar.succeeded()) {
-          RedisClient client = ar.result();
+          Redis client = ar.result();
 
           // ...
 
