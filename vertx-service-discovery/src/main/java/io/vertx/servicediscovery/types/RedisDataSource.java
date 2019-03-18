@@ -21,7 +21,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
-import io.vertx.redis.client.Redis;
+import io.vertx.redis.RedisClient;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.spi.ServiceType;
@@ -63,7 +63,7 @@ public interface RedisDataSource extends ServiceType {
   }
 
   /**
-   * Convenient method that looks for a Redis data source and provides the configured {@link io.vertx.redis.client.Redis}.
+   * Convenient method that looks for a Redis data source and provides the configured {@link io.vertx.redis.RedisClient}.
    * The async result is marked as failed is there are no matching services, or if the lookup fails.
    *
    * @param discovery     The service discovery instance
@@ -71,36 +71,37 @@ public interface RedisDataSource extends ServiceType {
    * @param resultHandler The result handler
    */
   static void getRedisClient(ServiceDiscovery discovery, JsonObject filter,
-                             Handler<AsyncResult<Redis>> resultHandler) {
+                             Handler<AsyncResult<RedisClient>> resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.<Redis>getReference(ar.result()).get()));
+        resultHandler.handle(Future.succeededFuture(discovery.<RedisClient>getReference(ar.result()).get()));
       }
     });
   }
 
   /**
-   * Convenient method that looks for a Redis data source and provides the configured {@link io.vertx.redis.client.Redis}.
+   * Convenient method that looks for a Redis data source and provides the configured {@link io.vertx.redis.RedisClient}.
    * The async result is marked as failed is there are no matching services, or if the lookup fails.
    *
    * @param discovery     The service discovery instance
    * @param filter        The filter, cannot be {@code null}
    * @param resultHandler The result handler
    */
-  static void getRedisClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, Handler<AsyncResult<Redis>> resultHandler) {
+  static void getRedisClient(ServiceDiscovery discovery, Function<Record, Boolean> filter,
+                             Handler<AsyncResult<RedisClient>> resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.<Redis>getReference(ar.result()).get()));
+        resultHandler.handle(Future.succeededFuture(discovery.<RedisClient>getReference(ar.result()).get()));
       }
     });
   }
 
   /**
-   * Convenient method that looks for a Redis data source and provides the configured {@link io.vertx.redis.client.Redis}.
+   * Convenient method that looks for a Redis data source and provides the configured {@link io.vertx.redis.RedisClient}.
    * The async result is marked as failed is there are no matching services, or if the lookup fails.
    *
    * @param discovery             The service discovery instance
@@ -109,19 +110,19 @@ public interface RedisDataSource extends ServiceType {
    * @param resultHandler         The result handler
    */
   static void getRedisClient(ServiceDiscovery discovery, JsonObject filter, JsonObject consumerConfiguration,
-                             Handler<AsyncResult<Redis>> resultHandler) {
+                             Handler<AsyncResult<RedisClient>> resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
         resultHandler.handle(Future.succeededFuture(
-          discovery.<Redis>getReferenceWithConfiguration(ar.result(), consumerConfiguration).get()));
+          discovery.<RedisClient>getReferenceWithConfiguration(ar.result(), consumerConfiguration).get()));
       }
     });
   }
 
   /**
-   * Convenient method that looks for a Redis data source and provides the configured {@link io.vertx.redis.client.Redis}.
+   * Convenient method that looks for a Redis data source and provides the configured {@link io.vertx.redis.RedisClient}.
    * The async result is marked as failed is there are no matching services, or if the lookup fails.
    *
    * @param discovery             The service discovery instance
@@ -131,13 +132,13 @@ public interface RedisDataSource extends ServiceType {
    */
   static void getRedisClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject
     consumerConfiguration,
-                             Handler<AsyncResult<Redis>> resultHandler) {
+                             Handler<AsyncResult<RedisClient>> resultHandler) {
     discovery.getRecord(filter, ar -> {
       if (ar.failed() || ar.result() == null) {
         resultHandler.handle(Future.failedFuture("No matching record"));
       } else {
         resultHandler.handle(Future.succeededFuture(
-          discovery.<Redis>getReferenceWithConfiguration(ar.result(), consumerConfiguration).get()));
+          discovery.<RedisClient>getReferenceWithConfiguration(ar.result(), consumerConfiguration).get()));
       }
     });
   }

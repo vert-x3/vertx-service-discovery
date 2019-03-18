@@ -21,19 +21,15 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.net.SocketAddress;
-import io.vertx.redis.client.*;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend;
+import io.vertx.redis.RedisClient;
+import io.vertx.redis.RedisOptions;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import static io.vertx.redis.client.Request.cmd;
-import static io.vertx.redis.client.Command.*;
 
 /**
  * An implementation of the discovery backend based on Redis.
@@ -42,65 +38,13 @@ import static io.vertx.redis.client.Command.*;
  */
 public class RedisBackendService implements ServiceDiscoveryBackend {
 
-  private Redis redis;
+  private RedisClient redis;
   private String key;
-
-  private static final int DISCONNECTED = 0;
-  private static final int CONNECTING = 1;
-  private static final int CONNECTED = 2;
-
-  private final AtomicInteger state = new AtomicInteger();
 
   @Override
   public void init(Vertx vertx, JsonObject configuration) {
     key = configuration.getString("key", "records");
-
-    System.out.println(configuration.encodePrettily());
-
-    if (configuration.containsKey("host") || configuration.containsKey("port")) {
-      redis = Redis.createClient(vertx, new RedisOptions(configuration).setEndpoint(
-        SocketAddress.inetSocketAddress(
-          configuration.getInteger("port", 6379),
-          configuration.getString("host", "localhost"))
-      ));
-    } else {
-      redis = Redis.createClient(vertx, new RedisOptions(configuration));
-    }
-  }
-
-  private void redisCall(Request request, Handler<AsyncResult<Response>> handler) {
-    if (state.compareAndSet(DISCONNECTED, CONNECTING)) {
-      redis
-        .connect(connect -> {
-          if (connect.succeeded()) {
-            if (state.compareAndSet(CONNECTING, CONNECTED)) {
-              // send the reques
-              redis.send(request, handler);
-            } else {
-              handler.handle(Future.failedFuture("Redis client backend Illegal state (expected: CONNECTING)"));
-            }
-          } else {
-            // fail the connection
-            state.set(DISCONNECTED);
-            handler.handle(Future.failedFuture(connect.cause()));
-          }
-        })
-        .exceptionHandler(ex -> {
-          // fail the connection
-          state.set(DISCONNECTED);
-        });
-
-      return;
-    }
-
-    if (state.get() == CONNECTING) {
-      handler.handle(Future.failedFuture("Redis client backend Illegal state (expected: CONNECTED)"));
-      return;
-    }
-
-    if (state.get() == CONNECTED) {
-      redis.send(request, handler);
-    }
+    redis = RedisClient.create(vertx, new RedisOptions(configuration));
   }
 
   @Override
@@ -111,8 +55,7 @@ public class RedisBackendService implements ServiceDiscoveryBackend {
     }
     String uuid = UUID.randomUUID().toString();
     record.setRegistration(uuid);
-
-    redisCall(cmd(HSET).arg(key).arg(uuid).arg(record.toJson().encode()), ar -> {
+    redis.hset(key, uuid, record.toJson().encode(), ar -> {
       if (ar.succeeded()) {
         resultHandler.handle(Future.succeededFuture(record));
       } else {
@@ -131,12 +74,13 @@ public class RedisBackendService implements ServiceDiscoveryBackend {
   public void remove(String uuid, Handler<AsyncResult<Record>> resultHandler) {
     Objects.requireNonNull(uuid, "No registration id in the record");
 
-    redisCall(cmd(HGET).arg(key).arg(uuid), ar -> {
+    redis.hget(key, uuid, ar -> {
       if (ar.succeeded()) {
         if (ar.result() != null) {
-          redisCall(cmd(HDEL).arg(key).arg(uuid), deletion -> {
+          redis.hdel(key, uuid, deletion -> {
             if (deletion.succeeded()) {
-              resultHandler.handle(Future.succeededFuture(new Record(new JsonObject(ar.result().toBuffer()))));
+              resultHandler.handle(Future.succeededFuture(
+                  new Record(new JsonObject(ar.result()))));
             } else {
               resultHandler.handle(Future.failedFuture(deletion.cause()));
             }
@@ -153,7 +97,7 @@ public class RedisBackendService implements ServiceDiscoveryBackend {
   @Override
   public void update(Record record, Handler<AsyncResult<Void>> resultHandler) {
     Objects.requireNonNull(record.getRegistration(), "No registration id in the record");
-    redisCall(cmd(HSET).arg(key).arg(record.getRegistration()).arg(record.toJson().encode()), ar -> {
+    redis.hset(key, record.getRegistration(), record.toJson().encode(), ar -> {
       if (ar.succeeded()) {
         resultHandler.handle(Future.succeededFuture());
       } else {
@@ -164,12 +108,12 @@ public class RedisBackendService implements ServiceDiscoveryBackend {
 
   @Override
   public void getRecords(Handler<AsyncResult<List<Record>>> resultHandler) {
-    redisCall(cmd(HGETALL).arg(key), ar -> {
+    redis.hgetall(key, ar -> {
       if (ar.succeeded()) {
-        Response entries = ar.result();
-        resultHandler.handle(Future.succeededFuture(entries.getKeys().stream()
-          .map(key -> new Record(new JsonObject(entries.get(key).toBuffer())))
-          .collect(Collectors.toList())));
+        JsonObject entries = ar.result();
+        resultHandler.handle(Future.succeededFuture(entries.fieldNames().stream()
+            .map(key -> new Record(new JsonObject(entries.getString(key))))
+            .collect(Collectors.toList())));
       } else {
         resultHandler.handle(Future.failedFuture(ar.cause()));
       }
@@ -178,10 +122,10 @@ public class RedisBackendService implements ServiceDiscoveryBackend {
 
   @Override
   public void getRecord(String uuid, Handler<AsyncResult<Record>> resultHandler) {
-    redisCall(cmd(HGET).arg(key).arg(uuid), ar -> {
+    redis.hget(key, uuid, ar -> {
       if (ar.succeeded()) {
         if (ar.result() != null) {
-          resultHandler.handle(Future.succeededFuture(new Record(new JsonObject(ar.result().toBuffer()))));
+          resultHandler.handle(Future.succeededFuture(new Record(new JsonObject(ar.result()))));
         } else {
           resultHandler.handle(Future.succeededFuture(null));
         }

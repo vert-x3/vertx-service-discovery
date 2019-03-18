@@ -18,8 +18,8 @@ package io.vertx.servicediscovery.types.impl;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.redis.client.Redis;
-import io.vertx.redis.client.RedisOptions;
+import io.vertx.redis.RedisClient;
+import io.vertx.redis.RedisOptions;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceReference;
@@ -49,9 +49,9 @@ public class RedisDataSourceImpl implements RedisDataSource {
   }
 
   /**
-   * A {@link ServiceReference} on a Redis data source. When retrieved it provides a {@link Redis}.
+   * A {@link ServiceReference} on a Redis data source. When retrieved it provides a {@link RedisClient}.
    */
-  private class RedisServiceReference extends AbstractServiceReference<Redis> {
+  private class RedisServiceReference extends AbstractServiceReference<RedisClient> {
     private final JsonObject config;
 
     RedisServiceReference(Vertx vertx, ServiceDiscovery discovery, Record record, JsonObject config) {
@@ -65,7 +65,7 @@ public class RedisDataSourceImpl implements RedisDataSource {
      * @return the Redis client, configured to access the service
      */
     @Override
-    protected Redis retrieve() {
+    protected RedisClient retrieve() {
       JsonObject result = record().getMetadata().copy();
       result.mergeIn(record().getLocation());
 
@@ -73,12 +73,13 @@ public class RedisDataSourceImpl implements RedisDataSource {
         result.mergeIn(config);
       }
 
-      return Redis.createClient(vertx, new RedisOptions(result));
+      return RedisClient.create(vertx, new RedisOptions(result));
     }
 
     @Override
     protected void onClose() {
-      service.close();
+      service.close(ar -> {
+      });
     }
   }
 }
