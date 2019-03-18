@@ -42,6 +42,7 @@ import static io.vertx.redis.client.Command.*;
  */
 public class RedisBackendService implements ServiceDiscoveryBackend {
 
+  private Vertx vertx;
   private Redis redis;
   private String key;
 
@@ -53,6 +54,7 @@ public class RedisBackendService implements ServiceDiscoveryBackend {
 
   @Override
   public void init(Vertx vertx, JsonObject configuration) {
+    this.vertx = vertx;
     key = configuration.getString("key", "records");
 
     System.out.println(configuration.encodePrettily());
@@ -69,36 +71,46 @@ public class RedisBackendService implements ServiceDiscoveryBackend {
   }
 
   private void redisCall(Request request, Handler<AsyncResult<Response>> handler) {
-    if (state.compareAndSet(DISCONNECTED, CONNECTING)) {
-      redis
-        .connect(connect -> {
-          if (connect.succeeded()) {
-            if (state.compareAndSet(CONNECTING, CONNECTED)) {
-              // send the reques
-              redis.send(request, handler);
-            } else {
-              handler.handle(Future.failedFuture("Redis client backend Illegal state (expected: CONNECTING)"));
-            }
+    if (state.get() != CONNECTED) {
+      // we serialize the calls
+      vertx.<Redis>executeBlocking(fut -> {
+        // start the connect flow...
+        if (state.compareAndSet(DISCONNECTED, CONNECTING)) {
+          redis
+            .connect(connect -> {
+              if (connect.succeeded()) {
+                if (state.compareAndSet(CONNECTING, CONNECTED)) {
+                  fut.complete(connect.result());
+                }
+              } else {
+                // fail the connection
+                state.set(DISCONNECTED);
+                fut.fail(connect.cause());
+              }
+            })
+            .exceptionHandler(ex -> {
+              // fail the connection
+              state.set(DISCONNECTED);
+            });
+        } else {
+          // connecting state (or disconnected if there was an error)
+          if (state.get() == DISCONNECTED) {
+            fut.fail("Redis connection is not available.");
           } else {
-            // fail the connection
-            state.set(DISCONNECTED);
-            handler.handle(Future.failedFuture(connect.cause()));
+            fut.complete(redis);
           }
-        })
-        .exceptionHandler(ex -> {
-          // fail the connection
-          state.set(DISCONNECTED);
-        });
-
-      return;
-    }
-
-    if (state.get() == CONNECTING) {
-      handler.handle(Future.failedFuture("Redis client backend Illegal state (expected: CONNECTED)"));
-      return;
-    }
-
-    if (state.get() == CONNECTED) {
+        }
+      }, true, connect -> {
+        // connection result
+        if (connect.succeeded()) {
+          // send the request
+          redis.send(request, handler);
+        } else {
+          // failed
+          handler.handle(Future.failedFuture(connect.cause()));
+        }
+      });
+    } else {
       redis.send(request, handler);
     }
   }
