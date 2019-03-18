@@ -50,12 +50,14 @@ public class RedisBackendService implements ServiceDiscoveryBackend {
   private static final int CONNECTING = 1;
   private static final int CONNECTED = 2;
 
-  private final AtomicInteger state = new AtomicInteger(DISCONNECTED);
+  private final AtomicInteger state = new AtomicInteger();
 
   @Override
   public void init(Vertx vertx, JsonObject configuration) {
     this.vertx = vertx;
     key = configuration.getString("key", "records");
+
+    System.out.println(configuration.encodePrettily());
 
     if (configuration.containsKey("host") || configuration.containsKey("port")) {
       redis = Redis.createClient(vertx, new RedisOptions(configuration).setEndpoint(
