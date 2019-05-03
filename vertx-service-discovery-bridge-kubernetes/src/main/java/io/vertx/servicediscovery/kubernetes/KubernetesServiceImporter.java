@@ -193,8 +193,25 @@ public class KubernetesServiceImporter implements ServiceImporter {
         }
 
         @Override
+        public WriteStream<Buffer> write(Buffer data, Handler<AsyncResult<Void>> handler) {
+          parser.write(data);
+          if (handler != null) {
+            handler.handle(Future.succeededFuture());
+          }
+          return this;
+        }
+
+        @Override
+        public void end(Handler<AsyncResult<Void>> handler) {
+          end();
+          if (handler != null) {
+            handler.handle(Future.succeededFuture());
+          }
+        }
+
+        @Override
         public void end() {
-          parser.end();
+          end((Handler<AsyncResult<Void>>) null);
         }
 
         @Override
