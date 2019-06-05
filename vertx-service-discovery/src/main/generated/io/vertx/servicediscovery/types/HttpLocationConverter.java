@@ -4,12 +4,21 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import io.vertx.core.spi.json.JsonCodec;
 
 /**
- * Converter for {@link io.vertx.servicediscovery.types.HttpLocation}.
+ * Converter and Codec for {@link io.vertx.servicediscovery.types.HttpLocation}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.servicediscovery.types.HttpLocation} original class using Vert.x codegen.
  */
-public class HttpLocationConverter {
+public class HttpLocationConverter implements JsonCodec<HttpLocation, JsonObject> {
+
+  public static final HttpLocationConverter INSTANCE = new HttpLocationConverter();
+
+  @Override public JsonObject encode(HttpLocation value) { return (value != null) ? value.toJson() : null; }
+
+  @Override public HttpLocation decode(JsonObject value) { return (value != null) ? new HttpLocation(value) : null; }
+
+  @Override public Class<HttpLocation> getTargetClass() { return HttpLocation.class; }
 
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, HttpLocation obj) {
     for (java.util.Map.Entry<String, Object> member : json) {

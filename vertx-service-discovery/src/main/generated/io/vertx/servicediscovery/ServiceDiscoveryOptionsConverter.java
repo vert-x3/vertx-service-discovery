@@ -4,12 +4,21 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import io.vertx.core.spi.json.JsonCodec;
 
 /**
- * Converter for {@link io.vertx.servicediscovery.ServiceDiscoveryOptions}.
+ * Converter and Codec for {@link io.vertx.servicediscovery.ServiceDiscoveryOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.servicediscovery.ServiceDiscoveryOptions} original class using Vert.x codegen.
  */
-public class ServiceDiscoveryOptionsConverter {
+public class ServiceDiscoveryOptionsConverter implements JsonCodec<ServiceDiscoveryOptions, JsonObject> {
+
+  public static final ServiceDiscoveryOptionsConverter INSTANCE = new ServiceDiscoveryOptionsConverter();
+
+  @Override public JsonObject encode(ServiceDiscoveryOptions value) { return (value != null) ? value.toJson() : null; }
+
+  @Override public ServiceDiscoveryOptions decode(JsonObject value) { return (value != null) ? new ServiceDiscoveryOptions(value) : null; }
+
+  @Override public Class<ServiceDiscoveryOptions> getTargetClass() { return ServiceDiscoveryOptions.class; }
 
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, ServiceDiscoveryOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
