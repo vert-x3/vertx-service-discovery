@@ -19,6 +19,7 @@ package io.vertx.servicediscovery.spi;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
@@ -42,7 +43,7 @@ public interface ServiceImporter {
    * @param future        a future on which the bridge must report the completion of the starting
    */
   void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration,
-             Future<Void> future);
+             Promise<Void> future);
 
   /**
    * Closes the importer

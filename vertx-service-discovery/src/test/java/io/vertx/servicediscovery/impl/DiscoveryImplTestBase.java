@@ -19,6 +19,7 @@ package io.vertx.servicediscovery.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.AsyncMap;
@@ -355,7 +356,7 @@ public abstract class DiscoveryImplTestBase {
     AtomicBoolean registered = new AtomicBoolean();
     ServiceImporter bridge = new ServiceImporter() {
       @Override
-      public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Future<Void> future) {
+      public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Promise<Void> future) {
         Record rec1 = HttpEndpoint.createRecord("static-record-1", "acme.org");
         Record rec2 = HttpEndpoint.createRecord("static-record-2", "example.com");
         publisher.publish(rec1,
@@ -427,7 +428,7 @@ public abstract class DiscoveryImplTestBase {
     }
 
     @Override
-    public void init(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Future<Void> future) {
+    public void init(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Promise<Void> future) {
       future.complete(null);
     }
   }

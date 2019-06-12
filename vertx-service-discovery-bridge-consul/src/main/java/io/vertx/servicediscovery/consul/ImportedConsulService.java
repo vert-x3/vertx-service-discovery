@@ -17,6 +17,7 @@
 package io.vertx.servicediscovery.consul;
 
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.spi.ServicePublisher;
 
@@ -63,7 +64,7 @@ public class ImportedConsulService {
    * @param completion the completion future
    * @return the current {@link ImportedConsulService}
    */
-  public ImportedConsulService register(ServicePublisher publisher, Future<ImportedConsulService> completion) {
+  public ImportedConsulService register(ServicePublisher publisher, Promise<ImportedConsulService> completion) {
     publisher.publish(record, ar -> {
       if (ar.succeeded()) {
         record.setRegistration(ar.result().getRegistration());
@@ -81,7 +82,7 @@ public class ImportedConsulService {
    * @param publiher  the service publisher instance
    * @param completion the completion future
    */
-  public void unregister(ServicePublisher publiher, Future<Void> completion) {
+  public void unregister(ServicePublisher publiher, Promise<Void> completion) {
     if (record.getRegistration() != null) {
       publiher.unpublish(record.getRegistration(), ar -> {
         if (ar.succeeded()) {
