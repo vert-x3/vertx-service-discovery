@@ -68,7 +68,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
 
   @Override
   public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration,
-                    Future<Void> completion) {
+                    Promise<Void> completion) {
     this.publisher = publisher;
 
     JsonObject conf;
@@ -128,9 +128,9 @@ public class KubernetesServiceImporter implements ServiceImporter {
           JsonObject svc = ((JsonObject) s);
           Record record = createRecord(svc);
           if (addRecordIfNotContained(record)) {
-            Future<Record> fut = Future.future();
-            publishRecord(record, fut);
-            publications.add(fut);
+            Promise<Record> promise = Promise.promise();
+            publishRecord(record, promise);
+            publications.add(promise.future());
           }
         });
         return publications;
@@ -148,28 +148,28 @@ public class KubernetesServiceImporter implements ServiceImporter {
   }
 
   private Future<JsonArray> retrieveServices(String token) {
-    Future<JsonArray> future = Future.future();
+    Promise<JsonArray> promise = Promise.promise();
     String path = "/api/v1/namespaces/" + namespace + "/services";
     client.get(path)
       .putHeader("Authorization", "Bearer " + token)
       .send(resp -> {
         if (resp.failed()) {
-          future.fail(resp.cause());
+          promise.fail(resp.cause());
         } else if (resp.result().statusCode() != 200) {
-          future.fail("Unable to retrieve services from namespace " + namespace + ", status code: "
+          promise.fail("Unable to retrieve services from namespace " + namespace + ", status code: "
             + resp.result().statusCode() + ", content: " + resp.result().bodyAsString());
         } else {
           HttpResponse<Buffer> response = resp.result();
           JsonArray items = response.bodyAsJsonObject().getJsonArray("items");
           if (items == null) {
-            future.fail("Unable to retrieve services from namespace " + namespace + " - no items");
+            promise.fail("Unable to retrieve services from namespace " + namespace + " - no items");
           } else {
-            future.complete(items);
+            promise.complete(items);
             watch(client, token, response.bodyAsJsonObject().getJsonObject("metadata").getString("resourceVersion"));
           }
         }
       });
-    return future;
+    return promise.future();
   }
 
   private void watch(WebClient client, String token, String resourceVersion) {
@@ -275,12 +275,12 @@ public class KubernetesServiceImporter implements ServiceImporter {
   }
 
   private Future<String> getToken(Vertx vertx, JsonObject conf) {
-    Future<String> result = Future.future();
+    Promise<String> result = Promise.promise();
 
     String token = conf.getString("token");
     if (token != null && !token.trim().isEmpty()) {
       result.complete(token);
-      return result;
+      return result.future();
     }
 
     // Read from file
@@ -292,7 +292,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
       }
     });
 
-    return result;
+    return result.future();
   }
 
   private void publishRecord(Record record, Handler<AsyncResult<Record>> completionHandler) {

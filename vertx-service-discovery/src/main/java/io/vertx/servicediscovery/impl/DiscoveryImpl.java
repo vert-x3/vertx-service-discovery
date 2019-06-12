@@ -79,10 +79,10 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     Collection<ServiceImporter> spi = getServiceImporterFromSPI();
     Map<Future, ServiceImporter> map = new HashMap<>();
     List<Future> futures = spi.stream().map(imp -> {
-      Future<Void> fut = Future.future();
-      imp.start(vertx, this, new JsonObject(), fut);
-      map.put(fut, imp);
-      return fut;
+      Promise<Void> promise = Promise.promise();
+      imp.start(vertx, this, new JsonObject(), promise);
+      map.put(promise.future(), imp);
+      return promise.future();
     }).collect(Collectors.toList());
 
     CompositeFuture.join(futures)
@@ -203,8 +203,8 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
       conf = configuration;
     }
 
-    Future<Void> completed = Future.future();
-    completed.setHandler(
+    Promise<Void> completed = Promise.promise();
+    completed.future().setHandler(
       ar -> {
         if (ar.failed()) {
           LOGGER.error("Cannot start the service importer " + importer, ar.cause());
@@ -246,8 +246,8 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
       conf = configuration;
     }
 
-    Future<Void> completed = Future.future();
-    completed.setHandler(
+    Promise<Void> completed = Promise.promise();
+    completed.future().setHandler(
       ar -> {
         if (ar.failed()) {
           LOGGER.error("Cannot start the service importer " + exporter, ar.cause());
@@ -274,15 +274,15 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     LOGGER.info("Stopping service discovery");
     List<Future> futures = new ArrayList<>();
     for (ServiceImporter importer : importers) {
-      Future<Void> future = Future.future();
-      importer.close(v -> future.complete());
-      futures.add(future);
+      Promise<Void> promise = Promise.promise();
+      importer.close(v -> promise.complete());
+      futures.add(promise.future());
     }
 
     for (ServiceExporter exporter : exporters) {
-      Future<Void> future = Future.future();
-      exporter.close(future::complete);
-      futures.add(future);
+      Promise<Void> promise = Promise.promise();
+      exporter.close(promise::complete);
+      futures.add(promise.future());
     }
 
     bindings.forEach(ServiceReference::release);
