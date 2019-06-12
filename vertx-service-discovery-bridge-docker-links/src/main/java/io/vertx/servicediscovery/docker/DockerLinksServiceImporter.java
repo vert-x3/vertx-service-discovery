@@ -19,6 +19,7 @@ package io.vertx.servicediscovery.docker;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -60,7 +61,7 @@ public class DockerLinksServiceImporter implements ServiceImporter {
 
   @Override
   public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration,
-                    Future<Void> completion) {
+                    Promise<Void> completion) {
     this.publisher = publisher;
 
     synchronized (this) {
@@ -68,7 +69,7 @@ public class DockerLinksServiceImporter implements ServiceImporter {
     }
   }
 
-  private void lookup(Future<Void> completion) {
+  private void lookup(Promise<Void> completion) {
     Map<String, String> variables = getVariables();
 
     // Find names

@@ -20,6 +20,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -69,17 +70,17 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
     }
     ServiceOptions serviceOptions = recordToServiceOptions(record, uuid);
     record.setRegistration(serviceOptions.getId());
-    Future<Void> registration = Future.future();
+    Promise<Void> registration = Promise.promise();
     client.registerService(serviceOptions, registration);
-    registration.map(record).setHandler(resultHandler);
+    registration.future().map(record).setHandler(resultHandler);
   }
 
   @Override
   public void remove(Record record, Handler<AsyncResult<Record>> resultHandler) {
     Objects.requireNonNull(record.getRegistration(), "No registration id in the record");
-    Future<Void> deregistration = Future.future();
+    Promise<Void> deregistration = Promise.promise();
     client.deregisterService(record.getRegistration(), deregistration);
-    deregistration.map(record).setHandler(resultHandler);
+    deregistration.future().map(record).setHandler(resultHandler);
   }
 
   @Override
@@ -102,9 +103,9 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
 
   @Override
   public void getRecords(Handler<AsyncResult<List<Record>>> resultHandler) {
-    Future<ServiceList> nameList = Future.future();
+    Promise<ServiceList> nameList = Promise.promise();
     client.catalogServices(nameList);
-    nameList.map(ServiceList::getList)
+    nameList.future().map(ServiceList::getList)
       .map(l -> {
         List<Future> recordFutureList = new ArrayList<>();
         l.forEach(s -> {
@@ -113,9 +114,9 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
             if (!s.getTags().isEmpty()) {
               opt.setTag(s.getTags().get(0));
             }
-            Future<ServiceList> serviceList = Future.future();
+            Promise<ServiceList> serviceList = Promise.promise();
             client.catalogServiceNodesWithOptions(s.getName(), opt, serviceList);
-            recordFutureList.add(serviceList);
+            recordFutureList.add(serviceList.future());
           }
         });
         return recordFutureList;
@@ -130,9 +131,9 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
 
   @Override
   public void getRecord(String uuid, Handler<AsyncResult<Record>> resultHandler) {
-    Future<List<Record>> recordList = Future.future();
+    Promise<List<Record>> recordList = Promise.promise();
     getRecords(recordList);
-    recordList.map(l -> l.stream().filter(r -> uuid.equals(r.getRegistration())).findFirst().orElse(null)).setHandler(resultHandler);
+    recordList.future().map(l -> l.stream().filter(r -> uuid.equals(r.getRegistration())).findFirst().orElse(null)).setHandler(resultHandler);
   }
 
   public void close() {
@@ -182,9 +183,9 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
 
   private Future serviceToRecord(Service service) {
     //use the checks to set the record status
-    Future<CheckList> checkListFuture = Future.future();
+    Promise<CheckList> checkListFuture = Promise.promise();
     client.healthChecks(service.getName(), checkListFuture);
-    return checkListFuture.map(cl -> cl.getList().stream().map(Check::getStatus).allMatch(CheckStatus.PASSING::equals))
+    return checkListFuture.future().map(cl -> cl.getList().stream().map(Check::getStatus).allMatch(CheckStatus.PASSING::equals))
       .map(st -> st ? new Record().setStatus(Status.UP) : new Record().setStatus(Status.DOWN))
       .map(record -> {
         record.setMetadata(new JsonObject());

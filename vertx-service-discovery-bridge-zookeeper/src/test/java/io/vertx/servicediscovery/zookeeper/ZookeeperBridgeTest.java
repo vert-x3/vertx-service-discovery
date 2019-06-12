@@ -3,6 +3,7 @@ package io.vertx.servicediscovery.zookeeper;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
@@ -216,15 +217,15 @@ public class ZookeeperBridgeTest {
   }
 
   private Future<List<Record>> serviceLookup(io.vertx.servicediscovery.ServiceDiscovery discovery, int expected) {
-    Future<List<Record>> future = Future.future();
+    Promise<List<Record>> promise = Promise.promise();
     discovery.getRecords(x -> true, list -> {
       if (list.failed() || list.result().size() != expected) {
-        future.fail("service lookup failed");
+        promise.fail("service lookup failed");
       } else {
-        future.complete(list.result());
+        promise.complete(list.result());
       }
     });
-    return future;
+    return promise.future();
   }
 
   // 1 here, import 1, second arrive, both imported

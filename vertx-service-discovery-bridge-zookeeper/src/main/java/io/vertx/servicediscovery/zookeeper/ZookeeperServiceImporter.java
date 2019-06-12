@@ -3,6 +3,7 @@ package io.vertx.servicediscovery.zookeeper;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.ConcurrentHashSet;
 import io.vertx.core.json.JsonObject;
@@ -42,7 +43,7 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
   private Set<RegistrationHolder<ServiceInstance<JsonObject>>> registrations = new ConcurrentHashSet<>();
 
   @Override
-  public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Future<Void> future) {
+  public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Promise<Void> future) {
     this.publisher = publisher;
 
     String connection = Objects.requireNonNull(configuration.getString("connection"));
@@ -86,8 +87,8 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
           if (ar.failed()) {
             future.fail(ar.cause());
           } else {
-            Future<Void> f = Future.future();
-            f.setHandler(x -> {
+            Promise<Void> p = Promise.promise();
+            p.future().setHandler(x -> {
               if (x.failed()) {
                 future.fail(x.cause());
               } else {
@@ -95,13 +96,13 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
                 future.complete(null);
               }
             });
-            compute(f);
+            compute(p);
           }
         }
     );
   }
 
-  private synchronized void compute(Future<Void> done) {
+  private synchronized void compute(Promise<Void> done) {
     List<ServiceInstance<JsonObject>> instances = new ArrayList<>();
     try {
       Collection<String> names = discovery.queryForNames();
@@ -129,31 +130,31 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
     RegistrationHolder.filter(registered, instances)
         .stream()
         .map(reg -> {
-          Future<Void> future = Future.future();
+          Promise<Void> promise = Promise.promise();
           publisher.unpublish(reg.record().getRegistration(), v -> {
             registrations.remove(reg);
             if (v.succeeded()) {
-              future.complete(null);
+              promise.complete(null);
             } else {
-              future.fail(v.cause());
+              promise.fail(v.cause());
             }
           });
-          return future;
+          return promise.future();
         }).forEach(actions::add);
 
     RegistrationHolder.filter(remote, registrations)
         .stream()
         .map(instance -> {
-          Future<Void> future = Future.future();
+          Promise<Void> promise = Promise.promise();
           publisher.publish(createRecordForInstance(instance), v -> {
             if (v.succeeded()) {
               registrations.add(new RegistrationHolder<>(v.result(), instance));
-              future.complete(null);
+              promise.complete(null);
             } else {
-              future.fail(v.cause());
+              promise.fail(v.cause());
             }
           });
-          return future;
+          return promise.future();
         }).forEach(actions::add);
 
     if (done != null) {
@@ -214,10 +215,10 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
 
   @Override
   public void close(Handler<Void> closeHandler) {
-    Future<Void> done = Future.future();
+    Promise<Void> done = Promise.promise();
     unregisterAllServices(done);
 
-    done.setHandler(v -> {
+    done.future().setHandler(v -> {
       try {
         cache.close();
         discovery.close();
@@ -237,11 +238,11 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
     }
   }
 
-  private synchronized void unregisterAllServices(Future<Void> done) {
+  private synchronized void unregisterAllServices(Promise<Void> done) {
     List<Future> list = new ArrayList<>();
 
     new HashSet<>(registrations).forEach(reg -> {
-      Future<Void> unreg = Future.future();
+      Promise<Void> unreg = Promise.promise();
       publisher.unpublish(reg.record().getRegistration(), unreg);
     });
     registrations.clear();

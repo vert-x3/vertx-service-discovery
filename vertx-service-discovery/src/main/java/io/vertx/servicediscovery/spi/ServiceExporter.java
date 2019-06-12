@@ -3,6 +3,7 @@ package io.vertx.servicediscovery.spi;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
@@ -26,7 +27,7 @@ public interface ServiceExporter {
    * @param future        a future on which the bridge must report the completion of the starting
    */
   void init(Vertx vertx, ServicePublisher publisher, JsonObject configuration,
-            Future<Void> future);
+            Promise<Void> future);
 
   /**
    * Notify a new record has been published, the record's registration can be used to uniquely

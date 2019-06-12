@@ -19,6 +19,7 @@ package io.vertx.servicediscovery.consul;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -54,7 +55,7 @@ public class ConsulServiceImporter implements ServiceImporter {
   private String upThreshold;
 
   @Override
-  public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Future<Void> completion) {
+  public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Promise<Void> completion) {
     this.vertx = vertx;
     this.publisher = publisher;
     this.upThreshold = configuration.getString("up_threshold", "passing");
@@ -67,22 +68,22 @@ public class ConsulServiceImporter implements ServiceImporter {
 
     client = ConsulClient.create(vertx, opts);
 
-    Future<List<ImportedConsulService>> imports = Future.future();
+    Promise<List<ImportedConsulService>> imports = Promise.promise();
 
     retrieveServicesFromConsul(imports);
 
-    imports.setHandler(ar -> {
+    imports.future().setHandler(ar -> {
       if (ar.succeeded()) {
         Integer period = configuration.getInteger("scan-period", 2000);
         if (period != 0) {
           scanTask = vertx.setPeriodic(period, l -> {
-            Future<List<ImportedConsulService>> future = Future.future();
-            future.setHandler(ar2 -> {
+            Promise<List<ImportedConsulService>> promise = Promise.promise();
+            promise.future().setHandler(ar2 -> {
               if (ar2.failed()) {
                 LOGGER.warn("Consul importation has failed", ar.cause());
               }
             });
-            retrieveServicesFromConsul(future);
+            retrieveServicesFromConsul(promise);
           });
         }
         completion.complete();
@@ -94,19 +95,17 @@ public class ConsulServiceImporter implements ServiceImporter {
   }
 
 
-  private Handler<Throwable> getErrorHandler(Future future) {
+  private Handler<Throwable> getErrorHandler(Promise future) {
     return t -> {
       if (future != null) {
-        if (!future.isComplete()) {
-          future.fail(t);
-        }
+        future.tryFail(t);
       } else {
         LOGGER.error(t);
       }
     };
   }
 
-  private void retrieveServicesFromConsul(Future<List<ImportedConsulService>> completed) {
+  private void retrieveServicesFromConsul(Promise<List<ImportedConsulService>> completed) {
     client.catalogServices(ar -> {
       if (ar.succeeded()) {
         retrieveIndividualServices(ar.result(), completed);
@@ -126,20 +125,20 @@ public class ConsulServiceImporter implements ServiceImporter {
     return true;
   }
 
-  private void retrieveIndividualServices(ServiceList list, Future<List<ImportedConsulService>> completed) {
+  private void retrieveIndividualServices(ServiceList list, Promise<List<ImportedConsulService>> completed) {
     List<Future> futures = new ArrayList<>();
     list.getList().forEach(service -> {
 
-      Future<List<ImportedConsulService>> future = Future.future();
+      Promise<List<ImportedConsulService>> promise = Promise.promise();
       client.healthServiceNodes(service.getName(),false, ar -> {
         if (ar.succeeded()) {
-          importService(ar.result().getList(), future);
+          importService(ar.result().getList(), promise);
         } else {
           completed.fail(ar.cause());
         }
       });
 
-      futures.add(future);
+      futures.add(promise.future());
     });
 
     CompositeFuture.all(futures).setHandler(ar -> {
@@ -189,7 +188,7 @@ public class ConsulServiceImporter implements ServiceImporter {
     });
   }
 
-  private void importService(List<ServiceEntry> list, Future<List<ImportedConsulService>> future) {
+  private void importService(List<ServiceEntry> list, Promise<List<ImportedConsulService>> future) {
     if (list.isEmpty()) {
       future.fail("no service with the given name");
     } else {
@@ -203,7 +202,7 @@ public class ConsulServiceImporter implements ServiceImporter {
 
       List<Future> registrations = new ArrayList<>();
       for (int i = 0; i < serviceEntries.size(); i++) {
-        Future<Void> registration = Future.future();
+        Promise<Void> registration = Promise.promise();
 
         ServiceEntry consulService = serviceEntries.get(i);
         String id = consulService.getService().getId();
@@ -219,16 +218,18 @@ public class ConsulServiceImporter implements ServiceImporter {
           LOGGER.info("Importing service " + record.getName() + " (" + id + ")"
               + " from consul");
           ImportedConsulService service = new ImportedConsulService(name, id, record);
-          service.register(publisher, Future.<ImportedConsulService>future().setHandler(res -> {
+          Promise<ImportedConsulService> promise = Promise.promise();
+          promise.future().setHandler(res -> {
             if (res.succeeded()) {
               importedServices.add(res.result());
               registration.complete();
             } else {
               registration.fail(res.cause());
             }
-          }));
+          });
+          service.register(publisher, promise);
         }
-        registrations.add(registration);
+        registrations.add(registration.future());
       }
 
       CompositeFuture.all(registrations).setHandler(ar -> {
@@ -295,8 +296,8 @@ public class ConsulServiceImporter implements ServiceImporter {
     // Remove all the services that has been imported
     List<Future> list = new ArrayList<>();
     imports.forEach(imported -> {
-      Future<Void> fut = Future.future();
-      fut.setHandler(ar -> {
+      Promise<Void> promise = Promise.promise();
+      promise.future().setHandler(ar -> {
         LOGGER.info("Unregistering " + imported.name());
         if (ar.succeeded()) {
           list.add(Future.succeededFuture());
@@ -304,7 +305,7 @@ public class ConsulServiceImporter implements ServiceImporter {
           list.add(Future.failedFuture(ar.cause()));
         }
       });
-      imported.unregister(publisher, fut);
+      imported.unregister(publisher, promise);
     });
 
     CompositeFuture.all(list).setHandler(ar -> {

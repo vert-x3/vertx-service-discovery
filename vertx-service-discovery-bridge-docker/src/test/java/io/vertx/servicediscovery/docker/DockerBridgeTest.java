@@ -23,6 +23,7 @@ import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.core.DockerClientBuilder;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.ServiceDiscovery;
@@ -99,9 +100,9 @@ public class DockerBridgeTest {
   @Test
   public void testWithNoContainers() throws InterruptedException {
     AtomicBoolean done = new AtomicBoolean();
-    Future<Void> future = Future.future();
-    future.setHandler(ar -> done.set(ar.succeeded()));
-    bridge.scan(future);
+    Promise<Void> promise = Promise.promise();
+    promise.future().setHandler(ar -> done.set(ar.succeeded()));
+    bridge.scan(promise);
 
     await().untilAtomic(done, is(true));
     assertThat(bridge.getServices()).isEmpty();
@@ -115,17 +116,17 @@ public class DockerBridgeTest {
         .exec();
 
     AtomicBoolean done = new AtomicBoolean();
-    Future<Void> future = Future.future();
-    future.setHandler(ar -> done.set(ar.succeeded()));
-    bridge.scan(future);
+    Promise<Void> promise = Promise.promise();
+    promise.future().setHandler(ar -> done.set(ar.succeeded()));
+    bridge.scan(promise);
     await().untilAtomic(done, is(true));
     assertThat(bridge.getServices()).hasSize(0);
 
     done.set(false);
     client.startContainerCmd(container.getId()).exec();
-    Future<Void> future2 = Future.future();
-    future2.setHandler(ar -> done.set(ar.succeeded()));
-    bridge.scan(future2);
+    Promise<Void> promise2 = Promise.promise();
+    promise2.future().setHandler(ar -> done.set(ar.succeeded()));
+    bridge.scan(promise2);
     await().untilAtomic(done, is(true));
 
     assertThat(bridge.getServices()).hasSize(1);
@@ -136,9 +137,9 @@ public class DockerBridgeTest {
 
 
     done.set(false);
-    Future<Void> future3 = Future.future();
-    future3.setHandler(ar -> done.set(ar.succeeded()));
-    bridge.scan(future3);
+    Promise<Void> promise3 = Promise.promise();
+    promise3.future().setHandler(ar -> done.set(ar.succeeded()));
+    bridge.scan(promise3);
     await().untilAtomic(done, is(true));
     assertThat(bridge.getServices()).hasSize(0);
 
@@ -152,17 +153,17 @@ public class DockerBridgeTest {
         .exec();
 
     AtomicBoolean done = new AtomicBoolean();
-    Future<Void> future = Future.future();
-    future.setHandler(ar -> done.set(ar.succeeded()));
-    bridge.scan(future);
+    Promise<Void> promise = Promise.promise();
+    promise.future().setHandler(ar -> done.set(ar.succeeded()));
+    bridge.scan(promise);
     await().untilAtomic(done, is(true));
     assertThat(bridge.getServices()).hasSize(0);
 
     done.set(false);
     client.startContainerCmd(container.getId()).exec();
-    Future<Void> future2 = Future.future();
-    future2.setHandler(ar -> done.set(ar.succeeded()));
-    bridge.scan(future2);
+    Promise<Void> promise2 = Promise.promise();
+    promise2.future().setHandler(ar -> done.set(ar.succeeded()));
+    bridge.scan(promise2);
     await().untilAtomic(done, is(true));
 
     assertThat(bridge.getServices()).hasSize(1);
@@ -182,17 +183,17 @@ public class DockerBridgeTest {
         .exec();
 
     AtomicBoolean done = new AtomicBoolean();
-    Future<Void> future = Future.future();
-    future.setHandler(ar -> done.set(ar.succeeded()));
-    bridge.scan(future);
+    Promise<Void> promise = Promise.promise();
+    promise.future().setHandler(ar -> done.set(ar.succeeded()));
+    bridge.scan(promise);
     await().untilAtomic(done, is(true));
     assertThat(bridge.getServices()).hasSize(0);
 
     done.set(false);
     client.startContainerCmd(container.getId()).exec();
-    Future<Void> future2 = Future.future();
-    future2.setHandler(ar -> done.set(ar.succeeded()));
-    bridge.scan(future2);
+    Promise<Void> promise2 = Promise.promise();
+    promise2.future().setHandler(ar -> done.set(ar.succeeded()));
+    bridge.scan(promise2);
     await().untilAtomic(done, is(true));
 
     assertThat(bridge.getServices()).hasSize(1);

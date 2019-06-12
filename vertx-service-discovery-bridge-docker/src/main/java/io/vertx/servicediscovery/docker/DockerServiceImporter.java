@@ -22,6 +22,7 @@ import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
@@ -65,7 +66,7 @@ public class DockerServiceImporter implements ServiceImporter {
    * @param completion    future to assign with completion status
    */
   @Override
-  public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Future<Void> completion) {
+  public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Promise<Void> completion) {
     this.publisher = publisher;
     this.vertx = vertx;
     DockerClientConfig.DockerClientConfigBuilder builder =
@@ -129,7 +130,7 @@ public class DockerServiceImporter implements ServiceImporter {
     scan(completion);
   }
 
-  synchronized void scan(Future<Void> completion) {
+  synchronized void scan(Promise<Void> completion) {
     vertx.<List<Container>>executeBlocking(
         future -> {
           try {
