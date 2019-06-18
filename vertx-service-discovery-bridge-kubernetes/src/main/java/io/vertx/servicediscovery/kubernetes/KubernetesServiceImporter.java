@@ -187,18 +187,17 @@ public class KubernetesServiceImporter implements ServiceImporter {
         }
 
         @Override
-        public WriteStream<Buffer> write(Buffer data) {
+        public Future<Void> write(Buffer data) {
           parser.write(data);
-          return this;
+          return Future.succeededFuture();
         }
 
         @Override
-        public WriteStream<Buffer> write(Buffer data, Handler<AsyncResult<Void>> handler) {
+        public void write(Buffer data, Handler<AsyncResult<Void>> handler) {
           parser.write(data);
           if (handler != null) {
             handler.handle(Future.succeededFuture());
           }
-          return this;
         }
 
         @Override
@@ -207,11 +206,6 @@ public class KubernetesServiceImporter implements ServiceImporter {
           if (handler != null) {
             handler.handle(Future.succeededFuture());
           }
-        }
-
-        @Override
-        public void end() {
-          end((Handler<AsyncResult<Void>>) null);
         }
 
         @Override
