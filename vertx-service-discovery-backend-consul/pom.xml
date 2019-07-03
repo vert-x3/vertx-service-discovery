@@ -34,9 +34,16 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>fr.javacrea</groupId>
-      <artifactId>vertx-consul-test-env</artifactId>
-      <version>0.2.0</version>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-consul-client</artifactId>
+      <version>${project.version}</version>
+      <classifier>tests</classifier>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.pszymczyk.consul</groupId>
+      <artifactId>embedded-consul</artifactId>
+      <version>2.1.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
