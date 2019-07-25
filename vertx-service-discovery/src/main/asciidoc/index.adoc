@@ -268,7 +268,7 @@ type is the proxies interface (the location is the address).
 {@link io.vertx.ext.jdbc.JDBCClient} (the configuration of the client is computed from the location, metadata and
 consumer configuration).
 * {@link io.vertx.servicediscovery.types.RedisDataSource} - for Redis data sources, the service object is a
-{@link io.vertx.redis.RedisClient} (the configuration of the client is computed from the location, metadata and
+{@link io.vertx.redis.client.Redis} (the configuration of the client is computed from the location, metadata and
 consumer configuration).
 * {@link io.vertx.servicediscovery.types.MongoDataSource} - for Mongo data sources, the service object is a
 {@link io.vertx.ext.mongo.MongoClient} (the configuration of the client is computed from the location, metadata and
@@ -564,7 +564,7 @@ You can also use the {@link io.vertx.ext.jdbc.JDBCClient} class to the lookup an
 === Redis Data source
 
 Redis data sources are a specialization for Redis persistence databases.
-The client of a Redis data source service is a {@link io.vertx.redis.RedisClient}.
+The client of a Redis data source service is a {@link io.vertx.redis.client.Redis}.
 
 ==== Publishing a Redis service
 
@@ -584,7 +584,7 @@ source (url, port...).
 ==== Consuming a Redis service
 
 As stated in the previous section, how to access a data source depends on the data source itself. To build the
-{@link io.vertx.redis.RedisClient}, you can merge configuration: the record location, the metadata and a json object provided by
+{@link io.vertx.redis.client.Redis}, you can merge configuration: the record location, the metadata and a json object provided by
 the consumer:
 
 [source, $lang]
