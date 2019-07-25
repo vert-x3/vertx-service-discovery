@@ -58,11 +58,9 @@ public class RedisBackendService implements ServiceDiscoveryBackend {
     key = configuration.getString("key", "records");
 
     if (configuration.containsKey("host") || configuration.containsKey("port")) {
-      redis = Redis.createClient(vertx, new RedisOptions(configuration).setEndpoint(
-        SocketAddress.inetSocketAddress(
-          configuration.getInteger("port", 6379),
-          configuration.getString("host", "localhost"))
-      ));
+      String host = configuration.getString("host", "localhost");
+      Integer port = configuration.getInteger("port", 6379);
+      redis = Redis.createClient(vertx, new RedisOptions(configuration).setEndpoint("redis://" + host + ":" + port));
     } else {
       redis = Redis.createClient(vertx, new RedisOptions(configuration));
     }
