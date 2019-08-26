@@ -4,6 +4,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.redis.client.Command;
 import io.vertx.redis.client.Redis;
+import io.vertx.redis.client.RedisConnection;
 import io.vertx.redis.client.Request;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
@@ -65,9 +66,9 @@ public class RedisDataSourceTest {
   }
 
   @Test
-  public void test() throws InterruptedException {
+  public void test() {
     Record record = RedisDataSource.createRecord("some-redis-data-source",
-      new JsonObject().put("url", "localhost"),
+      new JsonObject().put("endpoint", "redis://localhost:6379"),
       new JsonObject().put("database", "some-raw-data"));
 
     discovery.publish(record, r -> {
@@ -85,7 +86,8 @@ public class RedisDataSourceTest {
     AtomicBoolean success = new AtomicBoolean();
     client.connect(connect -> {
       if (connect.succeeded()) {
-        client.send(Request.cmd(Command.PING), ar -> {
+        RedisConnection conn = connect.result();
+        conn.send(Request.cmd(Command.PING), ar -> {
           if (ar.succeeded()) {
             client.close();
             success.set(ar.succeeded());
@@ -116,7 +118,7 @@ public class RedisDataSourceTest {
   @Test
   public void testWithSugar() throws InterruptedException {
     Record record = RedisDataSource.createRecord("some-redis-data-source",
-      new JsonObject().put("url", "localhost"),
+      new JsonObject().put("endpoint", "redis://localhost:6379"),
       new JsonObject().put("database", "some-raw-data"));
 
     discovery.publish(record, r -> {
@@ -130,7 +132,8 @@ public class RedisDataSourceTest {
         Redis client = ar.result();
         client.connect(connect -> {
           if (connect.succeeded()) {
-            client.send(Request.cmd(Command.PING), ar1 -> {
+            RedisConnection conn = connect.result();
+            conn.send(Request.cmd(Command.PING), ar1 -> {
               if (ar1.succeeded()) {
                 client.close();
                 success.set(ar.succeeded());

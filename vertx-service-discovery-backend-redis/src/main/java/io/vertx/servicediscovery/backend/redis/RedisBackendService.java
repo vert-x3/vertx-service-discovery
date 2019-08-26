@@ -44,6 +44,7 @@ public class RedisBackendService implements ServiceDiscoveryBackend {
 
   private Vertx vertx;
   private Redis redis;
+  private RedisConnection conn;
   private String key;
 
   private static final int DISCONNECTED = 0;
@@ -69,45 +70,47 @@ public class RedisBackendService implements ServiceDiscoveryBackend {
   private void redisCall(Request request, Handler<AsyncResult<Response>> handler) {
     if (state.get() != CONNECTED) {
       // we serialize the calls
-      vertx.<Redis>executeBlocking(fut -> {
+      vertx.<RedisConnection>executeBlocking(fut -> {
         // start the connect flow...
         if (state.compareAndSet(DISCONNECTED, CONNECTING)) {
           redis
             .connect(connect -> {
               if (connect.succeeded()) {
+                RedisConnection conn = connect.result();
                 if (state.compareAndSet(CONNECTING, CONNECTED)) {
-                  fut.complete(connect.result());
+                  conn.exceptionHandler(ex -> {
+                    // fail the connection
+                    state.set(DISCONNECTED);
+                  });
+                  fut.complete(conn);
                 }
               } else {
                 // fail the connection
                 state.set(DISCONNECTED);
                 fut.fail(connect.cause());
               }
-            })
-            .exceptionHandler(ex -> {
-              // fail the connection
-              state.set(DISCONNECTED);
             });
         } else {
           // connecting state (or disconnected if there was an error)
           if (state.get() == DISCONNECTED) {
             fut.fail("Redis connection is not available.");
           } else {
-            fut.complete(redis);
+            fut.complete(conn);
           }
         }
       }, true, connect -> {
         // connection result
         if (connect.succeeded()) {
           // send the request
-          redis.send(request, handler);
+          conn = connect.result();
+          conn.send(request, handler);
         } else {
           // failed
           handler.handle(Future.failedFuture(connect.cause()));
         }
       });
     } else {
-      redis.send(request, handler);
+      conn.send(request, handler);
     }
   }
 
