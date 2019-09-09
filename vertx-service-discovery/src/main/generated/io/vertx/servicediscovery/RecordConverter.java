@@ -4,19 +4,19 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import io.vertx.core.spi.json.JsonCodec;
+import io.vertx.core.spi.json.JsonMapper;
 
 /**
- * Converter and Codec for {@link io.vertx.servicediscovery.Record}.
+ * Converter and mapper for {@link io.vertx.servicediscovery.Record}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.servicediscovery.Record} original class using Vert.x codegen.
  */
-public class RecordConverter implements JsonCodec<Record, JsonObject> {
+public class RecordConverter implements JsonMapper<Record, JsonObject> {
 
   public static final RecordConverter INSTANCE = new RecordConverter();
 
-  @Override public JsonObject encode(Record value) { return (value != null) ? value.toJson() : null; }
+  @Override public JsonObject serialize(Record value) { return (value != null) ? value.toJson() : null; }
 
-  @Override public Record decode(JsonObject value) { return (value != null) ? new Record(value) : null; }
+  @Override public Record deserialize(JsonObject value) { return (value != null) ? new Record(value) : null; }
 
   @Override public Class<Record> getTargetClass() { return Record.class; }
 

@@ -2,8 +2,8 @@ package io.vertx.servicediscovery.zookeeper;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.impl.DatabindCodec;
 import org.apache.curator.x.discovery.ServiceInstance;
 import org.apache.curator.x.discovery.ServiceInstanceBuilder;
 import org.apache.curator.x.discovery.details.InstanceSerializer;
@@ -15,7 +15,7 @@ import java.io.ByteArrayOutputStream;
  */
 public class JsonObjectSerializer implements InstanceSerializer<JsonObject> {
 
-  private final ObjectMapper mapper = Json.mapper;
+  private final ObjectMapper mapper = DatabindCodec.mapper;
   private final JavaType type;
 
   public JsonObjectSerializer() {

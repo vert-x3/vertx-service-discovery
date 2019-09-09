@@ -4,19 +4,19 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import io.vertx.core.spi.json.JsonCodec;
+import io.vertx.core.spi.json.JsonMapper;
 
 /**
- * Converter and Codec for {@link io.vertx.servicediscovery.types.HttpLocation}.
+ * Converter and mapper for {@link io.vertx.servicediscovery.types.HttpLocation}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.servicediscovery.types.HttpLocation} original class using Vert.x codegen.
  */
-public class HttpLocationConverter implements JsonCodec<HttpLocation, JsonObject> {
+public class HttpLocationConverter implements JsonMapper<HttpLocation, JsonObject> {
 
   public static final HttpLocationConverter INSTANCE = new HttpLocationConverter();
 
-  @Override public JsonObject encode(HttpLocation value) { return (value != null) ? value.toJson() : null; }
+  @Override public JsonObject serialize(HttpLocation value) { return (value != null) ? value.toJson() : null; }
 
-  @Override public HttpLocation decode(JsonObject value) { return (value != null) ? new HttpLocation(value) : null; }
+  @Override public HttpLocation deserialize(JsonObject value) { return (value != null) ? new HttpLocation(value) : null; }
 
   @Override public Class<HttpLocation> getTargetClass() { return HttpLocation.class; }
 
