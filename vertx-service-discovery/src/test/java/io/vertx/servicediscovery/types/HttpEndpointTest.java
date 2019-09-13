@@ -70,7 +70,7 @@ public class HttpEndpointTest {
     });
 
     AtomicBoolean done = new AtomicBoolean();
-    vertx.createHttpServer().requestHandler(router::accept).listen(8080, ar -> {
+    vertx.createHttpServer().requestHandler(router).listen(8080, ar -> {
       done.set(ar.succeeded());
     });
 
