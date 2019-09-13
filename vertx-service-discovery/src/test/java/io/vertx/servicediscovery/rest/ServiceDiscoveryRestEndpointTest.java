@@ -60,7 +60,7 @@ public class ServiceDiscoveryRestEndpointTest {
     ServiceDiscoveryRestEndpoint.create(router, discovery);
 
     AtomicBoolean done = new AtomicBoolean();
-    http = vertx.createHttpServer().requestHandler(router::accept)
+    http = vertx.createHttpServer().requestHandler(router)
       .listen(8080, ar -> done.set(ar.succeeded()));
 
     await().untilAtomic(done, is(true));
