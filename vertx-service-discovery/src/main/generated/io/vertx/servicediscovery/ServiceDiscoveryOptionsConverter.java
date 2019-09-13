@@ -4,21 +4,13 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import io.vertx.core.spi.json.JsonMapper;
 
 /**
  * Converter and mapper for {@link io.vertx.servicediscovery.ServiceDiscoveryOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.servicediscovery.ServiceDiscoveryOptions} original class using Vert.x codegen.
  */
-public class ServiceDiscoveryOptionsConverter implements JsonMapper<ServiceDiscoveryOptions, JsonObject> {
+public class ServiceDiscoveryOptionsConverter {
 
-  public static final ServiceDiscoveryOptionsConverter INSTANCE = new ServiceDiscoveryOptionsConverter();
-
-  @Override public JsonObject serialize(ServiceDiscoveryOptions value) { return (value != null) ? value.toJson() : null; }
-
-  @Override public ServiceDiscoveryOptions deserialize(JsonObject value) { return (value != null) ? new ServiceDiscoveryOptions(value) : null; }
-
-  @Override public Class<ServiceDiscoveryOptions> getTargetClass() { return ServiceDiscoveryOptions.class; }
 
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, ServiceDiscoveryOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
