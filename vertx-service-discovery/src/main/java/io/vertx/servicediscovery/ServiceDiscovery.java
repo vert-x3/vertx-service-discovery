@@ -20,6 +20,7 @@ import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.Nullable;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -94,38 +95,6 @@ public interface ServiceDiscovery {
   }
 
   /**
-   * Creates an instance of {@link ServiceDiscovery}.
-   *
-   * @param vertx             the vert.x instance
-   * @param options           the discovery options
-   * @param completionHandler completion handler called when the service discovery has been initialized. This
-   *                          includes the initialization of the service importer registered from the SPI.
-   * @return the created instance, should not be used to retrieve services before the invocation of the completion
-   * handler.
-   */
-  static ServiceDiscovery create(Vertx vertx, ServiceDiscoveryOptions options, Handler<ServiceDiscovery> completionHandler) {
-    DiscoveryImpl discovery = new DiscoveryImpl(vertx, options);
-    discovery.initialize(completionHandler);
-    return discovery;
-  }
-
-  /**
-   * Creates a new instance of {@link ServiceDiscovery} using the default configuration.
-   *
-   * @param vertx             the vert.x instance
-   * @param completionHandler completion handler called when the service discovery has been initialized. This
-   *                          includes the initialization of the service importer registered from the SPI.
-   * @return the created instance, should not be used to retrieve services before the invocation of the completion
-   * handler.
-   */
-  static ServiceDiscovery create(Vertx vertx, Handler<ServiceDiscovery> completionHandler) {
-    DiscoveryImpl discovery = new DiscoveryImpl(vertx, new ServiceDiscoveryOptions());
-    discovery.initialize(completionHandler);
-    return discovery;
-  }
-
-
-  /**
    * Gets a service reference from the given record.
    *
    * @param record the chosen record
@@ -153,15 +122,9 @@ public interface ServiceDiscovery {
   boolean release(ServiceReference reference);
 
   /**
-   * Registers a discovery service importer. Importers let you integrate other discovery technologies in this service
-   * discovery.
-   *
-   * @param importer      the service importer
-   * @param configuration the optional configuration
-   * @return the current {@link ServiceDiscovery}
+   * Like {@link #registerServiceImporter(ServiceImporter, JsonObject, Handler)} but returns a {@code Future} of the asynchronous result
    */
-  @Fluent
-  ServiceDiscovery registerServiceImporter(ServiceImporter importer, JsonObject configuration);
+  Future<Void> registerServiceImporter(ServiceImporter importer, JsonObject configuration);
 
   /**
    * Registers a discovery service importer. Importers let you integrate other discovery technologies in this service
@@ -178,15 +141,9 @@ public interface ServiceDiscovery {
                                            Handler<AsyncResult<Void>> completionHandler);
 
   /**
-   * Registers a discovery bridge. Exporters let you integrate other discovery technologies in this service
-   * discovery.
-   *
-   * @param exporter      the service exporter
-   * @param configuration the optional configuration
-   * @return the current {@link ServiceDiscovery}
+   * Like {@link #registerServiceExporter(ServiceExporter, JsonObject, Handler)} but returns a {@code Future} of the asynchronous result
    */
-  @Fluent
-  ServiceDiscovery registerServiceExporter(ServiceExporter exporter, JsonObject configuration);
+  Future<Void> registerServiceExporter(ServiceExporter exporter, JsonObject configuration);
 
   /**
    * Registers a discovery bridge. Exporters let you integrate other discovery technologies in this service
@@ -216,12 +173,23 @@ public interface ServiceDiscovery {
   void publish(Record record, Handler<AsyncResult<Record>> resultHandler);
 
   /**
+   * Like {@link #publish(Record, Handler)} but returns a {@code Future} of the asynchronous result
+   */
+  Future<Record> publish(Record record);
+
+
+  /**
    * Un-publishes a record.
    *
    * @param id            the registration id
    * @param resultHandler handler called when the operation has completed (successfully or not).
    */
   void unpublish(String id, Handler<AsyncResult<Void>> resultHandler);
+
+  /**
+   * Like {@link #unpublish(String, Handler)} but returns a {@code Future} of the asynchronous result
+   */
+  Future<Void> unpublish(String id);
 
   /**
    * Lookups for a single record.
@@ -249,6 +217,11 @@ public interface ServiceDiscovery {
   void getRecord(JsonObject filter, Handler<AsyncResult<@Nullable Record>> resultHandler);
 
   /**
+   * Like {@link #getRecord(JsonObject, Handler)} but returns a {@code Future} of the asynchronous result
+   */
+  Future<@Nullable Record> getRecord(JsonObject filter);
+
+  /**
    * Lookups for a single record.
    * <p>
    * The filter is a {@link Function} taking a {@link Record} as argument and returning a boolean. You should see it
@@ -261,6 +234,11 @@ public interface ServiceDiscovery {
    *                      record, the operation succeed, but the async result has no result.
    */
   void getRecord(Function<Record, Boolean> filter, Handler<AsyncResult<@Nullable Record>> resultHandler);
+
+  /**
+   * Like {@link #getRecord(Function, Handler)} but returns a {@code Future} of the asynchronous result
+   */
+  Future<@Nullable Record> getRecord(Function<Record, Boolean> filter);
 
   /**
    * Lookups for a single record.
@@ -279,6 +257,11 @@ public interface ServiceDiscovery {
   void getRecord(Function<Record, Boolean> filter, boolean includeOutOfService, Handler<AsyncResult<@Nullable Record>> resultHandler);
 
   /**
+   * Like {@link #getRecords(Function, boolean, Handler)} but returns a {@code Future} of the asynchronous result
+   */
+  Future<@Nullable Record> getRecord(Function<Record, Boolean> filter, boolean includeOutOfService);
+
+  /**
    * Lookups for a set of records. Unlike {@link #getRecord(JsonObject, Handler)}, this method returns all matching
    * records.
    *
@@ -287,6 +270,11 @@ public interface ServiceDiscovery {
    *                      operation succeed, but the async result has an empty list as result.
    */
   void getRecords(JsonObject filter, Handler<AsyncResult<List<Record>>> resultHandler);
+
+  /**
+   * Like {@link #getRecords(JsonObject, Handler)} but returns a {@code Future} of the asynchronous result
+   */
+  Future<List<Record>> getRecords(JsonObject filter);
 
   /**
    * Lookups for a set of records. Unlike {@link #getRecord(Function, Handler)}, this method returns all matching
@@ -302,6 +290,11 @@ public interface ServiceDiscovery {
    *                      operation succeed, but the async result has an empty list as result.
    */
   void getRecords(Function<Record, Boolean> filter, Handler<AsyncResult<List<Record>>> resultHandler);
+
+  /**
+   * Like {@link #getRecords(Function, Handler)} but returns a {@code Future} of the asynchronous result
+   */
+  Future<List<Record>> getRecords(Function<Record, Boolean> filter);
 
   /**
    * Lookups for a set of records. Unlike {@link #getRecord(Function, Handler)}, this method returns all matching
@@ -322,12 +315,22 @@ public interface ServiceDiscovery {
                   Handler<AsyncResult<List<Record>>> resultHandler);
 
   /**
+   * Like {@link #getRecords(Function, boolean, Handler)} but returns a {@code Future} of the asynchronous result
+   */
+  Future<List<Record>> getRecords(Function<Record, Boolean> filter, boolean includeOutOfService);
+
+  /**
    * Updates the given record. The record must has been published, and has it's registration id set.
    *
    * @param record        the updated record
    * @param resultHandler handler called when the lookup has been completed.
    */
   void update(Record record, Handler<AsyncResult<Record>> resultHandler);
+
+  /**
+   * Like {@link #update(Record, Handler)} but returns a {@code Future} of the asynchronous result
+   */
+  Future<Record> update(Record record);
 
   /**
    * @return the set of service references retrieved by this service discovery.
