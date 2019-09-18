@@ -102,7 +102,9 @@ public interface ServiceDiscovery {
    *                          includes the initialization of the service importer registered from the SPI.
    * @return the created instance, should not be used to retrieve services before the invocation of the completion
    * handler.
+   * @deprecated this will be removed in Vert.x 4, instead use {@link #create(Vertx, ServiceDiscoveryOptions)}
    */
+  @Deprecated
   static ServiceDiscovery create(Vertx vertx, ServiceDiscoveryOptions options, Handler<ServiceDiscovery> completionHandler) {
     DiscoveryImpl discovery = new DiscoveryImpl(vertx, options);
     discovery.initialize(completionHandler);
@@ -117,7 +119,9 @@ public interface ServiceDiscovery {
    *                          includes the initialization of the service importer registered from the SPI.
    * @return the created instance, should not be used to retrieve services before the invocation of the completion
    * handler.
+   * @deprecated this will be removed in Vert.x 4, instead use {@link #create(Vertx)}
    */
+  @Deprecated
   static ServiceDiscovery create(Vertx vertx, Handler<ServiceDiscovery> completionHandler) {
     DiscoveryImpl discovery = new DiscoveryImpl(vertx, new ServiceDiscoveryOptions());
     discovery.initialize(completionHandler);
