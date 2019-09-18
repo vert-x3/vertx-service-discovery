@@ -16,6 +16,7 @@
 
 package io.vertx.servicediscovery;
 
+import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.Nullable;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
@@ -159,6 +160,7 @@ public interface ServiceDiscovery {
    * @param configuration the optional configuration
    * @return the current {@link ServiceDiscovery}
    */
+  @Fluent
   ServiceDiscovery registerServiceImporter(ServiceImporter importer, JsonObject configuration);
 
   /**
@@ -171,6 +173,7 @@ public interface ServiceDiscovery {
    *                          initial imports
    * @return the current {@link ServiceDiscovery}
    */
+  @Fluent
   ServiceDiscovery registerServiceImporter(ServiceImporter importer, JsonObject configuration,
                                            Handler<AsyncResult<Void>> completionHandler);
 
@@ -182,6 +185,7 @@ public interface ServiceDiscovery {
    * @param configuration the optional configuration
    * @return the current {@link ServiceDiscovery}
    */
+  @Fluent
   ServiceDiscovery registerServiceExporter(ServiceExporter exporter, JsonObject configuration);
 
   /**
@@ -193,6 +197,7 @@ public interface ServiceDiscovery {
    * @param completionHandler handler notified when the exporter has been correctly initialized.
    * @return the current {@link ServiceDiscovery}
    */
+  @Fluent
   ServiceDiscovery registerServiceExporter(ServiceExporter exporter, JsonObject configuration,
                                            Handler<AsyncResult<Void>> completionHandler);
 
