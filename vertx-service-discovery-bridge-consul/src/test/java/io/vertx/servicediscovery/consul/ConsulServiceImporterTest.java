@@ -97,8 +97,8 @@ public class ConsulServiceImporterTest {
   public void testBasicImport() {
     services.add(buildService("10.1.10.12", "redis", "redis", null, 8000, "passing"));
 
-    discovery = ServiceDiscovery.create(vertx)
-        .registerServiceImporter(new ConsulServiceImporter(),
+    discovery = ServiceDiscovery.create(vertx);
+    discovery.registerServiceImporter(new ConsulServiceImporter(),
             new JsonObject().put("host", "localhost").put("port", 5601));
 
     await().until(() -> getAllRecordsBlocking().size() > 0);
@@ -120,8 +120,8 @@ public class ConsulServiceImporterTest {
     services.add(buildService("10.1.10.12", "redis", "redis", null, 8000, "passing"));
     services.add(buildService("10.1.10.12", "warning", "warning", null, 8001, "warning"));
 
-    discovery = ServiceDiscovery.create(vertx)
-      .registerServiceImporter(new ConsulServiceImporter(),
+    discovery = ServiceDiscovery.create(vertx);
+    discovery.registerServiceImporter(new ConsulServiceImporter(),
         new JsonObject().put("host", "localhost").put("port", 5601));
 
     await().until(() -> getAllRecordsBlocking().size() > 0);
@@ -135,8 +135,8 @@ public class ConsulServiceImporterTest {
     services.add(buildService("10.1.10.12", "redis", "redis", null, 8000, "passing"));
     services.add(buildService("10.1.10.12", "warning", "warning", null, 8001, "warning"));
 
-    discovery = ServiceDiscovery.create(vertx)
-      .registerServiceImporter(new ConsulServiceImporter(),
+    discovery = ServiceDiscovery.create(vertx);
+    discovery.registerServiceImporter(new ConsulServiceImporter(),
         new JsonObject().put("host", "localhost").put("port", 5601).put("up_threshold", "warning"));
 
     await().until(() -> getAllRecordsBlocking().size() > 0);
@@ -149,8 +149,8 @@ public class ConsulServiceImporterTest {
   public void testHttpImport() {
     services.add(buildService("172.17.0.2", "web", "web", new String[]{"rails", "http-endpoint"}, 80, "passing"));
 
-    discovery = ServiceDiscovery.create(vertx)
-        .registerServiceImporter(new ConsulServiceImporter(),
+    discovery = ServiceDiscovery.create(vertx);
+    discovery.registerServiceImporter(new ConsulServiceImporter(),
             new JsonObject().put("host", "localhost").put("port", 5601));
 
     await().until(() -> getAllRecordsBlocking().size() > 0);
@@ -223,8 +223,8 @@ public class ConsulServiceImporterTest {
     services.add(buildService("10.4.7.221", "ubuntu221:mysql:3306", "db", new String[] {"master", "backups"}, 32769, "passing"));
     services.add(buildService("10.4.7.220", "ubuntu220:mysql:3306", "db", new String[] {"master", "backups"}, 32771, "passing"));
 
-    discovery = ServiceDiscovery.create(vertx)
-        .registerServiceImporter(new ConsulServiceImporter(),
+    discovery = ServiceDiscovery.create(vertx);
+    discovery.registerServiceImporter(new ConsulServiceImporter(),
             new JsonObject().put("host", "localhost").put("port", 5601));
 
     await().until(() -> getAllRecordsBlocking().size() > 0);
