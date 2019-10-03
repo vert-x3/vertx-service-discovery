@@ -23,7 +23,7 @@
   <parent>
     <groupId>io.vertx</groupId>
     <artifactId>vertx-service-discovery-parent</artifactId>
-    <version>3.8.2-SNAPSHOT</version>
+    <version>3.8.2</version>
   </parent>
 
   <artifactId>vertx-service-discovery-bridge-consul</artifactId>
