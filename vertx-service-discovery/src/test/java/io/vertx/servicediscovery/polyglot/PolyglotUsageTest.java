@@ -237,14 +237,14 @@ public class PolyglotUsageTest {
 
       vertx.eventBus().<JsonObject>request("source1-sugar", "", reply -> {
         tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("HandlerRegistration"));
+        tc.assertTrue(reply.result().body().getString("client").contains("MessageConsumerImpl"));
         tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
         ms_sugar.complete();
       });
 
       vertx.eventBus().<JsonObject>request("source1-ref", "", reply -> {
         tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("HandlerRegistration"));
+        tc.assertTrue(reply.result().body().getString("client").contains("MessageConsumerImpl"));
         tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
         ms_ref.complete();
       });
