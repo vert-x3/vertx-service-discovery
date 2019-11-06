@@ -43,7 +43,7 @@ public class AsyncMapTest {
   @Before
   public void setUp() {
     vertx = Vertx.vertx();
-    map = new LocalAsyncMap<>(vertx.sharedData().getLocalMap("some-name"));
+    map = vertx.sharedData().<String, String>getLocalAsyncMap("some-name").result();
   }
 
   @After

@@ -42,7 +42,7 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
   public void init(Vertx vertx, JsonObject config) {
     this.vertx = vertx;
     if (!vertx.isClustered() || useLocalBackend()) {
-      registry = new LocalAsyncMap<>(vertx.sharedData().getLocalMap("service.registry"));
+      registry = vertx.sharedData().<String, String>getLocalAsyncMap("service.registry").result();
     }
   }
 

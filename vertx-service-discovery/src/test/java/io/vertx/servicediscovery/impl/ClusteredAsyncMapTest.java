@@ -35,7 +35,7 @@ public class ClusteredAsyncMapTest extends AsyncMapTest {
   @Before
   public void setUp() {
     Vertx.clusteredVertx(new VertxOptions(), ar -> {
-      ((VertxInternal) ar.result()).getClusterManager().<String, String>getAsyncMap("some-name", x -> {
+      ((VertxInternal) ar.result()).getClusterManager().<String, String>getAsyncMap("some-name").setHandler(x -> {
         map = x.result();
         vertx = ar.result();
       });

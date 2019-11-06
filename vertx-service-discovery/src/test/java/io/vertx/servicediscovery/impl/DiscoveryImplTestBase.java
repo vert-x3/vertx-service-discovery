@@ -218,7 +218,7 @@ public abstract class DiscoveryImplTestBase {
 
       @Override
       public void init(Vertx vertx, JsonObject config) {
-        this.registry = new LocalAsyncMap<>(vertx.sharedData().getLocalMap("service.registry"));
+        this.registry = vertx.sharedData().<String, String>getLocalAsyncMap("service.registry").result();
       }
 
       @Override
