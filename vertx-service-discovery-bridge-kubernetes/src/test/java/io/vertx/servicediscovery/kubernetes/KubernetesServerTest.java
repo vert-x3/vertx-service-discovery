@@ -21,7 +21,6 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static org.hamcrest.core.Is.is;
