@@ -16,8 +16,8 @@
 
 package io.vertx.servicediscovery.kubernetes;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.fabric8.kubernetes.api.model.*;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.spi.ServiceType;
@@ -38,8 +38,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class KubernetesServiceImporterTest {
 
+  private static final ObjectMapper mapper = new ObjectMapper();
+
   @Test
-  public void testRecordCreation() {
+  public void testRecordCreation() throws Exception {
     ObjectMeta metadata = new ObjectMeta();
     metadata.setName("my-service");
     metadata.setUid("uuid");
@@ -55,7 +57,7 @@ public class KubernetesServiceImporterTest {
     service.setMetadata(metadata);
     service.setSpec(spec);
 
-    Record record = KubernetesServiceImporter.createRecord(new JsonObject(Json.encodeToBuffer(service)));
+    Record record = KubernetesServiceImporter.createRecord(new JsonObject(mapper.writeValueAsString(service)));
     assertThat(record).isNotNull();
     assertThat(record.getName()).isEqualTo("my-service");
     assertThat(record.getMetadata().getString("kubernetes.name")).isEqualTo("my-service");
@@ -66,10 +68,10 @@ public class KubernetesServiceImporterTest {
   }
 
   @Test
-  public void testHttpRecordCreation() {
+  public void testHttpRecordCreation() throws Exception {
     Service service = getHttpService();
 
-    Record record = KubernetesServiceImporter.createRecord(new JsonObject(Json.encodeToBuffer(service)));
+    Record record = KubernetesServiceImporter.createRecord(new JsonObject(mapper.writeValueAsString(service)));
     assertThat(record).isNotNull();
     assertThat(record.getName()).isEqualTo("my-service");
     assertThat(record.getMetadata().getString("kubernetes.name")).isEqualTo("my-service");
@@ -103,7 +105,7 @@ public class KubernetesServiceImporterTest {
   }
 
   @Test
-  public void testHttpWithSSLRecordCreation() {
+  public void testHttpWithSSLRecordCreation() throws Exception {
     Map<String, String> labels = new LinkedHashMap<>();
     labels.put("service-type", "http-endpoint");
     labels.put("ssl", "true");
@@ -124,7 +126,7 @@ public class KubernetesServiceImporterTest {
     service.setMetadata(metadata);
     service.setSpec(spec);
 
-    Record record = KubernetesServiceImporter.createRecord(Json.encodeToBuffer(service).toJsonObject());
+    Record record = KubernetesServiceImporter.createRecord(new JsonObject(mapper.writeValueAsString(service)));
     assertThat(record).isNotNull();
     assertThat(record.getName()).isEqualTo("my-service");
     assertThat(record.getMetadata().getString("kubernetes.name")).isEqualTo("my-service");
@@ -136,7 +138,7 @@ public class KubernetesServiceImporterTest {
   }
 
   @Test
-  public void testServiceTypeDetection() {
+  public void testServiceTypeDetection() throws Exception {
     Map<String, String> labels = new LinkedHashMap<>();
 
     ObjectMeta metadata = new ObjectMeta();
@@ -155,62 +157,62 @@ public class KubernetesServiceImporterTest {
     service.setMetadata(metadata);
     service.setSpec(spec);
 
-    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(Json.encodeToBuffer(service)), new Record()))
+    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(mapper.writeValueAsString(service)), new Record()))
       .isEqualTo(HttpEndpoint.TYPE);
 
     port.setPort(443);
-    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(Json.encodeToBuffer(service)), new Record()))
+    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(mapper.writeValueAsString(service)), new Record()))
       .isEqualTo(HttpEndpoint.TYPE);
 
     port.setPort(433);
-    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(Json.encodeToBuffer(service)), new Record()))
+    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(mapper.writeValueAsString(service)), new Record()))
       .isEqualTo(ServiceType.UNKNOWN);
 
     port.setPort(8888);
-    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(Json.encodeToBuffer(service)), new Record()))
+    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(mapper.writeValueAsString(service)), new Record()))
       .isEqualTo(HttpEndpoint.TYPE);
 
     port.setPort(8080);
-    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(Json.encodeToBuffer(service)), new Record()))
+    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(mapper.writeValueAsString(service)), new Record()))
       .isEqualTo(HttpEndpoint.TYPE);
 
     port.setPort(9000);
-    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(Json.encodeToBuffer(service)), new Record()))
+    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(mapper.writeValueAsString(service)), new Record()))
       .isEqualTo(HttpEndpoint.TYPE);
 
     port.setPort(80);
-    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(Json.encodeToBuffer(service)), new Record()))
+    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(mapper.writeValueAsString(service)), new Record()))
       .isEqualTo(HttpEndpoint.TYPE);
 
     port.setPort(6379);
-    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(Json.encodeToBuffer(service)), new Record()))
+    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(mapper.writeValueAsString(service)), new Record()))
       .isEqualTo(RedisDataSource.TYPE);
 
     port.setPort(3306);
-    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(Json.encodeToBuffer(service)), new Record()))
+    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(mapper.writeValueAsString(service)), new Record()))
       .isEqualTo(JDBCDataSource.TYPE);
 
     port.setPort(27017);
-    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(Json.encodeToBuffer(service)), new Record()))
+    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(mapper.writeValueAsString(service)), new Record()))
       .isEqualTo(MongoDataSource.TYPE);
 
     port.setPort(27018);
-    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(Json.encodeToBuffer(service)), new Record()))
+    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(mapper.writeValueAsString(service)), new Record()))
       .isEqualTo(MongoDataSource.TYPE);
 
     port.setPort(27019);
-    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(Json.encodeToBuffer(service)), new Record()))
+    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(mapper.writeValueAsString(service)), new Record()))
       .isEqualTo(MongoDataSource.TYPE);
 
   }
 
   @Test
-  public void testHttpExternalServiceRecordCreation() {
+  public void testHttpExternalServiceRecordCreation() throws Exception {
 
     int servicePort = 8080;
     Service service = getExternalService(servicePort);
 
-    Record record = KubernetesServiceImporter.createRecord(new JsonObject(Json.encodeToBuffer(service)));
+    Record record = KubernetesServiceImporter.createRecord(new JsonObject(mapper.writeValueAsString(service)));
     assertThat(record).isNotNull();
     assertThat(record.getName()).isEqualTo("my-service");
     assertThat(record.getMetadata().getString("kubernetes.name")).isEqualTo("my-service");
@@ -225,12 +227,12 @@ public class KubernetesServiceImporterTest {
   }
 
   @Test
-  public void testHttpWithSSLExternalServiceRecordCreation() {
+  public void testHttpWithSSLExternalServiceRecordCreation() throws Exception {
 
     int servicePort = 443;
     Service service = getExternalService(servicePort);
 
-    Record record = KubernetesServiceImporter.createRecord(new JsonObject(Json.encodeToBuffer(service)));
+    Record record = KubernetesServiceImporter.createRecord(new JsonObject(mapper.writeValueAsString(service)));
     assertThat(record).isNotNull();
     assertThat(record.getName()).isEqualTo("my-service");
     assertThat(record.getMetadata().getString("kubernetes.name")).isEqualTo("my-service");
@@ -245,13 +247,13 @@ public class KubernetesServiceImporterTest {
   }
 
   @Test
-  public void testUnknownExternalServiceRecordCreation() {
+  public void testUnknownExternalServiceRecordCreation() throws Exception {
 
     // JDBC Example
     int servicePort = 5432;
     Service service = getExternalService(servicePort);
 
-    Record record = KubernetesServiceImporter.createRecord(new JsonObject(Json.encodeToBuffer(service)));
+    Record record = KubernetesServiceImporter.createRecord(new JsonObject(mapper.writeValueAsString(service)));
     assertThat(record).isNotNull();
     assertThat(record.getName()).isEqualTo("my-service");
     assertThat(record.getMetadata().getString("kubernetes.name")).isEqualTo("my-service");
