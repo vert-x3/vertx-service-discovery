@@ -16,13 +16,13 @@
 
 package io.vertx.servicediscovery.rest;
 
-import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.ServiceDiscovery;
-import io.vertx.servicediscovery.Record;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceDiscovery;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -183,9 +183,10 @@ public class ServiceDiscoveryRestEndpoint {
       if (ar.failed()) {
         routingContext.fail(ar.cause());
       } else {
-        routingContext.response().setStatusCode(200)
-            .putHeader("Content-Type", "application/json")
-            .end(Json.encode(ar.result()));
+        JsonArray jsonArray = ar.result().stream()
+          .map(Record::toJson)
+          .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
+        routingContext.json(jsonArray);
       }
     });
   }
