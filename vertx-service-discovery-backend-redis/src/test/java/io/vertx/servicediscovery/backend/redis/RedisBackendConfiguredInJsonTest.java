@@ -47,7 +47,7 @@ public class RedisBackendConfiguredInJsonTest extends ServiceDiscoveryBackendTes
   @Override
   protected ServiceDiscoveryBackend createBackend() {
     RedisBackendService backend = new RedisBackendService();
-    backend.init(vertx, new JsonObject().put("host", "localhost").put("port", PORT).put("key", "vertx"));
+    backend.init(vertx, new JsonObject().put("connectionString", "redis://localhost:" + PORT).put("key", "vertx"));
     return backend;
   }
 

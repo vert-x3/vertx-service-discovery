@@ -32,7 +32,7 @@ public class ServiceDiscoveryBackendRedisExamples {
     ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions()
         .setBackendConfiguration(
             new JsonObject()
-                .put("host", "127.0.0.1")
+                .put("connectionString", "redis://localhost:6379")
                 .put("key", "records")
         ));
   }
@@ -41,7 +41,7 @@ public class ServiceDiscoveryBackendRedisExamples {
     ServiceDiscovery.create(vertx,
       new ServiceDiscoveryOptions(new JsonObject()
         .put("backendConfiguration",
-          new JsonObject().put("host", "localhost").put("port", 1234).put("key", "my-records")
+          new JsonObject().put("connectionString", "redis://localhost:6379").put("key", "my-records")
     )));
   }
 
