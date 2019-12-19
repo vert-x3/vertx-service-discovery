@@ -202,10 +202,13 @@ public class KubernetesServiceImporter implements ServiceImporter {
 
         @Override
         public void end(Handler<AsyncResult<Void>> handler) {
-          end();
-          if (handler != null) {
-            handler.handle(Future.succeededFuture());
+          try {
+            parser.end();
+          } catch (Exception e) {
+            handler.handle(Future.failedFuture(e));
+            return;
           }
+          handler.handle(Future.succeededFuture());
         }
 
         @Override
