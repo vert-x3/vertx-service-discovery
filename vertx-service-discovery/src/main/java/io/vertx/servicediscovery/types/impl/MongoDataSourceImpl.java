@@ -56,7 +56,7 @@ public class MongoDataSourceImpl implements MongoDataSource {
       if (result.getBoolean("shared", false)) {
         return MongoClient.createShared(vertx, result);
       } else {
-        return MongoClient.createNonShared(vertx, result);
+        return MongoClient.create(vertx, result);
       }
     }
 
