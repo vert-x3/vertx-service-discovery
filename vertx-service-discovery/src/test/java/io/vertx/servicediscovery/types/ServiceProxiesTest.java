@@ -17,6 +17,9 @@
 package io.vertx.servicediscovery.types;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.eventbus.DeliveryOptions;
+import io.vertx.core.eventbus.MessageCodec;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
@@ -146,4 +149,71 @@ public class ServiceProxiesTest {
     service.release();
   }
 
+
+  @Test
+  public void testUsingGetMethodWithConfig() {
+    MyCustomCodec codec = new MyCustomCodec(new JsonObject().put("name", "intercepted"));
+    vertx.eventBus().registerCodec(codec);
+
+    HelloService svc = new HelloServiceImpl();
+    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    Record record = EventBusService.createRecord("Hello", "address", HelloService.class);
+
+    discovery.publish(record, (r) -> {
+    });
+    await().until(() -> record.getRegistration() != null);
+
+    AtomicReference<HelloService> found = new AtomicReference<>();
+    EventBusService.getProxy(discovery, HelloService.class, new DeliveryOptions().setCodecName(codec.name()).toJson(), ar -> {
+      found.set(ar.result());
+    });
+    await().until(() -> found.get() != null);
+
+    Assertions.assertThat(discovery.bindings()).hasSize(1);
+
+    HelloService hello = found.get();
+    AtomicReference<String> result = new AtomicReference<>();
+    hello.hello(name, ar -> result.set(ar.result()));
+    await().untilAtomic(result, not(nullValue()));
+
+    assertThat(result.get()).endsWith("intercepted");
+
+    ServiceDiscovery.releaseServiceObject(discovery, found.get());
+
+    Assertions.assertThat(discovery.bindings()).hasSize(0);
+  }
+
+  private static class MyCustomCodec implements MessageCodec<JsonObject, JsonObject> {
+
+    final JsonObject replacement;
+
+    MyCustomCodec(JsonObject replacement) {
+      this.replacement = replacement;
+    }
+
+    @Override
+    public void encodeToWire(Buffer buffer, JsonObject entries) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public JsonObject decodeFromWire(int i, Buffer buffer) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public JsonObject transform(JsonObject jsonObject) {
+      return jsonObject.put("name", replacement);
+    }
+
+    @Override
+    public String name() {
+      return getClass().getName();
+    }
+
+    @Override
+    public byte systemCodecID() {
+      return -1;
+    }
+  }
 }
