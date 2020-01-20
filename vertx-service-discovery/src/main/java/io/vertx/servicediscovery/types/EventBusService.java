@@ -135,6 +135,36 @@ public interface EventBusService extends ServiceType {
 
   /**
    * Lookup for a service record and if found, retrieve it and return the service object (used to consume the service).
+   * This is a convenient method to avoid explicit lookup and then retrieval of the service. A filter based on the
+   * request interface is used.
+   *
+   * @param discovery     the service discovery instance
+   * @param itf           the service interface
+   * @param conf          the configuration for message delivery
+   * @param resultHandler the result handler
+   * @param <T>           the service interface
+   * @return {@code null}
+   */
+  @GenIgnore // Java only
+  static <T> T getProxy(ServiceDiscovery discovery, Class<T> itf, JsonObject conf, Handler<AsyncResult<T>> resultHandler) {
+    JsonObject filter = new JsonObject().put("service.interface", itf.getName());
+    discovery.getRecord(filter, ar -> {
+      if (ar.failed()) {
+        resultHandler.handle(Future.failedFuture(ar.cause()));
+      } else {
+        if (ar.result() == null) {
+          resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
+        } else {
+          ServiceReference service = discovery.getReferenceWithConfiguration(ar.result(), conf);
+          resultHandler.handle(Future.succeededFuture(service.get()));
+        }
+      }
+    });
+    return null;
+  }
+
+  /**
+   * Lookup for a service record and if found, retrieve it and return the service object (used to consume the service).
    * This is a convenient method to avoid explicit lookup and then retrieval of the service. This method requires to
    * have the {@code clientClass} set with the expected set of client. This is important for usages not using Java so
    * you can pass the expected type.
@@ -172,6 +202,40 @@ public interface EventBusService extends ServiceType {
    * you can pass the expected type.
    *
    * @param discovery     the service discovery
+   * @param filter        the filter
+   * @param clientClass   the client class
+   * @param conf          the configuration for message delivery
+   * @param resultHandler the result handler
+   * @param <T>           the type of the client class
+   * @return {@code null} - do not use
+   */
+  static <T> T getServiceProxy(ServiceDiscovery discovery,
+                               Function<Record, Boolean> filter,
+                               Class<T> clientClass,
+                               JsonObject conf,
+                               Handler<AsyncResult<T>> resultHandler) {
+    discovery.getRecord(filter, ar -> {
+      if (ar.failed()) {
+        resultHandler.handle(Future.failedFuture(ar.cause()));
+      } else {
+        if (ar.result() == null) {
+          resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
+        } else {
+          ServiceReference service = discovery.getReferenceWithConfiguration(ar.result(), conf);
+          resultHandler.handle(Future.succeededFuture(service.getAs(clientClass)));
+        }
+      }
+    });
+    return null;
+  }
+
+  /**
+   * Lookup for a service record and if found, retrieve it and return the service object (used to consume the service).
+   * This is a convenient method to avoid explicit lookup and then retrieval of the service. This method requires to
+   * have the {@code clientClass} set with the expected set of client. This is important for usages not using Java so
+   * you can pass the expected type.
+   *
+   * @param discovery     the service discovery
    * @param filter        the filter as json object
    * @param clientClass   the client class
    * @param resultHandler the result handler
@@ -190,6 +254,40 @@ public interface EventBusService extends ServiceType {
           resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
         } else {
           ServiceReference service = discovery.getReference(ar.result());
+          resultHandler.handle(Future.succeededFuture(service.getAs(clientClass)));
+        }
+      }
+    });
+    return null;
+  }
+
+  /**
+   * Lookup for a service record and if found, retrieve it and return the service object (used to consume the service).
+   * This is a convenient method to avoid explicit lookup and then retrieval of the service. This method requires to
+   * have the {@code clientClass} set with the expected set of client. This is important for usages not using Java so
+   * you can pass the expected type.
+   *
+   * @param discovery     the service discovery
+   * @param filter        the filter as json object
+   * @param clientClass   the client class
+   * @param conf          the configuration for message delivery
+   * @param resultHandler the result handler
+   * @param <T>           the type of the client class
+   * @return {@code null} - do not use
+   */
+  static <T> T getServiceProxyWithJsonFilter(ServiceDiscovery discovery,
+                                             JsonObject filter,
+                                             Class<T> clientClass,
+                                             JsonObject conf,
+                                             Handler<AsyncResult<T>> resultHandler) {
+    discovery.getRecord(filter, ar -> {
+      if (ar.failed()) {
+        resultHandler.handle(Future.failedFuture(ar.cause()));
+      } else {
+        if (ar.result() == null) {
+          resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
+        } else {
+          ServiceReference service = discovery.getReferenceWithConfiguration(ar.result(), conf);
           resultHandler.handle(Future.succeededFuture(service.getAs(clientClass)));
         }
       }
