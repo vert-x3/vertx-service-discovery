@@ -70,7 +70,7 @@ public class JDBCDataSourceImpl implements JDBCDataSource {
       if (result.getBoolean("shared", false)) {
         return JDBCClient.createShared(vertx, result);
       } else {
-        return JDBCClient.createNonShared(vertx, result);
+        return JDBCClient.create(vertx, result);
       }
     }
 
