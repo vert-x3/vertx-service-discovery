@@ -108,7 +108,7 @@ public class HttpEndpointTest {
         HttpClient client2 = reference.get();
         context.assertTrue(client == client2);
 
-        client.getNow("/foo", context.asyncAssertSuccess(response -> {
+        client.get("/foo", context.asyncAssertSuccess(response -> {
           context.assertEquals(response.statusCode(), 200);
           response.bodyHandler(body -> {
             context.assertEquals(body.toString(), "hello");
@@ -204,7 +204,7 @@ public class HttpEndpointTest {
         context.assertTrue(found.succeeded());
         context.assertTrue(found.result() != null);
         HttpClient client = found.result();
-        client.getNow("/foo", context.asyncAssertSuccess(response -> {
+        client.get("/foo", context.asyncAssertSuccess(response -> {
           context.assertEquals(response.statusCode(), 200);
           context.assertEquals(response.getHeader("connection"), "close");
           response.bodyHandler(body -> {
