@@ -62,7 +62,7 @@ public class HTTPEndpointExamples {
         HttpClient client = reference.getAs(HttpClient.class);
 
         // You need to path the complete path
-        client.getNow("/api/persons", response -> {
+        client.get("/api/persons", response -> {
 
           // ...
 
@@ -104,7 +104,7 @@ public class HTTPEndpointExamples {
         HttpClient client = ar.result();
 
         // You need to path the complete path
-        client.getNow("/api/persons", response -> {
+        client.get("/api/persons", response -> {
 
           // ...
 
