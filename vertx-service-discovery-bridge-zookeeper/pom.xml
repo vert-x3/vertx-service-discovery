@@ -13,7 +13,7 @@
   <artifactId>vertx-service-discovery-bridge-zookeeper</artifactId>
 
   <properties>
-    <curator.version>2.11.0</curator.version>
+    <curator.version>2.13.0</curator.version>
   </properties>
 
   <dependencies>
@@ -66,7 +66,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>20.0</version>
+      <version>25.1-jre</version>
     </dependency>
 
     <!-- ZK requires these dependencies: declare this dependency to force this module to use this one. These are the versions used by vert.x -->
