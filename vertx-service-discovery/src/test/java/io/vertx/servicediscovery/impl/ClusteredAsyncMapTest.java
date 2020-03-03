@@ -16,14 +16,14 @@
 
 package io.vertx.servicediscovery.impl;
 
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
-import io.vertx.core.impl.VertxInternal;
+import io.vertx.core.shareddata.AsyncMap;
+import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.junit.Before;
+import io.vertx.test.fakecluster.FakeClusterManager;
 import org.junit.runner.RunWith;
-
-import static com.jayway.awaitility.Awaitility.await;
 
 /**
  * Test the async map when running in clustered mode.
@@ -32,14 +32,20 @@ import static com.jayway.awaitility.Awaitility.await;
  */
 @RunWith(VertxUnitRunner.class)
 public class ClusteredAsyncMapTest extends AsyncMapTest {
-  @Before
-  public void setUp() {
-    Vertx.clusteredVertx(new VertxOptions(), ar -> {
-      ((VertxInternal) ar.result()).getClusterManager().<String, String>getAsyncMap("some-name").setHandler(x -> {
-        map = x.result();
-        vertx = ar.result();
-      });
-    });
-    await().until(() -> vertx != null);
+
+  @Override
+  protected Future<Vertx> createVertx() {
+    return Vertx.clusteredVertx(new VertxOptions());
+  }
+
+  @Override
+  protected Future<AsyncMap<String, String>> getAsyncMap() {
+    return vertx.sharedData().getClusterWideMap("some-name");
+  }
+
+  @Override
+  public void tearDown(TestContext context) {
+    super.tearDown(context);
+    FakeClusterManager.reset();
   }
 }
