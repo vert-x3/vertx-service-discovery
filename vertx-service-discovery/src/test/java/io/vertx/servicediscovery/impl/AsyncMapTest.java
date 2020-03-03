@@ -16,6 +16,7 @@
 
 package io.vertx.servicediscovery.impl;
 
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.shareddata.AsyncMap;
 import io.vertx.ext.unit.Async;
@@ -25,11 +26,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static com.jayway.awaitility.Awaitility.await;
-import static org.hamcrest.CoreMatchers.is;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -41,16 +37,30 @@ public class AsyncMapTest {
   AsyncMap<String, String> map;
 
   @Before
-  public void setUp() {
-    vertx = Vertx.vertx();
-    map = vertx.sharedData().<String, String>getLocalAsyncMap("some-name").result();
+  public void setUp(TestContext context) {
+    Async async = context.async();
+    createVertx()
+      .onSuccess(instance -> vertx = instance)
+      .compose(v -> getAsyncMap())
+      .onSuccess(m -> {
+        map = m;
+        async.complete();
+      })
+      .onFailure(context::fail);
+    async.await();
+  }
+
+  protected Future<AsyncMap<String, String>> getAsyncMap() {
+    return vertx.sharedData().getLocalAsyncMap("some-name");
+  }
+
+  protected Future<Vertx> createVertx() {
+    return Future.succeededFuture(Vertx.vertx());
   }
 
   @After
-  public void tearDown() {
-    AtomicBoolean done = new AtomicBoolean();
-    vertx.close(v -> done.set(v.succeeded()));
-    await().untilAtomic(done, is(true));
+  public void tearDown(TestContext context) {
+    vertx.close(context.asyncAssertSuccess());
   }
 
   @Test

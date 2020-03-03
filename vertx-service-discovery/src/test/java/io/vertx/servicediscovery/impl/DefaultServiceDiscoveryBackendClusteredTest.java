@@ -19,7 +19,7 @@ package io.vertx.servicediscovery.impl;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
-import org.junit.Before;
+import io.vertx.test.fakecluster.FakeClusterManager;
 
 import static com.jayway.awaitility.Awaitility.await;
 
@@ -29,7 +29,7 @@ import static com.jayway.awaitility.Awaitility.await;
 public class DefaultServiceDiscoveryBackendClusteredTest extends DefaultServiceDiscoveryBackendTest {
 
 
-  @Before
+  @Override
   public void setUp() {
     backend = new DefaultServiceDiscoveryBackend();
     Vertx.clusteredVertx(new VertxOptions().setClusterHost("127.0.0.1"), ar -> {
@@ -39,5 +39,9 @@ public class DefaultServiceDiscoveryBackendClusteredTest extends DefaultServiceD
     await().until(() -> vertx != null);
   }
 
-
+  @Override
+  public void tearDown() {
+    super.tearDown();
+    FakeClusterManager.reset();
+  }
 }
