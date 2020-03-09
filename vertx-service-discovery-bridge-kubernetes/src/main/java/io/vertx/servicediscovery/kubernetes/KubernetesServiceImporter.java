@@ -136,7 +136,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
         return publications;
       })
       .compose(CompositeFuture::all)
-      .setHandler(ar -> {
+      .onComplete(ar -> {
         if (ar.succeeded()) {
           LOGGER.info("Kubernetes importer instantiated with " + records.size() + " services imported");
           completion.complete();

@@ -88,7 +88,7 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
             future.fail(ar.cause());
           } else {
             Promise<Void> p = Promise.promise();
-            p.future().setHandler(x -> {
+            p.future().onComplete(x -> {
               if (x.failed()) {
                 future.fail(x.cause());
               } else {
@@ -158,7 +158,7 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
         }).forEach(actions::add);
 
     if (done != null) {
-      CompositeFuture.all(actions).setHandler(ar -> {
+      CompositeFuture.all(actions).onComplete(ar -> {
         if (ar.succeeded()) {
           done.complete(null);
         } else {
@@ -218,7 +218,7 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
     Promise<Void> done = Promise.promise();
     unregisterAllServices(done);
 
-    done.future().setHandler(v -> {
+    done.future().onComplete(v -> {
       try {
         cache.close();
         discovery.close();
@@ -247,7 +247,7 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
     });
     registrations.clear();
 
-    CompositeFuture.all(list).setHandler(x -> {
+    CompositeFuture.all(list).onComplete(x -> {
       if (x.failed()) {
         done.fail(x.cause());
       } else {

@@ -145,7 +145,7 @@ public class DockerLinksServiceImporter implements ServiceImporter {
           v -> list.add(v.succeeded() ? Future.succeededFuture() : Future.failedFuture(v.cause())));
     }
 
-    CompositeFuture.all(list).setHandler(ar -> {
+    CompositeFuture.all(list).onComplete(ar -> {
           if (ar.succeeded()) {
             LOGGER.info("Successfully closed the service importer " + this);
           } else {

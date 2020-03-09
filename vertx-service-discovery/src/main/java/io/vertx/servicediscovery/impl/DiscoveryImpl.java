@@ -179,7 +179,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     }
 
     Promise<Void> completed = Promise.promise();
-    completed.future().setHandler(
+    completed.future().onComplete(
       ar -> {
         if (ar.failed()) {
           LOGGER.error("Cannot start the service importer " + importer, ar.cause());
@@ -226,7 +226,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     }
 
     Promise<Void> completed = Promise.promise();
-    completed.future().setHandler(
+    completed.future().onComplete(
       ar -> {
         if (ar.failed()) {
           LOGGER.error("Cannot start the service importer " + exporter, ar.cause());
@@ -267,7 +267,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     bindings.forEach(ServiceReference::release);
     bindings.clear();
 
-    CompositeFuture.all(futures).setHandler(ar -> {
+    CompositeFuture.all(futures).onComplete(ar -> {
       if (ar.succeeded()) {
         LOGGER.info("Discovery bridges stopped");
       } else {

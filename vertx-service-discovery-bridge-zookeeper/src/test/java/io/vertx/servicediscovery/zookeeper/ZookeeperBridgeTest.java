@@ -373,7 +373,7 @@ public class ZookeeperBridgeTest {
   private <T> void execute(AtomicInteger counter, Supplier<Future<T>> supplier,
                            Handler<AsyncResult<T>> handler) {
 
-    supplier.get().setHandler(ar -> {
+    supplier.get().onComplete(ar -> {
       if (ar.succeeded()) {
         handler.handle(Future.succeededFuture(ar.result()));
       } else {
