@@ -72,7 +72,7 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
     record.setRegistration(serviceOptions.getId());
     Promise<Void> registration = Promise.promise();
     client.registerService(serviceOptions, registration);
-    registration.future().map(record).setHandler(resultHandler);
+    registration.future().map(record).onComplete(resultHandler);
   }
 
   @Override
@@ -80,7 +80,7 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
     Objects.requireNonNull(record.getRegistration(), "No registration id in the record");
     Promise<Void> deregistration = Promise.promise();
     client.deregisterService(record.getRegistration(), deregistration);
-    deregistration.future().map(record).setHandler(resultHandler);
+    deregistration.future().map(record).onComplete(resultHandler);
   }
 
   @Override
@@ -125,7 +125,7 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
       .map(c -> c.<ServiceList>list().stream().flatMap(l -> l.getList().stream()).map(this::serviceToRecord).collect(Collectors.toList()))
       .compose(CompositeFuture::all)
       .map(c -> c.list().stream().map(o -> (Record) o).collect(Collectors.toList()))
-      .setHandler(resultHandler);
+      .onComplete(resultHandler);
 
   }
 
@@ -133,7 +133,7 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
   public void getRecord(String uuid, Handler<AsyncResult<Record>> resultHandler) {
     Promise<List<Record>> recordList = Promise.promise();
     getRecords(recordList);
-    recordList.future().map(l -> l.stream().filter(r -> uuid.equals(r.getRegistration())).findFirst().orElse(null)).setHandler(resultHandler);
+    recordList.future().map(l -> l.stream().filter(r -> uuid.equals(r.getRegistration())).findFirst().orElse(null)).onComplete(resultHandler);
   }
 
   public void close() {

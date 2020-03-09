@@ -101,7 +101,7 @@ public class DockerBridgeTest {
   public void testWithNoContainers() throws InterruptedException {
     AtomicBoolean done = new AtomicBoolean();
     Promise<Void> promise = Promise.promise();
-    promise.future().setHandler(ar -> done.set(ar.succeeded()));
+    promise.future().onComplete(ar -> done.set(ar.succeeded()));
     bridge.scan(promise);
 
     await().untilAtomic(done, is(true));
@@ -117,7 +117,7 @@ public class DockerBridgeTest {
 
     AtomicBoolean done = new AtomicBoolean();
     Promise<Void> promise = Promise.promise();
-    promise.future().setHandler(ar -> done.set(ar.succeeded()));
+    promise.future().onComplete(ar -> done.set(ar.succeeded()));
     bridge.scan(promise);
     await().untilAtomic(done, is(true));
     assertThat(bridge.getServices()).hasSize(0);
@@ -125,7 +125,7 @@ public class DockerBridgeTest {
     done.set(false);
     client.startContainerCmd(container.getId()).exec();
     Promise<Void> promise2 = Promise.promise();
-    promise2.future().setHandler(ar -> done.set(ar.succeeded()));
+    promise2.future().onComplete(ar -> done.set(ar.succeeded()));
     bridge.scan(promise2);
     await().untilAtomic(done, is(true));
 
@@ -138,7 +138,7 @@ public class DockerBridgeTest {
 
     done.set(false);
     Promise<Void> promise3 = Promise.promise();
-    promise3.future().setHandler(ar -> done.set(ar.succeeded()));
+    promise3.future().onComplete(ar -> done.set(ar.succeeded()));
     bridge.scan(promise3);
     await().untilAtomic(done, is(true));
     assertThat(bridge.getServices()).hasSize(0);
@@ -154,7 +154,7 @@ public class DockerBridgeTest {
 
     AtomicBoolean done = new AtomicBoolean();
     Promise<Void> promise = Promise.promise();
-    promise.future().setHandler(ar -> done.set(ar.succeeded()));
+    promise.future().onComplete(ar -> done.set(ar.succeeded()));
     bridge.scan(promise);
     await().untilAtomic(done, is(true));
     assertThat(bridge.getServices()).hasSize(0);
@@ -162,7 +162,7 @@ public class DockerBridgeTest {
     done.set(false);
     client.startContainerCmd(container.getId()).exec();
     Promise<Void> promise2 = Promise.promise();
-    promise2.future().setHandler(ar -> done.set(ar.succeeded()));
+    promise2.future().onComplete(ar -> done.set(ar.succeeded()));
     bridge.scan(promise2);
     await().untilAtomic(done, is(true));
 
@@ -184,7 +184,7 @@ public class DockerBridgeTest {
 
     AtomicBoolean done = new AtomicBoolean();
     Promise<Void> promise = Promise.promise();
-    promise.future().setHandler(ar -> done.set(ar.succeeded()));
+    promise.future().onComplete(ar -> done.set(ar.succeeded()));
     bridge.scan(promise);
     await().untilAtomic(done, is(true));
     assertThat(bridge.getServices()).hasSize(0);
@@ -192,7 +192,7 @@ public class DockerBridgeTest {
     done.set(false);
     client.startContainerCmd(container.getId()).exec();
     Promise<Void> promise2 = Promise.promise();
-    promise2.future().setHandler(ar -> done.set(ar.succeeded()));
+    promise2.future().onComplete(ar -> done.set(ar.succeeded()));
     bridge.scan(promise2);
     await().untilAtomic(done, is(true));
 

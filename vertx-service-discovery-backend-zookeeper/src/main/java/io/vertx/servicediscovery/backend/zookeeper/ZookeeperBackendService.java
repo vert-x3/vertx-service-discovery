@@ -233,7 +233,7 @@ public class ZookeeperBackendService implements ServiceDiscoveryBackend, Connect
                     }
 
                     CompositeFuture.all(futures)
-                        .setHandler(
+                        .onComplete(
                             ar -> runOnContextIfPossible(context, () -> {
                               if (ar.failed()) {
                                 resultHandler.handle(Future.failedFuture(ar.cause()));
