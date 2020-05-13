@@ -19,9 +19,9 @@ package io.vertx.servicediscovery.impl;
 import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.*;
 import io.vertx.core.impl.VertxInternal;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.*;
 import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend;
 import io.vertx.servicediscovery.spi.ServiceExporter;
@@ -77,7 +77,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
   private String getNodeId(Vertx vertx) {
     if (vertx.isClustered()) {
-      return ((VertxInternal) vertx).getNodeID();
+      return ((VertxInternal) vertx).getClusterManager().getNodeId();
     } else {
       return "localhost";
     }
