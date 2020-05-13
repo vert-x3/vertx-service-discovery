@@ -32,7 +32,9 @@ public class DefaultServiceDiscoveryBackendClusteredTest extends DefaultServiceD
   @Override
   public void setUp() {
     backend = new DefaultServiceDiscoveryBackend();
-    Vertx.clusteredVertx(new VertxOptions().setClusterHost("127.0.0.1"), ar -> {
+    VertxOptions options = new VertxOptions();
+    options.getEventBusOptions().setHost("127.0.0.1");
+    Vertx.clusteredVertx(options, ar -> {
       backend.init(ar.result(), new JsonObject());
       vertx = ar.result();
     });
