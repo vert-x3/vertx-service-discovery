@@ -17,6 +17,8 @@
 package examples;
 
 import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
@@ -54,21 +56,21 @@ public class HTTPEndpointExamples {
 
   public void example2(ServiceDiscovery discovery) {
     // Get the record
-    discovery.getRecord(new JsonObject().put("name", "some-http-service"), ar -> {
-      if (ar.succeeded() && ar.result() != null) {
+    discovery.getRecord(new JsonObject().put("name", "some-http-service"), ar1 -> {
+      if (ar1.succeeded() && ar1.result() != null) {
         // Retrieve the service reference
-        ServiceReference reference = discovery.getReference(ar.result());
+        ServiceReference reference = discovery.getReference(ar1.result());
         // Retrieve the service object
         HttpClient client = reference.getAs(HttpClient.class);
 
         // You need to path the complete path
-        client.get("/api/persons", response -> {
-
-          // ...
-
+        client.request(HttpMethod.GET, "/api/persons").compose(request ->
+          request
+            .send()
+            .compose(HttpClientResponse::body))
+          .onComplete(ar2 -> {
           // Dont' forget to release the service
           reference.release();
-
         });
       }
     });
@@ -104,14 +106,14 @@ public class HTTPEndpointExamples {
         HttpClient client = ar.result();
 
         // You need to path the complete path
-        client.get("/api/persons", response -> {
-
-          // ...
-
-          // Dont' forget to release the service
-          ServiceDiscovery.releaseServiceObject(discovery, client);
-
-        });
+        client.request(HttpMethod.GET, "/api/persons").compose(request ->
+          request
+            .send()
+            .compose(HttpClientResponse::body))
+          .onComplete(ar2 -> {
+            // Dont' forget to release the service
+            ServiceDiscovery.releaseServiceObject(discovery, client);
+          });
       }
     });
   }

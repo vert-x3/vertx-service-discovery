@@ -20,6 +20,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.SelfSignedCertificate;
@@ -108,18 +109,19 @@ public class HttpEndpointTest {
         HttpClient client2 = reference.get();
         context.assertTrue(client == client2);
 
-        client.get("/foo", context.asyncAssertSuccess(response -> {
-          context.assertEquals(response.statusCode(), 200);
-          response.bodyHandler(body -> {
-            context.assertEquals(body.toString(), "hello");
-
-            reference.release();
-
-            discovery.unpublish(published.getRegistration(), v -> {
-              async.complete();
-            });
+        client.request(HttpMethod.GET, "/foo").compose(request -> request
+          .send()
+          .compose(response -> {
+            context.assertEquals(response.statusCode(), 200);
+            return response.body();
+          })).onComplete(context.asyncAssertSuccess(body -> {
+          context.assertEquals(body.toString(), "hello");
+        })).onComplete(ar -> {
+          reference.release();
+          discovery.unpublish(published.getRegistration(), v -> {
+            async.complete();
           });
-        }));
+        });
       });
     });
   }
@@ -204,15 +206,18 @@ public class HttpEndpointTest {
         context.assertTrue(found.succeeded());
         context.assertTrue(found.result() != null);
         HttpClient client = found.result();
-        client.get("/foo", context.asyncAssertSuccess(response -> {
-          context.assertEquals(response.statusCode(), 200);
-          context.assertEquals(response.getHeader("connection"), "close");
-          response.bodyHandler(body -> {
-            context.assertEquals(body.toString(), "hello");
-            ServiceDiscovery.releaseServiceObject(discovery, client);
-            discovery.unpublish(published.getRegistration(), v -> async.complete());
+        client.request(HttpMethod.GET, "/foo").compose(request -> {
+          return request.send().compose(response -> {
+            context.assertEquals(response.statusCode(), 200);
+            context.assertEquals(response.getHeader("connection"), "close");
+            return response.body();
           });
-        }));
+        }).onComplete(context.asyncAssertSuccess(body -> {
+          context.assertEquals(body.toString(), "hello");
+        })).onComplete(ar -> {
+          ServiceDiscovery.releaseServiceObject(discovery, client);
+          discovery.unpublish(published.getRegistration(), v -> async.complete());
+        });
       });
     });
   }
