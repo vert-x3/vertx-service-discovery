@@ -71,7 +71,6 @@ public class DockerServiceImporter implements ServiceImporter {
     this.publisher = publisher;
     this.vertx = vertx;
     DefaultDockerClientConfig.Builder builder = DefaultDockerClientConfig.createDefaultConfigBuilder();
-
     String dockerCertPath = configuration.getString("docker-cert-path");
     String dockerCfgPath = configuration.getString("docker-cfg-path");
     String email = configuration.getString("docker-registry-email");
