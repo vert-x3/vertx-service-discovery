@@ -33,6 +33,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +59,7 @@ public class DockerBridgeTest {
     init();
 
     client = DockerClientBuilder.getInstance().build();
-    List<Container> running = client.listContainersCmd().withStatusFilter("running").exec();
+    List<Container> running = client.listContainersCmd().withStatusFilter(Collections.singletonList("running")).exec();
     if (running != null) {
       running.forEach(container -> client.stopContainerCmd(container.getId()).exec());
     }
@@ -88,7 +89,7 @@ public class DockerBridgeTest {
   @After
   public void tearDown() throws IOException {
     List<Container> running = client.listContainersCmd()
-        .withStatusFilter("running").exec();
+        .withStatusFilter(Collections.singletonList("running")).exec();
     if (running != null) {
       running.forEach(container -> client.stopContainerCmd(container.getId()).exec());
     }

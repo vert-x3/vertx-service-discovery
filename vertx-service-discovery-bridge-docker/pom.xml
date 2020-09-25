@@ -85,7 +85,7 @@
     <dependency>
       <groupId>com.github.docker-java</groupId>
       <artifactId>docker-java</artifactId>
-      <version>3.0.0</version>
+      <version>3.2.5</version>
       <exclusions>
         <exclusion>
           <groupId>org.slf4j</groupId>

@@ -18,6 +18,7 @@ package io.vertx.servicediscovery.docker;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Container;
+import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
 import io.vertx.core.Future;
@@ -35,6 +36,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -69,8 +71,7 @@ public class DockerServiceImporter implements ServiceImporter {
   public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Promise<Void> completion) {
     this.publisher = publisher;
     this.vertx = vertx;
-    DockerClientConfig.DockerClientConfigBuilder builder =
-        DockerClientConfig.createDefaultConfigBuilder();
+    DefaultDockerClientConfig.Builder builder = DefaultDockerClientConfig.createDefaultConfigBuilder();
     String dockerCertPath = configuration.getString("docker-cert-path");
     String dockerCfgPath = configuration.getString("docker-cfg-path");
     String email = configuration.getString("docker-registry-email");
@@ -134,7 +135,7 @@ public class DockerServiceImporter implements ServiceImporter {
     vertx.<List<Container>>executeBlocking(
         future -> {
           try {
-            future.complete(client.listContainersCmd().withStatusFilter("running").exec());
+            future.complete(client.listContainersCmd().withStatusFilter(Collections.singletonList("running")).exec());
           } catch (Exception e) {
             future.fail(e);
           }
