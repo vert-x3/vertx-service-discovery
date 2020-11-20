@@ -279,4 +279,9 @@ public class Record {
     result = 31 * result + (status == null ? 0 : status.hashCode());
     return result;
   }
+
+  @Override
+  public String toString() {
+    return "Record[" + toJson() + "]";
+  }
 }
