@@ -221,7 +221,7 @@ public class ZookeeperBridgeTest {
         failure.initCause(ar.cause());
         promise.fail(failure);
       } else if (ar.result().size() != expected) {
-        promise.fail("service lookup failed: unexpected records " + ar.result().size() + " != " + expected);
+        promise.fail("service lookup failed: unexpected records " + ar.result() + " != " + expected);
       } else {
         promise.complete(ar.result());
       }
