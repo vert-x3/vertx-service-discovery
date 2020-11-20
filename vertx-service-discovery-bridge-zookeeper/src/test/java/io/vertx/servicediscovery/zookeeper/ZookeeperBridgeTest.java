@@ -254,30 +254,25 @@ public class ZookeeperBridgeTest {
     sd.registerServiceImporter(
       new ZookeeperServiceImporter(),
       new JsonObject().put("connection", zkTestServer.getConnectString()),
-      v -> {
-        tc.assertTrue(v.succeeded());
-
-        waitUntil(() -> serviceLookup(sd, 1), list -> {
-          tc.assertTrue(list.succeeded());
-          tc.assertEquals(list.result().get(0).getName(), "foo-service");
-          vertx.executeBlocking(future -> {
+      tc.asyncAssertSuccess(v -> {
+        waitUntil(() -> serviceLookup(sd, 1), tc.asyncAssertSuccess(list -> {
+          tc.assertEquals(list.get(0).getName(), "foo-service");
+          vertx.executeBlocking(promise -> {
             try {
               this.discovery.registerService(instance2);
-              future.complete();
+              promise.complete();
             } catch (Exception e) {
-              future.fail(e);
+              promise.fail(e);
             }
-          }, ar -> {
-            tc.assertTrue(ar.succeeded());
-            waitUntil(() -> serviceLookup(sd, 2), lookup -> {
-              tc.assertTrue(lookup.succeeded());
-              tc.assertEquals(lookup.result().get(0).getName(), "foo-service");
-              tc.assertEquals(lookup.result().get(1).getName(), "foo-service");
+          }, tc.asyncAssertSuccess(v2 -> {
+            waitUntil(() -> serviceLookup(sd, 2), tc.asyncAssertSuccess(lookup -> {
+              tc.assertEquals(lookup.get(0).getName(), "foo-service");
+              tc.assertEquals(lookup.get(1).getName(), "foo-service");
               async.complete();
-            });
-          });
-        });
-      });
+            }));
+          }));
+        }));
+      }));
   }
 
   private void fetchRecords(AtomicBoolean marker, TestContext tc) {
