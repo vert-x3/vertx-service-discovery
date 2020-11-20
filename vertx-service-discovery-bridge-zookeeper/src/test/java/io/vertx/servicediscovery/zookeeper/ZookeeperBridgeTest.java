@@ -139,7 +139,7 @@ public class ZookeeperBridgeTest {
               future.fail(e);
             }
           }, tc.asyncAssertSuccess(v2 -> {
-            waitUntil(() -> serviceLookup(sd, 1), tc.asyncAssertSuccess(v2 -> {
+            waitUntil(() -> serviceLookup(sd, 1), tc.asyncAssertSuccess(v3 -> {
               async.complete();
             }));
           }));
