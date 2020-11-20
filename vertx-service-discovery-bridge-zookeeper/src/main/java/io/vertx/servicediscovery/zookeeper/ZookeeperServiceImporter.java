@@ -92,7 +92,6 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
               if (x.failed()) {
                 future.fail(x.cause());
               } else {
-                started = true;
                 future.complete(null);
               }
             });
@@ -232,8 +231,10 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
 
   @Override
   public void childEvent(CuratorFramework curatorFramework,
-                         TreeCacheEvent treeCacheEvent) throws Exception {
-    if (started) {
+                         TreeCacheEvent treeCacheEvent) {
+    if (treeCacheEvent.getType() == TreeCacheEvent.Type.INITIALIZED) {
+      started = true;
+    } else if (started) {
       compute(null);
     }
   }
