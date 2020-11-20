@@ -363,13 +363,13 @@ public class ZookeeperBridgeTest {
 
   private <T> void execute(AtomicInteger counter, Supplier<Future<T>> supplier,
                            Handler<AsyncResult<T>> handler) {
-
     supplier.get().onComplete(ar -> {
       if (ar.succeeded()) {
         handler.handle(Future.succeededFuture(ar.result()));
       } else {
         if (counter.incrementAndGet() > 10) {
-          handler.handle(Future.failedFuture("max attempt reached"));
+          Exception failure = new Exception("Max attempt reached", ar.cause());
+          handler.handle(Future.failedFuture(failure));
         } else {
           vertx.setTimer(100, l -> {
             execute(counter, supplier, handler);
