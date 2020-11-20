@@ -74,6 +74,7 @@ public class KubernetesServerTest {
 
   @After
   public void tearDown() {
+    vertx.exceptionHandler(null);
     server.destroy();
     vertx.close();
   }

@@ -217,11 +217,11 @@ public class ZookeeperBridgeTest {
     Promise<List<Record>> promise = Promise.promise();
     discovery.getRecords(x -> true, ar -> {
       if (ar.failed()) {
-        NoStackTraceThrowable failure = new NoStackTraceThrowable("service lookup failed");
+        NoStackTraceThrowable failure = new NoStackTraceThrowable("service lookup failed: " + ar.cause().getMessage());
         failure.initCause(ar.cause());
         promise.fail(failure);
       } else if (ar.result().size() != expected) {
-        promise.fail("service lookup failed");
+        promise.fail("service lookup failed: unexpected records " + ar.result() + " != " + expected);
       } else {
         promise.complete(ar.result());
       }
