@@ -5,6 +5,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.impl.NoStackTraceThrowable;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -214,11 +215,15 @@ public class ZookeeperBridgeTest {
 
   private Future<List<Record>> serviceLookup(io.vertx.servicediscovery.ServiceDiscovery discovery, int expected) {
     Promise<List<Record>> promise = Promise.promise();
-    discovery.getRecords(x -> true, list -> {
-      if (list.failed() || list.result().size() != expected) {
+    discovery.getRecords(x -> true, ar -> {
+      if (ar.failed()) {
+        NoStackTraceThrowable failure = new NoStackTraceThrowable("service lookup failed");
+        failure.initCause(ar.cause());
+        promise.fail(failure);
+      } else if (ar.result().size() != expected) {
         promise.fail("service lookup failed");
       } else {
-        promise.complete(list.result());
+        promise.complete(ar.result());
       }
     });
     return promise.future();
