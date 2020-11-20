@@ -127,11 +127,9 @@ public class ZookeeperBridgeTest {
     sd.registerServiceImporter(
       new ZookeeperServiceImporter(),
       new JsonObject().put("connection", zkTestServer.getConnectString()),
-      v -> {
-        tc.assertTrue(v.succeeded());
-        sd.getRecords(x -> true, l -> {
-          tc.assertTrue(l.succeeded());
-          tc.assertTrue(l.result().size() == 0);
+      tc.asyncAssertSuccess(v -> {
+        sd.getRecords(x -> true, tc.asyncAssertSuccess(l -> {
+          tc.assertTrue(l.size() == 0);
 
           vertx.executeBlocking(future -> {
             try {
@@ -140,15 +138,13 @@ public class ZookeeperBridgeTest {
             } catch (Exception e) {
               future.fail(e);
             }
-          }, ar -> {
-            tc.assertTrue(ar.succeeded());
-            waitUntil(() -> serviceLookup(sd, 1), lookup -> {
-              tc.assertTrue(lookup.succeeded());
+          }, tc.asyncAssertSuccess(v2 -> {
+            waitUntil(() -> serviceLookup(sd, 1), tc.asyncAssertSuccess(v2 -> {
               async.complete();
-            });
-          });
-        });
-      });
+            }));
+          }));
+        }));
+      }));
   }
 
   @Test
