@@ -362,22 +362,21 @@ public class ZookeeperBridgeTest {
 
 
   private <T> void waitUntil(Supplier<Future<T>> supplier, Handler<AsyncResult<T>> handler) {
-    AtomicInteger attempt = new AtomicInteger();
-    execute(attempt, supplier, handler);
+    execute(0, supplier, handler);
   }
 
-  private <T> void execute(AtomicInteger counter, Supplier<Future<T>> supplier,
+  private <T> void execute(int counter, Supplier<Future<T>> supplier,
                            Handler<AsyncResult<T>> handler) {
     supplier.get().onComplete(ar -> {
       if (ar.succeeded()) {
         handler.handle(Future.succeededFuture(ar.result()));
       } else {
-        if (counter.incrementAndGet() > 10) {
+        if (counter > 20) {
           Exception failure = new Exception("Max attempt reached", ar.cause());
           handler.handle(Future.failedFuture(failure));
         } else {
           vertx.setTimer(100, l -> {
-            execute(counter, supplier, handler);
+            execute(counter + 1, supplier, handler);
           });
         }
       }
