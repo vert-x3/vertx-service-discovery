@@ -1,6 +1,6 @@
 # Vert.x Service Discovery
 
-[![Build Status](https://travis-ci.org/vert-x3/vertx-service-discovery.svg?branch=master)](https://travis-ci.org/vert-x3/vertx-service-discovery)
+[![Build Status](https://github.com/vert-x3/vertx-service-discovery/workflows/CI/badge.svg?branch=master)](https://github.com/vert-x3/vertx-service-discovery/actions?query=workflow%3ACI)
 
 The `vertx-service-discovery` provides a discovery infrastructure to register and discover the services exposed by your
 microservice applications. It can be message sources (entities publishing message on the event bus), REST endpoints,
