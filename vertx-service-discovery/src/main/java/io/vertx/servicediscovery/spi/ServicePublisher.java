@@ -2,8 +2,11 @@ package io.vertx.servicediscovery.spi;
 
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceDiscovery;
 
 /**
  * The publisher is used by the importer to publish or unpublish records.
@@ -23,6 +26,11 @@ public interface ServicePublisher {
   void publish(Record record, Handler<AsyncResult<Record>> resultHandler);
 
   /**
+   * Like {@link #publish(Record, Handler)} but returns a future of the result
+   */
+  Future<Record> publish(Record record);
+
+  /**
    * Un-publishes a record.
    *
    * @param id            the registration id
@@ -30,6 +38,10 @@ public interface ServicePublisher {
    */
   void unpublish(String id, Handler<AsyncResult<Void>> resultHandler);
 
+  /**
+   * Like {@link #unpublish(String, Handler)} but returns a future of the result
+   */
+  Future<Void> unpublish(String id);
 
   /**
    * Updates an existing record.
@@ -39,5 +51,10 @@ public interface ServicePublisher {
    *                      the passed record has a registration id required to modify and un-register the service.
    */
   void update(Record record, Handler<AsyncResult<Record>> resultHandler);
+
+  /**
+   * Like {@link #update(Record, Handler)} but returns a future of the result
+   */
+  Future<Record> update(Record record);
 
 }

@@ -54,11 +54,18 @@ public interface MongoDataSource extends ServiceType {
    */
   static void getMongoClient(ServiceDiscovery discovery, JsonObject filter,
                              Handler<AsyncResult<MongoClient>> resultHandler) {
-    discovery.getRecord(filter, ar -> {
-      if (ar.failed() || ar.result() == null) {
-        resultHandler.handle(Future.failedFuture("No matching record"));
+    getMongoClient(discovery, filter).onComplete(resultHandler);
+  }
+
+  /**
+   * Like {@link #getMongoClient(ServiceDiscovery, JsonObject, Handler)} but returns a future of the result
+   */
+  static Future<MongoClient> getMongoClient(ServiceDiscovery discovery, JsonObject filter) {
+    return discovery.getRecord(filter).flatMap(res -> {
+      if (res == null) {
+        return Future.failedFuture("No matching records");
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.getReference(ar.result()).get()));
+        return Future.succeededFuture(discovery.getReference(res).get());
       }
     });
   }
@@ -74,15 +81,21 @@ public interface MongoDataSource extends ServiceType {
    */
   static void getMongoClient(ServiceDiscovery discovery, Function<Record, Boolean> filter,
                              Handler<AsyncResult<MongoClient>> resultHandler) {
-    discovery.getRecord(filter, ar -> {
-      if (ar.failed() || ar.result() == null) {
-        resultHandler.handle(Future.failedFuture("No matching record"));
+    getMongoClient(discovery, filter).onComplete(resultHandler);
+  }
+
+  /**
+   * Like {@link #getMongoClient(ServiceDiscovery, Function, Handler)} but returns a future of the result
+   */
+  static Future<MongoClient> getMongoClient(ServiceDiscovery discovery, Function<Record, Boolean> filter) {
+    return discovery.getRecord(filter).flatMap(res -> {
+      if (res == null) {
+        return Future.failedFuture("No matching records");
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.getReference(ar.result()).get()));
+        return Future.succeededFuture(discovery.getReference(res).get());
       }
     });
   }
-
 
   /**
    * Convenient method that looks for a Mongo datasource source and provides the configured {@link io.vertx.ext.mongo.MongoClient}. The
@@ -95,12 +108,18 @@ public interface MongoDataSource extends ServiceType {
    */
   static void getMongoClient(ServiceDiscovery discovery, JsonObject filter, JsonObject consumerConfiguration,
                              Handler<AsyncResult<MongoClient>> resultHandler) {
-    discovery.getRecord(filter, ar -> {
-      if (ar.failed() || ar.result() == null) {
-        resultHandler.handle(Future.failedFuture("No matching record"));
+    getMongoClient(discovery, filter, consumerConfiguration).onComplete(resultHandler);
+  }
+
+  /**
+   * Like {@link #getMongoClient(ServiceDiscovery, JsonObject, JsonObject, Handler)} but returns a future of the result
+   */
+  static Future<MongoClient> getMongoClient(ServiceDiscovery discovery, JsonObject filter, JsonObject consumerConfiguration) {
+    return discovery.getRecord(filter).flatMap(res -> {
+      if (res == null) {
+        return Future.failedFuture("No matching records");
       } else {
-        resultHandler.handle(Future.succeededFuture(
-          discovery.getReferenceWithConfiguration(ar.result(), consumerConfiguration).get()));
+        return Future.succeededFuture(discovery.getReferenceWithConfiguration(res, consumerConfiguration).get());
       }
     });
   }

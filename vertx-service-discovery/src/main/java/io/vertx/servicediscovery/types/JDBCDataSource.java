@@ -24,10 +24,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.Record;
 import io.vertx.ext.jdbc.JDBCClient;
-import io.vertx.servicediscovery.impl.ServiceTypes;
 import io.vertx.servicediscovery.spi.ServiceType;
-import io.vertx.servicediscovery.types.impl.HttpEndpointImpl;
-import io.vertx.servicediscovery.types.impl.JDBCDataSourceImpl;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -46,8 +43,8 @@ public interface JDBCDataSource extends ServiceType {
     Objects.requireNonNull(location);
 
     Record record = new Record().setName(name)
-        .setType(TYPE)
-        .setLocation(location);
+      .setType(TYPE)
+      .setLocation(location);
 
     if (metadata != null) {
       record.setMetadata(metadata);
@@ -66,11 +63,18 @@ public interface JDBCDataSource extends ServiceType {
    */
   static void getJDBCClient(ServiceDiscovery discovery, JsonObject filter,
                             Handler<AsyncResult<JDBCClient>> resultHandler) {
-    discovery.getRecord(filter, ar -> {
-      if (ar.failed() || ar.result() == null) {
-        resultHandler.handle(Future.failedFuture("No matching record"));
+    getJDBCClient(discovery, filter).onComplete(resultHandler);
+  }
+
+  /**
+   * Like {@link #getJDBCClient(ServiceDiscovery, JsonObject, Handler)} but returns a future of the result
+   */
+  static Future<JDBCClient> getJDBCClient(ServiceDiscovery discovery, JsonObject filter) {
+    return discovery.getRecord(filter).flatMap(res -> {
+      if (res == null) {
+        return Future.failedFuture("No matching records");
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.<JDBCClient>getReference(ar.result()).get()));
+        return Future.succeededFuture(discovery.getReference(res).get());
       }
     });
   }
@@ -85,11 +89,18 @@ public interface JDBCDataSource extends ServiceType {
    */
   static void getJDBCClient(ServiceDiscovery discovery, Function<Record, Boolean> filter,
                             Handler<AsyncResult<JDBCClient>> resultHandler) {
-    discovery.getRecord(filter, ar -> {
-      if (ar.failed() || ar.result() == null) {
-        resultHandler.handle(Future.failedFuture("No matching record"));
+    getJDBCClient(discovery, filter).onComplete(resultHandler);
+  }
+
+  /**
+   * Like {@link #getJDBCClient(ServiceDiscovery, Function, Handler)} but returns a future of the result
+   */
+  static Future<JDBCClient> getJDBCClient(ServiceDiscovery discovery, Function<Record, Boolean> filter) {
+    return discovery.getRecord(filter).flatMap(res -> {
+      if (res == null) {
+        return Future.failedFuture("No matching records");
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.<JDBCClient>getReference(ar.result()).get()));
+        return Future.succeededFuture(discovery.getReference(res).get());
       }
     });
   }
@@ -105,12 +116,18 @@ public interface JDBCDataSource extends ServiceType {
    */
   static void getJDBCClient(ServiceDiscovery discovery, JsonObject filter, JsonObject consumerConfiguration,
                             Handler<AsyncResult<JDBCClient>> resultHandler) {
-    discovery.getRecord(filter, ar -> {
-      if (ar.failed() || ar.result() == null) {
-        resultHandler.handle(Future.failedFuture("No matching record"));
+    getJDBCClient(discovery, filter, consumerConfiguration).onComplete(resultHandler);
+  }
+
+  /**
+   * Like {@link #getJDBCClient(ServiceDiscovery, JsonObject, JsonObject, Handler)} but returns a future of the result
+   */
+  static Future<JDBCClient> getJDBCClient(ServiceDiscovery discovery, JsonObject filter, JsonObject consumerConfiguration) {
+    return discovery.getRecord(filter).flatMap(res -> {
+      if (res == null) {
+        return Future.failedFuture("No matching records");
       } else {
-        resultHandler.handle(Future.succeededFuture(
-            discovery.<JDBCClient>getReferenceWithConfiguration(ar.result(), consumerConfiguration).get()));
+        return Future.succeededFuture(discovery.getReferenceWithConfiguration(res, consumerConfiguration).get());
       }
     });
   }
@@ -126,12 +143,18 @@ public interface JDBCDataSource extends ServiceType {
    */
   static void getJDBCClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject consumerConfiguration,
                             Handler<AsyncResult<JDBCClient>> resultHandler) {
-    discovery.getRecord(filter, ar -> {
-      if (ar.failed() || ar.result() == null) {
-        resultHandler.handle(Future.failedFuture("No matching record"));
+    getJDBCClient(discovery, filter, consumerConfiguration).onComplete(resultHandler);
+  }
+
+  /**
+   * Like {@link #getJDBCClient(ServiceDiscovery, Function, JsonObject, Handler)} but returns a future of the result
+   */
+  static Future<JDBCClient> getJDBCClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject consumerConfiguration) {
+    return discovery.getRecord(filter).flatMap(res -> {
+      if (res == null) {
+        return Future.failedFuture("No matching records");
       } else {
-        resultHandler.handle(Future.succeededFuture(
-          discovery.<JDBCClient>getReferenceWithConfiguration(ar.result(), consumerConfiguration).get()));
+        return Future.succeededFuture(discovery.getReferenceWithConfiguration(res, consumerConfiguration).get());
       }
     });
   }
