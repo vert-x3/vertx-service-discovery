@@ -120,11 +120,18 @@ public interface HttpEndpoint extends ServiceType {
    */
   static void getClient(ServiceDiscovery discovery, JsonObject filter, Handler<AsyncResult<HttpClient>>
     resultHandler) {
-    discovery.getRecord(filter, ar -> {
-      if (ar.failed() || ar.result() == null) {
-        resultHandler.handle(Future.failedFuture("No matching record"));
+    getClient(discovery, filter).onComplete(resultHandler);
+  }
+
+  /**
+   * Like {@link #getClient(ServiceDiscovery, JsonObject, Handler)} but returns a future of the result
+   */
+  static Future<HttpClient> getClient(ServiceDiscovery discovery, JsonObject filter) {
+    return discovery.getRecord(filter).flatMap(res -> {
+      if (res == null) {
+        return Future.failedFuture("No matching records");
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.<HttpClient>getReference(ar.result()).get()));
+        return Future.succeededFuture(discovery.getReference(res).get());
       }
     });
   }
@@ -139,11 +146,18 @@ public interface HttpEndpoint extends ServiceType {
    */
   static void getWebClient(ServiceDiscovery discovery, JsonObject filter, Handler<AsyncResult<WebClient>>
     resultHandler) {
-    discovery.getRecord(filter, ar -> {
-      if (ar.failed() || ar.result() == null) {
-        resultHandler.handle(Future.failedFuture("No matching record"));
+    getWebClient(discovery, filter).onComplete(resultHandler);
+  }
+
+  /**
+   * Like {@link #getWebClient(ServiceDiscovery, JsonObject, Handler)} but returns a future of the result
+   */
+  static Future<WebClient> getWebClient(ServiceDiscovery discovery, JsonObject filter) {
+    return discovery.getRecord(filter).flatMap(res -> {
+      if (res == null) {
+        return Future.failedFuture("No matching records");
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.<HttpClient>getReference(ar.result()).getAs(WebClient.class)));
+        return Future.succeededFuture(discovery.getReference(res).get());
       }
     });
   }
@@ -160,12 +174,18 @@ public interface HttpEndpoint extends ServiceType {
    */
   static void getClient(ServiceDiscovery discovery, JsonObject filter, JsonObject conf, Handler<AsyncResult<HttpClient>>
     resultHandler) {
-    discovery.getRecord(filter, ar -> {
-      if (ar.failed() || ar.result() == null) {
-        resultHandler.handle(Future.failedFuture("No matching record"));
+    getClient(discovery, filter, conf).onComplete(resultHandler);
+  }
+
+  /**
+   * Like {@link #getClient(ServiceDiscovery, JsonObject, JsonObject, Handler)} but returns a future of the result
+   */
+  static Future<HttpClient> getClient(ServiceDiscovery discovery, JsonObject filter, JsonObject conf) {
+    return discovery.getRecord(filter).flatMap(res -> {
+      if (res == null) {
+        return Future.failedFuture("No matching records");
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.<HttpClient>getReferenceWithConfiguration(ar.result(), conf).get
-          ()));
+        return Future.succeededFuture(discovery.getReferenceWithConfiguration(res, conf).get());
       }
     });
   }
@@ -182,16 +202,21 @@ public interface HttpEndpoint extends ServiceType {
    */
   static void getWebClient(ServiceDiscovery discovery, JsonObject filter, JsonObject conf,
                          Handler<AsyncResult<WebClient>>  resultHandler) {
-    discovery.getRecord(filter, ar -> {
-      if (ar.failed() || ar.result() == null) {
-        resultHandler.handle(Future.failedFuture("No matching record"));
+    getWebClient(discovery, filter, conf).onComplete(resultHandler);
+  }
+
+  /**
+   * Like {@link #getWebClient(ServiceDiscovery, JsonObject, JsonObject, Handler)} but returns a future of the result
+   */
+  static Future<WebClient> getWebClient(ServiceDiscovery discovery, JsonObject filter, JsonObject conf) {
+    return discovery.getRecord(filter).flatMap(res -> {
+      if (res == null) {
+        return Future.failedFuture("No matching records");
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.<HttpClient>getReferenceWithConfiguration(ar.result(), conf)
-          .getAs(WebClient.class)));
+        return Future.succeededFuture(discovery.getReferenceWithConfiguration(res, conf).getAs(WebClient.class));
       }
     });
   }
-
 
   /**
    * Convenient method that looks for a HTTP endpoint and provides the configured {@link HttpClient}. The async result
@@ -203,11 +228,18 @@ public interface HttpEndpoint extends ServiceType {
    */
   static void getClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, Handler<AsyncResult<HttpClient>>
     resultHandler) {
-    discovery.getRecord(filter, ar -> {
-      if (ar.failed() || ar.result() == null) {
-        resultHandler.handle(Future.failedFuture("No matching record"));
+    getClient(discovery, filter).onComplete(resultHandler);
+  }
+
+  /**
+   * Like {@link #getClient(ServiceDiscovery, Function, Handler)} but returns a future of the result
+   */
+  static Future<HttpClient> getClient(ServiceDiscovery discovery, Function<Record, Boolean> filter) {
+    return discovery.getRecord(filter).flatMap(res -> {
+      if (res == null) {
+        return Future.failedFuture("No matching records");
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.<HttpClient>getReference(ar.result()).get()));
+        return Future.succeededFuture(discovery.getReference(res).get());
       }
     });
   }
@@ -222,11 +254,18 @@ public interface HttpEndpoint extends ServiceType {
    */
   static void getWebClient(ServiceDiscovery discovery, Function<Record, Boolean> filter,
                            Handler<AsyncResult<WebClient>> resultHandler) {
-    discovery.getRecord(filter, ar -> {
-      if (ar.failed() || ar.result() == null) {
-        resultHandler.handle(Future.failedFuture("No matching record"));
+    getWebClient(discovery, filter).onComplete(resultHandler);
+  }
+
+  /**
+   * Like {@link #getWebClient(ServiceDiscovery, Function, Handler)} but returns a future of the result
+   */
+  static Future<WebClient> getWebClient(ServiceDiscovery discovery, Function<Record, Boolean> filter) {
+    return discovery.getRecord(filter).flatMap(res -> {
+      if (res == null) {
+        return Future.failedFuture("No matching records");
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.<HttpClient>getReference(ar.result()).getAs(WebClient.class)));
+        return Future.succeededFuture(discovery.getReference(res).getAs(WebClient.class));
       }
     });
   }
@@ -243,12 +282,18 @@ public interface HttpEndpoint extends ServiceType {
    */
   static void getClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject conf,
                         Handler<AsyncResult<HttpClient>> resultHandler) {
-    discovery.getRecord(filter, ar -> {
-      if (ar.failed() || ar.result() == null) {
-        resultHandler.handle(Future.failedFuture("No matching record"));
+    getClient(discovery, filter, conf).onComplete(resultHandler);
+  }
+
+  /**
+   * Like {@link #getClient(ServiceDiscovery, JsonObject, JsonObject, Handler)} but returns a future of the result
+   */
+  static Future<HttpClient> getClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject conf) {
+    return discovery.getRecord(filter).flatMap(res -> {
+      if (res == null) {
+        return Future.failedFuture("No matching records");
       } else {
-        resultHandler.handle(Future.succeededFuture(
-          discovery.<HttpClient>getReferenceWithConfiguration(ar.result(), conf).get()));
+        return Future.succeededFuture(discovery.getReferenceWithConfiguration(res, conf).get());
       }
     });
   }
@@ -265,12 +310,18 @@ public interface HttpEndpoint extends ServiceType {
    */
   static void getWebClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject conf,
                         Handler<AsyncResult<WebClient>> resultHandler) {
-    discovery.getRecord(filter, ar -> {
-      if (ar.failed() || ar.result() == null) {
-        resultHandler.handle(Future.failedFuture("No matching record"));
+    getWebClient(discovery, filter, conf).onComplete(resultHandler);
+  }
+
+  /**
+   * Like {@link #getWebClient(ServiceDiscovery, JsonObject, JsonObject, Handler)} but returns a future of the result
+   */
+  static Future<WebClient> getWebClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject conf) {
+    return discovery.getRecord(filter).flatMap(res -> {
+      if (res == null) {
+        return Future.failedFuture("No matching records");
       } else {
-        resultHandler.handle(Future.succeededFuture(
-          discovery.<HttpClient>getReferenceWithConfiguration(ar.result(), conf).getAs(WebClient.class)));
+        return Future.succeededFuture(discovery.getReferenceWithConfiguration(res, conf).getAs(WebClient.class));
       }
     });
   }

@@ -131,11 +131,18 @@ public interface MessageSource extends ServiceType {
   static <T> void getConsumer(ServiceDiscovery discovery, JsonObject filter,
                               Handler<AsyncResult<MessageConsumer<T>>>
                                   resultHandler) {
-    discovery.getRecord(filter, ar -> {
-      if (ar.failed() || ar.result() == null) {
-        resultHandler.handle(Future.failedFuture("No matching record"));
+    MessageSource.<T>getConsumer(discovery, filter).onComplete(resultHandler);
+  }
+
+  /**
+   * Like {@link #getConsumer(ServiceDiscovery, JsonObject, Handler)} but returns a future of the result
+   */
+  static <T> Future<MessageConsumer<T>> getConsumer(ServiceDiscovery discovery, JsonObject filter) {
+    return discovery.getRecord(filter).flatMap(res -> {
+      if (res == null) {
+        return Future.failedFuture("No matching records");
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.<MessageConsumer<T>>getReference(ar.result()).get()));
+        return Future.succeededFuture(discovery.getReference(res).get());
       }
     });
   }
@@ -152,11 +159,18 @@ public interface MessageSource extends ServiceType {
   static <T> void getConsumer(ServiceDiscovery discovery, Function<Record, Boolean> filter,
                               Handler<AsyncResult<MessageConsumer<T>>>
                                 resultHandler) {
-    discovery.getRecord(filter, ar -> {
-      if (ar.failed() || ar.result() == null) {
-        resultHandler.handle(Future.failedFuture("No matching record"));
+    MessageSource.<T>getConsumer(discovery, filter).onComplete(resultHandler);
+  }
+
+  /**
+   * Like {@link #getConsumer(ServiceDiscovery, Function, Handler)} but returns a future of the result
+   */
+  static <T> Future<MessageConsumer<T>> getConsumer(ServiceDiscovery discovery, Function<Record, Boolean> filter) {
+    return discovery.getRecord(filter).flatMap(res -> {
+      if (res == null) {
+        return Future.failedFuture("No matching records");
       } else {
-        resultHandler.handle(Future.succeededFuture(discovery.<MessageConsumer<T>>getReference(ar.result()).get()));
+        return Future.succeededFuture(discovery.getReference(res).get());
       }
     });
   }
