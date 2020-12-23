@@ -43,7 +43,7 @@ public class JsonObjectSerializer implements InstanceSerializer<JsonObject> {
       builder.sslPort(rawServiceInstance.getSslPort());
     }
     if (rawServiceInstance.getPort() != null) {
-      builder.sslPort(rawServiceInstance.getPort());
+      builder.port(rawServiceInstance.getPort());
     }
     if (rawServiceInstance.getUriSpec() != null) {
       builder.uriSpec(rawServiceInstance.getUriSpec());
