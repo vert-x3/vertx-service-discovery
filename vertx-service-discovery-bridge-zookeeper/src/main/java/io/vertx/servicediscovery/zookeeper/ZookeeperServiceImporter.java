@@ -245,6 +245,7 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
     new HashSet<>(registrations).forEach(reg -> {
       Promise<Void> unreg = Promise.promise();
       publisher.unpublish(reg.record().getRegistration(), unreg);
+      list.add(unreg.future());
     });
     registrations.clear();
 
