@@ -689,6 +689,10 @@ This method must complete the given {@link io.vertx.core.Future} to notify the c
 
 Notice than in a cluster, only one member needs to register the bridge as the records are accessible by all members.
 
+ifeval::["$lang" == "java"]
+include::override/rxjava2.adoc[]
+endif::[]
+
 == Additional bridges
 
 In addition of the bridges supported by this library, Vert.x Service Discovery provides additional
