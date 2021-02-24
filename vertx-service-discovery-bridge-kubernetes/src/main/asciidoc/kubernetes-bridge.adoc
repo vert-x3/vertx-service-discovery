@@ -29,6 +29,13 @@ descriptor:
 compile 'io.vertx:vertx-service-discovery-bridge-kubernetes:${maven.version}'
 ----
 
+Then, when creating the service discovery, register this bridge as follows:
+
+[source, $lang]
+----
+{@link examples.ServiceDiscoveryBridgeKubernetesExamples#register(io.vertx.servicediscovery.ServiceDiscovery)}
+----
+
 ==== Configuring the bridge
 
 The bridge is configured using:
