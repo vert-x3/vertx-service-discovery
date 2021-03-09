@@ -98,7 +98,7 @@ public class KubernetesServerTest {
   @Test
   public void testInitialRetrieval(TestContext tc) {
     Async async = tc.async();
-    ServiceDiscovery discovery = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions().setAutoRegistrationOfImporters(false));
+    ServiceDiscovery discovery = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions());
     discovery.registerServiceImporter(new KubernetesServiceImporter(), config().copy().put("namespace", "default"),
       ar -> {
         if (ar.failed()) {
@@ -119,7 +119,7 @@ public class KubernetesServerTest {
   @Test
   public void testWatch() {
     AtomicBoolean done = new AtomicBoolean();
-    ServiceDiscovery discovery = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions().setAutoRegistrationOfImporters(false));
+    ServiceDiscovery discovery = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions());
     discovery.registerServiceImporter(new KubernetesServiceImporter(), config().copy().put("namespace", "default"),
       ar -> done.set(ar.succeeded()));
 
@@ -144,7 +144,7 @@ public class KubernetesServerTest {
   @Test
   public void testWatchWithDeletion() {
     AtomicBoolean done = new AtomicBoolean();
-    ServiceDiscovery discovery = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions().setAutoRegistrationOfImporters(false));
+    ServiceDiscovery discovery = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions());
     discovery.registerServiceImporter(new KubernetesServiceImporter(), config().copy().put("namespace", "issue96"),
       ar -> done.set(ar.succeeded()));
 
