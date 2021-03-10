@@ -96,4 +96,13 @@ public class MessageSourceTest {
     // Just there to be sure we can call it twice
     service.release();
   }
+
+  @Test
+  public void testPreserveMetadata() {
+    Record record = MessageSource.createRecord("Hello", "data", JsonObject.class, new JsonObject().put("foo", "bar"));
+
+    JsonObject metadata = record.getMetadata();
+    assertThat(metadata.getString("foo")).isEqualTo("bar");
+    assertThat(metadata.getString("message.type")).isEqualTo(JsonObject.class.getName());
+  }
 }

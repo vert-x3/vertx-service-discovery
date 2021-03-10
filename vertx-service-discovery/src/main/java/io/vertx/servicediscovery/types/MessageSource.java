@@ -23,9 +23,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.Record;
-import io.vertx.servicediscovery.impl.ServiceTypes;
+import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.spi.ServiceType;
 
 import java.util.Objects;
@@ -62,7 +61,7 @@ public interface MessageSource extends ServiceType {
     }
 
     if (type != null) {
-      record.setMetadata(new JsonObject().put("message.type", type));
+      record.getMetadata().put("message.type", type);
     }
 
     return record;
