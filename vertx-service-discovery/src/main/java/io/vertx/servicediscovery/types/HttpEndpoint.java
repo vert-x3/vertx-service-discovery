@@ -153,13 +153,7 @@ public interface HttpEndpoint extends ServiceType {
    * Like {@link #getWebClient(ServiceDiscovery, JsonObject, Handler)} but returns a future of the result
    */
   static Future<WebClient> getWebClient(ServiceDiscovery discovery, JsonObject filter) {
-    return discovery.getRecord(filter).flatMap(res -> {
-      if (res == null) {
-        return Future.failedFuture("No matching records");
-      } else {
-        return Future.succeededFuture(discovery.getReference(res).get());
-      }
-    });
+    return getWebClient(discovery, filter, (JsonObject) null);
   }
 
   /**
@@ -212,6 +206,9 @@ public interface HttpEndpoint extends ServiceType {
     return discovery.getRecord(filter).flatMap(res -> {
       if (res == null) {
         return Future.failedFuture("No matching records");
+      }
+      if (conf == null || conf.isEmpty()) {
+        return Future.succeededFuture(discovery.getReference(res).getAs(WebClient.class));
       } else {
         return Future.succeededFuture(discovery.getReferenceWithConfiguration(res, conf).getAs(WebClient.class));
       }
@@ -261,13 +258,7 @@ public interface HttpEndpoint extends ServiceType {
    * Like {@link #getWebClient(ServiceDiscovery, Function, Handler)} but returns a future of the result
    */
   static Future<WebClient> getWebClient(ServiceDiscovery discovery, Function<Record, Boolean> filter) {
-    return discovery.getRecord(filter).flatMap(res -> {
-      if (res == null) {
-        return Future.failedFuture("No matching records");
-      } else {
-        return Future.succeededFuture(discovery.getReference(res).getAs(WebClient.class));
-      }
-    });
+    return getWebClient(discovery, filter, (JsonObject) null);
   }
 
   /**
@@ -320,6 +311,9 @@ public interface HttpEndpoint extends ServiceType {
     return discovery.getRecord(filter).flatMap(res -> {
       if (res == null) {
         return Future.failedFuture("No matching records");
+      }
+      if (conf == null || conf.isEmpty()) {
+        return Future.succeededFuture(discovery.getReference(res).getAs(WebClient.class));
       } else {
         return Future.succeededFuture(discovery.getReferenceWithConfiguration(res, conf).getAs(WebClient.class));
       }

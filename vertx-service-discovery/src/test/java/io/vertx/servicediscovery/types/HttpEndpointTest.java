@@ -236,6 +236,7 @@ public class HttpEndpointTest {
         new JsonObject().put("keepAlive", false), found -> {
           context.assertTrue(found.succeeded());
           context.assertTrue(found.result() != null);
+          context.assertTrue(found.result() instanceof WebClient);
           WebClient client = found.result();
           client.get("/foo").send(ar -> {
             if (ar.failed()) {
@@ -244,6 +245,36 @@ public class HttpEndpointTest {
             HttpResponse<Buffer> response = ar.result();
             context.assertEquals(response.statusCode(), 200);
             context.assertEquals(response.getHeader("connection"), "close");
+            context.assertEquals(response.body().toString(), "hello");
+
+            ServiceDiscovery.releaseServiceObject(discovery, client);
+            discovery.unpublish(published.getRegistration(), v -> async.complete());
+          });
+        });
+    });
+  }
+
+  @Test
+  public void testPublicationAndConsumptionAsWebClientViaHttpEndpoint(TestContext context) {
+    Async async = context.async();
+
+    // Publish the service
+    Record record = HttpEndpoint.createRecord("hello-service", "localhost", 8080, "/foo");
+    discovery.publish(record, rec -> {
+      Record published = rec.result();
+
+      HttpEndpoint.getWebClient(discovery,
+        new JsonObject().put("name", "hello-service"), found -> {
+          context.assertTrue(found.succeeded());
+          context.assertTrue(found.result() != null);
+          context.assertTrue(found.result() instanceof WebClient);
+          WebClient client = found.result();
+          client.get("/foo").send(ar -> {
+            if (ar.failed()) {
+              context.fail(ar.cause());
+            }
+            HttpResponse<Buffer> response = ar.result();
+            context.assertEquals(response.statusCode(), 200);
             context.assertEquals(response.body().toString(), "hello");
 
             ServiceDiscovery.releaseServiceObject(discovery, client);
