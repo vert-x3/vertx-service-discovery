@@ -137,32 +137,6 @@ public interface HttpEndpoint extends ServiceType {
   }
 
   /**
-   * Convenient method that looks for a HTTP endpoint and provides the configured {@linkWebClient}. The async result
-   * is marked as failed is there are no matching services, or if the lookup fails.
-   *
-   * @param discovery     The service discovery instance
-   * @param filter        The filter, optional
-   * @param resultHandler The result handler
-   */
-  static void getWebClient(ServiceDiscovery discovery, JsonObject filter, Handler<AsyncResult<WebClient>>
-    resultHandler) {
-    getWebClient(discovery, filter).onComplete(resultHandler);
-  }
-
-  /**
-   * Like {@link #getWebClient(ServiceDiscovery, JsonObject, Handler)} but returns a future of the result
-   */
-  static Future<WebClient> getWebClient(ServiceDiscovery discovery, JsonObject filter) {
-    return discovery.getRecord(filter).flatMap(res -> {
-      if (res == null) {
-        return Future.failedFuture("No matching records");
-      } else {
-        return Future.succeededFuture(discovery.getReference(res).get());
-      }
-    });
-  }
-
-  /**
    * Convenient method that looks for a HTTP endpoint and provides the configured {@link HttpClient}. The async result
    * is marked as failed is there are no matching services, or if the lookup fails. This method accepts a
    * configuration for the HTTP client
@@ -191,6 +165,26 @@ public interface HttpEndpoint extends ServiceType {
   }
 
   /**
+   * Convenient method that looks for a HTTP endpoint and provides the configured {@linkWebClient}. The async result
+   * is marked as failed is there are no matching services, or if the lookup fails.
+   *
+   * @param discovery     The service discovery instance
+   * @param filter        The filter, optional
+   * @param resultHandler The result handler
+   */
+  static void getWebClient(ServiceDiscovery discovery, JsonObject filter, Handler<AsyncResult<WebClient>>
+    resultHandler) {
+    getWebClient(discovery, filter).onComplete(resultHandler);
+  }
+
+  /**
+   * Like {@link #getWebClient(ServiceDiscovery, JsonObject, Handler)} but returns a future of the result
+   */
+  static Future<WebClient> getWebClient(ServiceDiscovery discovery, JsonObject filter) {
+    return getWebClient(discovery, filter, (JsonObject) null);
+  }
+
+  /**
    * Convenient method that looks for a HTTP endpoint and provides the configured {@link WebClient}. The async result
    * is marked as failed is there are no matching services, or if the lookup fails. This method accepts a
    * configuration for the HTTP client
@@ -212,6 +206,8 @@ public interface HttpEndpoint extends ServiceType {
     return discovery.getRecord(filter).flatMap(res -> {
       if (res == null) {
         return Future.failedFuture("No matching records");
+      } if(conf == null || conf.isEmpty()) {
+        return Future.succeededFuture(discovery.getReference(res).getAs(WebClient.class));
       } else {
         return Future.succeededFuture(discovery.getReferenceWithConfiguration(res, conf).getAs(WebClient.class));
       }
@@ -240,32 +236,6 @@ public interface HttpEndpoint extends ServiceType {
         return Future.failedFuture("No matching records");
       } else {
         return Future.succeededFuture(discovery.getReference(res).get());
-      }
-    });
-  }
-
-  /**
-   * Convenient method that looks for a HTTP endpoint and provides the configured {@link WebClient}. The async result
-   * is marked as failed is there are no matching services, or if the lookup fails.
-   *
-   * @param discovery     The service discovery instance
-   * @param filter        The filter
-   * @param resultHandler The result handler
-   */
-  static void getWebClient(ServiceDiscovery discovery, Function<Record, Boolean> filter,
-                           Handler<AsyncResult<WebClient>> resultHandler) {
-    getWebClient(discovery, filter).onComplete(resultHandler);
-  }
-
-  /**
-   * Like {@link #getWebClient(ServiceDiscovery, Function, Handler)} but returns a future of the result
-   */
-  static Future<WebClient> getWebClient(ServiceDiscovery discovery, Function<Record, Boolean> filter) {
-    return discovery.getRecord(filter).flatMap(res -> {
-      if (res == null) {
-        return Future.failedFuture("No matching records");
-      } else {
-        return Future.succeededFuture(discovery.getReference(res).getAs(WebClient.class));
       }
     });
   }
@@ -300,6 +270,26 @@ public interface HttpEndpoint extends ServiceType {
 
   /**
    * Convenient method that looks for a HTTP endpoint and provides the configured {@link WebClient}. The async result
+   * is marked as failed is there are no matching services, or if the lookup fails.
+   *
+   * @param discovery     The service discovery instance
+   * @param filter        The filter
+   * @param resultHandler The result handler
+   */
+  static void getWebClient(ServiceDiscovery discovery, Function<Record, Boolean> filter,
+                           Handler<AsyncResult<WebClient>> resultHandler) {
+    getWebClient(discovery, filter).onComplete(resultHandler);
+  }
+
+  /**
+   * Like {@link #getWebClient(ServiceDiscovery, Function, Handler)} but returns a future of the result
+   */
+  static Future<WebClient> getWebClient(ServiceDiscovery discovery, Function<Record, Boolean> filter) {
+    return getWebClient(discovery, filter, (JsonObject) null);
+  }
+
+  /**
+   * Convenient method that looks for a HTTP endpoint and provides the configured {@link WebClient}. The async result
    * is marked as failed is there are no matching services, or if the lookup fails. This method accepts a
    * configuration for the HTTP client.
    *
@@ -320,9 +310,12 @@ public interface HttpEndpoint extends ServiceType {
     return discovery.getRecord(filter).flatMap(res -> {
       if (res == null) {
         return Future.failedFuture("No matching records");
-      } else {
+      } if(conf == null || conf.isEmpty()) {
+        return Future.succeededFuture(discovery.getReference(res).getAs(WebClient.class));
+      }  else {
         return Future.succeededFuture(discovery.getReferenceWithConfiguration(res, conf).getAs(WebClient.class));
       }
     });
   }
+
 }
