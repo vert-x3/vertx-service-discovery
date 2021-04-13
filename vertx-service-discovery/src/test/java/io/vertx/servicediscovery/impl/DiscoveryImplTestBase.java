@@ -246,6 +246,11 @@ public abstract class DiscoveryImplTestBase {
       }
 
       @Override
+      public void store(String key, Record record, Handler<AsyncResult<Record>> resultHandler) {
+
+      }
+
+      @Override
       public void remove(Record record, Handler<AsyncResult<Record>> resultHandler) {
 
       }

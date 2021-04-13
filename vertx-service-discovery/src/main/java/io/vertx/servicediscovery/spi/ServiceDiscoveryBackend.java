@@ -60,6 +60,15 @@ public interface ServiceDiscoveryBackend {
   void store(Record record, Handler<AsyncResult<Record>> resultHandler);
 
   /**
+   * Stores a record.
+   *
+   * @param uuid          the uuid / registration id
+   * @param record        the record
+   * @param resultHandler the completion handler
+   */
+  void store(String uuid, Record record, Handler<AsyncResult<Record>> resultHandler);
+
+  /**
    * Removes a record.
    *
    * @param record        the record

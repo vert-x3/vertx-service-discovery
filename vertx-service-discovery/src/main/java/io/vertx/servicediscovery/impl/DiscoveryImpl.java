@@ -301,6 +301,30 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
   }
 
   @Override
+  public void publish(String key, Record record, Handler<AsyncResult<Record>> resultHandler) {
+    Status status = record.getStatus() == null || record.getStatus() == Status.UNKNOWN
+      ? Status.UP : record.getStatus();
+
+    backend.store(key, record.setStatus(status), ar -> {
+      if (ar.failed()) {
+        resultHandler.handle(Future.failedFuture(ar.cause()));
+        return;
+      }
+
+      for (ServiceExporter exporter : exporters) {
+        exporter.onPublish(new Record(ar.result()));
+      }
+      Record announcedRecord = new Record(ar.result());
+      announcedRecord
+        .setRegistration(null)
+        .setStatus(status);
+
+      vertx.eventBus().publish(announce, announcedRecord.toJson());
+      resultHandler.handle(Future.succeededFuture(ar.result()));
+    });
+  }
+
+  @Override
   public Future<Record> publish(Record record) {
     Promise<Record> promise = Promise.promise();
     publish(record, promise);
@@ -384,6 +408,26 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
           .findAny();
         if (any.isPresent()) {
           resultHandler.handle(Future.succeededFuture(any.get()));
+        } else {
+          resultHandler.handle(Future.succeededFuture(null));
+        }
+      }
+    });
+  }
+
+  @Override
+  public void getRecord(String key, boolean includeOutOfService, Handler<AsyncResult<Record>>
+    resultHandler) {
+    Objects.requireNonNull(key);
+    backend.getRecord(key, record -> {
+      if (record.failed()) {
+        resultHandler.handle(Future.failedFuture(record.cause()));
+      } else {
+        Record any = record.result();
+        if (any != null) {
+          if (any.getStatus() == Status.UP || includeOutOfService) {
+            resultHandler.handle(Future.succeededFuture(any));
+          }
         } else {
           resultHandler.handle(Future.succeededFuture(null));
         }

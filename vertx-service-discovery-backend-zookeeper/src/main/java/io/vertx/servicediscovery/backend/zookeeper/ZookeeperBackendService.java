@@ -1,5 +1,6 @@
 package io.vertx.servicediscovery.backend.zookeeper;
 
+import io.netty.util.internal.StringUtil;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
@@ -85,6 +86,41 @@ public class ZookeeperBackendService implements ServiceDiscoveryBackend, Connect
               .withUnhandledErrorListener((s, throwable)
                   -> resultHandler.handle(Future.failedFuture(throwable)))
               .forPath(getPath(record.getRegistration()), content.getBytes(CHARSET));
+        } catch (Exception e) {
+          resultHandler.handle(Future.failedFuture(e));
+        }
+      }
+    });
+  }
+
+  @Override
+  public void store(String uuid, Record record, Handler<AsyncResult<Record>> resultHandler) {
+    String key;
+    if (!StringUtil.isNullOrEmpty(uuid)) {
+      key = uuid;
+    } else if (StringUtil.isNullOrEmpty(record.getRegistration())) {
+      key = record.getRegistration();
+    } else {
+      key = UUID.randomUUID().toString();
+    }
+    record.setRegistration(key);
+
+    String content = record.toJson().encode();
+    Context context = Vertx.currentContext();
+
+    ensureConnected(x -> {
+      if (x.failed()) {
+        resultHandler.handle(Future.failedFuture(x.cause()));
+      } else {
+        try {
+          client.create()
+            .creatingParentsIfNeeded()
+            .withMode(ephemeral ? CreateMode.EPHEMERAL : CreateMode.PERSISTENT)
+            .inBackground((curatorFramework, curatorEvent)
+              -> callback(context, record, resultHandler, curatorEvent))
+            .withUnhandledErrorListener((s, throwable)
+              -> resultHandler.handle(Future.failedFuture(throwable)))
+            .forPath(getPath(record.getRegistration()), content.getBytes(CHARSET));
         } catch (Exception e) {
           resultHandler.handle(Future.failedFuture(e));
         }

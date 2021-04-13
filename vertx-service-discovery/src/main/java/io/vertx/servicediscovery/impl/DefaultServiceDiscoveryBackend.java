@@ -16,6 +16,7 @@
 
 package io.vertx.servicediscovery.impl;
 
+import io.netty.util.internal.StringUtil;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -70,6 +71,32 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
         resultHandler.handle(failure(reg.cause()));
       } else {
         reg.result().put(uuid, record.toJson().encode(), ar -> {
+          if (ar.succeeded()) {
+            resultHandler.handle(Future.succeededFuture(record));
+          } else {
+            resultHandler.handle(Future.failedFuture(ar.cause()));
+          }
+        });
+      }
+    });
+  }
+
+  @Override
+  public void store(String uuid, Record record, Handler<AsyncResult<Record>> resultHandler) {
+    String key;
+    if (!StringUtil.isNullOrEmpty(uuid)) {
+      key = uuid;
+    } else if (StringUtil.isNullOrEmpty(record.getRegistration())) {
+      key = record.getRegistration();
+    } else {
+      key = UUID.randomUUID().toString();
+    }
+    record.setRegistration(key);
+    retrieveRegistry(reg -> {
+      if (reg.failed()) {
+        resultHandler.handle(failure(reg.cause()));
+      } else {
+        reg.result().put(key, record.toJson().encode(), ar -> {
           if (ar.succeeded()) {
             resultHandler.handle(Future.succeededFuture(record));
           } else {

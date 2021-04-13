@@ -173,10 +173,19 @@ public interface ServiceDiscovery {
   void publish(Record record, Handler<AsyncResult<Record>> resultHandler);
 
   /**
+   * Publishes a record.
+   *
+   * @param key           the uuid / registration id
+   * @param record        the record
+   * @param resultHandler handler called when the operation has completed (successfully or not). In case of success,
+   *                      the passed record has a registration id required to modify and un-register the service.
+   */
+  void publish(String key, Record record, Handler<AsyncResult<Record>> resultHandler);
+
+  /**
    * Like {@link #publish(Record, Handler)} but returns a {@code Future} of the asynchronous result
    */
   Future<Record> publish(Record record);
-
 
   /**
    * Un-publishes a record.
@@ -239,6 +248,18 @@ public interface ServiceDiscovery {
    * Like {@link #getRecord(Function, Handler)} but returns a {@code Future} of the asynchronous result
    */
   Future<@Nullable Record> getRecord(Function<Record, Boolean> filter);
+
+  /**
+   * Lookups for a single record.
+   * this method may accept records with a {@code OUT OF SERVICE}
+   * status, if the {@code includeOutOfService} parameter is set to {@code true}.
+   *
+   * @param key                 the uuid / registration id
+   * @param includeOutOfService whether or not the filter accepts  {@code OUT OF SERVICE} records
+   * @param resultHandler       the result handler called when the lookup has been completed. When there are no matching
+   *                            record, the operation succeed, but the async result has no result.
+   */
+  void getRecord(String key, boolean includeOutOfService, Handler<AsyncResult<@Nullable Record>> resultHandler);
 
   /**
    * Lookups for a single record.
