@@ -73,7 +73,7 @@ public class RedisBackendService implements ServiceDiscoveryBackend {
     String key;
     if (!StringUtil.isNullOrEmpty(uuid)) {
       key = uuid;
-    } else if (StringUtil.isNullOrEmpty(record.getRegistration())) {
+    } else if (!StringUtil.isNullOrEmpty(record.getRegistration())) {
       key = record.getRegistration();
     } else {
       key = UUID.randomUUID().toString();
