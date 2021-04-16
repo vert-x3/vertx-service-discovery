@@ -173,16 +173,6 @@ public interface ServiceDiscovery {
   void publish(Record record, Handler<AsyncResult<Record>> resultHandler);
 
   /**
-   * Publishes a record.
-   *
-   * @param key           the uuid / registration id
-   * @param record        the record
-   * @param resultHandler handler called when the operation has completed (successfully or not). In case of success,
-   *                      the passed record has a registration id required to modify and un-register the service.
-   */
-  void publish(String key, Record record, Handler<AsyncResult<Record>> resultHandler);
-
-  /**
    * Like {@link #publish(Record, Handler)} but returns a {@code Future} of the asynchronous result
    */
   Future<Record> publish(Record record);

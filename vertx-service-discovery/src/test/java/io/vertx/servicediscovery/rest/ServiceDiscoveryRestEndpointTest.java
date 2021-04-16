@@ -29,10 +29,10 @@ import io.vertx.servicediscovery.types.EventBusService;
 import io.vertx.serviceproxy.ProxyHelper;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jayway.awaitility.Awaitility.await;
@@ -272,6 +272,9 @@ public class ServiceDiscoveryRestEndpointTest {
     assertThat(services.size()).isEqualTo(0);
   }
 
+  // This test is uselees because we can use the registration string for publish a record
+  // if the registration string is null will be generate an UUID random string for publish a record
+  @Ignore
   @Test
   public void testFailedPublication() {
     HelloService svc = new HelloServiceImpl("stuff");
@@ -283,6 +286,22 @@ public class ServiceDiscoveryRestEndpointTest {
 
     Restafari.Response response = given().request().body(record.toJson().toString()).post("/discovery");
     assertThat(response.getStatusCode()).isEqualTo(500);
+  }
+
+  @Test
+  public void testUserRegistrationKey() {
+    HelloService svc = new HelloServiceImpl("stuff");
+    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    Record record = new Record()
+      .setName("Hello")
+      .setRegistration("this-is-allowed")
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
+
+    Restafari.Response response = given().request().body(record.toJson().toString()).post("/discovery");
+    assertThat(response.getStatusCode()).isEqualTo(201);
+
+    Record r = retrieve("this-is-allowed");
+    assertThat(r.getRegistration()).isEqualTo("this-is-allowed");
   }
 
   @Test

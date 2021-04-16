@@ -63,12 +63,9 @@ public class ZookeeperBackendService implements ServiceDiscoveryBackend, Connect
 
   @Override
   public void store(Record record, Handler<AsyncResult<Record>> resultHandler) {
-    if (record.getRegistration() != null) {
-      resultHandler.handle(Future.failedFuture("The record has already been registered"));
-      return;
+    if (StringUtil.isNullOrEmpty(record.getRegistration())) {
+      record.setRegistration(UUID.randomUUID().toString());
     }
-    String uuid = UUID.randomUUID().toString();
-    record.setRegistration(uuid);
 
     String content = record.toJson().encode();
     Context context = Vertx.currentContext();
@@ -86,41 +83,6 @@ public class ZookeeperBackendService implements ServiceDiscoveryBackend, Connect
               .withUnhandledErrorListener((s, throwable)
                   -> resultHandler.handle(Future.failedFuture(throwable)))
               .forPath(getPath(record.getRegistration()), content.getBytes(CHARSET));
-        } catch (Exception e) {
-          resultHandler.handle(Future.failedFuture(e));
-        }
-      }
-    });
-  }
-
-  @Override
-  public void store(String uuid, Record record, Handler<AsyncResult<Record>> resultHandler) {
-    String key;
-    if (!StringUtil.isNullOrEmpty(uuid)) {
-      key = uuid;
-    } else if (!StringUtil.isNullOrEmpty(record.getRegistration())) {
-      key = record.getRegistration();
-    } else {
-      key = UUID.randomUUID().toString();
-    }
-    record.setRegistration(key);
-
-    String content = record.toJson().encode();
-    Context context = Vertx.currentContext();
-
-    ensureConnected(x -> {
-      if (x.failed()) {
-        resultHandler.handle(Future.failedFuture(x.cause()));
-      } else {
-        try {
-          client.create()
-            .creatingParentsIfNeeded()
-            .withMode(ephemeral ? CreateMode.EPHEMERAL : CreateMode.PERSISTENT)
-            .inBackground((curatorFramework, curatorEvent)
-              -> callback(context, record, resultHandler, curatorEvent))
-            .withUnhandledErrorListener((s, throwable)
-              -> resultHandler.handle(Future.failedFuture(throwable)))
-            .forPath(getPath(record.getRegistration()), content.getBytes(CHARSET));
         } catch (Exception e) {
           resultHandler.handle(Future.failedFuture(e));
         }

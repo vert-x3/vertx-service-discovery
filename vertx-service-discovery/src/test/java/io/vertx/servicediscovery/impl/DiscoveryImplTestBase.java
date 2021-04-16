@@ -16,6 +16,7 @@
 
 package io.vertx.servicediscovery.impl;
 
+import io.netty.util.internal.StringUtil;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -223,12 +224,14 @@ public abstract class DiscoveryImplTestBase {
 
       @Override
       public void store(Record record, Handler<AsyncResult<Record>> resultHandler) {
-        String uuid = UUID.randomUUID().toString();
-        if (record.getRegistration() != null) {
-          throw new IllegalArgumentException("The record has already been registered");
+        String uuid = null;
+        if (StringUtil.isNullOrEmpty(record.getRegistration())) {
+          uuid = UUID.randomUUID().toString();
+          record.setRegistration(uuid);
+        } else {
+          uuid = record.getRegistration();
         }
 
-        record.setRegistration(uuid);
         registry.put(uuid, record.toJson().encode(), ar -> {
           // Put takes some time to complete
           try {
@@ -243,11 +246,6 @@ public abstract class DiscoveryImplTestBase {
             resultHandler.handle(Future.failedFuture(ar.cause()));
           }
         });
-      }
-
-      @Override
-      public void store(String key, Record record, Handler<AsyncResult<Record>> resultHandler) {
-
       }
 
       @Override

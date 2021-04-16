@@ -39,6 +39,10 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
   private AsyncMap<String, String> registry;
   private Vertx vertx;
 
+  private static <T> Future<T> failure(Throwable e) {
+    return Future.failedFuture(new Exception("Unable to retrieve the registry", e));
+  }
+
   @Override
   public void init(Vertx vertx, JsonObject config) {
     this.vertx = vertx;
@@ -61,42 +65,19 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
 
   @Override
   public void store(Record record, Handler<AsyncResult<Record>> resultHandler) {
-    String uuid = UUID.randomUUID().toString();
-    if (record.getRegistration() != null) {
-      throw new IllegalArgumentException("The record has already been registered");
+    String uuid;
+    if (StringUtil.isNullOrEmpty(record.getRegistration())) {
+      uuid = UUID.randomUUID().toString();
+      record.setRegistration(uuid);
+    } else {
+      uuid = record.getRegistration();
     }
-    record.setRegistration(uuid);
+
     retrieveRegistry(reg -> {
       if (reg.failed()) {
         resultHandler.handle(failure(reg.cause()));
       } else {
         reg.result().put(uuid, record.toJson().encode(), ar -> {
-          if (ar.succeeded()) {
-            resultHandler.handle(Future.succeededFuture(record));
-          } else {
-            resultHandler.handle(Future.failedFuture(ar.cause()));
-          }
-        });
-      }
-    });
-  }
-
-  @Override
-  public void store(String uuid, Record record, Handler<AsyncResult<Record>> resultHandler) {
-    String key;
-    if (!StringUtil.isNullOrEmpty(uuid)) {
-      key = uuid;
-    } else if (!StringUtil.isNullOrEmpty(record.getRegistration())) {
-      key = record.getRegistration();
-    } else {
-      key = UUID.randomUUID().toString();
-    }
-    record.setRegistration(key);
-    retrieveRegistry(reg -> {
-      if (reg.failed()) {
-        resultHandler.handle(failure(reg.cause()));
-      } else {
-        reg.result().put(key, record.toJson().encode(), ar -> {
           if (ar.succeeded()) {
             resultHandler.handle(Future.succeededFuture(record));
           } else {
@@ -128,10 +109,6 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
   public void remove(Record record, Handler<AsyncResult<Record>> resultHandler) {
     Objects.requireNonNull(record.getRegistration(), MESSAGE_NO_REG_ID);
     remove(record.getRegistration(), resultHandler);
-  }
-
-  private static <T> Future<T> failure(Throwable e) {
-    return Future.failedFuture(new Exception("Unable to retrieve the registry", e));
   }
 
   @Override

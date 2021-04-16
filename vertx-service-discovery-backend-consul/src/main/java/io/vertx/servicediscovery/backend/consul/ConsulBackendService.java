@@ -65,28 +65,11 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
 
   @Override
   public void store(Record record, Handler<AsyncResult<Record>> resultHandler) {
-    String uuid = UUID.randomUUID().toString();
-    if (record.getRegistration() != null) {
-      throw new IllegalArgumentException("The record has already been registered");
+    String uuid = null;
+    if (StringUtil.isNullOrEmpty(record.getRegistration())) {
+      uuid = UUID.randomUUID().toString();
+      record.setRegistration(uuid);
     }
-    ServiceOptions serviceOptions = recordToServiceOptions(record, uuid);
-    record.setRegistration(serviceOptions.getId());
-    Promise<Void> registration = Promise.promise();
-    client.registerService(serviceOptions, registration);
-    registration.future().map(record).onComplete(resultHandler);
-  }
-
-  @Override
-  public void store(String uuid, Record record, Handler<AsyncResult<Record>> resultHandler) {
-    String key;
-    if (!StringUtil.isNullOrEmpty(uuid)) {
-      key = uuid;
-    } else if (!StringUtil.isNullOrEmpty(record.getRegistration())) {
-      key = record.getRegistration();
-    } else {
-      key = UUID.randomUUID().toString();
-    }
-    record.setRegistration(key);
 
     ServiceOptions serviceOptions = recordToServiceOptions(record, uuid);
     record.setRegistration(serviceOptions.getId());

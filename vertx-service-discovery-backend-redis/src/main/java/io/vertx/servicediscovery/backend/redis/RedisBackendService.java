@@ -52,33 +52,13 @@ public class RedisBackendService implements ServiceDiscoveryBackend {
 
   @Override
   public void store(Record record, Handler<AsyncResult<Record>> resultHandler) {
-    if (record.getRegistration() != null) {
-      resultHandler.handle(Future.failedFuture("The record has already been registered"));
-      return;
-    }
-    String uuid = UUID.randomUUID().toString();
-    record.setRegistration(uuid);
-
-    redis.send(cmd(HSET).arg(key).arg(uuid).arg(record.toJson().encode()), ar -> {
-      if (ar.succeeded()) {
-        resultHandler.handle(Future.succeededFuture(record));
-      } else {
-        resultHandler.handle(Future.failedFuture(ar.cause()));
-      }
-    });
-  }
-
-  @Override
-  public void store(String uuid, Record record, Handler<AsyncResult<Record>> resultHandler) {
-    String key;
-    if (!StringUtil.isNullOrEmpty(uuid)) {
-      key = uuid;
-    } else if (!StringUtil.isNullOrEmpty(record.getRegistration())) {
-      key = record.getRegistration();
+    String uuid;
+    if (StringUtil.isNullOrEmpty(record.getRegistration())) {
+      uuid = UUID.randomUUID().toString();
+      record.setRegistration(uuid);
     } else {
-      key = UUID.randomUUID().toString();
+      uuid = record.getRegistration();
     }
-    record.setRegistration(key);
 
     redis.send(cmd(HSET).arg(key).arg(uuid).arg(record.toJson().encode()), ar -> {
       if (ar.succeeded()) {
