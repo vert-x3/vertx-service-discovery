@@ -117,7 +117,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
 
     retrieveTokenFuture
       .map(t -> {
-        LOGGER.info("Kubernetes discovery: Bearer Token { " + t + " }");
+        LOGGER.debug("Kubernetes discovery: Bearer Token { " + t + " }");
         return t;
       })
       .compose(this::retrieveServices)
