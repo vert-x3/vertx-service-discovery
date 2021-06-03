@@ -89,7 +89,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
 
     String p = System.getenv("KUBERNETES_SERVICE_PORT");
     if (p != null) {
-      port = Integer.valueOf(p);
+      port = Integer.parseInt(p);
     }
 
     String host = conf.getString("host");
