@@ -38,6 +38,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static java.lang.Boolean.parseBoolean;
+
 /**
  * A discovery bridge listening for kubernetes services and publishing them in the Vert.x service discovery.
  * This bridge only supports the importation of services from kubernetes in vert.x (and not the opposite).
@@ -464,7 +466,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
         location.setHost(spec.getString("clusterIP"));
       }
 
-      if (isTrue(record.getMetadata().getString("ssl")) || p != null && p == 443) {
+      if (parseBoolean(record.getMetadata().getString("ssl")) || p != null && p == 443) {
         location.setSsl(true);
       }
       record.setLocation(location.toJson());
@@ -475,10 +477,6 @@ public class KubernetesServiceImporter implements ServiceImporter {
 
   private static boolean isExternalService(JsonObject service) {
     return service.containsKey("spec") && service.getJsonObject("spec").containsKey("type") && service.getJsonObject("spec").getString("type").equals("ExternalName");
-  }
-
-  private static boolean isTrue(String ssl) {
-    return "true".equalsIgnoreCase(ssl);
   }
 
 
