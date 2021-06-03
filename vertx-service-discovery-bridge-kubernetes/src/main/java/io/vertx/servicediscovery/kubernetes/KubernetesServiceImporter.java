@@ -116,10 +116,6 @@ public class KubernetesServiceImporter implements ServiceImporter {
     LOGGER.info("Kubernetes master url: http" + (conf.getBoolean("ssl", true) ? "s" : "") + "//" + host + ":" + port);
 
     retrieveTokenFuture
-      .map(t -> {
-        LOGGER.info("Kubernetes discovery: Bearer Token { " + t + " }");
-        return t;
-      })
       .compose(this::retrieveServices)
       .map(list -> {
         LOGGER.info("Kubernetes initial import of " + list.size() + " services");
