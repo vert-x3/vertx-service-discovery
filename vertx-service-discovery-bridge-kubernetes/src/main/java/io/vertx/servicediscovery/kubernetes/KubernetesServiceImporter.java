@@ -430,7 +430,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
         //Number or name of the port to access on the pods targeted by the service.
         Object targetPort = port.getValue("targetPort");
         if (targetPort instanceof Integer) {
-          location.put("internal-port", (Integer) targetPort);
+          location.put("internal-port", targetPort);
         }
         location.put("host", spec.getString("clusterIP"));
       }
