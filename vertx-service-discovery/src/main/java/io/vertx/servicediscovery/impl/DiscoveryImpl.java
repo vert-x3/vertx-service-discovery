@@ -18,7 +18,6 @@ package io.vertx.servicediscovery.impl;
 
 import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.*;
-import io.vertx.servicediscovery.Record;
 import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
@@ -41,7 +40,7 @@ import java.util.stream.Collectors;
  */
 public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
-  private final Vertx vertx;
+  private final VertxInternal vertx;
   private final String announce;
   private final String usage;
   private final ServiceDiscoveryBackend backend;
@@ -66,7 +65,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
    * @param backend the backend service
    */
   DiscoveryImpl(Vertx vertx, ServiceDiscoveryOptions options, ServiceDiscoveryBackend backend) {
-    this.vertx = vertx;
+    this.vertx = (VertxInternal) vertx;
     this.announce = options.getAnnounceAddress();
     this.usage = options.getUsageAddress();
 
@@ -179,7 +178,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
       conf = configuration;
     }
 
-    Promise<Void> completed = Promise.promise();
+    Promise<Void> completed = vertx.promise();
     completed.future().onComplete(
       ar -> {
         if (ar.failed()) {
@@ -204,14 +203,14 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
   @Override
   public Future<Void> registerServiceImporter(ServiceImporter importer, JsonObject configuration) {
-    Promise<Void> promise = Promise.promise();
+    Promise<Void> promise = vertx.promise();
     registerServiceImporter(importer, configuration, promise);
     return promise.future();
   }
 
   @Override
   public Future<Void> registerServiceExporter(ServiceExporter exporter, JsonObject configuration) {
-    Promise<Void> promise = Promise.promise();
+    Promise<Void> promise = vertx.promise();
     registerServiceExporter(exporter, configuration, promise);
     return promise.future();
   }
@@ -226,7 +225,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
       conf = configuration;
     }
 
-    Promise<Void> completed = Promise.promise();
+    Promise<Void> completed = vertx.promise();
     completed.future().onComplete(
       ar -> {
         if (ar.failed()) {
@@ -254,13 +253,13 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     LOGGER.info("Stopping service discovery");
     List<Future> futures = new ArrayList<>();
     for (ServiceImporter importer : importers) {
-      Promise<Void> promise = Promise.promise();
+      Promise<Void> promise = vertx.promise();
       importer.close(v -> promise.complete());
       futures.add(promise.future());
     }
 
     for (ServiceExporter exporter : exporters) {
-      Promise<Void> promise = Promise.promise();
+      Promise<Void> promise = vertx.promise();
       exporter.close(promise::complete);
       futures.add(promise.future());
     }
@@ -303,7 +302,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
   @Override
   public Future<Record> publish(Record record) {
-    Promise<Record> promise = Promise.promise();
+    Promise<Record> promise = vertx.promise();
     publish(record, promise);
     return promise.future();
   }
@@ -332,7 +331,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
   @Override
   public Future<Void> unpublish(String id) {
-    Promise<Void> promise = Promise.promise();
+    Promise<Void> promise = vertx.promise();
     unpublish(id, promise);
     return promise.future();
   }
@@ -354,8 +353,20 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
   @Override
   public Future<@Nullable Record> getRecord(JsonObject filter) {
-    Promise<Record> promise = Promise.promise();
+    Promise<Record> promise = vertx.promise();
     getRecord(filter, promise);
+    return promise.future();
+  }
+
+  @Override
+  public void getRecord(String id, Handler<AsyncResult<@Nullable Record>> resultHandler) {
+    backend.getRecord(id, resultHandler);
+  }
+
+  @Override
+  public Future<@Nullable Record> getRecord(String id) {
+    Promise<Record> promise = vertx.promise();
+    getRecord(id, promise);
     return promise.future();
   }
 
@@ -366,7 +377,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
   @Override
   public Future<@Nullable Record> getRecord(Function<Record, Boolean> filter) {
-    Promise<Record> promise = Promise.promise();
+    Promise<Record> promise = vertx.promise();
     getRecord(filter, promise);
     return promise.future();
   }
@@ -394,7 +405,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
   @Override
   public Future<@Nullable Record> getRecord(Function<Record, Boolean> filter, boolean includeOutOfService) {
-    Promise<Record> promise = Promise.promise();
+    Promise<Record> promise = vertx.promise();
     getRecord(filter, includeOutOfService, promise);
     return promise.future();
   }
@@ -415,7 +426,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
   @Override
   public Future<List<Record>> getRecords(JsonObject filter) {
-    Promise<List<Record>> promise = Promise.promise();
+    Promise<List<Record>> promise = vertx.promise();
     getRecords(filter, promise);
     return promise.future();
   }
@@ -427,7 +438,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
   @Override
   public Future<List<Record>> getRecords(Function<Record, Boolean> filter) {
-    Promise<List<Record>> promise = Promise.promise();
+    Promise<List<Record>> promise = vertx.promise();
     getRecords(filter, promise);
     return promise.future();
   }
@@ -451,7 +462,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
   @Override
   public Future<List<Record>> getRecords(Function<Record, Boolean> filter, boolean includeOutOfService) {
-    Promise<List<Record>> promise = Promise.promise();
+    Promise<List<Record>> promise = vertx.promise();
     getRecords(filter, includeOutOfService, promise);
     return promise.future();
   }
@@ -476,7 +487,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
   @Override
   public Future<Record> update(Record record) {
-    Promise<Record> promise = Promise.promise();
+    Promise<Record> promise = vertx.promise();
     update(record, promise);
     return promise.future();
   }

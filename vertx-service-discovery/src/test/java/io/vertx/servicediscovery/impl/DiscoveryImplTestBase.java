@@ -68,6 +68,30 @@ public abstract class DiscoveryImplTestBase {
   }
 
   @Test
+  public void testPublicationAndLookupById() {
+    HelloService svc = new HelloServiceImpl("stuff");
+    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    Record record = new Record()
+      .setName("Hello")
+      .setType(EventBusService.TYPE)
+      .setLocation(new JsonObject().put(Record.ENDPOINT, "address"))
+      .setMetadata(new JsonObject().put("service.interface", HelloService.class.getName()));
+
+    discovery.publish(record, (r) -> {
+    });
+    await().until(() -> record.getRegistration() != null);
+
+    AtomicReference<Record> found = new AtomicReference<>();
+    discovery.getRecord(record.getRegistration(), ar -> {
+      found.set(ar.result());
+    });
+
+    await().until(() -> found.get() != null);
+    assertThat(found.get().getLocation().getString("endpoint")).isEqualTo("address");
+    assertThat(discovery.options().toJson()).isNotEmpty();
+  }
+
+  @Test
   public void testPublicationAndSimpleLookup() {
     HelloService svc = new HelloServiceImpl("stuff");
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");

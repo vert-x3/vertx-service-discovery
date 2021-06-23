@@ -222,6 +222,23 @@ public interface ServiceDiscovery {
   Future<@Nullable Record> getRecord(JsonObject filter);
 
   /**
+   * Looks up for a single record by its registration {@code id}.
+   * <p>
+   * When there are no matching record, the operation succeeds, but the async result has no result ({@code null}).
+   *
+   * @param id            the registration id
+   * @param resultHandler handler called when the lookup has been completed
+   * @see Record#getRegistration()
+   */
+  void getRecord(String id, Handler<AsyncResult<@Nullable Record>> resultHandler);
+
+  /**
+   * Like {@link #getRecord(String, Handler)} but returns a {@code Future} of the asynchronous result
+   */
+  Future<@Nullable Record> getRecord(String id);
+
+
+  /**
    * Lookups for a single record.
    * <p>
    * The filter is a {@link Function} taking a {@link Record} as argument and returning a boolean. You should see it
