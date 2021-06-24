@@ -52,7 +52,7 @@ public class KubernetesServerTest {
     server.expect().get().withPath("/api/v1/namespaces/default/services").andReturn(200, new ServiceListBuilder()
       .addToItems(svc1, svc2).withNewMetadata("1234", "/self").build()).always();
 
-    server.expect().get().withPath("/api/v1/namespaces/default/services?watch=true&resourceVersion=1234")
+    server.expect().get().withPath("/api/v1/namespaces/default/services?watch=true&allowWatchBookmarks=true&resourceVersion=1234")
       .andReturnChunked(200,
         new WatchEvent(svc3, "ADDED"), "\n",
         new WatchEvent(svc1, "DELETED"), "\n",
@@ -62,7 +62,7 @@ public class KubernetesServerTest {
     server.expect().get().withPath("/api/v1/namespaces/issue96/services").andReturn(200, new ServiceListBuilder()
       .addToItems(svc96)
       .withNewMetadata("1235", "/self").build()).always();
-    server.expect().get().withPath("/api/v1/namespaces/issue96/services?watch=true&resourceVersion=1235")
+    server.expect().get().withPath("/api/v1/namespaces/issue96/services?watch=true&allowWatchBookmarks=true&resourceVersion=1235")
       .andReturnChunked(200,
         new WatchEvent(getUpdatedService96(), "MODIFIED"), "\n",
         new WatchEvent(getUpdatedService96(), "DELETED"), "\n").once();

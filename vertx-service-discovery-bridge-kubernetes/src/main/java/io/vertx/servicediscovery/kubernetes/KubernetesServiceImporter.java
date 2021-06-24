@@ -18,26 +18,23 @@ package io.vertx.servicediscovery.kubernetes;
 
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.parsetools.JsonParser;
-import io.vertx.core.streams.WriteStream;
-import io.vertx.ext.web.client.HttpResponse;
-import io.vertx.ext.web.client.WebClient;
-import io.vertx.ext.web.client.WebClientOptions;
-import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServicePublisher;
 import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.*;
 
+import static io.vertx.core.http.HttpMethod.GET;
 import static java.lang.Boolean.parseBoolean;
 
 /**
@@ -61,16 +58,26 @@ public class KubernetesServiceImporter implements ServiceImporter {
   private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceImporter.class.getName());
   public static final String KUBERNETES_UUID = "kubernetes.uuid";
 
+  private final Map<RecordKey, Record> records = new HashMap<>();
+
+  private ContextInternal context;
   private ServicePublisher publisher;
+  private String token;
   private String namespace;
-  private List<Record> records = new CopyOnWriteArrayList<>();
-  private WebClient client;
+  private HttpClient client;
+  private String lastResourceVersion;
+
+  private volatile boolean stop;
 
   private static final String OPENSHIFT_KUBERNETES_TOKEN_FILE = "/var/run/secrets/kubernetes.io/serviceaccount/token";
 
   @Override
-  public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration,
-                    Promise<Void> completion) {
+  public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Promise<Void> completion) {
+    context = (ContextInternal) vertx.getOrCreateContext();
+    context.runOnContext(v -> init(publisher, configuration, completion));
+  }
+
+  private void init(ServicePublisher publisher, JsonObject configuration, Promise<Void> completion) {
     this.publisher = publisher;
 
     JsonObject conf;
@@ -100,17 +107,15 @@ public class KubernetesServiceImporter implements ServiceImporter {
       host = h;
     }
 
-    client = WebClient.create(vertx,
-      new WebClientOptions()
-        .setTrustAll(true)
-        .setSsl(conf.getBoolean("ssl", true))
-        .setDefaultHost(host)
-        .setDefaultPort(port)
-        .setFollowRedirects(true)
+    client = context.owner().createHttpClient(new HttpClientOptions()
+      .setTrustAll(true)
+      .setSsl(conf.getBoolean("ssl", true))
+      .setDefaultHost(host)
+      .setDefaultPort(port)
     );
 
     // Retrieve token
-    Future<String> retrieveTokenFuture = getToken(vertx, conf);
+    Future<Void> retrieveTokenFuture = retrieveToken(conf);
 
     // 1) get kubernetes auth info
     this.namespace = conf.getString("namespace", getNamespaceOrDefault());
@@ -118,26 +123,14 @@ public class KubernetesServiceImporter implements ServiceImporter {
     LOGGER.info("Kubernetes master url: http" + (conf.getBoolean("ssl", true) ? "s" : "") + "//" + host + ":" + port);
 
     retrieveTokenFuture
-      .compose(this::retrieveServices)
-      .map(list -> {
-        LOGGER.info("Kubernetes initial import of " + list.size() + " services");
-        List<Future> publications = new ArrayList<>();
-        list.forEach(s -> {
-          JsonObject svc = ((JsonObject) s);
-          Record record = createRecord(svc);
-          if (addRecordIfNotContained(record)) {
-            Promise<Record> promise = Promise.promise();
-            publishRecord(record, promise);
-            publications.add(promise.future());
-          }
-        });
-        return publications;
-      })
-      .compose(CompositeFuture::all)
+      .compose(v -> retrieveServices())
+      .onSuccess(items -> LOGGER.info("Kubernetes initial import of " + items.size() + " services"))
+      .compose(this::publishRecords)
       .onComplete(ar -> {
         if (ar.succeeded()) {
           LOGGER.info("Kubernetes importer instantiated with " + records.size() + " services imported");
           completion.complete();
+          watch();
         } else {
           LOGGER.error("Error while interacting with kubernetes", ar.cause());
           completion.fail(ar.cause());
@@ -145,93 +138,99 @@ public class KubernetesServiceImporter implements ServiceImporter {
       });
   }
 
-  private Future<JsonArray> retrieveServices(String token) {
-    Promise<JsonArray> promise = Promise.promise();
+  private Future<JsonArray> retrieveServices() {
     String path = "/api/v1/namespaces/" + namespace + "/services";
-    client.get(path)
-      .putHeader("Authorization", "Bearer " + token)
-      .send(resp -> {
-        if (resp.failed()) {
-          promise.fail(resp.cause());
-        } else if (resp.result().statusCode() != 200) {
-          promise.fail("Unable to retrieve services from namespace " + namespace + ", status code: "
-            + resp.result().statusCode() + ", content: " + resp.result().bodyAsString());
+    return client.request(GET, path).compose(request -> {
+      request.setFollowRedirects(true);
+      request.putHeader("Authorization", "Bearer " + token);
+      return request.send();
+    }).compose(response -> {
+      return response.body().compose(body -> {
+        if (response.statusCode() != 200) {
+          return context.failedFuture("Unable to retrieve services from namespace " + namespace + ", status code: "
+            + response.statusCode() + ", content: " + body.toString());
         } else {
-          HttpResponse<Buffer> response = resp.result();
-          JsonArray items = response.bodyAsJsonObject().getJsonArray("items");
-          if (items == null) {
-            promise.fail("Unable to retrieve services from namespace " + namespace + " - no items");
+          JsonObject serviceList = body.toJsonObject();
+          lastResourceVersion = serviceList.getJsonObject("metadata").getString("resourceVersion");
+          JsonArray items = serviceList.getJsonArray("items");
+          if (!serviceList.containsKey("items")) {
+            return context.failedFuture("Unable to retrieve services from namespace " + namespace + " - no items");
           } else {
-            promise.complete(items);
-            watch(client, token, response.bodyAsJsonObject().getJsonObject("metadata").getString("resourceVersion"));
+            return context.succeededFuture(items);
           }
         }
       });
-    return promise.future();
+    });
   }
 
-  private void watch(WebClient client, String token, String resourceVersion) {
-    String path = "/api/v1/namespaces/" + namespace + "/services";
+  private CompositeFuture publishRecords(JsonArray items) {
+    List<Future> publications = new ArrayList<>();
+    items.forEach(s -> {
+      JsonObject svc = ((JsonObject) s);
+      Record record = createRecord(svc);
+      if (addRecordIfNotContained(record)) {
+        Promise<Record> promise = context.promise();
+        publishRecord(record, promise);
+        publications.add(promise.future());
+      }
+    });
+    return CompositeFuture.all(publications);
+  }
+
+  private void watch() {
+    if (stop) {
+      return;
+    }
+    String path = "/api/v1/namespaces/" + namespace + "/services?"
+      + "watch=true"
+      + "&"
+      + "allowWatchBookmarks=true"
+      + "&"
+      + "resourceVersion=" + lastResourceVersion;
+
     JsonParser parser = JsonParser.newParser().objectValueMode()
       .handler(event -> onChunk(event.objectValue()));
 
-    client.get(path)
-      .addQueryParam("watch", "true")
-      .addQueryParam("resourceVersion", resourceVersion)
-      .as(BodyCodec.pipe(new WriteStream<Buffer>() {
-        @Override
-        public WriteStream<Buffer> exceptionHandler(Handler<Throwable> handler) {
-          return this;
-        }
+    client.request(GET, path).compose(request -> {
+      request.setFollowRedirects(true);
+      request.putHeader("Authorization", "Bearer " + token);
+      return request.send();
+    }).compose(response -> {
+      Promise<Void> promise = Promise.promise();
+      if (response.statusCode() == 200) {
+        LOGGER.info("Watching services from namespace " + namespace);
+        response
+          .exceptionHandler(t -> promise.tryComplete())
+          .endHandler(v -> promise.tryComplete())
+          .handler(parser);
+      } else {
+        promise.fail("");
+      }
+      return promise.future();
+    }).onComplete(res -> {
+      if (res.succeeded()) {
+        watch();
+      } else {
+        LOGGER.error("Failure while watching service list", res.cause());
+        fetchAndWatch();
+      }
+    });
+  }
 
-        @Override
-        public Future<Void> write(Buffer data) {
-          parser.write(data);
-          return Future.succeededFuture();
-        }
-
-        @Override
-        public void write(Buffer data, Handler<AsyncResult<Void>> handler) {
-          parser.write(data);
-          if (handler != null) {
-            handler.handle(Future.succeededFuture());
-          }
-        }
-
-        @Override
-        public void end(Handler<AsyncResult<Void>> handler) {
-          try {
-            parser.end();
-          } catch (Exception e) {
-            handler.handle(Future.failedFuture(e));
-            return;
-          }
-          handler.handle(Future.succeededFuture());
-        }
-
-        @Override
-        public WriteStream<Buffer> setWriteQueueMaxSize(int maxSize) {
-          return this;
-        }
-
-        @Override
-        public boolean writeQueueFull() {
-          return false;
-        }
-
-        @Override
-        public WriteStream<Buffer> drainHandler(Handler<Void> handler) {
-          return this;
-        }
-      }))
-      .putHeader("Authorization", "Bearer " + token)
-      .send(ar -> {
-        if (ar.failed()) {
-          LOGGER.error("Unable to setup the watcher on the service list", ar.cause());
-        } else {
-          LOGGER.info("Watching services from namespace " + namespace);
-        }
+  private void fetchAndWatch() {
+    if (!stop) {
+      context.setTimer(2000, l -> {
+        retrieveServices()
+          .compose(this::publishRecords)
+          .onComplete(res -> {
+            if (res.succeeded()) {
+              watch();
+            } else {
+              fetchAndWatch();
+            }
+          });
       });
+    }
   }
 
   private void onChunk(JsonObject json) {
@@ -239,11 +238,14 @@ public class KubernetesServiceImporter implements ServiceImporter {
     if (type == null) {
       return;
     }
-    JsonObject service = json.getJsonObject("object");
+    JsonObject object = json.getJsonObject("object");
     switch (type) {
+      case "BOOKMARK":
+        lastResourceVersion = object.getJsonObject("metadata").getString("resourceVersion");
+        break;
       case "ADDED":
         // new service
-        Record record = createRecord(service);
+        Record record = createRecord(object);
         if (addRecordIfNotContained(record)) {
           LOGGER.info("Adding service " + record.getName());
           publishRecord(record, null);
@@ -252,7 +254,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
       case "DELETED":
       case "ERROR":
         // remove service
-        record = createRecord(service);
+        record = createRecord(object);
         LOGGER.info("Removing service " + record.getName());
         Record storedRecord = removeRecordIfContained(record);
         if (storedRecord != null) {
@@ -260,7 +262,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
         }
         break;
       case "MODIFIED":
-        record = createRecord(service);
+        record = createRecord(object);
         LOGGER.info("Modifying service " + record.getName());
         storedRecord = replaceRecordIfContained(record);
         if (storedRecord != null) {
@@ -269,25 +271,15 @@ public class KubernetesServiceImporter implements ServiceImporter {
     }
   }
 
-  private Future<String> getToken(Vertx vertx, JsonObject conf) {
-    Promise<String> result = Promise.promise();
-
+  private Future<Void> retrieveToken(JsonObject conf) {
+    Future<String> result;
     String token = conf.getString("token");
     if (token != null && !token.trim().isEmpty()) {
-      result.complete(token);
-      return result.future();
+      result = context.succeededFuture(token);
+    } else {
+      result = context.owner().fileSystem().readFile(OPENSHIFT_KUBERNETES_TOKEN_FILE).map(Buffer::toString);
     }
-
-    // Read from file
-    vertx.fileSystem().readFile(OPENSHIFT_KUBERNETES_TOKEN_FILE, ar -> {
-      if (ar.failed()) {
-        result.tryFail(ar.cause());
-      } else {
-        result.tryComplete(ar.result().toString());
-      }
-    });
-
-    return result.future();
+    return result.onSuccess(tk -> this.token = tk).mapEmpty();
   }
 
   private void publishRecord(Record record, Handler<AsyncResult<Record>> completionHandler) {
@@ -305,13 +297,8 @@ public class KubernetesServiceImporter implements ServiceImporter {
     });
   }
 
-  private synchronized boolean addRecordIfNotContained(Record record) {
-    for (Record rec : records) {
-      if (areTheSameService(rec, record)) {
-        return false;
-      }
-    }
-    return records.add(record);
+  private boolean addRecordIfNotContained(Record record) {
+    return records.putIfAbsent(new RecordKey(record), record) == null;
   }
 
   private String getNamespaceOrDefault() {
@@ -325,16 +312,6 @@ public class KubernetesServiceImporter implements ServiceImporter {
       }
     }
     return ns;
-  }
-
-  private boolean areTheSameService(Record record1, Record record2) {
-    String uuid = record1.getMetadata().getString(KUBERNETES_UUID, "");
-    String uuid2 = record2.getMetadata().getString(KUBERNETES_UUID, "");
-    String endpoint = record1.getLocation().getString(Record.ENDPOINT, "");
-    String endpoint2 = record2.getLocation().getString(Record.ENDPOINT, "");
-
-    // Check the uuid and location
-    return uuid.equals(uuid2) && endpoint.equals(endpoint2);
   }
 
   static Record createRecord(JsonObject service) {
@@ -482,14 +459,16 @@ public class KubernetesServiceImporter implements ServiceImporter {
 
   @Override
   public void close(Handler<Void> completionHandler) {
-    synchronized (this) {
-      if (client != null) {
+    stop = true;
+    if (context != null) {
+      context.runOnContext(v -> {
         client.close();
         client = null;
-      }
-    }
-
-    if (completionHandler != null) {
+        if (completionHandler != null) {
+          completionHandler.handle(null);
+        }
+      });
+    } else if (completionHandler != null) {
       completionHandler.handle(null);
     }
   }
@@ -508,23 +487,42 @@ public class KubernetesServiceImporter implements ServiceImporter {
   }
 
   private Record removeRecordIfContained(Record record) {
-    for (Record rec : records) {
-      if (areTheSameService(rec, record)) {
-        records.remove(rec);
-        return rec;
-      }
-    }
-    return null;
+    return records.remove(new RecordKey(record));
   }
 
   private Record replaceRecordIfContained(Record record) {
-    for (Record rec : records) {
-      if (areTheSameService(rec, record)) {
-        records.remove(rec);
-        records.add(record);
-        return rec;
-      }
+    RecordKey key = new RecordKey(record);
+    Record old = records.remove(key);
+    if (old != null) {
+      records.put(key, record);
     }
-    return null;
+    return old;
+  }
+
+  private static class RecordKey {
+    final String uuid;
+    final String endpoint;
+
+    RecordKey(Record record) {
+      this.uuid = Objects.requireNonNull(record.getMetadata().getString(KUBERNETES_UUID));
+      this.endpoint = record.getLocation().getString(Record.ENDPOINT, "");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+
+      RecordKey recordKey = (RecordKey) o;
+
+      return uuid.equals(recordKey.uuid) && endpoint.equals(recordKey.endpoint);
+    }
+
+    @Override
+    public int hashCode() {
+      int result = uuid.hashCode();
+      result = 31 * result + endpoint.hashCode();
+      return result;
+    }
   }
 }
