@@ -33,9 +33,11 @@ import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.*;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static io.vertx.core.http.HttpMethod.GET;
 import static java.lang.Boolean.parseBoolean;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * A discovery bridge listening for kubernetes services and publishing them in the Vert.x service discovery.
@@ -56,6 +58,15 @@ import static java.lang.Boolean.parseBoolean;
 public class KubernetesServiceImporter implements ServiceImporter {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesServiceImporter.class.getName());
+
+  private static final Set<String> SUPPORTED_EVENT_TYPES = Stream.of(
+    "BOOKMARK",
+    "ADDED",
+    "DELETED",
+    "ERROR",
+    "MODIFIED"
+  ).collect(toSet());
+
   public static final String KUBERNETES_UUID = "kubernetes.uuid";
 
   private final Map<RecordKey, Record> records = new HashMap<>();
@@ -66,6 +77,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
   private String namespace;
   private HttpClient client;
   private String lastResourceVersion;
+  private BatchOfUpdates batchOfUpdates;
 
   private volatile boolean stop;
 
@@ -189,7 +201,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
       + "resourceVersion=" + lastResourceVersion;
 
     JsonParser parser = JsonParser.newParser().objectValueMode()
-      .handler(event -> onChunk(event.objectValue()));
+      .handler(event -> addToBatch(event.objectValue()));
 
     client.request(GET, path).compose(request -> {
       request.setFollowRedirects(true);
@@ -233,11 +245,51 @@ public class KubernetesServiceImporter implements ServiceImporter {
     }
   }
 
+  private void addToBatch(JsonObject json) {
+    if (batchOfUpdates == null) {
+      long timerId = context.setTimer(500, l -> processBatch());
+      batchOfUpdates = new BatchOfUpdates(context.owner(), timerId);
+    }
+    batchOfUpdates.objects.add(json);
+  }
+
+  private void processBatch() {
+    Map<Object, JsonObject> objects = compact(batchOfUpdates.objects);
+    batchOfUpdates = null;
+    for (JsonObject json : objects.values()) {
+      onChunk(json);
+    }
+  }
+
+  private Map<Object, JsonObject> compact(List<JsonObject> source) {
+    Map<Object, JsonObject> res = new HashMap<>();
+    for (JsonObject json : source) {
+      String type = json.getString("type");
+      if (type == null || !SUPPORTED_EVENT_TYPES.contains(type)) {
+        continue;
+      }
+      JsonObject object = json.getJsonObject("object");
+      if ("BOOKMARK".equals(type)) {
+        res.merge("BOOKMARK", json, (oldVal, newVal) -> newVal);
+      } else {
+        RecordKey key = new RecordKey(createRecord(object));
+        if ("DELETED".equals(type) || "ERROR".equals(type)) {
+          res.put(key, json);
+        } else {
+          JsonObject oldVal = res.get(key);
+          if (oldVal == null) {
+            res.put(key, json);
+          } else {
+            oldVal.put("object", object);
+          }
+        }
+      }
+    }
+    return res;
+  }
+
   private void onChunk(JsonObject json) {
     String type = json.getString("type");
-    if (type == null) {
-      return;
-    }
     JsonObject object = json.getJsonObject("object");
     switch (type) {
       case "BOOKMARK":
@@ -462,6 +514,9 @@ public class KubernetesServiceImporter implements ServiceImporter {
     stop = true;
     if (context != null) {
       context.runOnContext(v -> {
+        if (batchOfUpdates != null) {
+          batchOfUpdates.cancel();
+        }
         client.close();
         client = null;
         if (completionHandler != null) {
@@ -523,6 +578,26 @@ public class KubernetesServiceImporter implements ServiceImporter {
       int result = uuid.hashCode();
       result = 31 * result + endpoint.hashCode();
       return result;
+    }
+
+    @Override
+    public String toString() {
+      return "RecordKey{" + "uuid='" + uuid + '\'' + ", endpoint='" + endpoint + '\'' + '}';
+    }
+  }
+
+  private static class BatchOfUpdates {
+    final Vertx vertx;
+    final long timerId;
+    final List<JsonObject> objects = new ArrayList<>();
+
+    public BatchOfUpdates(Vertx vertx, long timerId) {
+      this.vertx = vertx;
+      this.timerId = timerId;
+    }
+
+    public void cancel() {
+      vertx.cancelTimer(timerId);
     }
   }
 }

@@ -23,6 +23,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.jayway.awaitility.Awaitility.await;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.Is.is;
 
 /**
@@ -41,11 +42,9 @@ public class KubernetesServerTest {
     vertx = Vertx.vertx();
     vertx.exceptionHandler(tc.exceptionHandler());
 
-    Service svc1 = getSimpleService();
+    Service svc1 = getSimpleService("uuid-2", "my-service");
     Service svc2 = getHttpService();
-    Service svc3 = getSimpleService();
-    svc3.getMetadata().setName("service3");
-    svc3.getMetadata().setUid("uid-3");
+    Service svc3 = getSimpleService("uid-3", "service3");
 
     server = getServer();
 
@@ -53,10 +52,12 @@ public class KubernetesServerTest {
       .addToItems(svc1, svc2).withNewMetadata("1234", "/self").build()).always();
 
     server.expect().get().withPath("/api/v1/namespaces/default/services?watch=true&allowWatchBookmarks=true&resourceVersion=1234")
-      .andReturnChunked(200,
-        new WatchEvent(svc3, "ADDED"), "\n",
-        new WatchEvent(svc1, "DELETED"), "\n",
-        new WatchEvent(getUpdatedHttpService(), "MODIFIED"), "\n").once();
+      .andReturnChunked(200
+        , new WatchEvent(svc3, "ADDED"), "\n"
+        , new WatchEvent(svc1, "DELETED"), "\n"
+        , new WatchEvent(getUpdatedHttpService(), "MODIFIED"), "\n"
+        , new WatchEvent(addLabelFooBar(getSimpleService("uid-3", "service3")), "MODIFIED"), "\n"
+      ).once();
 
     Service svc96 = getService96();
     server.expect().get().withPath("/api/v1/namespaces/issue96/services").andReturn(200, new ServiceListBuilder()
@@ -128,9 +129,10 @@ public class KubernetesServerTest {
     await().until(() -> {
       List<Record> records = getRecordsBlocking(discovery);
       try {
-        assertThatListContains(records, "service3");
-        assertThatListDoesNotContain(records, "my-service");
-        assertThatListContains(records, "my-http-service");
+        assertThat(records).hasSize(2).extracting(Record::getName)
+          .containsOnly("service3", "my-http-service");
+        assertThat(records.stream().filter(record -> record.getName().equals("service3")).findFirst())
+          .hasValueSatisfying(record -> assertThat(record.getMetadata().getString("foo")).isEqualTo("bar"));
         return true;
       } catch (Throwable e) {
         return false;
@@ -180,7 +182,16 @@ public class KubernetesServerTest {
 
   private KubernetesResource getUpdatedHttpService() {
     Service service = getHttpService();
-    service.getMetadata().getLabels().put("foo", "bar");
+    return addLabelFooBar(service);
+  }
+
+  private Service addLabelFooBar(Service service) {
+    Map<String, String> labels = service.getMetadata().getLabels();
+    if (labels == null) {
+      labels = new HashMap<>();
+      service.getMetadata().setLabels(labels);
+    }
+    labels.put("foo", "bar");
     return service;
   }
 
@@ -201,10 +212,10 @@ public class KubernetesServerTest {
     return records;
   }
 
-  private Service getSimpleService() {
+  private Service getSimpleService(String uid, String name) {
     ObjectMeta metadata = new ObjectMeta();
-    metadata.setName("my-service");
-    metadata.setUid("uuid-2");
+    metadata.setName(name);
+    metadata.setUid(uid);
     metadata.setNamespace("my-project");
 
     ServiceSpec spec = new ServiceSpec();
