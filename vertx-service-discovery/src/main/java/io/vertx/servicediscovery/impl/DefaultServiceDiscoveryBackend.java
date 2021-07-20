@@ -83,12 +83,12 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
   }
 
   private static String getServiceDiscoveryMapName() {
-	String mapName = DEFAULT_SERVICE_DISCOVERY_MAP_NAME;
-	String property = System.getProperty(ENV_VERTX_SERVICE_DISCOVERY_MAP_NAME);
-	if (property != null) {
+    String mapName = DEFAULT_SERVICE_DISCOVERY_MAP_NAME;
+    String property = System.getProperty(ENV_VERTX_SERVICE_DISCOVERY_MAP_NAME);
+    if (property != null) {
       mapName = property;
-	} else {
-	  property = System.getProperty(ENV_VERTX_SERVICE_DISCOVERY_MAP_NAME.toLowerCase());
+    } else {
+     property = System.getProperty(ENV_VERTX_SERVICE_DISCOVERY_MAP_NAME.toLowerCase());
       if (property != null) {
         mapName = property;
       }
