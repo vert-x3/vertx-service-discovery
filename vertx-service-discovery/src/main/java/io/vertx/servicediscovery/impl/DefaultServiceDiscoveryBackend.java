@@ -34,6 +34,8 @@ import java.util.stream.Collectors;
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
 public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
+  private static final String ENV_VERTX_SERVICE_DISCOVERY_MAP_NAME = "VERTX-SERVICE-DISCOVERY-MAP-NAME";
+  private static final String DEFAULT_SERVICE_DISCOVERY_MAP_NAME = "service.registry";
   private static final String MESSAGE_NO_REG_ID = "No registration id in the record";
   private AsyncMap<String, String> registry;
   private Vertx vertx;
@@ -42,7 +44,7 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
   public void init(Vertx vertx, JsonObject config) {
     this.vertx = vertx;
     if (!vertx.isClustered() || useLocalBackend()) {
-      registry = vertx.sharedData().<String, String>getLocalAsyncMap("service.registry").result();
+      registry = vertx.sharedData().<String, String>getLocalAsyncMap(getServiceDiscoveryMapName()).result();
     }
   }
 
@@ -78,6 +80,20 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
         });
       }
     });
+  }
+
+  private static String getServiceDiscoveryMapName() {
+	String mapName = DEFAULT_SERVICE_DISCOVERY_MAP_NAME;
+	String property = System.getProperty(ENV_VERTX_SERVICE_DISCOVERY_MAP_NAME);
+	if (property != null) {
+      mapName = property;
+	} else {
+	  property = System.getProperty(ENV_VERTX_SERVICE_DISCOVERY_MAP_NAME.toLowerCase());
+      if (property != null) {
+        mapName = property;
+      }
+    }
+    return mapName;
   }
 
   private synchronized void retrieveRegistry(Handler<AsyncResult<AsyncMap<String, String>>> handler) {
