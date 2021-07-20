@@ -88,7 +88,7 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
     if (property != null) {
       mapName = property;
     } else {
-     property = System.getProperty(ENV_VERTX_SERVICE_DISCOVERY_MAP_NAME.toLowerCase());
+      property = System.getProperty(ENV_VERTX_SERVICE_DISCOVERY_MAP_NAME.toLowerCase());
       if (property != null) {
         mapName = property;
       }
