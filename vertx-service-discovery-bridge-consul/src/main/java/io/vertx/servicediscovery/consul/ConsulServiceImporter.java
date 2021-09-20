@@ -207,7 +207,7 @@ public class ConsulServiceImporter implements ServiceImporter {
         ServiceEntry consulService = serviceEntries.get(i);
         String id = consulService.getService().getId();
         String name = consulService.getService().getName();
-        Record record = createRecord(consulService.getService());
+        Record record = createRecord(consulService.getNode(), consulService.getService());
 
         // the id must be unique, so check if the service has already being imported
         ImportedConsulService imported = getImportedServiceById(id);
@@ -242,8 +242,12 @@ public class ConsulServiceImporter implements ServiceImporter {
     }
   }
 
-  private Record createRecord(Service service) {
+  private Record createRecord(Node node, Service service) {
     String address = service.getAddress();
+    if (address != null && address.isEmpty()) {
+      address = node.getAddress();
+    }
+
     int port = service.getPort();
 
     JsonObject metadata = service.toJson();

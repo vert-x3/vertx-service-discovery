@@ -115,6 +115,28 @@ public class ConsulServiceImporterTest {
   }
 
   @Test
+  public void testBasicImportWithEmptyServiceAddress() {
+    JsonObject svc = buildService("10.1.10.12", "redis", "redis", null, 8000, "passing");
+    services.add(svc.mergeIn(new JsonObject("{\"Service\":{\"Address\":\"\"}}"), true));
+
+    discovery = ServiceDiscovery.create(vertx);
+    discovery.registerServiceImporter(new ConsulServiceImporter(),
+            new JsonObject().put("host", "localhost").put("port", 5601));
+
+    await().until(() -> getAllRecordsBlocking().size() > 0);
+    List<Record> list = getAllRecordsBlocking();
+
+    assertThat(list).hasSize(1);
+
+    Record record = list.get(0);
+    assertThat(record.getLocation().getString("host")).isEqualTo("10.1.10.12");
+    assertThat(record.getLocation().getInteger("port")).isEqualTo(8000);
+    assertThat(record.getLocation().getString("path")).isNull();
+    assertThat(record.getName()).isEqualTo("redis");
+    assertThat(record.getRegistration()).isNotEmpty();
+  }
+
+  @Test
   public void testDoesNotImportServicesWithWarningStatus() {
     // add 2 services so we can await on 1 being added below
     services.add(buildService("10.1.10.12", "redis", "redis", null, 8000, "passing"));
