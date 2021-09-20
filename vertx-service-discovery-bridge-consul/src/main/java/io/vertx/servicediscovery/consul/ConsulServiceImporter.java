@@ -244,7 +244,7 @@ public class ConsulServiceImporter implements ServiceImporter {
 
   private Record createRecord(Node node, Service service) {
     String address = service.getAddress();
-    if (address != null && address.isEmpty()) {
+    if (address == null || address.isEmpty()) {
       address = node.getAddress();
     }
 
