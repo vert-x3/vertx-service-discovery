@@ -140,7 +140,6 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
     client.close();
   }
 
-
   private ServiceOptions recordToServiceOptions(Record record, String uuid) {
     ServiceOptions serviceOptions = new ServiceOptions();
     serviceOptions.setName(record.getName());
