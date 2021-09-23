@@ -23,7 +23,6 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.net.SelfSignedCertificate;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -299,25 +298,19 @@ public class HttpEndpointTest {
     record = HttpEndpoint.createRecord("some-name", "acme.org");
     assertThat(record.getLocation().getString(Record.ENDPOINT)).isEqualTo("http://acme.org:80/");
 
-    SelfSignedCertificate selfSignedCertificate = SelfSignedCertificate.create();
     vertx.createHttpServer(new HttpServerOptions()
       .setHost("127.0.0.1")
-      .setSsl(true)
-      .setKeyCertOptions(selfSignedCertificate.keyCertOptions())
     ).requestHandler(request -> {
       request.response().end(new JsonObject().put("url", request.absoluteURI()).encode());
     }).listen(0, testContext.asyncAssertSuccess(server -> {
 
-      Record sslRecord = HttpEndpoint.createRecord("http-bin", true, "127.0.0.1", server.actualPort(), "/get", null);
+      Record sslRecord = HttpEndpoint.createRecord("http-bin", false, "127.0.0.1", server.actualPort(), "/get", null);
       ServiceReference reference = discovery.getReferenceWithConfiguration(sslRecord, new HttpClientOptions()
-        .setSsl(true)
-        .setTrustAll(true)
-        .setVerifyHost(false)
         .toJson());
 
       WebClient webClient = WebClient.wrap(reference.get());
       webClient.get("/get").as(BodyCodec.jsonObject()).send(testContext.asyncAssertSuccess(resp -> {
-        assertEquals("https://127.0.0.1:" + server.actualPort() + "/get", resp.body().getString("url"));
+        assertEquals("http://127.0.0.1:" + server.actualPort() + "/get", resp.body().getString("url"));
       }));
     }));
   }

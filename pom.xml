@@ -32,6 +32,7 @@
     <asciidoc.dir>${project.basedir}/src/main/asciidoc</asciidoc.dir>
     <doc.skip>true</doc.skip>
     <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
+    <testcontainers.version>1.15.2</testcontainers.version>
   </properties>
 
 

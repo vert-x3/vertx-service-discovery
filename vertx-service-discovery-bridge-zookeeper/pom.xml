@@ -90,4 +90,16 @@
 
   </dependencies>
 
+  <profiles>
+    <profile>
+      <id>java-17</id>
+      <activation>
+        <jdk>[17,*)</jdk>
+      </activation>
+      <properties>
+        <maven.test.skip>true</maven.test.skip>
+      </properties>
+    </profile>
+  </profiles>
+
 </project>
