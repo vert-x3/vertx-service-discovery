@@ -29,7 +29,7 @@ public abstract class ServiceDiscoveryBackendTest {
   protected Vertx vertx;
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
     vertx = Vertx.vertx();
     backend = createBackend();
   }
