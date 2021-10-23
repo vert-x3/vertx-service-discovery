@@ -17,9 +17,6 @@
 package io.vertx.servicediscovery.kubernetes;
 
 import io.vertx.core.*;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.impl.ContextInternal;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
@@ -35,7 +32,6 @@ import io.vertx.servicediscovery.types.*;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static io.vertx.core.http.HttpMethod.GET;
 import static java.lang.Boolean.parseBoolean;
 import static java.util.stream.Collectors.toSet;
 
@@ -73,68 +69,23 @@ public class KubernetesServiceImporter implements ServiceImporter {
 
   private ContextInternal context;
   private ServicePublisher publisher;
-  private String token;
-  private String namespace;
-  private HttpClient client;
+  private KubernetesClient client;
   private String lastResourceVersion;
   private BatchOfUpdates batchOfUpdates;
 
   private volatile boolean stop;
 
-  private static final String OPENSHIFT_KUBERNETES_TOKEN_FILE = "/var/run/secrets/kubernetes.io/serviceaccount/token";
-
   @Override
-  public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Promise<Void> completion) {
+  public void start(final Vertx vertx, final ServicePublisher publisher, final JsonObject configuration, final Promise<Void> completion) {
     context = (ContextInternal) vertx.getOrCreateContext();
     context.runOnContext(v -> init(publisher, configuration, completion));
   }
 
-  private void init(ServicePublisher publisher, JsonObject configuration, Promise<Void> completion) {
+  private void init(final ServicePublisher publisher, final JsonObject configuration, final Promise<Void> completion) {
     this.publisher = publisher;
 
-    JsonObject conf;
-    if (configuration == null) {
-      conf = new JsonObject();
-    } else {
-      conf = configuration;
-    }
-
-    int port = conf.getInteger("port", 0);
-    if (port == 0) {
-      if (conf.getBoolean("ssl", true)) {
-        port = 443;
-      } else {
-        port = 80;
-      }
-    }
-
-    String p = System.getenv("KUBERNETES_SERVICE_PORT");
-    if (p != null) {
-      port = Integer.parseInt(p);
-    }
-
-    String host = conf.getString("host");
-    String h = System.getenv("KUBERNETES_SERVICE_HOST");
-    if (h != null) {
-      host = h;
-    }
-
-    client = context.owner().createHttpClient(new HttpClientOptions()
-      .setTrustAll(true)
-      .setSsl(conf.getBoolean("ssl", true))
-      .setDefaultHost(host)
-      .setDefaultPort(port)
-    );
-
-    // Retrieve token
-    Future<Void> retrieveTokenFuture = retrieveToken(conf);
-
-    // 1) get kubernetes auth info
-    this.namespace = conf.getString("namespace", getNamespaceOrDefault());
-    LOGGER.info("Kubernetes discovery configured for namespace: " + namespace);
-    LOGGER.info("Kubernetes master url: http" + (conf.getBoolean("ssl", true) ? "s" : "") + "//" + host + ":" + port);
-
-    retrieveTokenFuture
+    KubernetesClient.create(context, configuration)
+      .onSuccess(c -> this.client = c)
       .compose(v -> retrieveServices())
       .onSuccess(items -> LOGGER.info("Kubernetes initial import of " + items.size() + " services"))
       .compose(this::publishRecords)
@@ -151,31 +102,18 @@ public class KubernetesServiceImporter implements ServiceImporter {
   }
 
   private Future<JsonArray> retrieveServices() {
-    String path = "/api/v1/namespaces/" + namespace + "/services";
-    return client.request(GET, path).compose(request -> {
-      request.setFollowRedirects(true);
-      request.putHeader("Authorization", "Bearer " + token);
-      return request.send();
-    }).compose(response -> {
-      return response.body().compose(body -> {
-        if (response.statusCode() != 200) {
-          return context.failedFuture("Unable to retrieve services from namespace " + namespace + ", status code: "
-            + response.statusCode() + ", content: " + body.toString());
-        } else {
-          JsonObject serviceList = body.toJsonObject();
-          lastResourceVersion = serviceList.getJsonObject("metadata").getString("resourceVersion");
-          JsonArray items = serviceList.getJsonArray("items");
-          if (!serviceList.containsKey("items")) {
-            return context.failedFuture("Unable to retrieve services from namespace " + namespace + " - no items");
-          } else {
-            return context.succeededFuture(items);
-          }
-        }
-      });
+    return client.listServices().compose(serviceList -> {
+      lastResourceVersion = serviceList.getJsonObject("metadata").getString("resourceVersion");
+      JsonArray items = serviceList.getJsonArray("items");
+      if (!serviceList.containsKey("items")) {
+        return context.failedFuture("Unable to retrieve services from namespace " + client.getNamespace() + " - no items");
+      } else {
+        return context.succeededFuture(items);
+      }
     });
   }
 
-  private CompositeFuture publishRecords(JsonArray items) {
+  private CompositeFuture publishRecords(final JsonArray items) {
     List<Future> publications = new ArrayList<>();
     items.forEach(s -> {
       JsonObject svc = ((JsonObject) s);
@@ -193,40 +131,26 @@ public class KubernetesServiceImporter implements ServiceImporter {
     if (stop) {
       return;
     }
-    String path = "/api/v1/namespaces/" + namespace + "/services?"
-      + "watch=true"
-      + "&"
-      + "allowWatchBookmarks=true"
-      + "&"
-      + "resourceVersion=" + lastResourceVersion;
 
     JsonParser parser = JsonParser.newParser().objectValueMode()
       .handler(event -> addToBatch(event.objectValue()));
 
-    client.request(GET, path).compose(request -> {
-      request.setFollowRedirects(true);
-      request.putHeader("Authorization", "Bearer " + token);
-      return request.send();
-    }).compose(response -> {
-      Promise<Void> promise = Promise.promise();
-      if (response.statusCode() == 200) {
-        LOGGER.info("Watching services from namespace " + namespace);
-        response
-          .exceptionHandler(t -> promise.tryComplete())
+    client.watchServices(lastResourceVersion)
+      .compose(response -> {
+        Promise<Void> promise = Promise.promise();
+        LOGGER.info("Watching services from namespace " + client.getNamespace());
+        response.exceptionHandler(t -> promise.tryComplete())
           .endHandler(v -> promise.tryComplete())
           .handler(parser);
-      } else {
-        promise.fail("");
-      }
-      return promise.future();
-    }).onComplete(res -> {
-      if (res.succeeded()) {
-        watch();
-      } else {
-        LOGGER.error("Failure while watching service list", res.cause());
-        fetchAndWatch();
-      }
-    });
+        return promise.future();
+      }).onComplete(res -> {
+        if (res.succeeded()) {
+          watch();
+        } else {
+          LOGGER.error("Failure while watching service list", res.cause());
+          fetchAndWatch();
+        }
+      });
   }
 
   private void fetchAndWatch() {
@@ -245,7 +169,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
     }
   }
 
-  private void addToBatch(JsonObject json) {
+  private void addToBatch(final JsonObject json) {
     if (batchOfUpdates == null) {
       long timerId = context.setTimer(500, l -> processBatch());
       batchOfUpdates = new BatchOfUpdates(context.owner(), timerId);
@@ -261,7 +185,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
     }
   }
 
-  private Map<Object, JsonObject> compact(List<JsonObject> source) {
+  private Map<Object, JsonObject> compact(final List<JsonObject> source) {
     Map<Object, JsonObject> res = new HashMap<>();
     for (JsonObject json : source) {
       String type = json.getString("type");
@@ -288,7 +212,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
     return res;
   }
 
-  private void onChunk(JsonObject json) {
+  private void onChunk(final JsonObject json) {
     String type = json.getString("type");
     JsonObject object = json.getJsonObject("object");
     switch (type) {
@@ -323,18 +247,8 @@ public class KubernetesServiceImporter implements ServiceImporter {
     }
   }
 
-  private Future<Void> retrieveToken(JsonObject conf) {
-    Future<String> result;
-    String token = conf.getString("token");
-    if (token != null && !token.trim().isEmpty()) {
-      result = context.succeededFuture(token);
-    } else {
-      result = context.owner().fileSystem().readFile(OPENSHIFT_KUBERNETES_TOKEN_FILE).map(Buffer::toString);
-    }
-    return result.onSuccess(tk -> this.token = tk).mapEmpty();
-  }
 
-  private void publishRecord(Record record, Handler<AsyncResult<Record>> completionHandler) {
+  private void publishRecord(final Record record, final Handler<AsyncResult<Record>> completionHandler) {
     publisher.publish(record, ar -> {
       if (completionHandler != null) {
         completionHandler.handle(ar);
@@ -349,24 +263,11 @@ public class KubernetesServiceImporter implements ServiceImporter {
     });
   }
 
-  private boolean addRecordIfNotContained(Record record) {
+  private boolean addRecordIfNotContained(final Record record) {
     return records.putIfAbsent(new RecordKey(record), record) == null;
   }
 
-  private String getNamespaceOrDefault() {
-    // Kubernetes with Fabric8 build
-    String ns = System.getenv("KUBERNETES_NAMESPACE");
-    if (ns == null) {
-      // oc / docker build
-      ns = System.getenv("OPENSHIFT_BUILD_NAMESPACE");
-      if (ns == null) {
-        ns = "default";
-      }
-    }
-    return ns;
-  }
-
-  static Record createRecord(JsonObject service) {
+  static Record createRecord(final JsonObject service) {
     JsonObject metadata = service.getJsonObject("metadata");
     Record record = new Record()
       .setName(metadata.getString("name"));
@@ -401,7 +302,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
     return record;
   }
 
-  static String discoveryType(JsonObject service, Record record) {
+  static String discoveryType(final JsonObject service, final Record record) {
     JsonObject spec = service.getJsonObject("spec");
     JsonArray ports = spec.getJsonArray("ports");
     if (ports == null || ports.isEmpty()) {
@@ -444,7 +345,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
     return ServiceType.UNKNOWN;
   }
 
-  private static void manageUnknownService(Record record, JsonObject service, String type) {
+  private static void manageUnknownService(final Record record, final JsonObject service, final String type) {
     JsonObject spec = service.getJsonObject("spec");
     JsonArray ports = spec.getJsonArray("ports");
     if (ports != null && !ports.isEmpty()) {
@@ -472,7 +373,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
     }
   }
 
-  private static void manageHttpService(Record record, JsonObject service) {
+  private static void manageHttpService(final Record record, final JsonObject service) {
     JsonObject spec = service.getJsonObject("spec");
     JsonArray ports = spec.getJsonArray("ports");
 
@@ -504,20 +405,20 @@ public class KubernetesServiceImporter implements ServiceImporter {
     }
   }
 
-  private static boolean isExternalService(JsonObject service) {
+  private static boolean isExternalService(final JsonObject service) {
     return service.containsKey("spec") && service.getJsonObject("spec").containsKey("type") && service.getJsonObject("spec").getString("type").equals("ExternalName");
   }
 
 
   @Override
-  public void close(Handler<Void> completionHandler) {
+  public void close(final Handler<Void> completionHandler) {
     stop = true;
     if (context != null) {
       context.runOnContext(v -> {
         if (batchOfUpdates != null) {
           batchOfUpdates.cancel();
         }
-        client.close();
+        client.close(completionHandler);
         client = null;
         if (completionHandler != null) {
           completionHandler.handle(null);
@@ -528,7 +429,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
     }
   }
 
-  private void unpublishRecord(Record record, Handler<Void> completionHandler) {
+  private void unpublishRecord(final Record record, final Handler<Void> completionHandler) {
     publisher.unpublish(record.getRegistration(), ar -> {
       if (ar.failed()) {
         LOGGER.error("Cannot unregister kubernetes service", ar.cause());
@@ -541,63 +442,16 @@ public class KubernetesServiceImporter implements ServiceImporter {
     });
   }
 
-  private Record removeRecordIfContained(Record record) {
+  private Record removeRecordIfContained(final Record record) {
     return records.remove(new RecordKey(record));
   }
 
-  private Record replaceRecordIfContained(Record record) {
+  private Record replaceRecordIfContained(final Record record) {
     RecordKey key = new RecordKey(record);
     Record old = records.remove(key);
     if (old != null) {
       records.put(key, record);
     }
     return old;
-  }
-
-  private static class RecordKey {
-    final String uuid;
-    final String endpoint;
-
-    RecordKey(Record record) {
-      this.uuid = Objects.requireNonNull(record.getMetadata().getString(KUBERNETES_UUID));
-      this.endpoint = record.getLocation().getString(Record.ENDPOINT, "");
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-
-      RecordKey recordKey = (RecordKey) o;
-
-      return uuid.equals(recordKey.uuid) && endpoint.equals(recordKey.endpoint);
-    }
-
-    @Override
-    public int hashCode() {
-      int result = uuid.hashCode();
-      result = 31 * result + endpoint.hashCode();
-      return result;
-    }
-
-    @Override
-    public String toString() {
-      return "RecordKey{" + "uuid='" + uuid + '\'' + ", endpoint='" + endpoint + '\'' + '}';
-    }
-  }
-
-  private static class BatchOfUpdates {
-    final Vertx vertx;
-    final long timerId;
-    final List<JsonObject> objects = new ArrayList<>();
-
-    public BatchOfUpdates(Vertx vertx, long timerId) {
-      this.vertx = vertx;
-      this.timerId = timerId;
-    }
-
-    public void cancel() {
-      vertx.cancelTimer(timerId);
-    }
   }
 }
