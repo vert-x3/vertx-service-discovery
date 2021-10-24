@@ -2,6 +2,7 @@ package io.vertx.servicediscovery.kubernetes;
 
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
@@ -56,7 +57,7 @@ class KubernetesClient {
   /**
    * Returns a Kubernetes {@code ServiceList} for the namespace.
    *
-   * @see <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.19/#list-service-v1-core">Kuberenetes API: List Service operation</a>
+   * @see <a href="https://kubernetes.io/docs/reference/kubernetes-api/service-resources/service-v1/#list-list-or-watch-objects-of-kind-service">Kuberenetes API: List Service operation</a>
    */
   public Future<JsonObject> listServices() {
     String path = "/api/v1/namespaces/" + namespace + "/services";
@@ -64,14 +65,14 @@ class KubernetesClient {
       .compose(this::sendRequest)
       .compose(response -> response.body().compose(body -> {
         if (response.statusCode() != 200) {
-          return context.failedFuture("Unable to list services from namespace " + namespace + ", status code: " + response.statusCode() + ", content: " + body.toString());
+          return context.failedFuture("Unable to list services from namespace. [namespace=" + namespace + ", statusCode=" + response.statusCode() + ", content=" + body.toString() + "]");
         } else {
           return context.succeededFuture(body.toJsonObject());
         }
       }));
   }
 
-  public Future<HttpClientResponse> watchServices(final String resourceVersion) {
+  public Future<Void> watchServices(final String resourceVersion, final Handler<Buffer> bodyHandler) {
     String path = "/api/v1/namespaces/" + namespace + "/services?"
       + "watch=true"
       + "&allowWatchBookmarks=true"
@@ -83,7 +84,52 @@ class KubernetesClient {
         if (response.statusCode() != 200) {
           return response.body().compose(body -> context.failedFuture("Unable to watch services. [namespace=" + namespace + ", statusCode=" + response.statusCode() + ", content=" + body.toString() + "]"));
         } else {
-          return context.succeededFuture(response);
+          Promise<Void> promise = Promise.promise();
+          LOGGER.info("Watching services... [namespace=" + namespace + "]");
+          response.exceptionHandler(t -> promise.tryComplete())
+            .endHandler(v -> promise.tryComplete())
+            .handler(bodyHandler);
+          return promise.future();
+        }
+      });
+  }
+
+  /**
+   * Returns a Kubernetes {@code PodList} for the namespace.
+   *
+   * @see <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.19/#list-pod-v1-core">Kuberenetes API: List Pods operation</a>
+   */
+  public Future<JsonObject> listPods() {
+    String path = "/api/v1/namespaces/" + namespace + "/pods";
+    return client.request(GET, path)
+      .compose(this::sendRequest)
+      .compose(response -> response.body().compose(body -> {
+        if (response.statusCode() != 200) {
+          return context.failedFuture("Unable to list pods. [namespace=" + namespace + ", statusCode=" + response.statusCode() + ", content=" + body.toString() + "]");
+        } else {
+          return context.succeededFuture(body.toJsonObject());
+        }
+      }));
+  }
+
+  public Future<Void> watchPods(final String resourceVersion, final Handler<Buffer> bodyHandler) {
+    String path = "/api/v1/namespaces/" + namespace + "/pods?"
+      + "watch=true"
+      + "&allowWatchBookmarks=true"
+      + "&resourceVersion=" + resourceVersion;
+
+    return client.request(GET, path)
+      .compose(this::sendRequest)
+      .compose(response -> {
+        if (response.statusCode() != 200) {
+          return response.body().compose(body -> context.failedFuture("Unable to watch pods. [namespace=" + namespace + ", statusCode=" + response.statusCode() + ", content=" + body.toString() + "]"));
+        } else {
+          Promise<Void> promise = Promise.promise();
+          LOGGER.info("Watching pods... [namespace=" + namespace + "]");
+          response.exceptionHandler(t -> promise.tryComplete())
+            .endHandler(v -> promise.tryComplete())
+            .handler(bodyHandler);
+          return promise.future();
         }
       });
   }
