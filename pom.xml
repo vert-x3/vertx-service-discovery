@@ -23,12 +23,12 @@
   </parent>
 
   <artifactId>vertx-service-discovery-parent</artifactId>
-  <version>4.1.6</version>
+  <version>4.1.7-SNAPSHOT</version>
 
   <packaging>pom</packaging>
 
   <properties>
-    <stack.version>4.1.6</stack.version>
+    <stack.version>4.1.7-SNAPSHOT</stack.version>
     <asciidoc.dir>${project.basedir}/src/main/asciidoc</asciidoc.dir>
     <doc.skip>true</doc.skip>
     <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
