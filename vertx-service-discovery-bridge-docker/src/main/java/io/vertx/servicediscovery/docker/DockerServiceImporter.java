@@ -19,8 +19,9 @@ package io.vertx.servicediscovery.docker;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
-import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
+import com.github.dockerjava.core.DockerClientImpl;
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -34,6 +35,7 @@ import io.vertx.servicediscovery.spi.ServicePublisher;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -119,7 +121,14 @@ public class DockerServiceImporter implements ServiceImporter {
     } else {
       this.host = config.getDockerHost().getHost();
     }
-    client = DockerClientBuilder.getInstance(config).build();
+
+    client = DockerClientImpl.getInstance(config, new ApacheDockerHttpClient.Builder()
+      .dockerHost(config.getDockerHost())
+      .sslConfig(config.getSSLConfig())
+      .maxConnections(100)
+      .connectionTimeout(Duration.ofSeconds(30))
+      .responseTimeout(Duration.ofSeconds(45))
+      .build());
 
     long period = configuration.getLong("scan-period", 3000L);
     if (period > 0) {

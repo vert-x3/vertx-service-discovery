@@ -21,7 +21,10 @@ import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.PortBinding;
-import com.github.dockerjava.core.DockerClientBuilder;
+import com.github.dockerjava.core.DefaultDockerClientConfig;
+import com.github.dockerjava.core.DockerClientConfig;
+import com.github.dockerjava.core.DockerClientImpl;
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -32,6 +35,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -57,7 +61,15 @@ public class DockerBridgeTest {
   public void setUp() {
     init();
 
-    client = DockerClientBuilder.getInstance().build();
+    DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
+
+    client = DockerClientImpl.getInstance(config, new ApacheDockerHttpClient.Builder()
+      .dockerHost(config.getDockerHost())
+      .sslConfig(config.getSSLConfig())
+      .maxConnections(100)
+      .connectionTimeout(Duration.ofSeconds(30))
+      .responseTimeout(Duration.ofSeconds(45))
+      .build());
     List<Container> running = client.listContainersCmd().withStatusFilter(Collections.singletonList("running")).exec();
     if (running != null) {
       running.forEach(container -> client.stopContainerCmd(container.getId()).exec());
