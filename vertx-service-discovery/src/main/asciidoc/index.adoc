@@ -616,7 +616,7 @@ Publishing a Mongo data source is a 2-step process:
 {@link examples.MongoDataSourceExamples#example1(ServiceDiscovery)}
 ----
 
-The `location` is a simple JSON object that should provide the fields to access the Redis data
+The `location` is a simple JSON object that should provide the fields to access the Mongo data
 source (url, port...).
 
 ==== Consuming a Mongo service
