@@ -29,13 +29,13 @@
       
     <artifactId>vertx-service-discovery-parent</artifactId>
       
-    <version>3.9.14</version>
+    <version>3.9.15-SNAPSHOT</version>
       
     <packaging>pom</packaging>
       
     <properties>
             
-        <stack.version>3.9.14</stack.version>
+        <stack.version>3.9.15-SNAPSHOT</stack.version>
             
         <asciidoc.dir>${project.basedir}/src/main/asciidoc</asciidoc.dir>
             
