@@ -146,9 +146,9 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
       return;
     }
     vertx.eventBus().publish(usage, new JsonObject()
-      .put(ServiceDiscovery.USAGE_EVENT_TYPE, ServiceDiscovery.USAGE_EVENT_TYPE_BIND)
-      .put(ServiceDiscovery.USAGE_EVENT_RECORD, reference.record().toJson())
-      .put(ServiceDiscovery.USAGE_EVENT_ID, id));
+      .put(ServiceDiscovery.EVENT_TYPE, ServiceDiscovery.EVENT_TYPE_BIND)
+      .put(ServiceDiscovery.EVENT_RECORD, reference.record().toJson())
+      .put(ServiceDiscovery.EVENT_ID, id));
   }
 
   @Override
@@ -164,9 +164,9 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
       return;
     }
     vertx.eventBus().publish(usage, new JsonObject()
-      .put(ServiceDiscovery.USAGE_EVENT_TYPE, ServiceDiscovery.USAGE_EVENT_TYPE_RELEASE)
-      .put(ServiceDiscovery.USAGE_EVENT_RECORD, reference.record().toJson())
-      .put(ServiceDiscovery.USAGE_EVENT_ID, id));
+      .put(ServiceDiscovery.EVENT_TYPE, ServiceDiscovery.EVENT_TYPE_RELEASE)
+      .put(ServiceDiscovery.EVENT_RECORD, reference.record().toJson())
+      .put(ServiceDiscovery.EVENT_ID, id));
   }
 
   @Override
