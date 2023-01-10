@@ -351,10 +351,10 @@ public abstract class DiscoveryImplTestBase {
     ServiceReference reference = discovery.getReference(record);
     await().until(() -> usages.size() == 1);
 
-    assertThat(usages.get(0).getJsonObject("record").getJsonObject("location").getString(Record.ENDPOINT))
+    assertThat(usages.get(0).getJsonObject(ServiceDiscovery.EVENT_RECORD).getJsonObject("location").getString(Record.ENDPOINT))
       .isEqualToIgnoringCase("address");
-    assertThat(usages.get(0).getString("type")).isEqualTo("bind");
-    assertThat(usages.get(0).getString("id")).isNotNull().isNotEmpty();
+    assertThat(usages.get(0).getString(ServiceDiscovery.EVENT_TYPE)).isEqualTo(ServiceDiscovery.EVENT_TYPE_BIND);
+    assertThat(usages.get(0).getString(ServiceDiscovery.EVENT_ID)).isNotNull().isNotEmpty();
 
     assertThat((HelloService) reference.cached()).isNull();
     assertThat((HelloService) reference.get()).isNotNull();
@@ -363,10 +363,10 @@ public abstract class DiscoveryImplTestBase {
     reference.release();
     Assertions.assertThat(discovery.bindings()).isEmpty();
     await().until(() -> usages.size() == 2);
-    assertThat(usages.get(1).getJsonObject("record").getJsonObject("location").getString(Record.ENDPOINT))
+    assertThat(usages.get(1).getJsonObject(ServiceDiscovery.EVENT_RECORD).getJsonObject("location").getString(Record.ENDPOINT))
       .isEqualToIgnoringCase("address");
-    assertThat(usages.get(1).getString("type")).isEqualTo("release");
-    assertThat(usages.get(1).getString("id")).isNotNull().isNotEmpty();
+    assertThat(usages.get(1).getString(ServiceDiscovery.EVENT_TYPE)).isEqualTo(ServiceDiscovery.EVENT_TYPE_RELEASE);
+    assertThat(usages.get(1).getString(ServiceDiscovery.EVENT_ID)).isNotNull().isNotEmpty();
 
     // Check that even if we release the reference another time the service event is not send a second time.
     reference.release();

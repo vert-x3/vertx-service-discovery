@@ -95,6 +95,38 @@ public interface ServiceDiscovery {
   }
 
   /**
+   * Constant for type field of usage events.
+   *
+   * @see #EVENT_TYPE_BIND
+   * @see #EVENT_TYPE_RELEASE
+   */
+  String EVENT_TYPE = "type";
+
+  /**
+   * Constant for event type `Bind`.
+   *
+   * @see #EVENT_TYPE
+   */
+  String EVENT_TYPE_BIND = "bind";
+
+  /**
+   * Constant for event type `Release`.
+   *
+   * @see #EVENT_TYPE
+   */
+  String EVENT_TYPE_RELEASE = "release";
+
+  /**
+   * Constant for record field of usage events.
+   */
+  String EVENT_RECORD = "record";
+
+  /**
+   * Constant for id field of usage events.
+   */
+  String EVENT_ID = "id";
+
+  /**
    * Gets a service reference from the given record.
    *
    * @param record the chosen record
