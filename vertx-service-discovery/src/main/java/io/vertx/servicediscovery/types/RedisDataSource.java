@@ -69,7 +69,9 @@ public interface RedisDataSource extends ServiceType {
    * @param discovery     The service discovery instance
    * @param filter        The filter, optional
    * @param resultHandler The result handler
+   * @deprecated use {@link #getRedisClient(ServiceDiscovery, JsonObject)} instead
    */
+  @Deprecated
   static void getRedisClient(ServiceDiscovery discovery, JsonObject filter,
                              Handler<AsyncResult<Redis>> resultHandler) {
     getRedisClient(discovery, filter).onComplete(resultHandler);
@@ -96,7 +98,9 @@ public interface RedisDataSource extends ServiceType {
    * @param discovery     The service discovery instance
    * @param filter        The filter, cannot be {@code null}
    * @param resultHandler The result handler
+   * @deprecated use {@link #getRedisClient(ServiceDiscovery, Function)} instead
    */
+  @Deprecated
   static void getRedisClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, Handler<AsyncResult<Redis>> resultHandler) {
     getRedisClient(discovery, filter).onComplete(resultHandler);
   }
@@ -122,7 +126,9 @@ public interface RedisDataSource extends ServiceType {
    * @param filter                The filter, optional
    * @param consumerConfiguration The additional consumer configuration
    * @param resultHandler         The result handler
+   * @deprecated use {@link #getRedisClient(ServiceDiscovery, JsonObject, JsonObject)} instead
    */
+  @Deprecated
   static void getRedisClient(ServiceDiscovery discovery, JsonObject filter, JsonObject consumerConfiguration,
                              Handler<AsyncResult<Redis>> resultHandler) {
     getRedisClient(discovery, filter, consumerConfiguration).onComplete(resultHandler);
@@ -149,7 +155,9 @@ public interface RedisDataSource extends ServiceType {
    * @param filter                The filter, cannot be {@code null}
    * @param consumerConfiguration The additional consumer configuration
    * @param resultHandler         The result handler
+   * @deprecated use {@link #getRedisClient(ServiceDiscovery, Function, JsonObject)} instead
    */
+  @Deprecated
   static void getRedisClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject
     consumerConfiguration, Handler<AsyncResult<Redis>> resultHandler) {
     getRedisClient(discovery, filter, consumerConfiguration).onComplete(resultHandler);

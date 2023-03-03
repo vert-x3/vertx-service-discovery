@@ -60,7 +60,9 @@ public interface JDBCDataSource extends ServiceType {
    * @param discovery     The service discovery instance
    * @param filter        The filter, optional
    * @param resultHandler The result handler
+   * @deprecated use {@link #getJDBCClient(ServiceDiscovery, JsonObject)} instead
    */
+  @Deprecated
   static void getJDBCClient(ServiceDiscovery discovery, JsonObject filter,
                             Handler<AsyncResult<JDBCClient>> resultHandler) {
     getJDBCClient(discovery, filter).onComplete(resultHandler);
@@ -86,7 +88,9 @@ public interface JDBCDataSource extends ServiceType {
    * @param discovery     The service discovery instance
    * @param filter        The filter (must not be {@code null})
    * @param resultHandler The result handler
+   * @deprecated use {@link #getJDBCClient(ServiceDiscovery, Function)} instead
    */
+  @Deprecated
   static void getJDBCClient(ServiceDiscovery discovery, Function<Record, Boolean> filter,
                             Handler<AsyncResult<JDBCClient>> resultHandler) {
     getJDBCClient(discovery, filter).onComplete(resultHandler);
@@ -113,7 +117,9 @@ public interface JDBCDataSource extends ServiceType {
    * @param filter                The filter, optional
    * @param consumerConfiguration the consumer configuration
    * @param resultHandler         the result handler
+   * @deprecated use {@link #getJDBCClient(ServiceDiscovery, JsonObject, JsonObject)} instead
    */
+  @Deprecated
   static void getJDBCClient(ServiceDiscovery discovery, JsonObject filter, JsonObject consumerConfiguration,
                             Handler<AsyncResult<JDBCClient>> resultHandler) {
     getJDBCClient(discovery, filter, consumerConfiguration).onComplete(resultHandler);
@@ -140,7 +146,9 @@ public interface JDBCDataSource extends ServiceType {
    * @param filter                The filter, must not be {@code null}
    * @param consumerConfiguration the consumer configuration
    * @param resultHandler         the result handler
+   * @deprecated use {@link #getJDBCClient(ServiceDiscovery, Function, JsonObject)} instead
    */
+  @Deprecated
   static void getJDBCClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject consumerConfiguration,
                             Handler<AsyncResult<JDBCClient>> resultHandler) {
     getJDBCClient(discovery, filter, consumerConfiguration).onComplete(resultHandler);

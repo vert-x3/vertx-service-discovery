@@ -11,12 +11,9 @@ import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.impl.DiscoveryImpl;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import redis.embedded.RedisServer;
+import org.junit.*;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -32,21 +29,22 @@ import static org.hamcrest.core.Is.is;
  */
 public class RedisDataSourceTest {
 
-  private static RedisServer server;
+  @ClassRule
+  public static GenericContainer<?> redis = new GenericContainer<>(DockerImageName.parse("redis:5.0.3-alpine"))
+    .withExposedPorts(6379);
 
   private Vertx vertx;
   private ServiceDiscovery discovery;
 
   @BeforeClass
   static public void startRedis() throws Exception {
-    server = new RedisServer(6379);
-    System.out.println("Created embedded redis server on port 6379");
-    server.start();
+    redis.start();
+    System.out.println("Created embedded redis server on port "+redis.getMappedPort(6379));
   }
 
   @AfterClass
   static public void stopRedis() throws Exception {
-    server.stop();
+    redis.stop();
   }
 
   @Before
@@ -68,7 +66,7 @@ public class RedisDataSourceTest {
   @Test
   public void test() {
     Record record = RedisDataSource.createRecord("some-redis-data-source",
-      new JsonObject().put("endpoint", "redis://localhost:6379"),
+      new JsonObject().put("endpoint", "redis://localhost:" + redis.getMappedPort(6379)),
       new JsonObject().put("database", "some-raw-data"));
 
     discovery.publish(record, r -> {
@@ -118,7 +116,7 @@ public class RedisDataSourceTest {
   @Test
   public void testWithSugar() throws InterruptedException {
     Record record = RedisDataSource.createRecord("some-redis-data-source",
-      new JsonObject().put("endpoint", "redis://localhost:6379"),
+      new JsonObject().put("endpoint", "redis://localhost:" + redis.getMappedPort(6379)),
       new JsonObject().put("database", "some-raw-data"));
 
     discovery.publish(record, r -> {
