@@ -167,8 +167,10 @@ public interface ServiceDiscovery {
    * @param completionHandler handler call when the importer has finished its initialization and
    *                          initial imports
    * @return the current {@link ServiceDiscovery}
+   * @deprecated use {@link #registerServiceImporter(ServiceImporter, JsonObject)} instead
    */
   @Fluent
+  @Deprecated
   ServiceDiscovery registerServiceImporter(ServiceImporter importer, JsonObject configuration,
                                            Handler<AsyncResult<Void>> completionHandler);
 
@@ -185,8 +187,10 @@ public interface ServiceDiscovery {
    * @param configuration     the optional configuration
    * @param completionHandler handler notified when the exporter has been correctly initialized.
    * @return the current {@link ServiceDiscovery}
+   * @deprecated use {@link #registerServiceExporter(ServiceExporter, JsonObject)} instead
    */
   @Fluent
+  @Deprecated
   ServiceDiscovery registerServiceExporter(ServiceExporter exporter, JsonObject configuration,
                                            Handler<AsyncResult<Void>> completionHandler);
 
@@ -201,7 +205,9 @@ public interface ServiceDiscovery {
    * @param record        the record
    * @param resultHandler handler called when the operation has completed (successfully or not). In case of success,
    *                      the passed record has a registration id required to modify and un-register the service.
+   * @deprecated use {@link #publish(Record)} instead
    */
+  @Deprecated
   void publish(Record record, Handler<AsyncResult<Record>> resultHandler);
 
   /**
@@ -215,7 +221,9 @@ public interface ServiceDiscovery {
    *
    * @param id            the registration id
    * @param resultHandler handler called when the operation has completed (successfully or not).
+   * @deprecated use {@link #unpublish(String)} instead
    */
+  @Deprecated
   void unpublish(String id, Handler<AsyncResult<Void>> resultHandler);
 
   /**
@@ -245,7 +253,9 @@ public interface ServiceDiscovery {
    * @param filter        the filter.
    * @param resultHandler handler called when the lookup has been completed. When there are no matching record, the
    *                      operation succeeds, but the async result has no result ({@code null}).
+   * @deprecated use {@link #getRecord(JsonObject)} instead
    */
+  @Deprecated
   void getRecord(JsonObject filter, Handler<AsyncResult<@Nullable Record>> resultHandler);
 
   /**
@@ -261,7 +271,9 @@ public interface ServiceDiscovery {
    * @param id            the registration id
    * @param resultHandler handler called when the lookup has been completed
    * @see Record#getRegistration()
+   * @deprecated use {@link #getRecord(String)} instead
    */
+  @Deprecated
   void getRecord(String id, Handler<AsyncResult<@Nullable Record>> resultHandler);
 
   /**
@@ -281,7 +293,9 @@ public interface ServiceDiscovery {
    * @param filter        the filter, must not be {@code null}. To return all records, use a function accepting all records
    * @param resultHandler the result handler called when the lookup has been completed. When there are no matching
    *                      record, the operation succeed, but the async result has no result.
+   * @deprecated use {@link #getRecord(Function)} instead
    */
+  @Deprecated
   void getRecord(Function<Record, Boolean> filter, Handler<AsyncResult<@Nullable Record>> resultHandler);
 
   /**
@@ -302,7 +316,9 @@ public interface ServiceDiscovery {
    * @param includeOutOfService whether or not the filter accepts  {@code OUT OF SERVICE} records
    * @param resultHandler       the result handler called when the lookup has been completed. When there are no matching
    *                            record, the operation succeed, but the async result has no result.
+   * @deprecated use {@link #getRecord(Function, boolean)} instead
    */
+  @Deprecated
   void getRecord(Function<Record, Boolean> filter, boolean includeOutOfService, Handler<AsyncResult<@Nullable Record>> resultHandler);
 
   /**
@@ -317,7 +333,9 @@ public interface ServiceDiscovery {
    * @param filter        the filter - see {@link #getRecord(JsonObject, Handler)}
    * @param resultHandler handler called when the lookup has been completed. When there are no matching record, the
    *                      operation succeed, but the async result has an empty list as result.
+   * @deprecated use {@link #getRecords(JsonObject)} instead
    */
+  @Deprecated
   void getRecords(JsonObject filter, Handler<AsyncResult<List<Record>>> resultHandler);
 
   /**
@@ -337,7 +355,9 @@ public interface ServiceDiscovery {
    * @param filter        the filter, must not be {@code null}. To return all records, use a function accepting all records
    * @param resultHandler handler called when the lookup has been completed. When there are no matching record, the
    *                      operation succeed, but the async result has an empty list as result.
+   * @deprecated use {@link #getRecords(Function)} instead
    */
+  @Deprecated
   void getRecords(Function<Record, Boolean> filter, Handler<AsyncResult<List<Record>>> resultHandler);
 
   /**
@@ -359,7 +379,9 @@ public interface ServiceDiscovery {
    * @param includeOutOfService whether or not the filter accepts  {@code OUT OF SERVICE} records
    * @param resultHandler       handler called when the lookup has been completed. When there are no matching record, the
    *                            operation succeed, but the async result has an empty list as result.
+   * @deprecated use {@link #getRecord(Function, boolean)} instead
    */
+  @Deprecated
   void getRecords(Function<Record, Boolean> filter, boolean includeOutOfService,
                   Handler<AsyncResult<List<Record>>> resultHandler);
 
@@ -373,7 +395,9 @@ public interface ServiceDiscovery {
    *
    * @param record        the updated record
    * @param resultHandler handler called when the lookup has been completed.
+   * @deprecated use {@link #update(Record)} instead
    */
+  @Deprecated
   void update(Record record, Handler<AsyncResult<Record>> resultHandler);
 
   /**

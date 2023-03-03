@@ -1,12 +1,5 @@
 package io.vertx.servicediscovery.types;
 
-import de.flapdoodle.embed.mongo.MongodExecutable;
-import de.flapdoodle.embed.mongo.MongodProcess;
-import de.flapdoodle.embed.mongo.MongodStarter;
-import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
-import de.flapdoodle.embed.mongo.config.Net;
-import de.flapdoodle.embed.mongo.distribution.Version;
-import de.flapdoodle.embed.process.runtime.Network;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
@@ -15,12 +8,11 @@ import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.impl.DiscoveryImpl;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.utility.DockerImageName;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -35,25 +27,20 @@ import static org.hamcrest.core.Is.*;
  */
 public class MongoDataSourceTest {
 
-  private static MongodExecutable mongodExe;
+  @ClassRule
+  public static MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse("mongo:4.0.10"));
 
   private Vertx vertx;
   private ServiceDiscovery discovery;
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-    MongodStarter runtime = MongodStarter.getDefaultInstance();
-    mongodExe = runtime.prepare(
-      new MongodConfigBuilder().version(Version.V3_3_1)
-        .net(new Net(12345, Network.localhostIsIPv6()))
-        .build());
-    MongodProcess process = mongodExe.start();
-    await().until(() -> process != null);
+    mongoDBContainer.start();
   }
 
   @AfterClass
   public static void afterClass() {
-    mongodExe.stop();
+    mongoDBContainer.stop();
   }
 
   @Before
@@ -75,7 +62,7 @@ public class MongoDataSourceTest {
   @Test
   public void test() throws InterruptedException {
     Record record = MongoDataSource.createRecord("some-mongo-db",
-      new JsonObject().put("connection_string", "mongodb://localhost:12345"),
+      new JsonObject().put("connection_string", mongoDBContainer.getReplicaSetUrl()),
       new JsonObject().put("database", "some-raw-data"));
 
     discovery.publish(record, (r) -> {
@@ -119,7 +106,7 @@ public class MongoDataSourceTest {
   @Test
   public void testWithSugar() throws InterruptedException {
     Record record = MongoDataSource.createRecord("some-mongo-db",
-      new JsonObject().put("connection_string", "mongodb://localhost:12345"),
+      new JsonObject().put("connection_string", mongoDBContainer.getReplicaSetUrl()),
       new JsonObject().put("database", "some-raw-data"));
 
     discovery.publish(record, r -> { });

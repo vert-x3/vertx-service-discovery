@@ -1,12 +1,5 @@
 package io.vertx.servicediscovery.polyglot;
 
-import de.flapdoodle.embed.mongo.MongodExecutable;
-import de.flapdoodle.embed.mongo.MongodProcess;
-import de.flapdoodle.embed.mongo.MongodStarter;
-import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
-import de.flapdoodle.embed.mongo.config.Net;
-import de.flapdoodle.embed.mongo.distribution.Version;
-import de.flapdoodle.embed.process.runtime.Network;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
@@ -21,6 +14,8 @@ import io.vertx.servicediscovery.types.*;
 import io.vertx.serviceproxy.ProxyHelper;
 import org.junit.*;
 import org.junit.runner.RunWith;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -34,24 +29,20 @@ import static org.hamcrest.core.Is.is;
 @RunWith(VertxUnitRunner.class)
 public class PolyglotUsageTest {
 
-  private static MongodExecutable mongodExe;
+  @ClassRule
+  public static MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse("mongo:4.0.10"));
+
   protected Vertx vertx;
   protected ServiceDiscovery discovery;
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-    MongodStarter runtime = MongodStarter.getDefaultInstance();
-    mongodExe = runtime.prepare(
-      new MongodConfigBuilder().version(Version.V3_3_1)
-        .net(new Net(12345, Network.localhostIsIPv6()))
-        .build());
-    MongodProcess process = mongodExe.start();
-    await().until(() -> process != null);
+    mongoDBContainer.start();
   }
 
   @AfterClass
   public static void afterClass() {
-    mongodExe.stop();
+    mongoDBContainer.stop();
   }
 
   @Before
@@ -103,7 +94,7 @@ public class PolyglotUsageTest {
 
     discovery.publish(
       MongoDataSource.createRecord("my-mongo-data-source",
-        new JsonObject().put("connection_string", "mongodb://localhost:12345"),
+        new JsonObject().put("connection_string", mongoDBContainer.getReplicaSetUrl()),
         new JsonObject().put("database", "some-raw-data")),
       ar -> mongoDataSourcePublished.set(ar.succeeded())
     );
@@ -215,7 +206,6 @@ public class PolyglotUsageTest {
 
       vertx.eventBus().<JsonObject>request("redis-ref", "", reply -> {
         tc.assertTrue(reply.succeeded());
-        System.out.println(reply.result().body());
         tc.assertTrue(reply.result().body().getString("client").contains("RedisClient"));
         tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
         redis_ref.complete();

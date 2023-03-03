@@ -25,6 +25,7 @@ import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
+import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServiceType;
 
 import java.util.Objects;
@@ -126,7 +127,9 @@ public interface MessageSource extends ServiceType {
    * @param filter        The filter, optional
    * @param resultHandler The result handler
    * @param <T>           The class of the message
+   * @deprecated use {@link #getConsumer(ServiceDiscovery, JsonObject)} instead
    */
+  @Deprecated
   static <T> void getConsumer(ServiceDiscovery discovery, JsonObject filter,
                               Handler<AsyncResult<MessageConsumer<T>>>
                                   resultHandler) {
@@ -154,7 +157,9 @@ public interface MessageSource extends ServiceType {
    * @param filter        The filter, must not be {@code null}
    * @param resultHandler The result handler
    * @param <T>           The class of the message
+   * @deprecated use {@link #getConsumer(ServiceDiscovery, Function)} instead
    */
+  @Deprecated
   static <T> void getConsumer(ServiceDiscovery discovery, Function<Record, Boolean> filter,
                               Handler<AsyncResult<MessageConsumer<T>>>
                                 resultHandler) {

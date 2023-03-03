@@ -8,6 +8,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
+import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServiceType;
 
 import java.util.Objects;
@@ -51,7 +52,9 @@ public interface MongoDataSource extends ServiceType {
    * @param discovery     The service discovery instance
    * @param filter        The filter, optional
    * @param resultHandler The result handler
+   * @deprecated use {@link #getMongoClient(ServiceDiscovery, JsonObject)} instead
    */
+  @Deprecated
   static void getMongoClient(ServiceDiscovery discovery, JsonObject filter,
                              Handler<AsyncResult<MongoClient>> resultHandler) {
     getMongoClient(discovery, filter).onComplete(resultHandler);
@@ -78,7 +81,9 @@ public interface MongoDataSource extends ServiceType {
    * @param discovery     The service discovery instance
    * @param filter        The filter
    * @param resultHandler The result handler
+   * @deprecated use {@link #getMongoClient(ServiceDiscovery, Function)} instead
    */
+  @Deprecated
   static void getMongoClient(ServiceDiscovery discovery, Function<Record, Boolean> filter,
                              Handler<AsyncResult<MongoClient>> resultHandler) {
     getMongoClient(discovery, filter).onComplete(resultHandler);
@@ -105,7 +110,9 @@ public interface MongoDataSource extends ServiceType {
    * @param filter                The filter, optional
    * @param consumerConfiguration the consumer configuration
    * @param resultHandler         the result handler
+   * @deprecated use {@link #getMongoClient(ServiceDiscovery, JsonObject, JsonObject)} instead
    */
+  @Deprecated
   static void getMongoClient(ServiceDiscovery discovery, JsonObject filter, JsonObject consumerConfiguration,
                              Handler<AsyncResult<MongoClient>> resultHandler) {
     getMongoClient(discovery, filter, consumerConfiguration).onComplete(resultHandler);

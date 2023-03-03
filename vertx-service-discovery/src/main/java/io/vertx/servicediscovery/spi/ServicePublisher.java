@@ -22,7 +22,9 @@ public interface ServicePublisher {
    * @param record        the record
    * @param resultHandler handler called when the operation has completed (successfully or not). In case of success,
    *                      the passed record has a registration id required to modify and un-register the service.
+   * @deprecated use {@link #publish(Record)} instead
    */
+  @Deprecated
   void publish(Record record, Handler<AsyncResult<Record>> resultHandler);
 
   /**
@@ -35,7 +37,9 @@ public interface ServicePublisher {
    *
    * @param id            the registration id
    * @param resultHandler handler called when the operation has completed (successfully or not).
+   * @deprecated use {@link #unpublish(String)} instead
    */
+  @Deprecated
   void unpublish(String id, Handler<AsyncResult<Void>> resultHandler);
 
   /**
@@ -49,7 +53,9 @@ public interface ServicePublisher {
    * @param record        the record
    * @param resultHandler handler called when the operation has completed (successfully or not). In case of success,
    *                      the passed record has a registration id required to modify and un-register the service.
+   * @deprecated use {@link #update(Record)} instead
    */
+  @Deprecated
   void update(Record record, Handler<AsyncResult<Record>> resultHandler);
 
   /**

@@ -13,7 +13,7 @@
  *
  * You may elect to redistribute this code under either of these licenses.
  */
-@ModuleGen(name = "vertx-service-discovery-kubernetes", groupPackage = "io.vertx")
+@ModuleGen(name = "vertx-service-discovery-kubernetes", groupPackage = "io.vertx", checkCallbackDeprecation = true)
 package io.vertx.servicediscovery.kubernetes;
 
 import io.vertx.codegen.annotations.ModuleGen;

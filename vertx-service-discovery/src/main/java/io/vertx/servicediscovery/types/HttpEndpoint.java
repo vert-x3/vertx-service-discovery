@@ -117,7 +117,9 @@ public interface HttpEndpoint extends ServiceType {
    * @param discovery     The service discovery instance
    * @param filter        The filter, optional
    * @param resultHandler The result handler
+   * @deprecated use {@link #getClient(ServiceDiscovery, JsonObject)} instead
    */
+  @Deprecated
   static void getClient(ServiceDiscovery discovery, JsonObject filter, Handler<AsyncResult<HttpClient>>
     resultHandler) {
     getClient(discovery, filter).onComplete(resultHandler);
@@ -143,7 +145,9 @@ public interface HttpEndpoint extends ServiceType {
    * @param discovery     The service discovery instance
    * @param filter        The filter, optional
    * @param resultHandler The result handler
+   * @deprecated use {@link #getWebClient(ServiceDiscovery, JsonObject)} instead
    */
+  @Deprecated
   static void getWebClient(ServiceDiscovery discovery, JsonObject filter, Handler<AsyncResult<WebClient>>
     resultHandler) {
     getWebClient(discovery, filter).onComplete(resultHandler);
@@ -165,7 +169,9 @@ public interface HttpEndpoint extends ServiceType {
    * @param filter        The filter, optional
    * @param conf          the configuration of the client
    * @param resultHandler The result handler
+   * @deprecated use {@link #getClient(ServiceDiscovery, JsonObject, JsonObject)} instead
    */
+  @Deprecated
   static void getClient(ServiceDiscovery discovery, JsonObject filter, JsonObject conf, Handler<AsyncResult<HttpClient>>
     resultHandler) {
     getClient(discovery, filter, conf).onComplete(resultHandler);
@@ -193,7 +199,9 @@ public interface HttpEndpoint extends ServiceType {
    * @param filter        The filter, optional
    * @param conf          the configuration of the client
    * @param resultHandler The result handler
+   * @deprecated use {@link #getWebClient(ServiceDiscovery, JsonObject, JsonObject)} instead
    */
+  @Deprecated
   static void getWebClient(ServiceDiscovery discovery, JsonObject filter, JsonObject conf,
                          Handler<AsyncResult<WebClient>>  resultHandler) {
     getWebClient(discovery, filter, conf).onComplete(resultHandler);
@@ -222,7 +230,9 @@ public interface HttpEndpoint extends ServiceType {
    * @param discovery     The service discovery instance
    * @param filter        The filter
    * @param resultHandler The result handler
+   * @deprecated use {@link #getClient(ServiceDiscovery, Function)} instead
    */
+  @Deprecated
   static void getClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, Handler<AsyncResult<HttpClient>>
     resultHandler) {
     getClient(discovery, filter).onComplete(resultHandler);
@@ -248,7 +258,9 @@ public interface HttpEndpoint extends ServiceType {
    * @param discovery     The service discovery instance
    * @param filter        The filter
    * @param resultHandler The result handler
+   * @deprecated use {@link #getWebClient(ServiceDiscovery, Function)} instead
    */
+  @Deprecated
   static void getWebClient(ServiceDiscovery discovery, Function<Record, Boolean> filter,
                            Handler<AsyncResult<WebClient>> resultHandler) {
     getWebClient(discovery, filter).onComplete(resultHandler);
@@ -270,7 +282,9 @@ public interface HttpEndpoint extends ServiceType {
    * @param filter        The filter
    * @param conf          the configuration of the client
    * @param resultHandler The result handler
+   * @deprecated use {@link #getClient(ServiceDiscovery, Function, JsonObject)} instead
    */
+  @Deprecated
   static void getClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject conf,
                         Handler<AsyncResult<HttpClient>> resultHandler) {
     getClient(discovery, filter, conf).onComplete(resultHandler);
@@ -298,7 +312,9 @@ public interface HttpEndpoint extends ServiceType {
    * @param filter        The filter
    * @param conf          the configuration of the client
    * @param resultHandler The result handler
+   * @deprecated use {@link #getWebClient(ServiceDiscovery, Function, JsonObject)} instead
    */
+  @Deprecated
   static void getWebClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject conf,
                         Handler<AsyncResult<WebClient>> resultHandler) {
     getWebClient(discovery, filter, conf).onComplete(resultHandler);
