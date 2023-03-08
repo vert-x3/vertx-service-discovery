@@ -1,6 +1,7 @@
 # Vert.x Service Discovery
 
-[![Build Status](https://github.com/vert-x3/vertx-service-discovery/workflows/CI/badge.svg?branch=master)](https://github.com/vert-x3/vertx-service-discovery/actions?query=workflow%3ACI)
+[![Build Status (5.x)](https://github.com/vert-x3/vertx-service-discovery/actions/workflows/ci-5.x.yml/badge.svg)](https://github.com/vert-x3/vertx-service-discovery/actions/workflows/ci-5.x.yml)
+[![Build Status (4.x)](https://github.com/vert-x3/vertx-service-discovery/actions/workflows/ci-4.x.yml/badge.svg)](https://github.com/vert-x3/vertx-service-discovery/actions/workflows/ci-4.x.yml)
 
 The `vertx-service-discovery` provides a discovery infrastructure to register and discover the services exposed by your
 microservice applications. It can be message sources (entities publishing message on the event bus), REST endpoints,
@@ -27,5 +28,5 @@ The `vertx-discovery-bridge-consul` is a discovery bridge importing the services
 
 ## Discovery Backend - Redis
 
-The `vertx-discovery-backend-redis` is another implementation of the Vert.x discovery backend (where service record 
+The `vertx-discovery-backend-redis` is another implementation of the Vert.x discovery backend (where service record
 are stored) using Redis instead of a distributed map.

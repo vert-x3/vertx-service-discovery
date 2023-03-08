@@ -1,4 +1,4 @@
-name: vertx-sockjs-service-proxy (5.x)
+name: vertx-service-discovery (5.x)
 on:
   push:
     branches:

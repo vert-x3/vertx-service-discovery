@@ -1,4 +1,4 @@
-name: vertx-sockjs-service-proxy (4.x)
+name: vertx-service-discovery (4.x)
 on:
   schedule:
     - cron: '0 4 * * *'
