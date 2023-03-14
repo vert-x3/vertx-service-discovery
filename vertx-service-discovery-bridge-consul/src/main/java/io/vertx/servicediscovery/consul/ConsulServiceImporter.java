@@ -106,7 +106,7 @@ public class ConsulServiceImporter implements ServiceImporter {
   }
 
   private void retrieveServicesFromConsul(Promise<List<ImportedConsulService>> completed) {
-    client.catalogServices(ar -> {
+    client.catalogServices().onComplete(ar -> {
       if (ar.succeeded()) {
         retrieveIndividualServices(ar.result(), completed);
       } else {
@@ -130,7 +130,7 @@ public class ConsulServiceImporter implements ServiceImporter {
     list.getList().forEach(service -> {
 
       Promise<List<ImportedConsulService>> promise = Promise.promise();
-      client.healthServiceNodes(service.getName(),false, ar -> {
+      client.healthServiceNodes(service.getName(),false).onComplete(ar -> {
         if (ar.succeeded()) {
           importService(ar.result().getList(), promise);
         } else {

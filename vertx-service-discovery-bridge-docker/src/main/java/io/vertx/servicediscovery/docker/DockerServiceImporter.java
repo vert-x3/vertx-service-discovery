@@ -147,8 +147,7 @@ public class DockerServiceImporter implements ServiceImporter {
           } catch (Exception e) {
             future.fail(e);
           }
-        },
-        ar -> {
+        }).onComplete(ar -> {
           if (ar.failed()) {
             if (completion != null) {
               completion.fail(ar.cause());
@@ -192,7 +191,7 @@ public class DockerServiceImporter implements ServiceImporter {
 
   private void publish(DockerService service) {
     for (Record record : service.records()) {
-      publisher.publish(record, ar -> {
+      publisher.publish(record).onComplete(ar -> {
         if (ar.succeeded()) {
           record.setRegistration(ar.result().getRegistration());
           LOGGER.info("Service from container " + service.id() + " on location "
@@ -207,7 +206,7 @@ public class DockerServiceImporter implements ServiceImporter {
 
   private void unpublish(DockerService service) {
     for (Record record : service.records()) {
-      publisher.unpublish(record.getRegistration(), ar -> {
+      publisher.unpublish(record.getRegistration()).onComplete(ar -> {
         LOGGER.info("Service from container " + service.id()
             + " on location " + record.getLocation() + " has been unpublished");
       });

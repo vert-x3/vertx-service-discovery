@@ -114,7 +114,7 @@ public class ServiceDiscoveryRestEndpoint {
       return;
     }
 
-    discovery.update(record, ar -> {
+    discovery.update(record).onComplete(ar -> {
       if (ar.failed()) {
         routingContext.fail(ar.cause());
       } else {
@@ -127,7 +127,7 @@ public class ServiceDiscoveryRestEndpoint {
 
   private void unpublish(RoutingContext routingContext) {
     String uuid = routingContext.request().getParam("uuid");
-    discovery.unpublish(uuid, ar -> {
+    discovery.unpublish(uuid).onComplete(ar -> {
       if (ar.failed()) {
         routingContext.fail(ar.cause());
       } else {
@@ -137,7 +137,7 @@ public class ServiceDiscoveryRestEndpoint {
   }
 
   private void one(RoutingContext routingContext) {
-    discovery.getRecord(new JsonObject().put("registration", routingContext.request().getParam("uuid")), ar -> {
+    discovery.getRecord(new JsonObject().put("registration", routingContext.request().getParam("uuid"))).onComplete(ar -> {
       if (ar.failed()) {
         routingContext.fail(ar.cause());
       } else {
@@ -155,7 +155,7 @@ public class ServiceDiscoveryRestEndpoint {
   private void publish(RoutingContext routingContext) {
     JsonObject json = routingContext.body().asJsonObject();
     Record record = new Record(json);
-    discovery.publish(record, ar -> {
+    discovery.publish(record).onComplete(ar -> {
       if (ar.failed()) {
         routingContext.fail(ar.cause());
       } else {
@@ -179,7 +179,7 @@ public class ServiceDiscoveryRestEndpoint {
         return;
       }
     }
-    discovery.getRecords(filter, ar -> {
+    discovery.getRecords(filter).onComplete(ar -> {
       if (ar.failed()) {
         routingContext.fail(ar.cause());
       } else {

@@ -82,7 +82,7 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
           } catch (Exception e) {
             future.fail(e);
           }
-        },
+        }).onComplete(
         ar -> {
           if (ar.failed()) {
             future.fail(ar.cause());
@@ -130,7 +130,7 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
         .stream()
         .map(reg -> {
           Promise<Void> promise = Promise.promise();
-          publisher.unpublish(reg.record().getRegistration(), v -> {
+          publisher.unpublish(reg.record().getRegistration()).onComplete(v -> {
             registrations.remove(reg);
             if (v.succeeded()) {
               promise.complete(null);
@@ -145,7 +145,7 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
         .stream()
         .map(instance -> {
           Promise<Void> promise = Promise.promise();
-          publisher.publish(createRecordForInstance(instance), v -> {
+          publisher.publish(createRecordForInstance(instance)).onComplete(v -> {
             if (v.succeeded()) {
               registrations.add(new RegistrationHolder<>(v.result(), instance));
               promise.complete(null);
@@ -244,7 +244,7 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
 
     new HashSet<>(registrations).forEach(reg -> {
       Promise<Void> unreg = Promise.promise();
-      publisher.unpublish(reg.record().getRegistration(), unreg);
+      publisher.unpublish(reg.record().getRegistration()).onComplete(unreg);
       list.add(unreg.future());
     });
     registrations.clear();
