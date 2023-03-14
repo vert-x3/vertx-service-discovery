@@ -61,41 +61,41 @@ public class PolyglotUsageTest {
     AtomicBoolean mongoDataSourcePublished = new AtomicBoolean();
 
     discovery.publish(
-      HttpEndpoint.createRecord("my-http-service", "localhost", 8080, "/"),
+      HttpEndpoint.createRecord("my-http-service", "localhost", 8080, "/")).onComplete(
       ar -> httpEndpointPublished.set(ar.succeeded()));
 
     discovery.publish(
-      EventBusService.createRecord("my-service", "my-service", HelloService.class.getName()),
+      EventBusService.createRecord("my-service", "my-service", HelloService.class.getName())).onComplete(
       ar -> serviceProxyPublished.set(ar.succeeded()));
 
     discovery.publish(
       JDBCDataSource.createRecord("my-data-source",
         new JsonObject().put("url", "jdbc:hsqldb:file:target/dumb-db;shutdown=true"),
-        new JsonObject().put("database", "some-raw-data")),
+        new JsonObject().put("database", "some-raw-data"))).onComplete(
       ar -> jdbcDataSourcePublished.set(ar.succeeded())
     );
 
     discovery.publish(
-      MessageSource.createRecord("my-message-source-1", "source1"),
+      MessageSource.createRecord("my-message-source-1", "source1")).onComplete(
       ar -> messageSource1Published.set(ar.succeeded())
     );
 
     discovery.publish(
-      MessageSource.createRecord("my-message-source-2", "source2", JsonObject.class.getName()),
+      MessageSource.createRecord("my-message-source-2", "source2", JsonObject.class.getName())).onComplete(
       ar -> messageSource2Published.set(ar.succeeded())
     );
 
     discovery.publish(
       RedisDataSource.createRecord("my-redis-data-source",
         new JsonObject().put("url", "localhost"),
-        new JsonObject().put("database", "some-raw-data")),
+        new JsonObject().put("database", "some-raw-data"))).onComplete(
       ar -> redisDataSourcePublished.set(ar.succeeded())
     );
 
     discovery.publish(
       MongoDataSource.createRecord("my-mongo-data-source",
         new JsonObject().put("connection_string", mongoDBContainer.getReplicaSetUrl()),
-        new JsonObject().put("database", "some-raw-data")),
+        new JsonObject().put("database", "some-raw-data"))).onComplete(
       ar -> mongoDataSourcePublished.set(ar.succeeded())
     );
 
@@ -112,7 +112,7 @@ public class PolyglotUsageTest {
   public void tearDown() {
     discovery.close();
     AtomicBoolean completed = new AtomicBoolean();
-    vertx.close((v) -> completed.set(true));
+    vertx.close().onComplete((v) -> completed.set(true));
     await().untilAtomic(completed, is(true));
 
     assertThat(discovery.bindings()).isEmpty();
@@ -137,16 +137,16 @@ public class PolyglotUsageTest {
     Async mongo_ref = tc.async();
     Async mongo_sugar = tc.async();
 
-    vertx.deployVerticle(MyVerticle.class.getName(), deployed -> {
+    vertx.deployVerticle(MyVerticle.class.getName()).onComplete(deployed -> {
 
-      vertx.eventBus().<JsonObject>request("http-ref", "", reply -> {
+      vertx.eventBus().<JsonObject>request("http-ref", "").onComplete(reply -> {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("client").contains("HttpClient"));
         tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
         http_ref.complete();
       });
 
-      vertx.eventBus().<JsonObject>request("http-sugar", "", reply -> {
+      vertx.eventBus().<JsonObject>request("http-sugar", "").onComplete(reply -> {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("client").contains("HttpClient"));
         tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
@@ -154,7 +154,7 @@ public class PolyglotUsageTest {
       });
 
 
-      vertx.eventBus().<JsonObject>request("web-ref", "", reply -> {
+      vertx.eventBus().<JsonObject>request("web-ref", "").onComplete(reply -> {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("client").contains("WebClient"));
         tc.assertTrue(reply.result().body().getString("direct").contains("HttpClient"));
@@ -162,77 +162,77 @@ public class PolyglotUsageTest {
         web_ref.complete();
       });
 
-      vertx.eventBus().<JsonObject>request("web-sugar", "", reply -> {
+      vertx.eventBus().<JsonObject>request("web-sugar", "").onComplete(reply -> {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("client").contains("WebClient"));
         tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
         web_sugar.complete();
       });
 
-      vertx.eventBus().<JsonObject>request("service-sugar", "", reply -> {
+      vertx.eventBus().<JsonObject>request("service-sugar", "").onComplete(reply -> {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("client").contains("HelloServiceVertxEBProxy"));
         tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
         svc_sugar.complete();
       });
 
-      vertx.eventBus().<JsonObject>request("service-ref", "", reply -> {
+      vertx.eventBus().<JsonObject>request("service-ref", "").onComplete(reply -> {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("client").contains("HelloServiceVertxEBProxy"));
         tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
         svc_ref.complete();
       });
 
-      vertx.eventBus().<JsonObject>request("ds-sugar", "", reply -> {
+      vertx.eventBus().<JsonObject>request("ds-sugar", "").onComplete(reply -> {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("client").contains("JDBCClientImpl"));
         tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
         ds_sugar.complete();
       });
 
-      vertx.eventBus().<JsonObject>request("ds-ref", "", reply -> {
+      vertx.eventBus().<JsonObject>request("ds-ref", "").onComplete(reply -> {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("client").contains("JDBCClientImpl"));
         tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
         ds_ref.complete();
       });
 
-      vertx.eventBus().<JsonObject>request("redis-sugar", "", reply -> {
+      vertx.eventBus().<JsonObject>request("redis-sugar", "").onComplete(reply -> {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("client").contains("RedisClient"));
         tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
         redis_sugar.complete();
       });
 
-      vertx.eventBus().<JsonObject>request("redis-ref", "", reply -> {
+      vertx.eventBus().<JsonObject>request("redis-ref", "").onComplete(reply -> {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("client").contains("RedisClient"));
         tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
         redis_ref.complete();
       });
 
-      vertx.eventBus().<JsonObject>request("mongo-sugar", "", reply -> {
+      vertx.eventBus().<JsonObject>request("mongo-sugar", "").onComplete(reply -> {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("client").contains("MongoClientImpl"));
         tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
         mongo_sugar.complete();
       });
 
-      vertx.eventBus().<JsonObject>request("mongo-ref", "", reply -> {
+      vertx.eventBus().<JsonObject>request("mongo-ref", "").onComplete(reply -> {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("client").contains("MongoClientImpl"));
         tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
         mongo_ref.complete();
       });
 
-      vertx.eventBus().<JsonObject>request("source1-sugar", "", reply -> {
+      vertx.eventBus().<JsonObject>request("source1-sugar", "").onComplete(reply -> {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("client").contains("MessageConsumerImpl"));
         tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
         ms_sugar.complete();
       });
 
-      vertx.eventBus().<JsonObject>request("source1-ref", "", reply -> {
+      vertx.eventBus().<JsonObject>request("source1-ref", "").onComplete(reply -> {
         tc.assertTrue(reply.succeeded());
         tc.assertTrue(reply.result().body().getString("client").contains("MessageConsumerImpl"));
         tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());

@@ -92,7 +92,7 @@ public class DockerLinksServiceImporterTest {
       if (records.size() >= 2) {
         vertx.cancelTimer(l);
       } else {
-        service.getRecords(new JsonObject(), ar -> {
+        service.getRecords(new JsonObject()).onComplete(ar -> {
           records.clear();
           records.addAll(ar.result());
         });

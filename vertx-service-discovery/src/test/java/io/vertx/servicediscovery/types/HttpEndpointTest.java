@@ -70,7 +70,7 @@ public class HttpEndpointTest {
     });
 
     AtomicBoolean done = new AtomicBoolean();
-    vertx.createHttpServer().requestHandler(router).listen(8080, ar -> {
+    vertx.createHttpServer().requestHandler(router).listen(8080).onComplete(ar -> {
       done.set(ar.succeeded());
     });
 
@@ -81,7 +81,7 @@ public class HttpEndpointTest {
   public void tearDown() {
     discovery.close();
     AtomicBoolean completed = new AtomicBoolean();
-    vertx.close((v) -> completed.set(true));
+    vertx.close().onComplete((v) -> completed.set(true));
     await().untilAtomic(completed, is(true));
 
     Assertions.assertThat(discovery.bindings()).isEmpty();
@@ -94,10 +94,10 @@ public class HttpEndpointTest {
 
     // Publish the service
     Record record = HttpEndpoint.createRecord("hello-service", "localhost", 8080, "/foo");
-    discovery.publish(record, rec -> {
+    discovery.publish(record).onComplete(rec -> {
       Record published = rec.result();
 
-      discovery.getRecord(new JsonObject().put("name", "hello-service"), found -> {
+      discovery.getRecord(new JsonObject().put("name", "hello-service")).onComplete(found -> {
         context.assertTrue(found.succeeded());
         context.assertTrue(found.result() != null);
         Record match = found.result();
@@ -117,7 +117,7 @@ public class HttpEndpointTest {
           context.assertEquals(body.toString(), "hello");
         })).onComplete(ar -> {
           reference.release();
-          discovery.unpublish(published.getRegistration(), v -> {
+          discovery.unpublish(published.getRegistration()).onComplete(v -> {
             async.complete();
           });
         });
@@ -131,10 +131,10 @@ public class HttpEndpointTest {
 
     // Publish the service
     Record record = HttpEndpoint.createRecord("hello-service", "localhost", 8080, "/foo");
-    discovery.publish(record, rec -> {
+    discovery.publish(record).onComplete(rec -> {
       Record published = rec.result();
 
-      discovery.getRecord(new JsonObject().put("name", "hello-service"), found -> {
+      discovery.getRecord(new JsonObject().put("name", "hello-service")).onComplete(found -> {
         context.assertTrue(found.succeeded());
         context.assertTrue(found.result() != null);
         Record match = found.result();
@@ -146,7 +146,7 @@ public class HttpEndpointTest {
         context.assertTrue(client == client2);
 
         client.get("/foo")
-          .send(response -> {
+          .send().onComplete(response -> {
             if (response.failed()) {
               context.fail(response.cause());
             } else {
@@ -155,7 +155,7 @@ public class HttpEndpointTest {
               context.assertEquals(resp.body().toString(), "hello");
               reference.release();
 
-              discovery.unpublish(published.getRegistration(), v -> async.complete());
+              discovery.unpublish(published.getRegistration()).onComplete(v -> async.complete());
             }
           });
       });
@@ -168,10 +168,10 @@ public class HttpEndpointTest {
 
     // Publish the service
     Record record = HttpEndpoint.createRecord("hello-service", "localhost", 8080, "/foo");
-    discovery.publish(record, rec -> {
+    discovery.publish(record).onComplete(rec -> {
       Record published = rec.result();
 
-      discovery.getRecord(new JsonObject().put("name", "hello-service"), found -> {
+      discovery.getRecord(new JsonObject().put("name", "hello-service")).onComplete(found -> {
         context.assertTrue(found.succeeded());
         context.assertTrue(found.result() != null);
         Record match = found.result();
@@ -186,7 +186,7 @@ public class HttpEndpointTest {
           context.fail(e);
         }
 
-        discovery.unpublish(published.getRegistration(), v -> async.complete());
+        discovery.unpublish(published.getRegistration()).onComplete(v -> async.complete());
       });
     });
   }
@@ -197,11 +197,11 @@ public class HttpEndpointTest {
 
     // Publish the service
     Record record = HttpEndpoint.createRecord("hello-service", "localhost", 8080, "/foo");
-    discovery.publish(record, rec -> {
+    discovery.publish(record).onComplete(rec -> {
       Record published = rec.result();
 
       HttpEndpoint.getClient(discovery, new JsonObject().put("name", "hello-service"), new JsonObject().put
-        ("keepAlive", false), found -> {
+        ("keepAlive", false)).onComplete(found -> {
         context.assertTrue(found.succeeded());
         context.assertTrue(found.result() != null);
         HttpClient client = found.result();
@@ -215,7 +215,7 @@ public class HttpEndpointTest {
           context.assertEquals(body.toString(), "hello");
         })).onComplete(ar -> {
           ServiceDiscovery.releaseServiceObject(discovery, client);
-          discovery.unpublish(published.getRegistration(), v -> async.complete());
+          discovery.unpublish(published.getRegistration()).onComplete(v -> async.complete());
         });
       });
     });
@@ -227,17 +227,17 @@ public class HttpEndpointTest {
 
     // Publish the service
     Record record = HttpEndpoint.createRecord("hello-service", "localhost", 8080, "/foo");
-    discovery.publish(record, rec -> {
+    discovery.publish(record).onComplete(rec -> {
       Record published = rec.result();
 
       HttpEndpoint.getWebClient(discovery,
         new JsonObject().put("name", "hello-service"),
-        new JsonObject().put("keepAlive", false), found -> {
+        new JsonObject().put("keepAlive", false)).onComplete(found -> {
           context.assertTrue(found.succeeded());
           context.assertTrue(found.result() != null);
           context.assertTrue(found.result() instanceof WebClient);
           WebClient client = found.result();
-          client.get("/foo").send(ar -> {
+          client.get("/foo").send().onComplete(ar -> {
             if (ar.failed()) {
               context.fail(ar.cause());
             }
@@ -247,7 +247,7 @@ public class HttpEndpointTest {
             context.assertEquals(response.body().toString(), "hello");
 
             ServiceDiscovery.releaseServiceObject(discovery, client);
-            discovery.unpublish(published.getRegistration(), v -> async.complete());
+            discovery.unpublish(published.getRegistration()).onComplete(v -> async.complete());
           });
         });
     });
@@ -259,16 +259,16 @@ public class HttpEndpointTest {
 
     // Publish the service
     Record record = HttpEndpoint.createRecord("hello-service", "localhost", 8080, "/foo");
-    discovery.publish(record, rec -> {
+    discovery.publish(record).onComplete(rec -> {
       Record published = rec.result();
 
       HttpEndpoint.getWebClient(discovery,
-        new JsonObject().put("name", "hello-service"), found -> {
+        new JsonObject().put("name", "hello-service")).onComplete(found -> {
           context.assertTrue(found.succeeded());
           context.assertTrue(found.result() != null);
           context.assertTrue(found.result() instanceof WebClient);
           WebClient client = found.result();
-          client.get("/foo").send(ar -> {
+          client.get("/foo").send().onComplete(ar -> {
             if (ar.failed()) {
               context.fail(ar.cause());
             }
@@ -277,7 +277,7 @@ public class HttpEndpointTest {
             context.assertEquals(response.body().toString(), "hello");
 
             ServiceDiscovery.releaseServiceObject(discovery, client);
-            discovery.unpublish(published.getRegistration(), v -> async.complete());
+            discovery.unpublish(published.getRegistration()).onComplete(v -> async.complete());
           });
         });
     });
@@ -302,14 +302,14 @@ public class HttpEndpointTest {
       .setHost("127.0.0.1")
     ).requestHandler(request -> {
       request.response().end(new JsonObject().put("url", request.absoluteURI()).encode());
-    }).listen(0, testContext.asyncAssertSuccess(server -> {
+    }).listen(0).onComplete(testContext.asyncAssertSuccess(server -> {
 
       Record sslRecord = HttpEndpoint.createRecord("http-bin", false, "127.0.0.1", server.actualPort(), "/get", null);
       ServiceReference reference = discovery.getReferenceWithConfiguration(sslRecord, new HttpClientOptions()
         .toJson());
 
       WebClient webClient = WebClient.wrap(reference.get());
-      webClient.get("/get").as(BodyCodec.jsonObject()).send(testContext.asyncAssertSuccess(resp -> {
+      webClient.get("/get").as(BodyCodec.jsonObject()).send().onComplete(testContext.asyncAssertSuccess(resp -> {
         assertEquals("http://127.0.0.1:" + server.actualPort() + "/get", resp.body().getString("url"));
       }));
     }));

@@ -57,7 +57,7 @@ public class RecordTest {
   public void tearDown() {
     discovery.close();
     AtomicBoolean completed = new AtomicBoolean();
-    vertx.close((v) -> completed.set(true));
+    vertx.close().onComplete((v) -> completed.set(true));
     await().untilAtomic(completed, is(true));
 
     Assertions.assertThat(discovery.bindings()).isEmpty();
@@ -111,24 +111,19 @@ public class RecordTest {
     Record record5 = new Record().setName("baz").setMetadata(new JsonObject().put("key", "A"));
 
     AtomicBoolean done = new AtomicBoolean();
-    discovery.publish(record1, ar -> {
-      discovery.publish(record2, ar2 -> {
-        discovery.publish(record3, ar3 -> {
-          discovery.publish(record4, ar4 -> {
-            discovery.publish(record5, ar5 -> {
-              done.set(true);
-            });
-          });
-        });
-      });
-    });
+    discovery.publish(record1)
+      .compose(res -> discovery.publish(record2))
+      .compose(res -> discovery.publish(record3))
+      .compose(res -> discovery.publish(record4))
+      .compose(res -> discovery.publish(record5))
+      .onComplete(ar -> done.set(true));
 
     await().untilAtomic(done, is(true));
 
 
     AtomicReference<Record> match = new AtomicReference<>();
     done.set(false);
-    discovery.getRecord(r -> r.getName().equals("Name"), result -> {
+    discovery.getRecord(r -> r.getName().equals("Name")).onComplete(result -> {
       match.set(result.result());
       done.set(true);
     });
@@ -137,7 +132,7 @@ public class RecordTest {
 
     match.set(null);
     done.set(false);
-    discovery.getRecord(r -> r.getName().equals("Name-nope"), result -> {
+    discovery.getRecord(r -> r.getName().equals("Name-nope")).onComplete(result -> {
       match.set(result.result());
       done.set(true);
     });
@@ -146,7 +141,7 @@ public class RecordTest {
 
     match.set(null);
     done.set(false);
-    discovery.getRecord(r -> "A".equals(r.getMetadata().getString("key")), result -> {
+    discovery.getRecord(r -> "A".equals(r.getMetadata().getString("key"))).onComplete(result -> {
       match.set(result.result());
       done.set(true);
     });
@@ -156,7 +151,7 @@ public class RecordTest {
 
     match.set(null);
     done.set(false);
-    discovery.getRecord(r -> "A".equals(r.getMetadata().getString("key")) && r.getName().equals("baz"),
+    discovery.getRecord(r -> "A".equals(r.getMetadata().getString("key")) && r.getName().equals("baz")).onComplete(
         result -> {
           match.set(result.result());
           done.set(true);
@@ -168,7 +163,7 @@ public class RecordTest {
 
     match.set(null);
     done.set(false);
-    discovery.getRecord(r -> "A".equals(r.getMetadata().getString("key")) && r.getName().equals("boom"),
+    discovery.getRecord(r -> "A".equals(r.getMetadata().getString("key")) && r.getName().equals("boom")).onComplete(
         result -> {
           match.set(result.result());
           done.set(true);
@@ -178,7 +173,7 @@ public class RecordTest {
 
     match.set(null);
     done.set(false);
-    discovery.getRecord(r -> true,
+    discovery.getRecord(r -> true).onComplete(
         result -> {
           match.set(result.result());
           done.set(true);
@@ -188,7 +183,7 @@ public class RecordTest {
 
     List<Record> matches = new ArrayList<>();
     done.set(false);
-    discovery.getRecords(r -> true,
+    discovery.getRecords(r -> true).onComplete(
         result -> {
           matches.addAll(result.result());
           done.set(true);
@@ -198,7 +193,7 @@ public class RecordTest {
 
     matches.clear();
     done.set(false);
-    discovery.getRecords(r -> true, true,
+    discovery.getRecords(r -> true, true).onComplete(
         result -> {
           matches.addAll(result.result());
           done.set(true);
@@ -208,7 +203,7 @@ public class RecordTest {
 
     matches.clear();
     done.set(false);
-    discovery.getRecords(r -> r.getName().equals("Name"),
+    discovery.getRecords(r -> r.getName().equals("Name")).onComplete(
         result -> {
           matches.addAll(result.result());
           done.set(true);
@@ -218,7 +213,7 @@ public class RecordTest {
 
     matches.clear();
     done.set(false);
-    discovery.getRecords(r -> r.getName().equals("Name-Nope"),
+    discovery.getRecords(r -> r.getName().equals("Name-Nope")).onComplete(
         result -> {
           matches.addAll(result.result());
           done.set(true);
@@ -228,7 +223,7 @@ public class RecordTest {
 
     matches.clear();
     done.set(false);
-    discovery.getRecords(r -> "A".equals(r.getMetadata().getString("key")),
+    discovery.getRecords(r -> "A".equals(r.getMetadata().getString("key"))).onComplete(
         result -> {
           matches.addAll(result.result());
           done.set(true);
@@ -238,7 +233,7 @@ public class RecordTest {
 
     matches.clear();
     done.set(false);
-    discovery.getRecords(r -> "B".equals(r.getMetadata().getString("key")),
+    discovery.getRecords(r -> "B".equals(r.getMetadata().getString("key"))).onComplete(
         result -> {
           matches.addAll(result.result());
           done.set(true);
@@ -248,7 +243,7 @@ public class RecordTest {
 
     matches.clear();
     done.set(false);
-    discovery.getRecords(r -> "B".equals(r.getMetadata().getString("key")), true,
+    discovery.getRecords(r -> "B".equals(r.getMetadata().getString("key")), true).onComplete(
         result -> {
           matches.addAll(result.result());
           done.set(true);
@@ -257,16 +252,14 @@ public class RecordTest {
     Assertions.assertThat(matches).hasSize(2);
 
     try {
-      discovery.getRecord((Function<Record, Boolean>) null, ar -> {
-      });
+      discovery.getRecord((Function<Record, Boolean>) null);
       fail("NPE expected");
     } catch (NullPointerException e) {
       // OK
     }
 
     try {
-      discovery.getRecords((Function<Record, Boolean>) null, ar -> {
-      });
+      discovery.getRecords((Function<Record, Boolean>) null);
       fail("NPE expected");
     } catch (NullPointerException e) {
       // OK
@@ -275,7 +268,7 @@ public class RecordTest {
     // Null json filter
     matches.clear();
     done.set(false);
-    discovery.getRecords((JsonObject) null,
+    discovery.getRecords((JsonObject) null).onComplete(
         result -> {
           matches.addAll(result.result());
           done.set(true);
@@ -285,7 +278,7 @@ public class RecordTest {
 
     matches.clear();
     done.set(false);
-    discovery.getRecord((JsonObject) null,
+    discovery.getRecord((JsonObject) null).onComplete(
         result -> {
           matches.add(result.result());
           done.set(true);
@@ -296,7 +289,7 @@ public class RecordTest {
     // Test with status set to *
     matches.clear();
     done.set(false);
-    discovery.getRecords(new JsonObject().put("status", "*"),
+    discovery.getRecords(new JsonObject().put("status", "*")).onComplete(
         result -> {
           matches.addAll(result.result());
           done.set(true);

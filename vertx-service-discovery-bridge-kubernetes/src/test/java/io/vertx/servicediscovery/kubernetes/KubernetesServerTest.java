@@ -100,12 +100,12 @@ public class KubernetesServerTest {
   public void testInitialRetrieval(TestContext tc) {
     Async async = tc.async();
     ServiceDiscovery discovery = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions());
-    discovery.registerServiceImporter(new KubernetesServiceImporter(), config().copy().put("namespace", "default"),
+    discovery.registerServiceImporter(new KubernetesServiceImporter(), config().copy().put("namespace", "default")).onComplete(
       ar -> {
         if (ar.failed()) {
           tc.fail(ar.cause());
         } else {
-          discovery.getRecords(s -> true, res -> {
+          discovery.getRecords(s -> true).onComplete(res -> {
             if (res.failed()) {
               tc.fail(res.cause());
             } else {
@@ -121,7 +121,7 @@ public class KubernetesServerTest {
   public void testWatch() {
     AtomicBoolean done = new AtomicBoolean();
     ServiceDiscovery discovery = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions());
-    discovery.registerServiceImporter(new KubernetesServiceImporter(), config().copy().put("namespace", "default"),
+    discovery.registerServiceImporter(new KubernetesServiceImporter(), config().copy().put("namespace", "default")).onComplete(
       ar -> done.set(ar.succeeded()));
 
     await().untilAtomic(done, is(true));
@@ -147,7 +147,7 @@ public class KubernetesServerTest {
   public void testWatchWithDeletion() {
     AtomicBoolean done = new AtomicBoolean();
     ServiceDiscovery discovery = ServiceDiscovery.create(vertx, new ServiceDiscoveryOptions());
-    discovery.registerServiceImporter(new KubernetesServiceImporter(), config().copy().put("namespace", "issue96"),
+    discovery.registerServiceImporter(new KubernetesServiceImporter(), config().copy().put("namespace", "issue96")).onComplete(
       ar -> done.set(ar.succeeded()));
 
     await().untilAtomic(done, is(true));
@@ -199,7 +199,7 @@ public class KubernetesServerTest {
     CountDownLatch latch = new CountDownLatch(1);
 
     List<Record> records = new ArrayList<>();
-    discovery.getRecords(s -> true, ar -> {
+    discovery.getRecords(s -> true).onComplete(ar -> {
       records.addAll(ar.result());
       latch.countDown();
     });

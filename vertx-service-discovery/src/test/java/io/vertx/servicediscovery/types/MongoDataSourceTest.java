@@ -53,7 +53,7 @@ public class MongoDataSourceTest {
   public void tearDown() {
     discovery.close();
     AtomicBoolean completed = new AtomicBoolean();
-    vertx.close((v) -> completed.set(true));
+    vertx.close().onComplete((v) -> completed.set(true));
     await().untilAtomic(completed, is(true));
 
     assertThat(discovery.bindings()).isEmpty();
@@ -65,12 +65,11 @@ public class MongoDataSourceTest {
       new JsonObject().put("connection_string", mongoDBContainer.getReplicaSetUrl()),
       new JsonObject().put("database", "some-raw-data"));
 
-    discovery.publish(record, (r) -> {
-    });
+    discovery.publish(record);
     await().until(() -> record.getRegistration() != null);
 
     AtomicReference<Record> found = new AtomicReference<>();
-    discovery.getRecord(new JsonObject().put("name", "some-mongo-db"), ar -> {
+    discovery.getRecord(new JsonObject().put("name", "some-mongo-db")).onComplete(ar -> {
       found.set(ar.result());
     });
 
@@ -79,7 +78,7 @@ public class MongoDataSourceTest {
     ServiceReference service = discovery.getReference(found.get());
     MongoClient client = service.get();
     AtomicBoolean success = new AtomicBoolean();
-    client.getCollections(ar -> {
+    client.getCollections().onComplete(ar -> {
       success.set(ar.succeeded());
     });
 
@@ -93,7 +92,7 @@ public class MongoDataSourceTest {
   public void testMissing() throws InterruptedException {
     AtomicReference<Throwable> expected = new AtomicReference<>();
     MongoDataSource.getMongoClient(discovery,
-      new JsonObject().put("name", "some-mongo-db"),
+      new JsonObject().put("name", "some-mongo-db")).onComplete(
       ar -> {
         expected.set(ar.cause());
       });
@@ -109,16 +108,16 @@ public class MongoDataSourceTest {
       new JsonObject().put("connection_string", mongoDBContainer.getReplicaSetUrl()),
       new JsonObject().put("database", "some-raw-data"));
 
-    discovery.publish(record, r -> { });
+    discovery.publish(record).onComplete(r -> { });
     await().until(() -> record.getRegistration() != null);
 
 
     AtomicBoolean success = new AtomicBoolean();
-    MongoDataSource.getMongoClient(discovery, new JsonObject().put("name", "some-mongo-db"),
+    MongoDataSource.getMongoClient(discovery, new JsonObject().put("name", "some-mongo-db")).onComplete(
       ar -> {
         MongoClient client = ar.result();
 
-        client.getCollections(coll -> {
+        client.getCollections().onComplete(coll -> {
           client.close();
           success.set(coll.succeeded());
         });

@@ -55,7 +55,7 @@ public class JDBCDataSourceTest {
   public void tearDown() {
     discovery.close();
     AtomicBoolean completed = new AtomicBoolean();
-    vertx.close((v) -> completed.set(true));
+    vertx.close().onComplete((v) -> completed.set(true));
     await().untilAtomic(completed, is(true));
 
     assertThat(discovery.bindings()).isEmpty();
@@ -70,12 +70,11 @@ public class JDBCDataSourceTest {
         new JsonObject().put("url", "jdbc:hsqldb:file:target/dumb-db;shutdown=true"),
         new JsonObject().put("database", "some-raw-data"));
 
-    discovery.publish(record, (r) -> {
-    });
+    discovery.publish(record);
     await().until(() -> record.getRegistration() != null);
 
     AtomicReference<Record> found = new AtomicReference<>();
-    discovery.getRecord(new JsonObject().put("name", "some-hsql-db"), ar -> {
+    discovery.getRecord(new JsonObject().put("name", "some-hsql-db")).onComplete(ar -> {
       found.set(ar.result());
     });
 
@@ -101,7 +100,7 @@ public class JDBCDataSourceTest {
   public void testMissing() throws InterruptedException {
     AtomicReference<Throwable> expected = new AtomicReference<>();
     JDBCDataSource.getJDBCClient(discovery,
-        new JsonObject().put("name", "some-hsql-db"),
+        new JsonObject().put("name", "some-hsql-db")).onComplete(
         ar -> {
           expected.set(ar.cause());
         });
@@ -120,13 +119,12 @@ public class JDBCDataSourceTest {
         new JsonObject().put("url", "jdbc:hsqldb:file:target/dumb-db;shutdown=true"),
         new JsonObject().put("database", "some-raw-data"));
 
-    discovery.publish(record, (r) -> {
-    });
+    discovery.publish(record);
     await().until(() -> record.getRegistration() != null);
 
 
     AtomicBoolean success = new AtomicBoolean();
-    JDBCDataSource.getJDBCClient(discovery, new JsonObject().put("name", "some-hsql-db"), conf,
+    JDBCDataSource.getJDBCClient(discovery, new JsonObject().put("name", "some-hsql-db"), conf).onComplete(
         ar -> {
           JDBCClient client = ar.result();
           client.getConnection(conn -> {
@@ -147,13 +145,12 @@ public class JDBCDataSourceTest {
         new JsonObject().put("url", "jdbc:hsqldb:file:target/dumb-db;shutdown=true"),
         new JsonObject().put("database", "some-raw-data").put("driverclass", "org.hsqldb.jdbcDriver"));
 
-    discovery.publish(record, (r) -> {
-    });
+    discovery.publish(record);
     await().until(() -> record.getRegistration() != null);
 
 
     AtomicBoolean success = new AtomicBoolean();
-    JDBCDataSource.getJDBCClient(discovery, new JsonObject().put("name", "some-hsql-db"),
+    JDBCDataSource.getJDBCClient(discovery, new JsonObject().put("name", "some-hsql-db")).onComplete(
         ar -> {
           JDBCClient client = ar.result();
           client.getConnection(conn -> {

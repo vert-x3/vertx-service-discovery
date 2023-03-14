@@ -74,8 +74,8 @@ public class ConsulServiceImporterTest {
           } else {
             request.response().setStatusCode(404).end();
           }
-        })
-        .listen(5601, ar -> done.set(ar.succeeded()));
+        });
+    server.listen(5601).onComplete(ar -> done.set(ar.succeeded()));
 
     await().untilAtomic(done, is(true));
   }
@@ -86,10 +86,10 @@ public class ConsulServiceImporterTest {
       discovery.close();
     }
     AtomicBoolean done = new AtomicBoolean();
-    server.close(ar -> done.set(true));
+    server.close().onComplete(ar -> done.set(true));
     await().untilAtomic(done, is(true));
     done.set(false);
-    vertx.close(ar -> done.set(true));
+    vertx.close().onComplete(ar -> done.set(true));
     await().untilAtomic(done, is(true));
   }
 
@@ -211,12 +211,12 @@ public class ConsulServiceImporterTest {
     services.add(buildService("10.1.10.12", "redis", "redis", null, 8000, "passing"));
 
     AtomicBoolean initialized = new AtomicBoolean();
-    vertx.runOnContext(v ->
-        discovery = ServiceDiscovery.create(vertx)
-            .registerServiceImporter(new ConsulServiceImporter(),
-                new JsonObject().put("host", "localhost").put("port", 5601).put("scan-period", 100),
-        x -> initialized.set(true))
-    );
+    vertx.runOnContext(v -> {
+      discovery = ServiceDiscovery.create(vertx);
+      discovery.registerServiceImporter(new ConsulServiceImporter(),
+        new JsonObject().put("host", "localhost").put("port", 5601).put("scan-period", 100))
+        .onComplete(x -> initialized.set(true));
+    });
 
     await().untilAtomic(initialized, is(true));
 
@@ -239,11 +239,12 @@ public class ConsulServiceImporterTest {
     services.add(buildService("10.1.10.12", "redis", "redis", null, 8000,"passing"));
 
     AtomicBoolean initialized = new AtomicBoolean();
-    vertx.runOnContext(v ->
-        discovery = ServiceDiscovery.create(vertx)
-            .registerServiceImporter(new ConsulServiceImporter(),
-                new JsonObject().put("host", "localhost").put("port", 5601).put("scan-period", 100),
-                x -> initialized.set(true))
+    vertx.runOnContext(v -> {
+        discovery = ServiceDiscovery.create(vertx);
+        discovery.registerServiceImporter(new ConsulServiceImporter(),
+          new JsonObject().put("host", "localhost").put("port", 5601).put("scan-period", 100)).onComplete(
+          x -> initialized.set(true));
+      }
     );
 
     await().untilAtomic(initialized, is(true));
@@ -290,7 +291,7 @@ public class ConsulServiceImporterTest {
     CountDownLatch latch = new CountDownLatch(1);
     List<Record> list = new ArrayList<>();
 
-    discovery.getRecords((JsonObject) null, ar -> {
+    discovery.getRecords((JsonObject) null).onComplete(ar -> {
       list.addAll(ar.result());
       latch.countDown();
     });

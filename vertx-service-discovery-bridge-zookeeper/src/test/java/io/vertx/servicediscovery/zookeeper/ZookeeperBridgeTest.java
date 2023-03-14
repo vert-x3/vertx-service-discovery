@@ -93,14 +93,14 @@ public class ZookeeperBridgeTest {
     discovery.registerService(instance);
     sd.registerServiceImporter(
       new ZookeeperServiceImporter(),
-      new JsonObject().put("connection", zkTestServer.getConnectString()),
+      new JsonObject().put("connection", zkTestServer.getConnectString())).onComplete(
       v -> {
         if (v.failed()) {
           v.cause().printStackTrace();
         }
         tc.assertTrue(v.succeeded());
 
-        sd.getRecords(x -> true, l -> {
+        sd.getRecords(x -> true).onComplete(l -> {
           if (l.failed()) {
             l.cause().printStackTrace();
           }
@@ -127,9 +127,9 @@ public class ZookeeperBridgeTest {
 
     sd.registerServiceImporter(
       new ZookeeperServiceImporter(),
-      new JsonObject().put("connection", zkTestServer.getConnectString()),
+      new JsonObject().put("connection", zkTestServer.getConnectString())).onComplete(
       tc.asyncAssertSuccess(v -> {
-        sd.getRecords(x -> true, tc.asyncAssertSuccess(l -> {
+        sd.getRecords(x -> true).onComplete(tc.asyncAssertSuccess(l -> {
           tc.assertTrue(l.size() == 0);
 
           vertx.executeBlocking(future -> {
@@ -139,7 +139,7 @@ public class ZookeeperBridgeTest {
             } catch (Exception e) {
               future.fail(e);
             }
-          }, tc.asyncAssertSuccess(v2 -> {
+          }).onComplete(tc.asyncAssertSuccess(v2 -> {
             waitUntil(() -> serviceLookup(sd, 1), tc.asyncAssertSuccess(v3 -> {
               async.complete();
             }));
@@ -162,9 +162,9 @@ public class ZookeeperBridgeTest {
 
     sd.registerServiceImporter(
       new ZookeeperServiceImporter(),
-      new JsonObject().put("connection", zkTestServer.getConnectString()),
+      new JsonObject().put("connection", zkTestServer.getConnectString())).onComplete(
       tc.asyncAssertSuccess(v1 -> {
-        sd.getRecords(x -> true, tc.asyncAssertSuccess(l -> {
+        sd.getRecords(x -> true).onComplete(tc.asyncAssertSuccess(l -> {
           tc.assertTrue(l.size() == 0);
           vertx.executeBlocking(future -> {
             try {
@@ -173,7 +173,7 @@ public class ZookeeperBridgeTest {
             } catch (Exception e) {
               future.fail(e);
             }
-          }, tc.asyncAssertSuccess(v2 -> {
+          }).onComplete(tc.asyncAssertSuccess(v2 -> {
             waitUntil(() -> serviceLookup(sd, 1), tc.asyncAssertSuccess(v3 -> {
               // Leave
               vertx.executeBlocking(future2 -> {
@@ -183,7 +183,7 @@ public class ZookeeperBridgeTest {
                 } catch (Exception e) {
                   future2.fail(e);
                 }
-              }, tc.asyncAssertSuccess(v4 -> {
+              }).onComplete(tc.asyncAssertSuccess(v4 -> {
                 waitUntil(() -> serviceLookup(sd, 0), tc.asyncAssertSuccess(v5 -> {
                   vertx.executeBlocking(future3 -> {
                     try {
@@ -192,7 +192,7 @@ public class ZookeeperBridgeTest {
                     } catch (Exception e) {
                       future3.fail(e);
                     }
-                  }, ar3 -> waitUntil(() -> serviceLookup(sd, 1), tc.asyncAssertSuccess(v6 -> {
+                  }).onComplete(ar3 -> waitUntil(() -> serviceLookup(sd, 1), tc.asyncAssertSuccess(v6 -> {
                     async.complete();
                   })));
                 }));
@@ -205,7 +205,7 @@ public class ZookeeperBridgeTest {
 
   private Future<List<Record>> serviceLookup(io.vertx.servicediscovery.ServiceDiscovery discovery, int expected) {
     Promise<List<Record>> promise = Promise.promise();
-    discovery.getRecords(x -> true, ar -> {
+    discovery.getRecords(x -> true).onComplete(ar -> {
       if (ar.failed()) {
         NoStackTraceThrowable failure = new NoStackTraceThrowable("service lookup failed: " + ar.cause().getMessage());
         failure.initCause(ar.cause());
@@ -244,7 +244,7 @@ public class ZookeeperBridgeTest {
 
     sd.registerServiceImporter(
       new ZookeeperServiceImporter(),
-      new JsonObject().put("connection", zkTestServer.getConnectString()),
+      new JsonObject().put("connection", zkTestServer.getConnectString())).onComplete(
       tc.asyncAssertSuccess(v -> {
         waitUntil(() -> serviceLookup(sd, 1), tc.asyncAssertSuccess(list -> {
           tc.assertEquals(list.get(0).getName(), "foo-service");
@@ -255,7 +255,7 @@ public class ZookeeperBridgeTest {
             } catch (Exception e) {
               promise.fail(e);
             }
-          }, tc.asyncAssertSuccess(v2 -> {
+          }).onComplete(tc.asyncAssertSuccess(v2 -> {
             waitUntil(() -> serviceLookup(sd, 2), tc.asyncAssertSuccess(lookup -> {
               tc.assertEquals(lookup.get(0).getName(), "foo-service");
               tc.assertEquals(lookup.get(1).getName(), "foo-service");
@@ -267,7 +267,7 @@ public class ZookeeperBridgeTest {
   }
 
   private void fetchRecords(AtomicBoolean marker, TestContext tc) {
-    sd.getRecords(x -> true, l -> {
+    sd.getRecords(x -> true).onComplete(l -> {
       if (l.succeeded() && l.result().size() == 1) {
         tc.assertEquals("foo-service", l.result().get(0).getName());
         marker.set(true);
@@ -298,7 +298,7 @@ public class ZookeeperBridgeTest {
         .put("connection", zkTestServer.getConnectString())
         .put("connectionTimeoutMs", 10)
         .put("baseSleepTimeBetweenRetries", 10)
-        .put("maxRetries", 3),
+        .put("maxRetries", 3)).onComplete(
       v -> {
         if (v.failed()) {
           v.cause().printStackTrace();
@@ -319,7 +319,7 @@ public class ZookeeperBridgeTest {
     zkTestServer.stop();
 
     importDone.set(false);
-    sd.getRecords(x -> true, l -> {
+    sd.getRecords(x -> true).onComplete(l -> {
       if (l.failed()) {
         l.cause().printStackTrace();
       }
@@ -335,7 +335,7 @@ public class ZookeeperBridgeTest {
     zkTestServer.start();
 
     importDone.set(false);
-    sd.getRecords(x -> true, l -> {
+    sd.getRecords(x -> true).onComplete(l -> {
       if (l.failed()) {
         l.cause().printStackTrace();
       }

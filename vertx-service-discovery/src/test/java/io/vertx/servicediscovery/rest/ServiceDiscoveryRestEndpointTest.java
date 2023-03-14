@@ -61,8 +61,8 @@ public class ServiceDiscoveryRestEndpointTest {
     ServiceDiscoveryRestEndpoint.create(router, discovery);
 
     AtomicBoolean done = new AtomicBoolean();
-    http = vertx.createHttpServer().requestHandler(router)
-      .listen(8080, ar -> done.set(ar.succeeded()));
+    http = vertx.createHttpServer().requestHandler(router);
+    http.listen(8080).onComplete(ar -> done.set(ar.succeeded()));
 
     await().untilAtomic(done, is(true));
   }
@@ -72,11 +72,11 @@ public class ServiceDiscoveryRestEndpointTest {
     discovery.close();
 
     AtomicBoolean completed = new AtomicBoolean();
-    http.close(ar -> completed.set(true));
+    http.close().onComplete(ar -> completed.set(true));
     await().untilAtomic(completed, is(true));
 
     completed.set(false);
-    vertx.close((v) -> completed.set(true));
+    vertx.close().onComplete((v) -> completed.set(true));
     await().untilAtomic(completed, is(true));
   }
 
@@ -88,8 +88,7 @@ public class ServiceDiscoveryRestEndpointTest {
       .setName("Hello")
       .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
 
-    discovery.publish(record, (r) -> {
-    });
+    discovery.publish(record);
     await().until(() -> record.getRegistration() != null);
 
     Restafari.Response response = get("/discovery");
@@ -102,7 +101,7 @@ public class ServiceDiscoveryRestEndpointTest {
     assertThat(rec.getName()).isEqualTo("Hello");
 
     AtomicBoolean done = new AtomicBoolean();
-    discovery.unpublish(record.getRegistration(), ar -> done.set(true));
+    discovery.unpublish(record.getRegistration()).onComplete(ar -> done.set(true));
     await().untilAtomic(done, is(true));
 
     response = get("/discovery");
@@ -122,10 +121,8 @@ public class ServiceDiscoveryRestEndpointTest {
     Record record2 = EventBusService.createRecord("Hello-2", "address", HelloService.class,
       new JsonObject().put("key", "bar"));
 
-    discovery.publish(record1, (r) -> {
-    });
-    discovery.publish(record2, (r) -> {
-    });
+    discovery.publish(record1);
+    discovery.publish(record2);
 
     await().until(() -> record1.getRegistration() != null);
     await().until(() -> record2.getRegistration() != null);
@@ -189,8 +186,7 @@ public class ServiceDiscoveryRestEndpointTest {
       .setName("Hello")
       .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
 
-    discovery.publish(record, (r) -> {
-    });
+    discovery.publish(record);
     await().until(() -> record.getRegistration() != null);
 
     Record retrieved = retrieve(record.getRegistration());
@@ -229,10 +225,8 @@ public class ServiceDiscoveryRestEndpointTest {
     Record record2 = EventBusService.createRecord("Hello-2", "address", HelloService.class,
       new JsonObject().put("key", "bar"));
 
-    discovery.publish(record1, (r) -> {
-    });
-    discovery.publish(record2, (r) -> {
-    });
+    discovery.publish(record1);
+    discovery.publish(record2);
 
     await().until(() -> record1.getRegistration() != null);
     await().until(() -> record2.getRegistration() != null);
@@ -257,10 +251,8 @@ public class ServiceDiscoveryRestEndpointTest {
     Record record2 = EventBusService.createRecord("Hello-2", "address", HelloService.class,
       new JsonObject().put("key", "bar"));
 
-    discovery.publish(record1, (r) -> {
-    });
-    discovery.publish(record2, (r) -> {
-    });
+    discovery.publish(record1);
+    discovery.publish(record2);
 
     await().until(() -> record1.getRegistration() != null);
     await().until(() -> record2.getRegistration() != null);
@@ -294,8 +286,7 @@ public class ServiceDiscoveryRestEndpointTest {
       .setName("Hello")
       .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
 
-    discovery.publish(record, (r) -> {
-    });
+    discovery.publish(record);
     await().until(() -> record.getRegistration() != null);
 
     Record retrieved = retrieve(record.getRegistration());
@@ -317,8 +308,7 @@ public class ServiceDiscoveryRestEndpointTest {
       .setName("Hello")
       .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
 
-    discovery.publish(record, (r) -> {
-    });
+    discovery.publish(record);
     await().until(() -> record.getRegistration() != null);
 
     Record retrieved = retrieve(record.getRegistration());

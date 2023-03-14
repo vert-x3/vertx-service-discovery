@@ -63,7 +63,7 @@ public class ServiceProxiesTest {
   public void tearDown() {
     discovery.close();
     AtomicBoolean completed = new AtomicBoolean();
-    vertx.close((v) -> completed.set(true));
+    vertx.close().onComplete((v) -> completed.set(true));
     await().untilAtomic(completed, is(true));
   }
 
@@ -73,12 +73,11 @@ public class ServiceProxiesTest {
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
     Record record = EventBusService.createRecord("Hello", "address", HelloService.class);
 
-    discovery.publish(record, (r) -> {
-    });
+    discovery.publish(record);
     await().until(() -> record.getRegistration() != null);
 
     AtomicReference<Record> found = new AtomicReference<>();
-    discovery.getRecord(new JsonObject().put("name", "Hello"), ar -> {
+    discovery.getRecord(new JsonObject().put("name", "Hello")).onComplete(ar -> {
       found.set(ar.result());
     });
 
@@ -100,7 +99,7 @@ public class ServiceProxiesTest {
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
     Record record = EventBusService.createRecord("Hello", "address", HelloService.class);
 
-    discovery.publish(record, (r) -> {
+    discovery.publish(record).onComplete((r) -> {
     });
     await().until(() -> record.getRegistration() != null);
 
@@ -128,12 +127,11 @@ public class ServiceProxiesTest {
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
     Record record = EventBusService.createRecord("Hello", "address", HelloService.class);
 
-    discovery.publish(record, (r) -> {
-    });
+    discovery.publish(record);
     await().until(() -> record.getRegistration() != null);
 
     AtomicReference<Record> found = new AtomicReference<>();
-    discovery.getRecord(new JsonObject().put("name", "Hello"), ar -> {
+    discovery.getRecord(new JsonObject().put("name", "Hello")).onComplete(ar -> {
       found.set(ar.result());
     });
 
@@ -159,8 +157,7 @@ public class ServiceProxiesTest {
     ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
     Record record = EventBusService.createRecord("Hello", "address", HelloService.class);
 
-    discovery.publish(record, (r) -> {
-    });
+    discovery.publish(record);
     await().until(() -> record.getRegistration() != null);
 
     AtomicReference<HelloService> found = new AtomicReference<>();
