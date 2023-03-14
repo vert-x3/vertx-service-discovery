@@ -106,7 +106,7 @@ public class ServiceDiscoveryRestEndpoint {
 
   private void update(RoutingContext routingContext) {
     String uuid = routingContext.request().getParam("uuid");
-    JsonObject json = routingContext.getBodyAsJson();
+    JsonObject json = routingContext.body().asJsonObject();
     Record record = new Record(json);
 
     if (!uuid.equals(record.getRegistration())) {
@@ -153,7 +153,7 @@ public class ServiceDiscoveryRestEndpoint {
   }
 
   private void publish(RoutingContext routingContext) {
-    JsonObject json = routingContext.getBodyAsJson();
+    JsonObject json = routingContext.body().asJsonObject();
     Record record = new Record(json);
     discovery.publish(record, ar -> {
       if (ar.failed()) {
