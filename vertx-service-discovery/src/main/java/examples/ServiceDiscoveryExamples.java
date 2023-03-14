@@ -57,7 +57,7 @@ public class ServiceDiscoveryExamples {
         .setName("my-service")
         .setMetadata(new JsonObject().put("some-label", "some-value"));
 
-    discovery.publish(record, ar -> {
+    discovery.publish(record).onComplete(ar -> {
       if (ar.succeeded()) {
         // publication succeeded
         Record publishedRecord = ar.result();
@@ -68,7 +68,7 @@ public class ServiceDiscoveryExamples {
 
     // Record creation from a type
     record = HttpEndpoint.createRecord("some-rest-api", "localhost", 8080, "/api");
-    discovery.publish(record, ar -> {
+    discovery.publish(record).onComplete(ar -> {
       if (ar.succeeded()) {
         // publication succeeded
         Record publishedRecord = ar.result();
@@ -80,7 +80,7 @@ public class ServiceDiscoveryExamples {
 
   public void example3(ServiceDiscovery discovery, Record record) {
 
-    discovery.unpublish(record.getRegistration(), ar -> {
+    discovery.unpublish(record.getRegistration()).onComplete(ar -> {
       if (ar.succeeded()) {
         // Ok
       } else {
@@ -91,7 +91,7 @@ public class ServiceDiscoveryExamples {
 
   public void example4(ServiceDiscovery discovery) {
     // Get any record
-    discovery.getRecord(r -> true, ar -> {
+    discovery.getRecord(r -> true).onComplete(ar -> {
       if (ar.succeeded()) {
         if (ar.result() != null) {
           // we have a record
@@ -103,7 +103,7 @@ public class ServiceDiscoveryExamples {
       }
     });
 
-    discovery.getRecord((JsonObject) null, ar -> {
+    discovery.getRecord((JsonObject) null).onComplete(ar -> {
       if (ar.succeeded()) {
         if (ar.result() != null) {
           // we have a record
@@ -117,7 +117,7 @@ public class ServiceDiscoveryExamples {
 
 
     // Get a record by name
-    discovery.getRecord(r -> r.getName().equals("some-name"), ar -> {
+    discovery.getRecord(r -> r.getName().equals("some-name")).onComplete(ar -> {
       if (ar.succeeded()) {
         if (ar.result() != null) {
           // we have a record
@@ -129,7 +129,7 @@ public class ServiceDiscoveryExamples {
       }
     });
 
-    discovery.getRecord(new JsonObject().put("name", "some-service"), ar -> {
+    discovery.getRecord(new JsonObject().put("name", "some-service")).onComplete(ar -> {
       if (ar.succeeded()) {
         if (ar.result() != null) {
           // we have a record
@@ -142,7 +142,7 @@ public class ServiceDiscoveryExamples {
     });
 
     // Get all records matching the filter
-    discovery.getRecords(r -> "some-value".equals(r.getMetadata().getString("some-label")), ar -> {
+    discovery.getRecords(r -> "some-value".equals(r.getMetadata().getString("some-label"))).onComplete(ar -> {
       if (ar.succeeded()) {
         List<Record> results = ar.result();
         // If the list is not empty, we have matching record
@@ -153,7 +153,7 @@ public class ServiceDiscoveryExamples {
     });
 
 
-    discovery.getRecords(new JsonObject().put("some-label", "some-value"), ar -> {
+    discovery.getRecords(new JsonObject().put("some-label", "some-value")).onComplete(ar -> {
       if (ar.succeeded()) {
         List<Record> results = ar.result();
         // If the list is not empty, we have matching record

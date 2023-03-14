@@ -39,7 +39,7 @@ public class HTTPEndpointExamples {
       "/api" // the root of the service
     );
 
-    discovery.publish(record1, ar -> {
+    discovery.publish(record1).onComplete(ar -> {
       // ...
     });
 
@@ -56,7 +56,7 @@ public class HTTPEndpointExamples {
 
   public void example2(ServiceDiscovery discovery) {
     // Get the record
-    discovery.getRecord(new JsonObject().put("name", "some-http-service"), ar1 -> {
+    discovery.getRecord(new JsonObject().put("name", "some-http-service")).onComplete(ar1 -> {
       if (ar1.succeeded() && ar1.result() != null) {
         // Retrieve the service reference
         ServiceReference reference = discovery.getReference(ar1.result());
@@ -78,7 +78,7 @@ public class HTTPEndpointExamples {
 
   public void example2_webclient(ServiceDiscovery discovery) {
     // Get the record
-    discovery.getRecord(new JsonObject().put("name", "some-http-service"), ar -> {
+    discovery.getRecord(new JsonObject().put("name", "some-http-service")).onComplete(ar -> {
       if (ar.succeeded() && ar.result() != null) {
         // Retrieve the service reference
         ServiceReference reference = discovery.getReference(ar.result());
@@ -86,7 +86,7 @@ public class HTTPEndpointExamples {
         WebClient client = reference.getAs(WebClient.class);
 
         // You need to path the complete path
-        client.get("/api/persons").send(
+        client.get("/api/persons").send().onComplete(
           response -> {
 
             // ...
@@ -101,7 +101,7 @@ public class HTTPEndpointExamples {
 
 
   public void example3(ServiceDiscovery discovery) {
-    HttpEndpoint.getClient(discovery, new JsonObject().put("name", "some-http-service"), ar -> {
+    HttpEndpoint.getClient(discovery, new JsonObject().put("name", "some-http-service")).onComplete(ar -> {
       if (ar.succeeded()) {
         HttpClient client = ar.result();
 
@@ -119,13 +119,13 @@ public class HTTPEndpointExamples {
   }
 
   public void example3_webclient(ServiceDiscovery discovery) {
-    HttpEndpoint.getWebClient(discovery, new JsonObject().put("name", "some-http-service"), ar -> {
+    HttpEndpoint.getWebClient(discovery, new JsonObject().put("name", "some-http-service")).onComplete(ar -> {
       if (ar.succeeded()) {
         WebClient client = ar.result();
 
         // You need to path the complete path
         client.get("/api/persons")
-          .send(response -> {
+          .send().onComplete(response -> {
 
             // ...
 

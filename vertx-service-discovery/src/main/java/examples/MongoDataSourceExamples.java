@@ -19,7 +19,7 @@ public class MongoDataSourceExamples {
       new JsonObject().put("some-metadata", "some-value") // Some metadata
     );
 
-    discovery.publish(record, ar -> {
+    discovery.publish(record).onComplete(ar -> {
       // ...
     });
   }
@@ -27,8 +27,7 @@ public class MongoDataSourceExamples {
   public void example2(ServiceDiscovery discovery) {
     // Get the record
     discovery.getRecord(
-      new JsonObject().put("name", "some-data-source-service"),
-      ar -> {
+      new JsonObject().put("name", "some-data-source-service")).onComplete(ar -> {
         if (ar.succeeded() && ar.result() != null) {
           // Retrieve the service reference
           ServiceReference reference = discovery.getReferenceWithConfiguration(
@@ -47,10 +46,10 @@ public class MongoDataSourceExamples {
   }
 
   public void example3(ServiceDiscovery discovery) {
-    MongoDataSource.<JsonObject>getMongoClient(discovery,
+    MongoDataSource.getMongoClient(discovery,
       new JsonObject().put("name", "some-data-source-service"),
-      new JsonObject().put("username", "clement").put("password", "*****"), // Some additional metadata
-      ar -> {
+      new JsonObject().put("username", "clement").put("password", "*****") // Some additional metadata
+    ).onComplete(ar -> {
         if (ar.succeeded()) {
           MongoClient client = ar.result();
 
