@@ -335,7 +335,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
   }
 
   private void publishRecord(Record record, Handler<AsyncResult<Record>> completionHandler) {
-    publisher.publish(record, ar -> {
+    publisher.publish(record).onComplete(ar -> {
       if (completionHandler != null) {
         completionHandler.handle(ar);
       }
@@ -529,7 +529,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
   }
 
   private void unpublishRecord(Record record, Handler<Void> completionHandler) {
-    publisher.unpublish(record.getRegistration(), ar -> {
+    publisher.unpublish(record.getRegistration()).onComplete(ar -> {
       if (ar.failed()) {
         LOGGER.error("Cannot unregister kubernetes service", ar.cause());
       } else {

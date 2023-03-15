@@ -39,7 +39,7 @@ public abstract class ServiceDiscoveryBackendTest {
   @After
   public void tearDown() {
     AtomicBoolean completed = new AtomicBoolean();
-    vertx.close(ar -> completed.set(ar.succeeded()));
+    vertx.close().onComplete(ar -> completed.set(ar.succeeded()));
     await().untilAtomic(completed, is(true));
   }
 

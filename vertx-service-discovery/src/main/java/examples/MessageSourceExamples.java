@@ -34,7 +34,7 @@ public class MessageSourceExamples {
         "some-address" // The event bus address
     );
 
-    discovery.publish(record, ar -> {
+    discovery.publish(record).onComplete(ar -> {
       // ...
     });
 
@@ -47,7 +47,7 @@ public class MessageSourceExamples {
 
   public void example2(ServiceDiscovery discovery) {
     // Get the record
-    discovery.getRecord(new JsonObject().put("name", "some-message-source-service"), ar -> {
+    discovery.getRecord(new JsonObject().put("name", "some-message-source-service")).onComplete(ar -> {
       if (ar.succeeded() && ar.result() != null) {
         // Retrieve the service reference
         ServiceReference reference = discovery.getReference(ar.result());
@@ -64,7 +64,7 @@ public class MessageSourceExamples {
   }
 
   public void example3(ServiceDiscovery discovery) {
-    MessageSource.<JsonObject>getConsumer(discovery, new JsonObject().put("name", "some-message-source-service"), ar -> {
+    MessageSource.<JsonObject>getConsumer(discovery, new JsonObject().put("name", "some-message-source-service")).onComplete(ar -> {
       if (ar.succeeded()) {
         MessageConsumer<JsonObject> consumer = ar.result();
 

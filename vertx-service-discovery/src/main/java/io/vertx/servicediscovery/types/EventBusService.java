@@ -118,7 +118,7 @@ public interface EventBusService extends ServiceType {
   static <T> T getProxy(ServiceDiscovery discovery, Class<T> itf, Handler<AsyncResult<T>>
     resultHandler) {
     JsonObject filter = new JsonObject().put("service.interface", itf.getName());
-    discovery.getRecord(filter, ar -> {
+    discovery.getRecord(filter).onComplete(ar -> {
       if (ar.failed()) {
         resultHandler.handle(Future.failedFuture(ar.cause()));
       } else {
@@ -148,7 +148,7 @@ public interface EventBusService extends ServiceType {
   @GenIgnore // Java only
   static <T> T getProxy(ServiceDiscovery discovery, Class<T> itf, JsonObject conf, Handler<AsyncResult<T>> resultHandler) {
     JsonObject filter = new JsonObject().put("service.interface", itf.getName());
-    discovery.getRecord(filter, ar -> {
+    discovery.getRecord(filter).onComplete(ar -> {
       if (ar.failed()) {
         resultHandler.handle(Future.failedFuture(ar.cause()));
       } else {
@@ -180,7 +180,7 @@ public interface EventBusService extends ServiceType {
                                Function<Record, Boolean> filter,
                                Class<T> clientClass,
                                Handler<AsyncResult<T>> resultHandler) {
-    discovery.getRecord(filter, ar -> {
+    discovery.getRecord(filter).onComplete(ar -> {
       if (ar.failed()) {
         resultHandler.handle(Future.failedFuture(ar.cause()));
       } else {
@@ -214,7 +214,7 @@ public interface EventBusService extends ServiceType {
                                Class<T> clientClass,
                                JsonObject conf,
                                Handler<AsyncResult<T>> resultHandler) {
-    discovery.getRecord(filter, ar -> {
+    discovery.getRecord(filter).onComplete(ar -> {
       if (ar.failed()) {
         resultHandler.handle(Future.failedFuture(ar.cause()));
       } else {
@@ -246,7 +246,7 @@ public interface EventBusService extends ServiceType {
                                              JsonObject filter,
                                              Class<T> clientClass,
                                              Handler<AsyncResult<T>> resultHandler) {
-    discovery.getRecord(filter, ar -> {
+    discovery.getRecord(filter).onComplete(ar -> {
       if (ar.failed()) {
         resultHandler.handle(Future.failedFuture(ar.cause()));
       } else {
@@ -280,7 +280,7 @@ public interface EventBusService extends ServiceType {
                                              Class<T> clientClass,
                                              JsonObject conf,
                                              Handler<AsyncResult<T>> resultHandler) {
-    discovery.getRecord(filter, ar -> {
+    discovery.getRecord(filter).onComplete(ar -> {
       if (ar.failed()) {
         resultHandler.handle(Future.failedFuture(ar.cause()));
       } else {

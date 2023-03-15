@@ -35,7 +35,7 @@ public class EventBusServiceJavaExamples {
         MyService.class // the service interface
     );
 
-    discovery.publish(record, ar -> {
+    discovery.publish(record).onComplete(ar -> {
       // ...
     });
 
@@ -43,7 +43,7 @@ public class EventBusServiceJavaExamples {
 
   public void example2(ServiceDiscovery discovery) {
     // Get the record
-    discovery.getRecord(new JsonObject().put("name", "some-eventbus-service"), ar -> {
+    discovery.getRecord(new JsonObject().put("name", "some-eventbus-service")).onComplete(ar -> {
       if (ar.succeeded() && ar.result() != null) {
         // Retrieve the service reference
         ServiceReference reference = discovery.getReference(ar.result());

@@ -34,7 +34,7 @@ public class DefaultServiceDiscoveryBackendClusteredTest extends DefaultServiceD
     backend = new DefaultServiceDiscoveryBackend();
     VertxOptions options = new VertxOptions();
     options.getEventBusOptions().setHost("127.0.0.1");
-    Vertx.clusteredVertx(options, ar -> {
+    Vertx.clusteredVertx(options).onComplete(ar -> {
       backend.init(ar.result(), new JsonObject());
       vertx = ar.result();
     });

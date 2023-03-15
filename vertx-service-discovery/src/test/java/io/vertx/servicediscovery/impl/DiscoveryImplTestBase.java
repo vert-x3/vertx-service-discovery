@@ -61,7 +61,7 @@ public abstract class DiscoveryImplTestBase {
   public void tearDown() {
     discovery.close();
     AtomicBoolean completed = new AtomicBoolean();
-    vertx.close((v) -> completed.set(true));
+    vertx.close().onComplete((v) -> completed.set(true));
     await().untilAtomic(completed, is(true));
 
     Assertions.assertThat(discovery.bindings()).isEmpty();
@@ -77,12 +77,11 @@ public abstract class DiscoveryImplTestBase {
       .setLocation(new JsonObject().put(Record.ENDPOINT, "address"))
       .setMetadata(new JsonObject().put("service.interface", HelloService.class.getName()));
 
-    discovery.publish(record, (r) -> {
-    });
+    discovery.publish(record);
     await().until(() -> record.getRegistration() != null);
 
     AtomicReference<Record> found = new AtomicReference<>();
-    discovery.getRecord(record.getRegistration(), ar -> {
+    discovery.getRecord(record.getRegistration()).onComplete(ar -> {
       found.set(ar.result());
     });
 
@@ -101,12 +100,11 @@ public abstract class DiscoveryImplTestBase {
       .setLocation(new JsonObject().put(Record.ENDPOINT, "address"))
       .setMetadata(new JsonObject().put("service.interface", HelloService.class.getName()));
 
-    discovery.publish(record, (r) -> {
-    });
+    discovery.publish(record);
     await().until(() -> record.getRegistration() != null);
 
     AtomicReference<Record> found = new AtomicReference<>();
-    discovery.getRecord(new JsonObject().put("name", "Hello"), ar -> {
+    discovery.getRecord(new JsonObject().put("name", "Hello")).onComplete(ar -> {
       found.set(ar.result());
     });
 
@@ -126,13 +124,13 @@ public abstract class DiscoveryImplTestBase {
     Assertions.assertThat(discovery.bindings()).hasSize(1);
 
     AtomicBoolean done = new AtomicBoolean();
-    discovery.unpublish(record.getRegistration(), v -> done.set(v.succeeded()));
+    discovery.unpublish(record.getRegistration()).onComplete(v -> done.set(v.succeeded()));
 
     await().untilAtomic(done, is(true));
 
     found.set(null);
     done.set(false);
-    discovery.getRecord(new JsonObject().put("name", "Hello"), ar -> {
+    discovery.getRecord(new JsonObject().put("name", "Hello")).onComplete(ar -> {
       found.set(ar.result());
       done.set(true);
     });
@@ -153,22 +151,20 @@ public abstract class DiscoveryImplTestBase {
       .setName("Hello-2")
       .setMetadata(new JsonObject().put("key", "B"))
       .setLocation(new JsonObject().put(Record.ENDPOINT, "address2"));
-    discovery.publish(record, (r) -> {
-    });
-    discovery.publish(record2, (r) -> {
-    });
+    discovery.publish(record);
+    discovery.publish(record2);
     await().until(() -> record.getRegistration() != null);
     await().until(() -> record2.getRegistration() != null);
 
     AtomicReference<Record> found = new AtomicReference<>();
-    discovery.getRecord(new JsonObject().put("key", "A"), ar -> {
+    discovery.getRecord(new JsonObject().put("key", "A")).onComplete(ar -> {
       found.set(ar.result());
     });
     await().until(() -> found.get() != null);
     assertThat(found.get().getLocation().getString("endpoint")).isEqualTo("address");
 
     found.set(null);
-    discovery.getRecord(new JsonObject().put("key", "B"), ar -> {
+    discovery.getRecord(new JsonObject().put("key", "B")).onComplete(ar -> {
       found.set(ar.result());
     });
     await().until(() -> found.get() != null);
@@ -176,7 +172,7 @@ public abstract class DiscoveryImplTestBase {
 
     found.set(null);
     AtomicBoolean done = new AtomicBoolean();
-    discovery.getRecord(new JsonObject().put("key", "C"), ar -> {
+    discovery.getRecord(new JsonObject().put("key", "C")).onComplete(ar -> {
       found.set(ar.result());
       done.set(true);
     });
@@ -185,7 +181,7 @@ public abstract class DiscoveryImplTestBase {
 
     found.set(null);
     done.set(false);
-    discovery.getRecord(new JsonObject().put("key", "B").put("foo", "bar"), ar -> {
+    discovery.getRecord(new JsonObject().put("key", "B").put("foo", "bar")).onComplete(ar -> {
       found.set(ar.result());
       done.set(true);
     });
@@ -210,10 +206,8 @@ public abstract class DiscoveryImplTestBase {
       .setName("Hello-2")
       .setMetadata(new JsonObject().put("key", "B"))
       .setLocation(new JsonObject().put(Record.ENDPOINT, "address2"));
-    discovery.publish(record, (r) -> {
-    });
-    discovery.publish(record2, (r) -> {
-    });
+    discovery.publish(record);
+    discovery.publish(record2);
     await().until(() -> record.getRegistration() != null);
     await().until(() -> record2.getRegistration() != null);
 
@@ -222,9 +216,7 @@ public abstract class DiscoveryImplTestBase {
       assertThat(rec.getStatus()).isEqualTo(Status.UP);
     }
 
-    discovery.unpublish(record2.getRegistration(), v -> {
-
-    });
+    discovery.unpublish(record2.getRegistration());
 
     await().until(() -> announces.size() == 3);
     assertThat(announces.get(2).getStatus()).isEqualTo(Status.DOWN);
@@ -254,7 +246,7 @@ public abstract class DiscoveryImplTestBase {
         }
 
         record.setRegistration(uuid);
-        registry.put(uuid, record.toJson().encode(), ar -> {
+        registry.put(uuid, record.toJson().encode()).onComplete(ar -> {
           // Put takes some time to complete
           try {
             Thread.sleep(2000);
@@ -315,7 +307,7 @@ public abstract class DiscoveryImplTestBase {
     // Publish
     AtomicBoolean done = new AtomicBoolean();
     done.set(false);
-    discovery.publish(record, r -> {
+    discovery.publish(record).onComplete(r -> {
       done.set(r.succeeded());
     });
 
@@ -344,8 +336,7 @@ public abstract class DiscoveryImplTestBase {
         .put("service.interface", HelloService.class.getName()))
       .setType(EventBusService.TYPE)
       .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
-    discovery.publish(record, (r) -> {
-    });
+    discovery.publish(record);
     await().until(() -> record.getRegistration() != null);
 
     ServiceReference reference = discovery.getReference(record);
@@ -384,8 +375,8 @@ public abstract class DiscoveryImplTestBase {
       public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Promise<Void> future) {
         Record rec1 = HttpEndpoint.createRecord("static-record-1", "acme.org");
         Record rec2 = HttpEndpoint.createRecord("static-record-2", "example.com");
-        publisher.publish(rec1,
-          ar -> publisher.publish(rec2, ar2 -> {
+        publisher.publish(rec1).onComplete(
+          ar -> publisher.publish(rec2).onComplete(ar2 -> {
             registered.set(true);
             future.complete();
           }));
@@ -404,11 +395,11 @@ public abstract class DiscoveryImplTestBase {
 
     AtomicReference<Record> record1 = new AtomicReference<>();
     AtomicReference<Record> record2 = new AtomicReference<>();
-    discovery.getRecord(new JsonObject().put("name", "static-record-1"), found -> {
+    discovery.getRecord(new JsonObject().put("name", "static-record-1")).onComplete(found -> {
       record1.set(found.result());
     });
 
-    discovery.getRecord(new JsonObject().put("name", "static-record-2"), found -> {
+    discovery.getRecord(new JsonObject().put("name", "static-record-2")).onComplete(found -> {
       record2.set(found.result());
     });
 
@@ -471,7 +462,7 @@ public abstract class DiscoveryImplTestBase {
     TestServiceExporter exporter = new TestServiceExporter();
     discovery.registerServiceExporter(exporter, new JsonObject());
 
-    discovery.publish(record, (r) -> {
+    discovery.publish(record).onComplete((r) -> {
     });
     await().until(() -> exporter.state.size() > 0);
     String id = exporter.state.keySet().iterator().next();
@@ -484,7 +475,7 @@ public abstract class DiscoveryImplTestBase {
     assertEquals(new JsonObject().put("foo", "foo_value_1"), exported.getMetadata());
 
     AtomicBoolean updated = new AtomicBoolean();
-    discovery.update(new Record(record).setMetadata(new JsonObject().put("foo", "foo_value_2")), ar -> updated.set(true));
+    discovery.update(new Record(record).setMetadata(new JsonObject().put("foo", "foo_value_2"))).onComplete(ar -> updated.set(true));
     await().until(updated::get);
     assertNotSame(exporter.state.get(id), exported);
     exported = exporter.state.get(id);
@@ -495,7 +486,7 @@ public abstract class DiscoveryImplTestBase {
     assertEquals(new JsonObject().put("foo", "foo_value_2"), exported.getMetadata());
 
     AtomicBoolean removed = new AtomicBoolean();
-    discovery.unpublish(id, ar -> removed.set(true));
+    discovery.unpublish(id).onComplete(ar -> removed.set(true));
     await().until(removed::get);
     assertEquals(Collections.emptyMap(), exporter.state);
 
@@ -507,7 +498,7 @@ public abstract class DiscoveryImplTestBase {
   public void testPublicationWithoutStatus() {
     AtomicReference<Record> ref = new AtomicReference<>();
     Record record = HttpEndpoint.createRecord("some-service", "localhost");
-    discovery.publish(record, ar -> {
+    discovery.publish(record).onComplete(ar -> {
       ref.set(ar.result());
     });
 
@@ -521,7 +512,7 @@ public abstract class DiscoveryImplTestBase {
   public void testPublicationWithStatusUp() {
     AtomicReference<Record> ref = new AtomicReference<>();
     Record record = HttpEndpoint.createRecord("some-service", "localhost").setStatus(Status.UP);
-    discovery.publish(record, ar -> {
+    discovery.publish(record).onComplete(ar -> {
       ref.set(ar.result());
     });
 
@@ -535,7 +526,7 @@ public abstract class DiscoveryImplTestBase {
   public void testPublicationWithStatusUnknown() {
     AtomicReference<Record> ref = new AtomicReference<>();
     Record record = HttpEndpoint.createRecord("some-service", "localhost").setStatus(Status.UNKNOWN);
-    discovery.publish(record, ar -> {
+    discovery.publish(record).onComplete(ar -> {
       ref.set(ar.result());
     });
 
@@ -549,7 +540,7 @@ public abstract class DiscoveryImplTestBase {
   public void testPublicationWithStatusDown() {
     AtomicReference<Record> ref = new AtomicReference<>();
     Record record = HttpEndpoint.createRecord("some-service", "localhost").setStatus(Status.DOWN);
-    discovery.publish(record, ar -> {
+    discovery.publish(record).onComplete(ar -> {
       ref.set(ar.result());
     });
 
@@ -563,7 +554,7 @@ public abstract class DiscoveryImplTestBase {
   public void testPublicationWithStatusOutOfService() {
     AtomicReference<Record> ref = new AtomicReference<>();
     Record record = HttpEndpoint.createRecord("some-service", "localhost").setStatus(Status.OUT_OF_SERVICE);
-    discovery.publish(record, ar -> {
+    discovery.publish(record).onComplete(ar -> {
       ref.set(ar.result());
     });
 

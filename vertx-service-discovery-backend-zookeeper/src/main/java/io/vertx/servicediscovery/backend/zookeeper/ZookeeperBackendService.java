@@ -319,7 +319,7 @@ public class ZookeeperBackendService implements ServiceDiscoveryBackend, Connect
               } catch (Exception e) {
                 future.fail(e);
               }
-            }, ar -> {
+            }).onComplete(ar -> {
               if (ar.failed()) {
                 handler.handle(Future.failedFuture(KeeperException.create(KeeperException.Code.CONNECTIONLOSS)));
               } else {

@@ -71,7 +71,7 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
     ServiceOptions serviceOptions = recordToServiceOptions(record, uuid);
     record.setRegistration(serviceOptions.getId());
     Promise<Void> registration = Promise.promise();
-    client.registerService(serviceOptions, registration);
+    client.registerService(serviceOptions).onComplete(registration);
     registration.future().map(record).onComplete(resultHandler);
   }
 
@@ -79,7 +79,7 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
   public void remove(Record record, Handler<AsyncResult<Record>> resultHandler) {
     Objects.requireNonNull(record.getRegistration(), "No registration id in the record");
     Promise<Void> deregistration = Promise.promise();
-    client.deregisterService(record.getRegistration(), deregistration);
+    client.deregisterService(record.getRegistration()).onComplete(deregistration);
     deregistration.future().map(record).onComplete(resultHandler);
   }
 
@@ -98,13 +98,13 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
   @Override
   public void update(Record record, Handler<AsyncResult<Void>> resultHandler) {
     Objects.requireNonNull(record.getRegistration(), "No registration id in the record");
-    client.registerService(recordToServiceOptions(record, null), resultHandler);
+    client.registerService(recordToServiceOptions(record, null)).onComplete(resultHandler);
   }
 
   @Override
   public void getRecords(Handler<AsyncResult<List<Record>>> resultHandler) {
     Promise<ServiceList> nameList = Promise.promise();
-    client.catalogServices(nameList);
+    client.catalogServices().onComplete(nameList);
     nameList.future().map(ServiceList::getList)
       .map(l -> {
         List<Future> recordFutureList = new ArrayList<>();
@@ -115,7 +115,7 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
               opt.setTag(s.getTags().get(0));
             }
             Promise<ServiceList> serviceList = Promise.promise();
-            client.catalogServiceNodesWithOptions(s.getName(), opt, serviceList);
+            client.catalogServiceNodesWithOptions(s.getName(), opt).onComplete(serviceList);
             recordFutureList.add(serviceList.future());
           }
         });
@@ -183,7 +183,7 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
   private Future serviceToRecord(Service service) {
     //use the checks to set the record status
     Promise<CheckList> checkListFuture = Promise.promise();
-    client.healthChecks(service.getName(), checkListFuture);
+    client.healthChecks(service.getName()).onComplete(checkListFuture);
     return checkListFuture.future().map(cl -> cl.getList().stream().map(Check::getStatus).allMatch(CheckStatus.PASSING::equals))
       .map(st -> st ? new Record().setStatus(Status.UP) : new Record().setStatus(Status.DOWN))
       .map(record -> {

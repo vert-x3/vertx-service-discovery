@@ -89,7 +89,7 @@ public class DockerLinksServiceImporter implements ServiceImporter {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         LOGGER.info("Record created from link " + link + " : " + record);
-        publisher.publish(record, ar -> {
+        publisher.publish(record).onComplete(ar -> {
           if (ar.succeeded()) {
             records.add(ar.result());
             LOGGER.info("Service imported from Docker link : " + link + " with endpoint set to "
@@ -141,8 +141,7 @@ public class DockerLinksServiceImporter implements ServiceImporter {
   public void close(Handler<Void> completionHandler) {
     List<Future> list = new ArrayList<>();
     for (Record record : records) {
-      publisher.unpublish(record.getRegistration(),
-          v -> list.add(v.succeeded() ? Future.succeededFuture() : Future.failedFuture(v.cause())));
+      publisher.unpublish(record.getRegistration()).onComplete(v -> list.add(v.succeeded() ? Future.succeededFuture() : Future.failedFuture(v.cause())));
     }
 
     CompositeFuture.all(list).onComplete(ar -> {

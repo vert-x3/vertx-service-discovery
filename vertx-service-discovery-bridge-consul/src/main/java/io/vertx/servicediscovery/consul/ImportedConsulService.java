@@ -65,7 +65,7 @@ public class ImportedConsulService {
    * @return the current {@link ImportedConsulService}
    */
   public ImportedConsulService register(ServicePublisher publisher, Promise<ImportedConsulService> completion) {
-    publisher.publish(record, ar -> {
+    publisher.publish(record).onComplete(ar -> {
       if (ar.succeeded()) {
         record.setRegistration(ar.result().getRegistration());
         completion.complete(this);
@@ -84,7 +84,7 @@ public class ImportedConsulService {
    */
   public void unregister(ServicePublisher publiher, Promise<Void> completion) {
     if (record.getRegistration() != null) {
-      publiher.unpublish(record.getRegistration(), ar -> {
+      publiher.unpublish(record.getRegistration()).onComplete(ar -> {
         if (ar.succeeded()) {
           record.setRegistration(null);
         }

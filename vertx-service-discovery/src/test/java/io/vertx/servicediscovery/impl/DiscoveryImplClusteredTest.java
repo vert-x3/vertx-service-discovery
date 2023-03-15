@@ -36,7 +36,7 @@ public class DiscoveryImplClusteredTest extends DiscoveryImplTestBase {
     options
       .setClusterManager(new FakeClusterManager())
       .getEventBusOptions().setHost("127.0.0.1");
-    Vertx.clusteredVertx(options, ar -> {
+    Vertx.clusteredVertx(options).onComplete(ar -> {
       vertx = ar.result();
     });
     await().until(() -> vertx != null);

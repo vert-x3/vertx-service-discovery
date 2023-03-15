@@ -56,7 +56,7 @@ public class MessageSourceTest {
   public void tearDown() {
     discovery.close();
     AtomicBoolean completed = new AtomicBoolean();
-    vertx.close((v) -> completed.set(true));
+    vertx.close().onComplete((v) -> completed.set(true));
     await().untilAtomic(completed, is(true));
   }
 
@@ -69,12 +69,11 @@ public class MessageSourceTest {
 
     Record record = MessageSource.createRecord("Hello", "data");
 
-    discovery.publish(record, (r) -> {
-    });
+    discovery.publish(record);
     await().until(() -> record.getRegistration() != null);
 
     AtomicReference<Record> found = new AtomicReference<>();
-    discovery.getRecord(new JsonObject().put("name", "Hello"), ar -> {
+    discovery.getRecord(new JsonObject().put("name", "Hello")).onComplete(ar -> {
       found.set(ar.result());
     });
 

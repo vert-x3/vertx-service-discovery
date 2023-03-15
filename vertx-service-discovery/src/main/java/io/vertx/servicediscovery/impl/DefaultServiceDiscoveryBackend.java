@@ -69,7 +69,7 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
       if (reg.failed()) {
         resultHandler.handle(failure(reg.cause()));
       } else {
-        reg.result().put(uuid, record.toJson().encode(), ar -> {
+        reg.result().put(uuid, record.toJson().encode()).onComplete(ar -> {
           if (ar.succeeded()) {
             resultHandler.handle(Future.succeededFuture(record));
           } else {
@@ -84,7 +84,7 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
     if (registry != null) {
       handler.handle(Future.succeededFuture(registry));
     } else {
-      vertx.sharedData().<String, String>getClusterWideMap("service.registry", ar -> {
+      vertx.sharedData().<String, String>getClusterWideMap("service.registry").onComplete(ar -> {
         synchronized (DefaultServiceDiscoveryBackend.class) {
           if (ar.failed()) {
             handler.handle(ar);
@@ -114,7 +114,7 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
         if (reg.failed()) {
           resultHandler.handle(failure(reg.cause()));
         } else {
-          reg.result().remove(uuid, ar -> {
+          reg.result().remove(uuid).onComplete(ar -> {
             if (ar.succeeded()) {
               if (ar.result() == null) {
                 // Not found
@@ -139,7 +139,7 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
         if (reg.failed()) {
           resultHandler.handle(failure(reg.cause()));
         } else {
-          reg.result().put(record.getRegistration(), record.toJson().encode(), ar -> {
+          reg.result().put(record.getRegistration(), record.toJson().encode()).onComplete(ar -> {
             if (ar.succeeded()) {
               resultHandler.handle(Future.succeededFuture());
             } else {
@@ -177,7 +177,7 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
       if (reg.failed()) {
         resultHandler.handle(failure(reg.cause()));
       } else {
-        reg.result().get(uuid, ar -> {
+        reg.result().get(uuid).onComplete(ar -> {
           if (ar.succeeded()) {
             if (ar.result() != null) {
               resultHandler.handle(Future.succeededFuture(new Record(new JsonObject(ar.result()))));

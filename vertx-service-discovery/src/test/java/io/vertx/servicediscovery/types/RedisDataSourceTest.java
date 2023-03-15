@@ -57,7 +57,7 @@ public class RedisDataSourceTest {
   public void tearDown() {
     discovery.close();
     AtomicBoolean completed = new AtomicBoolean();
-    vertx.close((v) -> completed.set(true));
+    vertx.close().onComplete((v) -> completed.set(true));
     await().untilAtomic(completed, is(true));
 
     assertThat(discovery.bindings()).isEmpty();
@@ -69,12 +69,11 @@ public class RedisDataSourceTest {
       new JsonObject().put("endpoint", "redis://localhost:" + redis.getMappedPort(6379)),
       new JsonObject().put("database", "some-raw-data"));
 
-    discovery.publish(record, r -> {
-    });
+    discovery.publish(record);
     await().until(() -> record.getRegistration() != null);
 
     AtomicReference<Record> found = new AtomicReference<>();
-    discovery.getRecord(new JsonObject().put("name", "some-redis-data-source"), ar -> {
+    discovery.getRecord(new JsonObject().put("name", "some-redis-data-source")).onComplete(ar -> {
       found.set(ar.result());
     });
 
@@ -82,10 +81,10 @@ public class RedisDataSourceTest {
     ServiceReference service = discovery.getReference(found.get());
     Redis client = service.get();
     AtomicBoolean success = new AtomicBoolean();
-    client.connect(connect -> {
+    client.connect().onComplete(connect -> {
       if (connect.succeeded()) {
         RedisConnection conn = connect.result();
-        conn.send(Request.cmd(Command.PING), ar -> {
+        conn.send(Request.cmd(Command.PING)).onComplete(ar -> {
           if (ar.succeeded()) {
             client.close();
             success.set(ar.succeeded());
@@ -104,7 +103,7 @@ public class RedisDataSourceTest {
   public void testMissing() throws InterruptedException {
     AtomicReference<Throwable> expected = new AtomicReference<>();
     RedisDataSource.getRedisClient(discovery,
-      new JsonObject().put("name", "some-redis-data-source"),
+      new JsonObject().put("name", "some-redis-data-source")).onComplete(
       ar -> {
         expected.set(ar.cause());
       });
@@ -119,19 +118,18 @@ public class RedisDataSourceTest {
       new JsonObject().put("endpoint", "redis://localhost:" + redis.getMappedPort(6379)),
       new JsonObject().put("database", "some-raw-data"));
 
-    discovery.publish(record, r -> {
-    });
+    discovery.publish(record);
     await().until(() -> record.getRegistration() != null);
 
 
     AtomicBoolean success = new AtomicBoolean();
     RedisDataSource.getRedisClient(discovery,
-      new JsonObject().put("name", "some-redis-data-source"), ar -> {
+      new JsonObject().put("name", "some-redis-data-source")).onComplete(ar -> {
         Redis client = ar.result();
-        client.connect(connect -> {
+        client.connect().onComplete(connect -> {
           if (connect.succeeded()) {
             RedisConnection conn = connect.result();
-            conn.send(Request.cmd(Command.PING), ar1 -> {
+            conn.send(Request.cmd(Command.PING)).onComplete(ar1 -> {
               if (ar1.succeeded()) {
                 client.close();
                 success.set(ar.succeeded());
