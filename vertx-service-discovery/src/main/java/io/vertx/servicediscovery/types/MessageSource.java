@@ -18,14 +18,11 @@ package io.vertx.servicediscovery.types;
 
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceDiscovery;
-import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServiceType;
 
 import java.util.Objects;
@@ -125,19 +122,7 @@ public interface MessageSource extends ServiceType {
    *
    * @param discovery     The service discovery instance
    * @param filter        The filter, optional
-   * @param resultHandler The result handler
-   * @param <T>           The class of the message
-   * @deprecated use {@link #getConsumer(ServiceDiscovery, JsonObject)} instead
-   */
-  @Deprecated
-  static <T> void getConsumer(ServiceDiscovery discovery, JsonObject filter,
-                              Handler<AsyncResult<MessageConsumer<T>>>
-                                  resultHandler) {
-    MessageSource.<T>getConsumer(discovery, filter).onComplete(resultHandler);
-  }
-
-  /**
-   * Like {@link #getConsumer(ServiceDiscovery, JsonObject, Handler)} but returns a future of the result
+   * @return a future notified with the client
    */
   static <T> Future<MessageConsumer<T>> getConsumer(ServiceDiscovery discovery, JsonObject filter) {
     return discovery.getRecord(filter).flatMap(res -> {
@@ -155,19 +140,7 @@ public interface MessageSource extends ServiceType {
    *
    * @param discovery     The service discovery instance
    * @param filter        The filter, must not be {@code null}
-   * @param resultHandler The result handler
-   * @param <T>           The class of the message
-   * @deprecated use {@link #getConsumer(ServiceDiscovery, Function)} instead
-   */
-  @Deprecated
-  static <T> void getConsumer(ServiceDiscovery discovery, Function<Record, Boolean> filter,
-                              Handler<AsyncResult<MessageConsumer<T>>>
-                                resultHandler) {
-    MessageSource.<T>getConsumer(discovery, filter).onComplete(resultHandler);
-  }
-
-  /**
-   * Like {@link #getConsumer(ServiceDiscovery, Function, Handler)} but returns a future of the result
+   * @return a future notified with the client
    */
   static <T> Future<MessageConsumer<T>> getConsumer(ServiceDiscovery discovery, Function<Record, Boolean> filter) {
     return discovery.getRecord(filter).flatMap(res -> {

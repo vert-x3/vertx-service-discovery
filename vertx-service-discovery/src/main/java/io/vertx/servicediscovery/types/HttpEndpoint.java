@@ -17,7 +17,6 @@
 package io.vertx.servicediscovery.types;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpClient;
@@ -116,17 +115,7 @@ public interface HttpEndpoint extends ServiceType {
    *
    * @param discovery     The service discovery instance
    * @param filter        The filter, optional
-   * @param resultHandler The result handler
-   * @deprecated use {@link #getClient(ServiceDiscovery, JsonObject)} instead
-   */
-  @Deprecated
-  static void getClient(ServiceDiscovery discovery, JsonObject filter, Handler<AsyncResult<HttpClient>>
-    resultHandler) {
-    getClient(discovery, filter).onComplete(resultHandler);
-  }
-
-  /**
-   * Like {@link #getClient(ServiceDiscovery, JsonObject, Handler)} but returns a future of the result
+   * @return a future notified with the client
    */
   static Future<HttpClient> getClient(ServiceDiscovery discovery, JsonObject filter) {
     return discovery.getRecord(filter).flatMap(res -> {
@@ -144,17 +133,7 @@ public interface HttpEndpoint extends ServiceType {
    *
    * @param discovery     The service discovery instance
    * @param filter        The filter, optional
-   * @param resultHandler The result handler
-   * @deprecated use {@link #getWebClient(ServiceDiscovery, JsonObject)} instead
-   */
-  @Deprecated
-  static void getWebClient(ServiceDiscovery discovery, JsonObject filter, Handler<AsyncResult<WebClient>>
-    resultHandler) {
-    getWebClient(discovery, filter).onComplete(resultHandler);
-  }
-
-  /**
-   * Like {@link #getWebClient(ServiceDiscovery, JsonObject, Handler)} but returns a future of the result
+   * @return a future notified with the client
    */
   static Future<WebClient> getWebClient(ServiceDiscovery discovery, JsonObject filter) {
     return getWebClient(discovery, filter, (JsonObject) null);
@@ -168,17 +147,7 @@ public interface HttpEndpoint extends ServiceType {
    * @param discovery     The service discovery instance
    * @param filter        The filter, optional
    * @param conf          the configuration of the client
-   * @param resultHandler The result handler
-   * @deprecated use {@link #getClient(ServiceDiscovery, JsonObject, JsonObject)} instead
-   */
-  @Deprecated
-  static void getClient(ServiceDiscovery discovery, JsonObject filter, JsonObject conf, Handler<AsyncResult<HttpClient>>
-    resultHandler) {
-    getClient(discovery, filter, conf).onComplete(resultHandler);
-  }
-
-  /**
-   * Like {@link #getClient(ServiceDiscovery, JsonObject, JsonObject, Handler)} but returns a future of the result
+   * @return a future notified with the client
    */
   static Future<HttpClient> getClient(ServiceDiscovery discovery, JsonObject filter, JsonObject conf) {
     return discovery.getRecord(filter).flatMap(res -> {
@@ -198,17 +167,7 @@ public interface HttpEndpoint extends ServiceType {
    * @param discovery     The service discovery instance
    * @param filter        The filter, optional
    * @param conf          the configuration of the client
-   * @param resultHandler The result handler
-   * @deprecated use {@link #getWebClient(ServiceDiscovery, JsonObject, JsonObject)} instead
-   */
-  @Deprecated
-  static void getWebClient(ServiceDiscovery discovery, JsonObject filter, JsonObject conf,
-                         Handler<AsyncResult<WebClient>>  resultHandler) {
-    getWebClient(discovery, filter, conf).onComplete(resultHandler);
-  }
-
-  /**
-   * Like {@link #getWebClient(ServiceDiscovery, JsonObject, JsonObject, Handler)} but returns a future of the result
+   * @return a future notified with the client
    */
   static Future<WebClient> getWebClient(ServiceDiscovery discovery, JsonObject filter, JsonObject conf) {
     return discovery.getRecord(filter).flatMap(res -> {
@@ -229,17 +188,7 @@ public interface HttpEndpoint extends ServiceType {
    *
    * @param discovery     The service discovery instance
    * @param filter        The filter
-   * @param resultHandler The result handler
-   * @deprecated use {@link #getClient(ServiceDiscovery, Function)} instead
-   */
-  @Deprecated
-  static void getClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, Handler<AsyncResult<HttpClient>>
-    resultHandler) {
-    getClient(discovery, filter).onComplete(resultHandler);
-  }
-
-  /**
-   * Like {@link #getClient(ServiceDiscovery, Function, Handler)} but returns a future of the result
+   * @return a future notified with the client
    */
   static Future<HttpClient> getClient(ServiceDiscovery discovery, Function<Record, Boolean> filter) {
     return discovery.getRecord(filter).flatMap(res -> {
@@ -257,17 +206,7 @@ public interface HttpEndpoint extends ServiceType {
    *
    * @param discovery     The service discovery instance
    * @param filter        The filter
-   * @param resultHandler The result handler
-   * @deprecated use {@link #getWebClient(ServiceDiscovery, Function)} instead
-   */
-  @Deprecated
-  static void getWebClient(ServiceDiscovery discovery, Function<Record, Boolean> filter,
-                           Handler<AsyncResult<WebClient>> resultHandler) {
-    getWebClient(discovery, filter).onComplete(resultHandler);
-  }
-
-  /**
-   * Like {@link #getWebClient(ServiceDiscovery, Function, Handler)} but returns a future of the result
+   * @return a future notified with the client
    */
   static Future<WebClient> getWebClient(ServiceDiscovery discovery, Function<Record, Boolean> filter) {
     return getWebClient(discovery, filter, (JsonObject) null);
@@ -281,17 +220,7 @@ public interface HttpEndpoint extends ServiceType {
    * @param discovery     The service discovery instance
    * @param filter        The filter
    * @param conf          the configuration of the client
-   * @param resultHandler The result handler
-   * @deprecated use {@link #getClient(ServiceDiscovery, Function, JsonObject)} instead
-   */
-  @Deprecated
-  static void getClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject conf,
-                        Handler<AsyncResult<HttpClient>> resultHandler) {
-    getClient(discovery, filter, conf).onComplete(resultHandler);
-  }
-
-  /**
-   * Like {@link #getClient(ServiceDiscovery, JsonObject, JsonObject, Handler)} but returns a future of the result
+   * @return a future notified with the client
    */
   static Future<HttpClient> getClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject conf) {
     return discovery.getRecord(filter).flatMap(res -> {
@@ -311,17 +240,7 @@ public interface HttpEndpoint extends ServiceType {
    * @param discovery     The service discovery instance
    * @param filter        The filter
    * @param conf          the configuration of the client
-   * @param resultHandler The result handler
-   * @deprecated use {@link #getWebClient(ServiceDiscovery, Function, JsonObject)} instead
-   */
-  @Deprecated
-  static void getWebClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject conf,
-                        Handler<AsyncResult<WebClient>> resultHandler) {
-    getWebClient(discovery, filter, conf).onComplete(resultHandler);
-  }
-
-  /**
-   * Like {@link #getWebClient(ServiceDiscovery, JsonObject, JsonObject, Handler)} but returns a future of the result
+   * @return a future notified with the client
    */
   static Future<WebClient> getWebClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject conf) {
     return discovery.getRecord(filter).flatMap(res -> {

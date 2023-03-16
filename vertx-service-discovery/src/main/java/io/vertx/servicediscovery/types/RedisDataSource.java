@@ -17,9 +17,7 @@
 package io.vertx.servicediscovery.types;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.redis.client.Redis;
 import io.vertx.servicediscovery.Record;
@@ -68,17 +66,7 @@ public interface RedisDataSource extends ServiceType {
    *
    * @param discovery     The service discovery instance
    * @param filter        The filter, optional
-   * @param resultHandler The result handler
-   * @deprecated use {@link #getRedisClient(ServiceDiscovery, JsonObject)} instead
-   */
-  @Deprecated
-  static void getRedisClient(ServiceDiscovery discovery, JsonObject filter,
-                             Handler<AsyncResult<Redis>> resultHandler) {
-    getRedisClient(discovery, filter).onComplete(resultHandler);
-  }
-
-  /**
-   * Like {@link #getRedisClient(ServiceDiscovery, JsonObject, Handler)} but returns a future of the result
+   * @return a future notified with the client
    */
   static Future<Redis> getRedisClient(ServiceDiscovery discovery, JsonObject filter) {
     return discovery.getRecord(filter).flatMap(res -> {
@@ -97,16 +85,7 @@ public interface RedisDataSource extends ServiceType {
    *
    * @param discovery     The service discovery instance
    * @param filter        The filter, cannot be {@code null}
-   * @param resultHandler The result handler
-   * @deprecated use {@link #getRedisClient(ServiceDiscovery, Function)} instead
-   */
-  @Deprecated
-  static void getRedisClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, Handler<AsyncResult<Redis>> resultHandler) {
-    getRedisClient(discovery, filter).onComplete(resultHandler);
-  }
-
-  /**
-   * Like {@link #getRedisClient(ServiceDiscovery, Function, Handler)} but returns a future of the result
+   * @return a future notified with the client
    */
   static Future<Redis> getRedisClient(ServiceDiscovery discovery, Function<Record, Boolean> filter) {
     return discovery.getRecord(filter).flatMap(res -> {
@@ -125,17 +104,7 @@ public interface RedisDataSource extends ServiceType {
    * @param discovery             The service discovery instance
    * @param filter                The filter, optional
    * @param consumerConfiguration The additional consumer configuration
-   * @param resultHandler         The result handler
-   * @deprecated use {@link #getRedisClient(ServiceDiscovery, JsonObject, JsonObject)} instead
-   */
-  @Deprecated
-  static void getRedisClient(ServiceDiscovery discovery, JsonObject filter, JsonObject consumerConfiguration,
-                             Handler<AsyncResult<Redis>> resultHandler) {
-    getRedisClient(discovery, filter, consumerConfiguration).onComplete(resultHandler);
-  }
-
-  /**
-   * Like {@link #getRedisClient(ServiceDiscovery, JsonObject, JsonObject, Handler)} but returns a future of the result
+   * @return a future notified with the client
    */
   static Future<Redis> getRedisClient(ServiceDiscovery discovery, JsonObject filter, JsonObject consumerConfiguration) {
     return discovery.getRecord(filter).flatMap(res -> {
@@ -154,17 +123,7 @@ public interface RedisDataSource extends ServiceType {
    * @param discovery             The service discovery instance
    * @param filter                The filter, cannot be {@code null}
    * @param consumerConfiguration The additional consumer configuration
-   * @param resultHandler         The result handler
-   * @deprecated use {@link #getRedisClient(ServiceDiscovery, Function, JsonObject)} instead
-   */
-  @Deprecated
-  static void getRedisClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject
-    consumerConfiguration, Handler<AsyncResult<Redis>> resultHandler) {
-    getRedisClient(discovery, filter, consumerConfiguration).onComplete(resultHandler);
-  }
-
-  /**
-   * Like {@link #getRedisClient(ServiceDiscovery, Function, JsonObject, Handler)} but returns a future of the result
+   * @return a future notified with the client
    */
   static Future<Redis> getRedisClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject
     consumerConfiguration) {

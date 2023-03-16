@@ -169,7 +169,6 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
       .put(ServiceDiscovery.EVENT_ID, id));
   }
 
-  @Override
   public ServiceDiscovery registerServiceImporter(ServiceImporter importer, JsonObject configuration,
                                                   Handler<AsyncResult<Void>> completionHandler) {
     JsonObject conf;
@@ -216,7 +215,6 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     return promise.future();
   }
 
-  @Override
   public ServiceDiscovery registerServiceExporter(ServiceExporter exporter, JsonObject configuration,
                                                   Handler<AsyncResult<Void>> completionHandler) {
     JsonObject conf;
@@ -277,7 +275,6 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     });
   }
 
-  @Override
   public void publish(Record record, Handler<AsyncResult<Record>> resultHandler) {
     Status status = record.getStatus() == null || record.getStatus() == Status.UNKNOWN
       ? Status.UP : record.getStatus();
@@ -308,7 +305,6 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     return promise.future();
   }
 
-  @Override
   public void unpublish(String id, Handler<AsyncResult<Void>> resultHandler) {
     backend.remove(id, record -> {
       if (record.failed()) {
@@ -337,7 +333,6 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     return promise.future();
   }
 
-  @Override
   public void getRecord(JsonObject filter,
                         Handler<AsyncResult<Record>> resultHandler) {
     boolean includeOutOfService = false;
@@ -359,7 +354,6 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     return promise.future();
   }
 
-  @Override
   public void getRecord(String id, Handler<AsyncResult<@Nullable Record>> resultHandler) {
     backend.getRecord(id, resultHandler);
   }
@@ -371,7 +365,6 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     return promise.future();
   }
 
-  @Override
   public void getRecord(Function<Record, Boolean> filter, Handler<AsyncResult<Record>> resultHandler) {
     getRecord(filter, false, resultHandler);
   }
@@ -383,7 +376,6 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     return promise.future();
   }
 
-  @Override
   public void getRecord(Function<Record, Boolean> filter, boolean includeOutOfService, Handler<AsyncResult<Record>>
     resultHandler) {
     Objects.requireNonNull(filter);
@@ -411,7 +403,6 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     return promise.future();
   }
 
-  @Override
   public void getRecords(JsonObject filter, Handler<AsyncResult<List<Record>>> resultHandler) {
     boolean includeOutOfService = false;
     Function<Record, Boolean> accept;
@@ -432,7 +423,6 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     return promise.future();
   }
 
-  @Override
   public void getRecords(Function<Record, Boolean> filter, Handler<AsyncResult<List<Record>>> resultHandler) {
     getRecords(filter, false, resultHandler);
   }
@@ -444,7 +434,6 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     return promise.future();
   }
 
-  @Override
   public void getRecords(Function<Record, Boolean> filter, boolean includeOutOfService, Handler<AsyncResult<List<Record>>> resultHandler) {
     Objects.requireNonNull(filter);
     backend.getRecords(list -> {
@@ -468,7 +457,6 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     return promise.future();
   }
 
-  @Override
   public void update(Record record, Handler<AsyncResult<Record>> resultHandler) {
     backend.update(record, ar -> {
       if (ar.failed()) {

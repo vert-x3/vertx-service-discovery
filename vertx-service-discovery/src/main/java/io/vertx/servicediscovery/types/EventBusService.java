@@ -18,7 +18,6 @@ package io.vertx.servicediscovery.types;
 
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
@@ -110,27 +109,27 @@ public interface EventBusService extends ServiceType {
    *
    * @param discovery     the service discovery instance
    * @param itf           the service interface
-   * @param resultHandler the result handler
+   * @return a future notified with the client
    * @param <T>           the service interface
    * @return {@code null}
    */
   @GenIgnore // Java only
-  static <T> T getProxy(ServiceDiscovery discovery, Class<T> itf, Handler<AsyncResult<T>>
-    resultHandler) {
-    JsonObject filter = new JsonObject().put("service.interface", itf.getName());
-    discovery.getRecord(filter).onComplete(ar -> {
-      if (ar.failed()) {
-        resultHandler.handle(Future.failedFuture(ar.cause()));
-      } else {
-        if (ar.result() == null) {
-          resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
+  static <T> Future<T> getProxy(ServiceDiscovery discovery, Class<T> itf) {
+    return Future.future(resultHandler -> {
+      JsonObject filter = new JsonObject().put("service.interface", itf.getName());
+      discovery.getRecord(filter).onComplete(ar -> {
+        if (ar.failed()) {
+          resultHandler.handle(Future.failedFuture(ar.cause()));
         } else {
-          ServiceReference service = discovery.getReference(ar.result());
-          resultHandler.handle(Future.succeededFuture(service.get()));
+          if (ar.result() == null) {
+            resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
+          } else {
+            ServiceReference service = discovery.getReference(ar.result());
+            resultHandler.handle(Future.succeededFuture(service.get()));
+          }
         }
-      }
+      });
     });
-    return null;
   }
 
   /**
@@ -141,26 +140,27 @@ public interface EventBusService extends ServiceType {
    * @param discovery     the service discovery instance
    * @param itf           the service interface
    * @param conf          the configuration for message delivery
-   * @param resultHandler the result handler
+   * @return a future notified with the client
    * @param <T>           the service interface
    * @return {@code null}
    */
   @GenIgnore // Java only
-  static <T> T getProxy(ServiceDiscovery discovery, Class<T> itf, JsonObject conf, Handler<AsyncResult<T>> resultHandler) {
-    JsonObject filter = new JsonObject().put("service.interface", itf.getName());
-    discovery.getRecord(filter).onComplete(ar -> {
-      if (ar.failed()) {
-        resultHandler.handle(Future.failedFuture(ar.cause()));
-      } else {
-        if (ar.result() == null) {
-          resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
+  static <T> Future<T> getProxy(ServiceDiscovery discovery, Class<T> itf, JsonObject conf) {
+    return Future.future(resultHandler -> {
+      JsonObject filter = new JsonObject().put("service.interface", itf.getName());
+      discovery.getRecord(filter).onComplete(ar -> {
+        if (ar.failed()) {
+          resultHandler.handle(Future.failedFuture(ar.cause()));
         } else {
-          ServiceReference service = discovery.getReferenceWithConfiguration(ar.result(), conf);
-          resultHandler.handle(Future.succeededFuture(service.get()));
+          if (ar.result() == null) {
+            resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
+          } else {
+            ServiceReference service = discovery.getReferenceWithConfiguration(ar.result(), conf);
+            resultHandler.handle(Future.succeededFuture(service.get()));
+          }
         }
-      }
+      });
     });
-    return null;
   }
 
   /**
@@ -172,27 +172,27 @@ public interface EventBusService extends ServiceType {
    * @param discovery     the service discovery
    * @param filter        the filter
    * @param clientClass   the client class
-   * @param resultHandler the result handler
+   * @return a future notified with the client
    * @param <T>           the type of the client class
    * @return {@code null} - do not use
    */
-  static <T> T getServiceProxy(ServiceDiscovery discovery,
+  static <T> Future<T> getServiceProxy(ServiceDiscovery discovery,
                                Function<Record, Boolean> filter,
-                               Class<T> clientClass,
-                               Handler<AsyncResult<T>> resultHandler) {
-    discovery.getRecord(filter).onComplete(ar -> {
-      if (ar.failed()) {
-        resultHandler.handle(Future.failedFuture(ar.cause()));
-      } else {
-        if (ar.result() == null) {
-          resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
+                               Class<T> clientClass) {
+    return Future.future(resultHandler -> {
+      discovery.getRecord(filter).onComplete(ar -> {
+        if (ar.failed()) {
+          resultHandler.handle(Future.failedFuture(ar.cause()));
         } else {
-          ServiceReference service = discovery.getReference(ar.result());
-          resultHandler.handle(Future.succeededFuture(service.getAs(clientClass)));
+          if (ar.result() == null) {
+            resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
+          } else {
+            ServiceReference service = discovery.getReference(ar.result());
+            resultHandler.handle(Future.succeededFuture(service.getAs(clientClass)));
+          }
         }
-      }
+      });
     });
-    return null;
   }
 
   /**
@@ -205,28 +205,28 @@ public interface EventBusService extends ServiceType {
    * @param filter        the filter
    * @param clientClass   the client class
    * @param conf          the configuration for message delivery
-   * @param resultHandler the result handler
+   * @return a future notified with the client
    * @param <T>           the type of the client class
    * @return {@code null} - do not use
    */
-  static <T> T getServiceProxy(ServiceDiscovery discovery,
+  static <T> Future<T> getServiceProxy(ServiceDiscovery discovery,
                                Function<Record, Boolean> filter,
                                Class<T> clientClass,
-                               JsonObject conf,
-                               Handler<AsyncResult<T>> resultHandler) {
-    discovery.getRecord(filter).onComplete(ar -> {
-      if (ar.failed()) {
-        resultHandler.handle(Future.failedFuture(ar.cause()));
-      } else {
-        if (ar.result() == null) {
-          resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
+                               JsonObject conf) {
+    return Future.future(resultHandler -> {
+      discovery.getRecord(filter).onComplete(ar -> {
+        if (ar.failed()) {
+          resultHandler.handle(Future.failedFuture(ar.cause()));
         } else {
-          ServiceReference service = discovery.getReferenceWithConfiguration(ar.result(), conf);
-          resultHandler.handle(Future.succeededFuture(service.getAs(clientClass)));
+          if (ar.result() == null) {
+            resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
+          } else {
+            ServiceReference service = discovery.getReferenceWithConfiguration(ar.result(), conf);
+            resultHandler.handle(Future.succeededFuture(service.getAs(clientClass)));
+          }
         }
-      }
+      });
     });
-    return null;
   }
 
   /**
@@ -238,27 +238,27 @@ public interface EventBusService extends ServiceType {
    * @param discovery     the service discovery
    * @param filter        the filter as json object
    * @param clientClass   the client class
-   * @param resultHandler the result handler
+   * @return a future notified with the client
    * @param <T>           the type of the client class
    * @return {@code null} - do not use
    */
-  static <T> T getServiceProxyWithJsonFilter(ServiceDiscovery discovery,
+  static <T> Future<T> getServiceProxyWithJsonFilter(ServiceDiscovery discovery,
                                              JsonObject filter,
-                                             Class<T> clientClass,
-                                             Handler<AsyncResult<T>> resultHandler) {
-    discovery.getRecord(filter).onComplete(ar -> {
-      if (ar.failed()) {
-        resultHandler.handle(Future.failedFuture(ar.cause()));
-      } else {
-        if (ar.result() == null) {
-          resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
+                                             Class<T> clientClass) {
+    return Future.future(resultHandler -> {
+      discovery.getRecord(filter).onComplete(ar -> {
+        if (ar.failed()) {
+          resultHandler.handle(Future.failedFuture(ar.cause()));
         } else {
-          ServiceReference service = discovery.getReference(ar.result());
-          resultHandler.handle(Future.succeededFuture(service.getAs(clientClass)));
+          if (ar.result() == null) {
+            resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
+          } else {
+            ServiceReference service = discovery.getReference(ar.result());
+            resultHandler.handle(Future.succeededFuture(service.getAs(clientClass)));
+          }
         }
-      }
+      });
     });
-    return null;
   }
 
   /**
@@ -271,28 +271,28 @@ public interface EventBusService extends ServiceType {
    * @param filter        the filter as json object
    * @param clientClass   the client class
    * @param conf          the configuration for message delivery
-   * @param resultHandler the result handler
+   * @return a future notified with the client
    * @param <T>           the type of the client class
    * @return {@code null} - do not use
    */
-  static <T> T getServiceProxyWithJsonFilter(ServiceDiscovery discovery,
+  static <T> Future<T> getServiceProxyWithJsonFilter(ServiceDiscovery discovery,
                                              JsonObject filter,
                                              Class<T> clientClass,
-                                             JsonObject conf,
-                                             Handler<AsyncResult<T>> resultHandler) {
-    discovery.getRecord(filter).onComplete(ar -> {
-      if (ar.failed()) {
-        resultHandler.handle(Future.failedFuture(ar.cause()));
-      } else {
-        if (ar.result() == null) {
-          resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
+                                             JsonObject conf) {
+    return Future.future(resultHandler -> {
+      discovery.getRecord(filter).onComplete(ar -> {
+        if (ar.failed()) {
+          resultHandler.handle(Future.failedFuture(ar.cause()));
         } else {
-          ServiceReference service = discovery.getReferenceWithConfiguration(ar.result(), conf);
-          resultHandler.handle(Future.succeededFuture(service.getAs(clientClass)));
+          if (ar.result() == null) {
+            resultHandler.handle(Future.failedFuture("Cannot find service matching with " + filter));
+          } else {
+            ServiceReference service = discovery.getReferenceWithConfiguration(ar.result(), conf);
+            resultHandler.handle(Future.succeededFuture(service.getAs(clientClass)));
+          }
         }
-      }
+      });
     });
-    return null;
   }
 
   /**

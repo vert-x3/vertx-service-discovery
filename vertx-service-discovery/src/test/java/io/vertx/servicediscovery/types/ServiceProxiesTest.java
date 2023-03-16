@@ -104,7 +104,7 @@ public class ServiceProxiesTest {
     await().until(() -> record.getRegistration() != null);
 
     AtomicReference<HelloService> found = new AtomicReference<>();
-    EventBusService.getProxy(discovery, HelloService.class, ar -> {
+    EventBusService.getProxy(discovery, HelloService.class).onComplete(ar -> {
       found.set(ar.result());
     });
     await().until(() -> found.get() != null);
@@ -161,7 +161,7 @@ public class ServiceProxiesTest {
     await().until(() -> record.getRegistration() != null);
 
     AtomicReference<HelloService> found = new AtomicReference<>();
-    EventBusService.getProxy(discovery, HelloService.class, new DeliveryOptions().setCodecName(codec.name()).toJson(), ar -> {
+    EventBusService.getProxy(discovery, HelloService.class, new DeliveryOptions().setCodecName(codec.name()).toJson()).onComplete(ar -> {
       found.set(ar.result());
     });
     await().until(() -> found.get() != null);

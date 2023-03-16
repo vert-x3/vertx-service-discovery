@@ -157,7 +157,7 @@ public class DefaultServiceDiscoveryBackend implements ServiceDiscoveryBackend {
         if (reg.failed()) {
           resultHandler.handle(failure(reg.cause()));
         } else {
-          reg.result().entries(ar -> {
+          reg.result().entries().onComplete(ar -> {
             if (ar.succeeded()) {
               resultHandler.handle(Future.succeededFuture(ar.result().values().stream()
                 .map(s -> new Record(new JsonObject(s)))

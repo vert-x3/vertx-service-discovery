@@ -58,7 +58,7 @@ public class EventBusServiceExamples {
 
   // Java only
   public void example3(ServiceDiscovery discovery) {
-    EventBusService.getProxy(discovery, MyService.class, ar -> {
+    EventBusService.getProxy(discovery, MyService.class).onComplete(ar -> {
       if (ar.succeeded()) {
         MyService service = ar.result();
 
@@ -71,7 +71,7 @@ public class EventBusServiceExamples {
   public void example31(ServiceDiscovery discovery) {
     EventBusService.getServiceProxyWithJsonFilter(discovery,
       new JsonObject().put("service.interface", "org.acme.MyService"), // The java interface
-      MyService.class, // The expect client
+      MyService.class).onComplete( // The expect client
       ar -> {
       if (ar.succeeded()) {
         MyService service = ar.result();

@@ -14,7 +14,7 @@
  * You may elect to redistribute this code under either of these licenses.
  */
 
-@ModuleGen(name = "vertx-service-discovery-consul", groupPackage = "io.vertx", checkCallbackDeprecation = true)
+@ModuleGen(name = "vertx-service-discovery-consul", groupPackage = "io.vertx", useFutures = true)
 package io.vertx.servicediscovery.consul;
 
 import io.vertx.codegen.annotations.ModuleGen;

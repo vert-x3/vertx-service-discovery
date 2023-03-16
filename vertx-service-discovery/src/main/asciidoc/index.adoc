@@ -214,12 +214,12 @@ Here are some examples:
 ----
 
 You can retrieve a single record or all matching records with
-{@link io.vertx.servicediscovery.ServiceDiscovery#getRecords(io.vertx.core.json.JsonObject, io.vertx.core.Handler)}.
+{@link io.vertx.servicediscovery.ServiceDiscovery#getRecords(io.vertx.core.json.JsonObject)}.
 By default, record lookup does include only records with a `status` set to `UP`. This can be overridden:
 
 * when using JSON filter, just set `status` to the value you want (or `*` to accept all status)
 * when using function, set the `includeOutOfService` parameter to `true` in
-{@link io.vertx.servicediscovery.ServiceDiscovery#getRecords(java.util.function.Function, boolean, io.vertx.core.Handler)}
+{@link io.vertx.servicediscovery.ServiceDiscovery#getRecords(java.util.function.Function, boolean)}
 .
 
 == Retrieving a service reference
@@ -341,7 +341,7 @@ Once a HTTP endpoint is published, a consumer can retrieve it. The service objec
 ----
 
 You can also use the
-{@link io.vertx.servicediscovery.types.HttpEndpoint#getClient(ServiceDiscovery, io.vertx.core.json.JsonObject, io.vertx.core.Handler)}
+{@link io.vertx.servicediscovery.types.HttpEndpoint#getClient(ServiceDiscovery, io.vertx.core.json.JsonObject)}
 method to combine lookup and service retrieval in one call:
 
 [source, $lang]
@@ -681,7 +681,7 @@ The second parameter can provide an optional configuration for the bridge.
 
 When the bridge is registered the {@link io.vertx.servicediscovery.spi.ServiceImporter#start} method is called.
 It lets you configure the bridge. When the bridge is configured, ready and has imported / exported the initial services, it must complete the given {@link io.vertx.core.Future}.
-If the bridge starts method is blocking, it must use an {@link io.vertx.core.Vertx#executeBlocking(io.vertx.core.Handler, boolean, io.vertx.core.Handler)} construct, and complete the given future object.
+If the bridge starts method is blocking, it must use an {@link io.vertx.core.Vertx#executeBlocking(io.vertx.core.Handler, boolean)} construct, and complete the given future object.
 
 When the service discovery is stopped, the bridge is stopped.
 The {@link io.vertx.servicediscovery.spi.ServiceImporter#close(io.vertx.core.Handler)} method is called that provides the opportunity to cleanup resources, removed imported / exported services...

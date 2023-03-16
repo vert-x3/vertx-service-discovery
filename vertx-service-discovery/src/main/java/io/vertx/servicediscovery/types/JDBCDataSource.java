@@ -17,7 +17,6 @@
 package io.vertx.servicediscovery.types;
 
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
@@ -59,17 +58,7 @@ public interface JDBCDataSource extends ServiceType {
    *
    * @param discovery     The service discovery instance
    * @param filter        The filter, optional
-   * @param resultHandler The result handler
-   * @deprecated use {@link #getJDBCClient(ServiceDiscovery, JsonObject)} instead
-   */
-  @Deprecated
-  static void getJDBCClient(ServiceDiscovery discovery, JsonObject filter,
-                            Handler<AsyncResult<JDBCClient>> resultHandler) {
-    getJDBCClient(discovery, filter).onComplete(resultHandler);
-  }
-
-  /**
-   * Like {@link #getJDBCClient(ServiceDiscovery, JsonObject, Handler)} but returns a future of the result
+   * @return a future notified with the client
    */
   static Future<JDBCClient> getJDBCClient(ServiceDiscovery discovery, JsonObject filter) {
     return discovery.getRecord(filter).flatMap(res -> {
@@ -87,17 +76,7 @@ public interface JDBCDataSource extends ServiceType {
    *
    * @param discovery     The service discovery instance
    * @param filter        The filter (must not be {@code null})
-   * @param resultHandler The result handler
-   * @deprecated use {@link #getJDBCClient(ServiceDiscovery, Function)} instead
-   */
-  @Deprecated
-  static void getJDBCClient(ServiceDiscovery discovery, Function<Record, Boolean> filter,
-                            Handler<AsyncResult<JDBCClient>> resultHandler) {
-    getJDBCClient(discovery, filter).onComplete(resultHandler);
-  }
-
-  /**
-   * Like {@link #getJDBCClient(ServiceDiscovery, Function, Handler)} but returns a future of the result
+   * @return a future notified with the client
    */
   static Future<JDBCClient> getJDBCClient(ServiceDiscovery discovery, Function<Record, Boolean> filter) {
     return discovery.getRecord(filter).flatMap(res -> {
@@ -116,17 +95,7 @@ public interface JDBCDataSource extends ServiceType {
    * @param discovery             The service discovery instance
    * @param filter                The filter, optional
    * @param consumerConfiguration the consumer configuration
-   * @param resultHandler         the result handler
-   * @deprecated use {@link #getJDBCClient(ServiceDiscovery, JsonObject, JsonObject)} instead
-   */
-  @Deprecated
-  static void getJDBCClient(ServiceDiscovery discovery, JsonObject filter, JsonObject consumerConfiguration,
-                            Handler<AsyncResult<JDBCClient>> resultHandler) {
-    getJDBCClient(discovery, filter, consumerConfiguration).onComplete(resultHandler);
-  }
-
-  /**
-   * Like {@link #getJDBCClient(ServiceDiscovery, JsonObject, JsonObject, Handler)} but returns a future of the result
+   * @return a future notified with the client
    */
   static Future<JDBCClient> getJDBCClient(ServiceDiscovery discovery, JsonObject filter, JsonObject consumerConfiguration) {
     return discovery.getRecord(filter).flatMap(res -> {
@@ -145,17 +114,7 @@ public interface JDBCDataSource extends ServiceType {
    * @param discovery             The service discovery instance
    * @param filter                The filter, must not be {@code null}
    * @param consumerConfiguration the consumer configuration
-   * @param resultHandler         the result handler
-   * @deprecated use {@link #getJDBCClient(ServiceDiscovery, Function, JsonObject)} instead
-   */
-  @Deprecated
-  static void getJDBCClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject consumerConfiguration,
-                            Handler<AsyncResult<JDBCClient>> resultHandler) {
-    getJDBCClient(discovery, filter, consumerConfiguration).onComplete(resultHandler);
-  }
-
-  /**
-   * Like {@link #getJDBCClient(ServiceDiscovery, Function, JsonObject, Handler)} but returns a future of the result
+   * @return a future notified with the client
    */
   static Future<JDBCClient> getJDBCClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject consumerConfiguration) {
     return discovery.getRecord(filter).flatMap(res -> {

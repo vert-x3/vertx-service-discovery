@@ -19,7 +19,6 @@ package io.vertx.servicediscovery;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.Nullable;
 import io.vertx.codegen.annotations.VertxGen;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -154,30 +153,15 @@ public interface ServiceDiscovery {
   boolean release(ServiceReference reference);
 
   /**
-   * Like {@link #registerServiceImporter(ServiceImporter, JsonObject, Handler)} but returns a {@code Future} of the asynchronous result
-   */
-  Future<Void> registerServiceImporter(ServiceImporter importer, JsonObject configuration);
-
-  /**
    * Registers a discovery service importer. Importers let you integrate other discovery technologies in this service
    * discovery.
    *
    * @param importer          the service importer
    * @param configuration     the optional configuration
-   * @param completionHandler handler call when the importer has finished its initialization and
+   * @return a future notified when the importer has finished its initialization and
    *                          initial imports
-   * @return the current {@link ServiceDiscovery}
-   * @deprecated use {@link #registerServiceImporter(ServiceImporter, JsonObject)} instead
    */
-  @Fluent
-  @Deprecated
-  ServiceDiscovery registerServiceImporter(ServiceImporter importer, JsonObject configuration,
-                                           Handler<AsyncResult<Void>> completionHandler);
-
-  /**
-   * Like {@link #registerServiceExporter(ServiceExporter, JsonObject, Handler)} but returns a {@code Future} of the asynchronous result
-   */
-  Future<Void> registerServiceExporter(ServiceExporter exporter, JsonObject configuration);
+  Future<Void> registerServiceImporter(ServiceImporter importer, JsonObject configuration);
 
   /**
    * Registers a discovery bridge. Exporters let you integrate other discovery technologies in this service
@@ -185,14 +169,9 @@ public interface ServiceDiscovery {
    *
    * @param exporter          the service exporter
    * @param configuration     the optional configuration
-   * @param completionHandler handler notified when the exporter has been correctly initialized.
-   * @return the current {@link ServiceDiscovery}
-   * @deprecated use {@link #registerServiceExporter(ServiceExporter, JsonObject)} instead
+   * @return a future notified when the exporter has been correctly initialized.
    */
-  @Fluent
-  @Deprecated
-  ServiceDiscovery registerServiceExporter(ServiceExporter exporter, JsonObject configuration,
-                                           Handler<AsyncResult<Void>> completionHandler);
+  Future<Void> registerServiceExporter(ServiceExporter exporter, JsonObject configuration);
 
   /**
    * Closes the service discovery
@@ -203,15 +182,8 @@ public interface ServiceDiscovery {
    * Publishes a record.
    *
    * @param record        the record
-   * @param resultHandler handler called when the operation has completed (successfully or not). In case of success,
+   * @return a future notified when the operation has completed (successfully or not). In case of success,
    *                      the passed record has a registration id required to modify and un-register the service.
-   * @deprecated use {@link #publish(Record)} instead
-   */
-  @Deprecated
-  void publish(Record record, Handler<AsyncResult<Record>> resultHandler);
-
-  /**
-   * Like {@link #publish(Record, Handler)} but returns a {@code Future} of the asynchronous result
    */
   Future<Record> publish(Record record);
 
@@ -220,14 +192,7 @@ public interface ServiceDiscovery {
    * Un-publishes a record.
    *
    * @param id            the registration id
-   * @param resultHandler handler called when the operation has completed (successfully or not).
-   * @deprecated use {@link #unpublish(String)} instead
-   */
-  @Deprecated
-  void unpublish(String id, Handler<AsyncResult<Void>> resultHandler);
-
-  /**
-   * Like {@link #unpublish(String, Handler)} but returns a {@code Future} of the asynchronous result
+   * @return a future notified when the operation has completed (successfully or not).
    */
   Future<Void> unpublish(String id);
 
@@ -251,15 +216,8 @@ public interface ServiceDiscovery {
    * This method returns the first matching record.
    *
    * @param filter        the filter.
-   * @param resultHandler handler called when the lookup has been completed. When there are no matching record, the
+   * @return a future notified when the lookup has been completed. When there are no matching record, the
    *                      operation succeeds, but the async result has no result ({@code null}).
-   * @deprecated use {@link #getRecord(JsonObject)} instead
-   */
-  @Deprecated
-  void getRecord(JsonObject filter, Handler<AsyncResult<@Nullable Record>> resultHandler);
-
-  /**
-   * Like {@link #getRecord(JsonObject, Handler)} but returns a {@code Future} of the asynchronous result
    */
   Future<@Nullable Record> getRecord(JsonObject filter);
 
@@ -269,15 +227,8 @@ public interface ServiceDiscovery {
    * When there are no matching record, the operation succeeds, but the async result has no result ({@code null}).
    *
    * @param id            the registration id
-   * @param resultHandler handler called when the lookup has been completed
+   * @return a future notified when the lookup has been completed
    * @see Record#getRegistration()
-   * @deprecated use {@link #getRecord(String)} instead
-   */
-  @Deprecated
-  void getRecord(String id, Handler<AsyncResult<@Nullable Record>> resultHandler);
-
-  /**
-   * Like {@link #getRecord(String, Handler)} but returns a {@code Future} of the asynchronous result
    */
   Future<@Nullable Record> getRecord(String id);
 
@@ -291,15 +242,8 @@ public interface ServiceDiscovery {
    * This method only looks for records with a {@code UP} status.
    *
    * @param filter        the filter, must not be {@code null}. To return all records, use a function accepting all records
-   * @param resultHandler the result handler called when the lookup has been completed. When there are no matching
+   * @return a future notified when the lookup has been completed. When there are no matching
    *                      record, the operation succeed, but the async result has no result.
-   * @deprecated use {@link #getRecord(Function)} instead
-   */
-  @Deprecated
-  void getRecord(Function<Record, Boolean> filter, Handler<AsyncResult<@Nullable Record>> resultHandler);
-
-  /**
-   * Like {@link #getRecord(Function, Handler)} but returns a {@code Future} of the asynchronous result
    */
   Future<@Nullable Record> getRecord(Function<Record, Boolean> filter);
 
@@ -309,42 +253,28 @@ public interface ServiceDiscovery {
    * The filter is a {@link Function} taking a {@link Record} as argument and returning a boolean. You should see it
    * as an {@code accept} method of a filter. This method return a record passing the filter.
    * <p>
-   * Unlike {@link #getRecord(Function, Handler)}, this method may accept records with a {@code OUT OF SERVICE}
+   * Unlike {@link #getRecord(Function)}, this method may accept records with a {@code OUT OF SERVICE}
    * status, if the {@code includeOutOfService} parameter is set to {@code true}.
    *
    * @param filter              the filter, must not be {@code null}. To return all records, use a function accepting all records
    * @param includeOutOfService whether or not the filter accepts  {@code OUT OF SERVICE} records
-   * @param resultHandler       the result handler called when the lookup has been completed. When there are no matching
+   * @return a future notified when the lookup has been completed. When there are no matching
    *                            record, the operation succeed, but the async result has no result.
-   * @deprecated use {@link #getRecord(Function, boolean)} instead
-   */
-  @Deprecated
-  void getRecord(Function<Record, Boolean> filter, boolean includeOutOfService, Handler<AsyncResult<@Nullable Record>> resultHandler);
-
-  /**
-   * Like {@link #getRecords(Function, boolean, Handler)} but returns a {@code Future} of the asynchronous result
    */
   Future<@Nullable Record> getRecord(Function<Record, Boolean> filter, boolean includeOutOfService);
 
   /**
-   * Lookups for a set of records. Unlike {@link #getRecord(JsonObject, Handler)}, this method returns all matching
+   * Lookups for a set of records. Unlike {@link #getRecord(JsonObject)}, this method returns all matching
    * records.
    *
-   * @param filter        the filter - see {@link #getRecord(JsonObject, Handler)}
-   * @param resultHandler handler called when the lookup has been completed. When there are no matching record, the
+   * @param filter        the filter - see {@link #getRecord(JsonObject)}
+   * @return a future notified when the lookup has been completed. When there are no matching record, the
    *                      operation succeed, but the async result has an empty list as result.
-   * @deprecated use {@link #getRecords(JsonObject)} instead
-   */
-  @Deprecated
-  void getRecords(JsonObject filter, Handler<AsyncResult<List<Record>>> resultHandler);
-
-  /**
-   * Like {@link #getRecords(JsonObject, Handler)} but returns a {@code Future} of the asynchronous result
    */
   Future<List<Record>> getRecords(JsonObject filter);
 
   /**
-   * Lookups for a set of records. Unlike {@link #getRecord(Function, Handler)}, this method returns all matching
+   * Lookups for a set of records. Unlike {@link #getRecord(Function)}, this method returns all matching
    * records.
    * <p>
    * The filter is a {@link Function} taking a {@link Record} as argument and returning a boolean. You should see it
@@ -353,40 +283,25 @@ public interface ServiceDiscovery {
    * This method only looks for records with a {@code UP} status.
    *
    * @param filter        the filter, must not be {@code null}. To return all records, use a function accepting all records
-   * @param resultHandler handler called when the lookup has been completed. When there are no matching record, the
+   * @return a future notified when the lookup has been completed. When there are no matching record, the
    *                      operation succeed, but the async result has an empty list as result.
-   * @deprecated use {@link #getRecords(Function)} instead
-   */
-  @Deprecated
-  void getRecords(Function<Record, Boolean> filter, Handler<AsyncResult<List<Record>>> resultHandler);
-
-  /**
-   * Like {@link #getRecords(Function, Handler)} but returns a {@code Future} of the asynchronous result
    */
   Future<List<Record>> getRecords(Function<Record, Boolean> filter);
 
   /**
-   * Lookups for a set of records. Unlike {@link #getRecord(Function, Handler)}, this method returns all matching
+   * Lookups for a set of records. Unlike {@link #getRecord(Function)}, this method returns all matching
    * records.
    * <p>
    * The filter is a {@link Function} taking a {@link Record} as argument and returning a boolean. You should see it
    * as an {@code accept} method of a filter. This method return a record passing the filter.
    * <p>
-   * Unlike {@link #getRecords(Function, Handler)}, this method may accept records with a {@code OUT OF SERVICE}
+   * Unlike {@link #getRecords(Function)}, this method may accept records with a {@code OUT OF SERVICE}
    * status, if the {@code includeOutOfService} parameter is set to {@code true}.
    *
    * @param filter              the filter, must not be {@code null}. To return all records, use a function accepting all records
-   * @param includeOutOfService whether or not the filter accepts  {@code OUT OF SERVICE} records
-   * @param resultHandler       handler called when the lookup has been completed. When there are no matching record, the
+   * @param includeOutOfService whether the filter accepts  {@code OUT OF SERVICE} records
+   * @return a future notified when the lookup has been completed. When there are no matching record, the
    *                            operation succeed, but the async result has an empty list as result.
-   * @deprecated use {@link #getRecord(Function, boolean)} instead
-   */
-  @Deprecated
-  void getRecords(Function<Record, Boolean> filter, boolean includeOutOfService,
-                  Handler<AsyncResult<List<Record>>> resultHandler);
-
-  /**
-   * Like {@link #getRecords(Function, boolean, Handler)} but returns a {@code Future} of the asynchronous result
    */
   Future<List<Record>> getRecords(Function<Record, Boolean> filter, boolean includeOutOfService);
 
@@ -394,14 +309,7 @@ public interface ServiceDiscovery {
    * Updates the given record. The record must has been published, and has it's registration id set.
    *
    * @param record        the updated record
-   * @param resultHandler handler called when the lookup has been completed.
-   * @deprecated use {@link #update(Record)} instead
-   */
-  @Deprecated
-  void update(Record record, Handler<AsyncResult<Record>> resultHandler);
-
-  /**
-   * Like {@link #update(Record, Handler)} but returns a {@code Future} of the asynchronous result
+   * @return a future notified when the lookup has been completed.
    */
   Future<Record> update(Record record);
 

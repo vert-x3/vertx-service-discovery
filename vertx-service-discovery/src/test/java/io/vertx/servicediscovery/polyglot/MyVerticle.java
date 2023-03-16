@@ -123,7 +123,7 @@ public class MyVerticle extends AbstractVerticle {
       JsonObject result = new JsonObject();
       EventBusService.getServiceProxy(discovery,
         record -> record.getName().equalsIgnoreCase("my-service"),
-        HelloService.class,
+        HelloService.class).onComplete(
         ar -> {
           if (ar.failed()) {
             message.reply("FAIL - no service");

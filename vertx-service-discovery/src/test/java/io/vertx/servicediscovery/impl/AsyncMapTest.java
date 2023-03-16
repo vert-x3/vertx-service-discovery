@@ -118,7 +118,7 @@ public class AsyncMapTest {
                     context.assertTrue(list2.succeeded());
                     context.assertEquals(list2.result().size(), 2);
 
-                    map.entries(map -> {
+                    map.entries().onComplete(map -> {
                       context.assertTrue(map.succeeded());
                       context.assertEquals(map.result().size(), 2);
 

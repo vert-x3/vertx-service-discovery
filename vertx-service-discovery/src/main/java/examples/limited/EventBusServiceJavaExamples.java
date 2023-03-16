@@ -58,7 +58,7 @@ public class EventBusServiceJavaExamples {
 
   // Java only
   public void example3(ServiceDiscovery discovery) {
-    EventBusService.getProxy(discovery, MyService.class, ar -> {
+    EventBusService.getProxy(discovery, MyService.class).onComplete(ar -> {
       if (ar.succeeded()) {
         MyService service = ar.result();
 
