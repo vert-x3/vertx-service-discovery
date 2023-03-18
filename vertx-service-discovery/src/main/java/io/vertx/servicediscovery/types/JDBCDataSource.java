@@ -16,6 +16,7 @@
 
 package io.vertx.servicediscovery.types;
 
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -60,6 +61,7 @@ public interface JDBCDataSource extends ServiceType {
    * @param filter        The filter, optional
    * @return a future notified with the client
    */
+  @GenIgnore(GenIgnore.PERMITTED_TYPE)
   static Future<JDBCClient> getJDBCClient(ServiceDiscovery discovery, JsonObject filter) {
     return discovery.getRecord(filter).flatMap(res -> {
       if (res == null) {
@@ -78,6 +80,7 @@ public interface JDBCDataSource extends ServiceType {
    * @param filter        The filter (must not be {@code null})
    * @return a future notified with the client
    */
+  @GenIgnore(GenIgnore.PERMITTED_TYPE)
   static Future<JDBCClient> getJDBCClient(ServiceDiscovery discovery, Function<Record, Boolean> filter) {
     return discovery.getRecord(filter).flatMap(res -> {
       if (res == null) {
@@ -97,6 +100,7 @@ public interface JDBCDataSource extends ServiceType {
    * @param consumerConfiguration the consumer configuration
    * @return a future notified with the client
    */
+  @GenIgnore(GenIgnore.PERMITTED_TYPE)
   static Future<JDBCClient> getJDBCClient(ServiceDiscovery discovery, JsonObject filter, JsonObject consumerConfiguration) {
     return discovery.getRecord(filter).flatMap(res -> {
       if (res == null) {
@@ -116,6 +120,7 @@ public interface JDBCDataSource extends ServiceType {
    * @param consumerConfiguration the consumer configuration
    * @return a future notified with the client
    */
+  @GenIgnore(GenIgnore.PERMITTED_TYPE)
   static Future<JDBCClient> getJDBCClient(ServiceDiscovery discovery, Function<Record, Boolean> filter, JsonObject consumerConfiguration) {
     return discovery.getRecord(filter).flatMap(res -> {
       if (res == null) {
