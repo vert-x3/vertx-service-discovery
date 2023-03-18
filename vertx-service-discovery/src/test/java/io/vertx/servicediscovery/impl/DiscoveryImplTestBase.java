@@ -117,7 +117,7 @@ public abstract class DiscoveryImplTestBase {
     HelloService service = reference.get();
     assertThat(service).isNotNull();
     AtomicReference<String> result = new AtomicReference<>();
-    service.hello(new JsonObject().put("name", "foo"), ar -> result.set(ar.result()));
+    service.hello(new JsonObject().put("name", "foo")).onComplete(ar -> result.set(ar.result()));
     await().until(() -> result.get() != null);
     assertThat(result.get()).isEqualToIgnoringCase("stuff foo");
 

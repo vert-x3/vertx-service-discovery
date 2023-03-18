@@ -87,7 +87,7 @@ public class ServiceProxiesTest {
     ServiceReference service = discovery.getReference(found.get());
     HelloService hello = service.get();
     AtomicReference<String> result = new AtomicReference<>();
-    hello.hello(name, ar -> result.set(ar.result()));
+    hello.hello(name).onComplete(ar -> result.set(ar.result()));
     await().untilAtomic(result, not(nullValue()));
 
     service.release();
@@ -113,7 +113,7 @@ public class ServiceProxiesTest {
 
     HelloService hello = found.get();
     AtomicReference<String> result = new AtomicReference<>();
-    hello.hello(name, ar -> result.set(ar.result()));
+    hello.hello(name).onComplete(ar -> result.set(ar.result()));
     await().untilAtomic(result, not(nullValue()));
 
     ServiceDiscovery.releaseServiceObject(discovery, found.get());
@@ -140,7 +140,7 @@ public class ServiceProxiesTest {
     ServiceReference service = discovery.getReference(found.get());
     HelloService hello = service.get();
     AtomicReference<String> result = new AtomicReference<>();
-    hello.hello(name, ar -> result.set(ar.result()));
+    hello.hello(name).onComplete(ar -> result.set(ar.result()));
     await().untilAtomic(result, not(nullValue()));
 
     service.release();
@@ -170,7 +170,7 @@ public class ServiceProxiesTest {
 
     HelloService hello = found.get();
     AtomicReference<String> result = new AtomicReference<>();
-    hello.hello(name, ar -> result.set(ar.result()));
+    hello.hello(name).onComplete(ar -> result.set(ar.result()));
     await().untilAtomic(result, not(nullValue()));
 
     assertThat(result.get()).endsWith("intercepted");
