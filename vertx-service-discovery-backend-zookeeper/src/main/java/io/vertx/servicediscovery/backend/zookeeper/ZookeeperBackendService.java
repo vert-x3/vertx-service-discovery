@@ -225,7 +225,7 @@ public class ZookeeperBackendService implements ServiceDiscoveryBackend, Connect
               client.getChildren()
                   .inBackground((fmk, event) -> {
                     List<String> children = event.getChildren();
-                    List<Future> futures = new ArrayList<>();
+                    List<Future<Record>> futures = new ArrayList<>();
                     for (String child : children) {
                       Promise<Record> promise = Promise.promise();
                       getRecord(child, promise);

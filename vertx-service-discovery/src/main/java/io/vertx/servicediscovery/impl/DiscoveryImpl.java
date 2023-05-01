@@ -250,7 +250,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
   @Override
   public void close() {
     LOGGER.info("Stopping service discovery");
-    List<Future> futures = new ArrayList<>();
+    List<Future<Void>> futures = new ArrayList<>();
     for (ServiceImporter importer : importers) {
       Promise<Void> promise = vertx.promise();
       importer.close(v -> promise.complete());

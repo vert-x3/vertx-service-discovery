@@ -176,7 +176,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
   }
 
   private CompositeFuture publishRecords(JsonArray items) {
-    List<Future> publications = new ArrayList<>();
+    List<Future<Record>> publications = new ArrayList<>();
     items.forEach(s -> {
       JsonObject svc = ((JsonObject) s);
       Record record = createRecord(svc);

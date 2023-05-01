@@ -107,7 +107,7 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
     client.catalogServices().onComplete(nameList);
     nameList.future().map(ServiceList::getList)
       .map(l -> {
-        List<Future> recordFutureList = new ArrayList<>();
+        List<Future<ServiceList>> recordFutureList = new ArrayList<>();
         l.forEach(s -> {
           if (!"consul".equals(s.getName())) {
             ServiceQueryOptions opt = new ServiceQueryOptions();
@@ -180,7 +180,7 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
   }
 
 
-  private Future serviceToRecord(Service service) {
+  private Future<Record> serviceToRecord(Service service) {
     //use the checks to set the record status
     Promise<CheckList> checkListFuture = Promise.promise();
     client.healthChecks(service.getName()).onComplete(checkListFuture);

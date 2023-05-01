@@ -139,7 +139,7 @@ public class DockerLinksServiceImporter implements ServiceImporter {
 
   @Override
   public void close(Handler<Void> completionHandler) {
-    List<Future> list = new ArrayList<>();
+    List<Future<Void>> list = new ArrayList<>();
     for (Record record : records) {
       publisher.unpublish(record.getRegistration()).onComplete(v -> list.add(v.succeeded() ? Future.succeededFuture() : Future.failedFuture(v.cause())));
     }

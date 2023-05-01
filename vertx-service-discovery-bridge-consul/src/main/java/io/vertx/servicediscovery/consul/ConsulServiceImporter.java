@@ -126,7 +126,7 @@ public class ConsulServiceImporter implements ServiceImporter {
   }
 
   private void retrieveIndividualServices(ServiceList list, Promise<List<ImportedConsulService>> completed) {
-    List<Future> futures = new ArrayList<>();
+    List<Future<List<ImportedConsulService>>> futures = new ArrayList<>();
     list.getList().forEach(service -> {
 
       Promise<List<ImportedConsulService>> promise = Promise.promise();
@@ -200,7 +200,7 @@ public class ConsulServiceImporter implements ServiceImporter {
 
       List<ImportedConsulService> importedServices = new ArrayList<>();
 
-      List<Future> registrations = new ArrayList<>();
+      List<Future<Void>> registrations = new ArrayList<>();
       for (int i = 0; i < serviceEntries.size(); i++) {
         Promise<Void> registration = Promise.promise();
 
@@ -298,7 +298,7 @@ public class ConsulServiceImporter implements ServiceImporter {
       vertx.cancelTimer(scanTask);
     }
     // Remove all the services that has been imported
-    List<Future> list = new ArrayList<>();
+    List<Future<Void>> list = new ArrayList<>();
     imports.forEach(imported -> {
       Promise<Void> promise = Promise.promise();
       promise.future().onComplete(ar -> {

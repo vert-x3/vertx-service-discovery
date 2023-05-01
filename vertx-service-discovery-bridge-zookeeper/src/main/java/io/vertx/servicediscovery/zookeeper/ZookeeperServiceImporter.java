@@ -124,7 +124,7 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
         = new HashSet<>(registrations);
     Set<ServiceInstance<JsonObject>> remote = new HashSet<>(instances);
 
-    List<Future> actions = new ArrayList<>();
+    List<Future<Void>> actions = new ArrayList<>();
 
     RegistrationHolder.filter(registered, instances)
         .stream()
@@ -240,7 +240,7 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
   }
 
   private synchronized void unregisterAllServices(Promise<Void> done) {
-    List<Future> list = new ArrayList<>();
+    List<Future<Void>> list = new ArrayList<>();
 
     new HashSet<>(registrations).forEach(reg -> {
       Promise<Void> unreg = Promise.promise();
