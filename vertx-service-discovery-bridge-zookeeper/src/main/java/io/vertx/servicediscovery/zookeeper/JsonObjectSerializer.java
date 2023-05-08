@@ -1,6 +1,7 @@
 package io.vertx.servicediscovery.zookeeper;
 
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.curator.x.discovery.ServiceInstance;
 import org.apache.curator.x.discovery.ServiceInstanceBuilder;
@@ -38,18 +39,28 @@ public class JsonObjectSerializer implements InstanceSerializer<JsonObject> {
         .address(json.getString("address"))
         .id(json.getString("id"))
         .name(json.getString("name"))
-        .payload(json.getJsonObject("payload"))
+        .payload(new JsonObject(json.getString("payload")))
         .registrationTimeUTC(json.getLong("registrationTimeUTC"))
         .serviceType(ServiceType.valueOf(json.getString("serviceType")));
 
-    if (json.containsKey("sslPort")) {
+    if (json.getValue("sslPort") != null) {
       builder.sslPort(json.getInteger("sslPort"));
     }
-    if (json.containsKey("port")) {
+    if (json.getValue("port") != null) {
       builder.port(json.getInteger("port"));
     }
-    if (json.containsKey("uriSpec")) {
-      builder.uriSpec(new UriSpec(json.getString("uriSpec")));
+    if (json.getValue("uriSpec") != null) {
+      JsonArray parts = json
+        .getJsonObject("uriSpec")
+        .getJsonArray("parts");
+      UriSpec spec = new UriSpec();
+      for (int idx = 0;idx < parts.size();idx++) {
+        JsonObject part = parts.getJsonObject(idx);
+        String value = part.getString("value");
+        boolean variable = part.getBoolean("variable");
+        spec.add(new UriSpec.Part(value, variable));
+      }
+      builder.uriSpec(spec);
     }
     return builder.build();
   }
