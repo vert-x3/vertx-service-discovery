@@ -232,7 +232,7 @@ public class ZookeeperBackendService implements ServiceDiscoveryBackend, Connect
                       futures.add(promise.future());
                     }
 
-                    CompositeFuture.all(futures)
+                    Future.all(futures)
                         .onComplete(
                             ar -> runOnContextIfPossible(context, () -> {
                               if (ar.failed()) {

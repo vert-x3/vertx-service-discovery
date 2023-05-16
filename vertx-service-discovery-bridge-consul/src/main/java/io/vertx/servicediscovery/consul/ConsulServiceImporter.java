@@ -16,7 +16,6 @@
 
 package io.vertx.servicediscovery.consul;
 
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -141,7 +140,7 @@ public class ConsulServiceImporter implements ServiceImporter {
       futures.add(promise.future());
     });
 
-    CompositeFuture.all(futures).onComplete(ar -> {
+    Future.all(futures).onComplete(ar -> {
       if (ar.failed()) {
         LOGGER.error("Fail to retrieve the services from consul", ar.cause());
       } else {
@@ -232,7 +231,7 @@ public class ConsulServiceImporter implements ServiceImporter {
         registrations.add(registration.future());
       }
 
-      CompositeFuture.all(registrations).onComplete(ar -> {
+      Future.all(registrations).onComplete(ar -> {
         if (ar.succeeded()) {
           future.complete(importedServices);
         } else {
@@ -312,7 +311,7 @@ public class ConsulServiceImporter implements ServiceImporter {
       imported.unregister(publisher, promise);
     });
 
-    CompositeFuture.all(list).onComplete(ar -> {
+    Future.all(list).onComplete(ar -> {
       clearImportedServices();
       if (ar.succeeded()) {
         LOGGER.info("Successfully closed the service importer " + this);

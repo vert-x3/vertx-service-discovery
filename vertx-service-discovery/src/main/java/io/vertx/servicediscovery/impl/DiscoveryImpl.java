@@ -266,7 +266,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     bindings.forEach(ServiceReference::release);
     bindings.clear();
 
-    CompositeFuture.all(futures).onComplete(ar -> {
+    Future.all(futures).onComplete(ar -> {
       if (ar.succeeded()) {
         LOGGER.info("Discovery bridges stopped");
       } else {

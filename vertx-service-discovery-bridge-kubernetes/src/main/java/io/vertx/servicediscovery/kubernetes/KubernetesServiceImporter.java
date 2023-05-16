@@ -186,7 +186,7 @@ public class KubernetesServiceImporter implements ServiceImporter {
         publications.add(promise.future());
       }
     });
-    return CompositeFuture.all(publications);
+    return Future.all(publications);
   }
 
   private void watch() {

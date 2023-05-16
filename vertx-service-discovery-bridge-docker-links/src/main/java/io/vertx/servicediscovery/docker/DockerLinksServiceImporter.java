@@ -16,7 +16,6 @@
 
 package io.vertx.servicediscovery.docker;
 
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -144,7 +143,7 @@ public class DockerLinksServiceImporter implements ServiceImporter {
       publisher.unpublish(record.getRegistration()).onComplete(v -> list.add(v.succeeded() ? Future.succeededFuture() : Future.failedFuture(v.cause())));
     }
 
-    CompositeFuture.all(list).onComplete(ar -> {
+    Future.all(list).onComplete(ar -> {
           if (ar.succeeded()) {
             LOGGER.info("Successfully closed the service importer " + this);
           } else {

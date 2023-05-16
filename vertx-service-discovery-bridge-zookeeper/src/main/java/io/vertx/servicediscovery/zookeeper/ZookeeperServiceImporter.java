@@ -1,6 +1,5 @@
 package io.vertx.servicediscovery.zookeeper;
 
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -157,7 +156,7 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
         }).forEach(actions::add);
 
     if (done != null) {
-      CompositeFuture.all(actions).onComplete(ar -> {
+      Future.all(actions).onComplete(ar -> {
         if (ar.succeeded()) {
           done.complete(null);
         } else {
@@ -249,7 +248,7 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
     });
     registrations.clear();
 
-    CompositeFuture.all(list).onComplete(x -> {
+    Future.all(list).onComplete(x -> {
       if (x.failed()) {
         done.fail(x.cause());
       } else {

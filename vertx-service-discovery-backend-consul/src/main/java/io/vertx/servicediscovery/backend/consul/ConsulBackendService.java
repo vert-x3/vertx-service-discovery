@@ -17,7 +17,6 @@
 package io.vertx.servicediscovery.backend.consul;
 
 import io.vertx.core.AsyncResult;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -121,9 +120,9 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
         });
         return recordFutureList;
       })
-      .compose(CompositeFuture::all)
+      .compose(Future::all)
       .map(c -> c.<ServiceList>list().stream().flatMap(l -> l.getList().stream()).map(this::serviceToRecord).collect(Collectors.toList()))
-      .compose(CompositeFuture::all)
+      .compose(Future::all)
       .map(c -> c.list().stream().map(o -> (Record) o).collect(Collectors.toList()))
       .onComplete(resultHandler);
 
