@@ -462,16 +462,15 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
       if (ar.failed()) {
         resultHandler.handle(Future.failedFuture(ar.cause()));
       } else {
+        for (ServiceExporter exporter : exporters) {
+          exporter.onUpdate(record);
+        }
+
+        Record announcedRecord = new Record(record);
+        vertx.eventBus().publish(announce, announcedRecord.toJson());
         resultHandler.handle(Future.succeededFuture(record));
       }
     });
-
-    for (ServiceExporter exporter : exporters) {
-      exporter.onUpdate(record);
-    }
-
-    Record announcedRecord = new Record(record);
-    vertx.eventBus().publish(announce, announcedRecord.toJson());
   }
 
   @Override
