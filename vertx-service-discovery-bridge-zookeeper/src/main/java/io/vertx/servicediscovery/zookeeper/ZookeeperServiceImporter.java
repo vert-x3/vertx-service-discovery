@@ -53,34 +53,29 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
     int connectionTimeoutMs = configuration.getInteger("connectionTimeoutMs", 1000);
 
     vertx.<Void>executeBlocking(
-        f -> {
-          try {
+      () -> {
+          client = CuratorFrameworkFactory.builder()
+            .canBeReadOnly(canBeReadOnly)
+            .connectString(connection)
+            .connectionTimeoutMs(connectionTimeoutMs)
+            .retryPolicy(new ExponentialBackoffRetry(baseGraceBetweenRetries, maxRetries))
+            .build();
+          client.start();
 
-            client = CuratorFrameworkFactory.builder()
-                .canBeReadOnly(canBeReadOnly)
-                .connectString(connection)
-                .connectionTimeoutMs(connectionTimeoutMs)
-                .retryPolicy(new ExponentialBackoffRetry(baseGraceBetweenRetries, maxRetries))
-                .build();
-            client.start();
+          discovery = ServiceDiscoveryBuilder.builder(JsonObject.class)
+            .client(client)
+            .basePath(basePath)
+            .serializer(new JsonObjectSerializer())
+            .watchInstances(true)
+            .build();
 
-            discovery = ServiceDiscoveryBuilder.builder(JsonObject.class)
-                .client(client)
-                .basePath(basePath)
-                .serializer(new JsonObjectSerializer())
-                .watchInstances(true)
-                .build();
+          discovery.start();
 
-            discovery.start();
+          cache = TreeCache.newBuilder(client, basePath).build();
+          cache.start();
+          cache.getListenable().addListener(this);
 
-            cache = TreeCache.newBuilder(client, basePath).build();
-            cache.start();
-            cache.getListenable().addListener(this);
-
-            f.complete();
-          } catch (Exception e) {
-            future.fail(e);
-          }
+          return null;
         }).onComplete(
         ar -> {
           if (ar.failed()) {

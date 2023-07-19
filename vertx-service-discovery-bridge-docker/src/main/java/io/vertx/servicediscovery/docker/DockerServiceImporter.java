@@ -140,14 +140,8 @@ public class DockerServiceImporter implements ServiceImporter {
   }
 
   synchronized void scan(Promise<Void> completion) {
-    vertx.<List<Container>>executeBlocking(
-        future -> {
-          try {
-            future.complete(client.listContainersCmd().withStatusFilter(Collections.singletonList("running")).exec());
-          } catch (Exception e) {
-            future.fail(e);
-          }
-        }).onComplete(ar -> {
+    vertx.executeBlocking(
+        () -> client.listContainersCmd().withStatusFilter(Collections.singletonList("running")).exec()).onComplete(ar -> {
           if (ar.failed()) {
             if (completion != null) {
               completion.fail(ar.cause());

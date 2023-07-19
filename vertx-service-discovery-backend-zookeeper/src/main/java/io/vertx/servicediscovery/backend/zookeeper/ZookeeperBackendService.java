@@ -309,15 +309,11 @@ public class ZookeeperBackendService implements ServiceDiscoveryBackend, Connect
       case LOST:
       case SUSPENDED:
         vertx.executeBlocking(
-            future -> {
-              try {
-                if (client.blockUntilConnected(connectionTimeoutMs, TimeUnit.MILLISECONDS)) {
-                  future.complete();
-                } else {
-                  future.fail(new TimeoutException());
-                }
-              } catch (Exception e) {
-                future.fail(e);
+          () -> {
+              if (client.blockUntilConnected(connectionTimeoutMs, TimeUnit.MILLISECONDS)) {
+                return null;
+              } else {
+                throw new TimeoutException();
               }
             }).onComplete(ar -> {
               if (ar.failed()) {

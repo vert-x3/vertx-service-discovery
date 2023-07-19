@@ -131,13 +131,9 @@ public class ZookeeperBridgeTest {
         sd.getRecords(x -> true).onComplete(tc.asyncAssertSuccess(l -> {
           tc.assertTrue(l.size() == 0);
 
-          vertx.executeBlocking(future -> {
-            try {
-              this.discovery.registerService(instance);
-              future.complete();
-            } catch (Exception e) {
-              future.fail(e);
-            }
+          vertx.executeBlocking(() -> {
+            this.discovery.registerService(instance);
+            return null;
           }).onComplete(tc.asyncAssertSuccess(v2 -> {
             waitUntil(() -> serviceLookup(sd, 1), tc.asyncAssertSuccess(v3 -> {
               async.complete();
@@ -165,32 +161,20 @@ public class ZookeeperBridgeTest {
       tc.asyncAssertSuccess(v1 -> {
         sd.getRecords(x -> true).onComplete(tc.asyncAssertSuccess(l -> {
           tc.assertTrue(l.size() == 0);
-          vertx.executeBlocking(future -> {
-            try {
-              this.discovery.registerService(instance);
-              future.complete();
-            } catch (Exception e) {
-              future.fail(e);
-            }
+          vertx.executeBlocking(() -> {
+            this.discovery.registerService(instance);
+            return null;
           }).onComplete(tc.asyncAssertSuccess(v2 -> {
             waitUntil(() -> serviceLookup(sd, 1), tc.asyncAssertSuccess(v3 -> {
               // Leave
-              vertx.executeBlocking(future2 -> {
-                try {
-                  this.discovery.unregisterService(instance);
-                  future2.complete();
-                } catch (Exception e) {
-                  future2.fail(e);
-                }
+              vertx.executeBlocking(() -> {
+                this.discovery.unregisterService(instance);
+                return null;
               }).onComplete(tc.asyncAssertSuccess(v4 -> {
                 waitUntil(() -> serviceLookup(sd, 0), tc.asyncAssertSuccess(v5 -> {
-                  vertx.executeBlocking(future3 -> {
-                    try {
-                      this.discovery.registerService(instance);
-                      future3.complete();
-                    } catch (Exception e) {
-                      future3.fail(e);
-                    }
+                  vertx.executeBlocking(() -> {
+                    this.discovery.registerService(instance);
+                    return null;
                   }).onComplete(ar3 -> waitUntil(() -> serviceLookup(sd, 1), tc.asyncAssertSuccess(v6 -> {
                     async.complete();
                   })));
@@ -247,13 +231,9 @@ public class ZookeeperBridgeTest {
       tc.asyncAssertSuccess(v -> {
         waitUntil(() -> serviceLookup(sd, 1), tc.asyncAssertSuccess(list -> {
           tc.assertEquals(list.get(0).getName(), "foo-service");
-          vertx.executeBlocking(promise -> {
-            try {
-              this.discovery.registerService(instance2);
-              promise.complete();
-            } catch (Exception e) {
-              promise.fail(e);
-            }
+          vertx.executeBlocking(() -> {
+            this.discovery.registerService(instance2);
+            return null;
           }).onComplete(tc.asyncAssertSuccess(v2 -> {
             waitUntil(() -> serviceLookup(sd, 2), tc.asyncAssertSuccess(lookup -> {
               tc.assertEquals(lookup.get(0).getName(), "foo-service");
