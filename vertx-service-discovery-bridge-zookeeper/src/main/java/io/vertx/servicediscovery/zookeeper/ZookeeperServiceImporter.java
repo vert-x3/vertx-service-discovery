@@ -4,7 +4,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.impl.ConcurrentHashSet;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
@@ -24,6 +23,7 @@ import org.apache.curator.x.discovery.ServiceInstance;
 import org.apache.zookeeper.KeeperException;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A service importer retrieving services from Zookeeper.
@@ -39,7 +39,7 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
   private TreeCache cache;
   private volatile boolean started;
 
-  private Set<RegistrationHolder<ServiceInstance<JsonObject>>> registrations = new ConcurrentHashSet<>();
+  private final Set<RegistrationHolder<ServiceInstance<JsonObject>>> registrations = ConcurrentHashMap.newKeySet();
 
   @Override
   public void start(Vertx vertx, ServicePublisher publisher, JsonObject configuration, Promise<Void> future) {
@@ -224,8 +224,7 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
   }
 
   @Override
-  public void childEvent(CuratorFramework curatorFramework,
-                         TreeCacheEvent treeCacheEvent) {
+  public void childEvent(CuratorFramework curatorFramework, TreeCacheEvent treeCacheEvent) {
     if (treeCacheEvent.getType() == TreeCacheEvent.Type.INITIALIZED) {
       started = true;
     } else if (started) {
@@ -234,7 +233,7 @@ public class ZookeeperServiceImporter implements ServiceImporter, TreeCacheListe
   }
 
   private synchronized void unregisterAllServices(Promise<Void> done) {
-    List<Future<Void>> list = new ArrayList<>();
+    List<Future<Void>> list = new ArrayList<>(registrations.size());
 
     new HashSet<>(registrations).forEach(reg -> {
       Promise<Void> unreg = Promise.promise();
