@@ -35,14 +35,14 @@ public class RecordConverter {
             obj.setName((String)member.getValue());
           }
           break;
-        case "registration":
-          if (member.getValue() instanceof String) {
-            obj.setRegistration((String)member.getValue());
-          }
-          break;
         case "status":
           if (member.getValue() instanceof String) {
             obj.setStatus(io.vertx.servicediscovery.Status.valueOf((String)member.getValue()));
+          }
+          break;
+        case "registration":
+          if (member.getValue() instanceof String) {
+            obj.setRegistration((String)member.getValue());
           }
           break;
         case "type":
@@ -68,11 +68,11 @@ public class RecordConverter {
     if (obj.getName() != null) {
       json.put("name", obj.getName());
     }
-    if (obj.getRegistration() != null) {
-      json.put("registration", obj.getRegistration());
-    }
     if (obj.getStatus() != null) {
       json.put("status", obj.getStatus().name());
+    }
+    if (obj.getRegistration() != null) {
+      json.put("registration", obj.getRegistration());
     }
     if (obj.getType() != null) {
       json.put("type", obj.getType());

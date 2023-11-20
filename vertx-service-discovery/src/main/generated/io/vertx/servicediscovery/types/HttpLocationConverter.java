@@ -20,14 +20,14 @@ public class HttpLocationConverter {
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, HttpLocation obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
-        case "endpoint":
-          if (member.getValue() instanceof String) {
-            obj.setEndpoint((String)member.getValue());
-          }
-          break;
         case "host":
           if (member.getValue() instanceof String) {
             obj.setHost((String)member.getValue());
+          }
+          break;
+        case "endpoint":
+          if (member.getValue() instanceof String) {
+            obj.setEndpoint((String)member.getValue());
           }
           break;
         case "port":
@@ -54,11 +54,11 @@ public class HttpLocationConverter {
   }
 
   public static void toJson(HttpLocation obj, java.util.Map<String, Object> json) {
-    if (obj.getEndpoint() != null) {
-      json.put("endpoint", obj.getEndpoint());
-    }
     if (obj.getHost() != null) {
       json.put("host", obj.getHost());
+    }
+    if (obj.getEndpoint() != null) {
+      json.put("endpoint", obj.getEndpoint());
     }
     json.put("port", obj.getPort());
     if (obj.getRoot() != null) {

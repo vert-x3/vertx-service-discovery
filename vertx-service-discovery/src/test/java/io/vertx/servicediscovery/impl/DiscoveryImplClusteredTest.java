@@ -33,10 +33,8 @@ public class DiscoveryImplClusteredTest extends DiscoveryImplTestBase {
   public void setUp() {
     FakeClusterManager.reset();
     VertxOptions options = new VertxOptions();
-    options
-      .setClusterManager(new FakeClusterManager())
-      .getEventBusOptions().setHost("127.0.0.1");
-    Vertx.clusteredVertx(options).onComplete(ar -> {
+    options.getEventBusOptions().setHost("127.0.0.1");
+    Vertx.builder().with(options).withClusterManager(new FakeClusterManager()).buildClustered().onComplete(ar -> {
       vertx = ar.result();
     });
     await().until(() -> vertx != null);
