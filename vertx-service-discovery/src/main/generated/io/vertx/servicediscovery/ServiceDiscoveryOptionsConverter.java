@@ -17,7 +17,7 @@ public class ServiceDiscoveryOptionsConverter {
   private static final Base64.Decoder BASE64_DECODER = JsonUtil.BASE64_DECODER;
   private static final Base64.Encoder BASE64_ENCODER = JsonUtil.BASE64_ENCODER;
 
-  public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, ServiceDiscoveryOptions obj) {
+   static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, ServiceDiscoveryOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
         case "announceAddress":
@@ -44,11 +44,11 @@ public class ServiceDiscoveryOptionsConverter {
     }
   }
 
-  public static void toJson(ServiceDiscoveryOptions obj, JsonObject json) {
+   static void toJson(ServiceDiscoveryOptions obj, JsonObject json) {
     toJson(obj, json.getMap());
   }
 
-  public static void toJson(ServiceDiscoveryOptions obj, java.util.Map<String, Object> json) {
+   static void toJson(ServiceDiscoveryOptions obj, java.util.Map<String, Object> json) {
     if (obj.getAnnounceAddress() != null) {
       json.put("announceAddress", obj.getAnnounceAddress());
     }

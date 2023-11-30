@@ -17,6 +17,7 @@
 package io.vertx.servicediscovery;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend;
 
@@ -25,7 +26,8 @@ import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-@DataObject(generateConverter = true)
+@DataObject
+@JsonGen(publicConverter = false)
 public class ServiceDiscoveryOptions {
 
   public static final String DEFAULT_ANNOUNCE_ADDRESS = "vertx.discovery.announce";
