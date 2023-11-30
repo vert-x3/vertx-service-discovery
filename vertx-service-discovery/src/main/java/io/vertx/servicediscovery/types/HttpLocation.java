@@ -25,7 +25,8 @@ import io.vertx.core.json.JsonObject;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
-@DataObject(generateConverter = true)
+@DataObject
+@JsonGen(publicConverter = false)
 public class HttpLocation {
 
   private String host;
