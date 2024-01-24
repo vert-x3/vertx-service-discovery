@@ -22,7 +22,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.spi.ServiceType;
 import io.vertx.servicediscovery.types.HttpEndpoint;
-import io.vertx.servicediscovery.types.JDBCDataSource;
 import io.vertx.servicediscovery.types.MongoDataSource;
 import io.vertx.servicediscovery.types.RedisDataSource;
 import org.junit.Test;
@@ -188,10 +187,6 @@ public class KubernetesServiceImporterTest {
     assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(mapper.writeValueAsString(service)), new Record()))
       .isEqualTo(RedisDataSource.TYPE);
 
-    port.setPort(3306);
-    assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(mapper.writeValueAsString(service)), new Record()))
-      .isEqualTo(JDBCDataSource.TYPE);
-
     port.setPort(27017);
     assertThat(KubernetesServiceImporter.discoveryType(new JsonObject(mapper.writeValueAsString(service)), new Record()))
       .isEqualTo(MongoDataSource.TYPE);
@@ -243,25 +238,6 @@ public class KubernetesServiceImporterTest {
     assertThat(record.getLocation().getInteger("port")).isEqualTo(servicePort);
     assertThat(record.getLocation().getBoolean("ssl")).isTrue();
     assertThat(record.getLocation().getString("endpoint")).isEqualTo("https://my-external-service:" + servicePort);
-
-  }
-
-  @Test
-  public void testUnknownExternalServiceRecordCreation() throws Exception {
-
-    // JDBC Example
-    int servicePort = 5432;
-    Service service = getExternalService(servicePort);
-
-    Record record = KubernetesServiceImporter.createRecord(new JsonObject(mapper.writeValueAsString(service)));
-    assertThat(record).isNotNull();
-    assertThat(record.getName()).isEqualTo("my-service");
-    assertThat(record.getMetadata().getString("kubernetes.name")).isEqualTo("my-service");
-    assertThat(record.getMetadata().getString("kubernetes.namespace")).isEqualTo("my-project");
-    assertThat(record.getMetadata().getString("kubernetes.uuid")).isEqualTo("uuid");
-    assertThat(record.getType()).isEqualTo(JDBCDataSource.TYPE);
-    assertThat(record.getLocation().getString("host")).isEqualTo("my-external-service");
-    assertThat(record.getLocation().getInteger("port")).isEqualTo(servicePort);
 
   }
 

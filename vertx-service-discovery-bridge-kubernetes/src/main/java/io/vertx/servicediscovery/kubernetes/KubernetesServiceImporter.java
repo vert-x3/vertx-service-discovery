@@ -421,16 +421,6 @@ public class KubernetesServiceImporter implements ServiceImporter {
       return HttpEndpoint.TYPE;
     }
 
-    // PostGreSQL
-    if (p == 5432 || p == 5433) {
-      return JDBCDataSource.TYPE;
-    }
-
-    // MySQL
-    if (p == 3306 || p == 13306) {
-      return JDBCDataSource.TYPE;
-    }
-
     // Redis
     if (p == 6379) {
       return RedisDataSource.TYPE;

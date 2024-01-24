@@ -29,7 +29,7 @@ Consumer would 1) lookup a service record matching their need, 2) retrieve the
 the service, 4) release the service object once done.
 
 The process can be simplified using _service type_ where you can directly retrieve the service object if you know
-from which type it is (JDBC client, Http client...).
+from which type it is (Http client...).
 
 As stated above, the central piece of information shared by the providers and consumers are
 {@link io.vertx.servicediscovery.Record records}.
@@ -264,9 +264,6 @@ These types are provided by default:
 type is the proxies interface (the location is the address).
 * {@link io.vertx.servicediscovery.types.MessageSource} - for message sources (publisher), the service object is a
 {@link io.vertx.core.eventbus.MessageConsumer} (the location is the address).
-* {@link io.vertx.servicediscovery.types.JDBCDataSource} - for JDBC data sources, the service object is a
-{@link io.vertx.ext.jdbc.JDBCClient} (the configuration of the client is computed from the location, metadata and
-consumer configuration).
 * {@link io.vertx.servicediscovery.types.RedisDataSource} - for Redis data sources, the service object is a
 {@link io.vertx.redis.client.Redis} (the configuration of the client is computed from the location, metadata and
 consumer configuration).
@@ -519,46 +516,6 @@ When, using {@link io.vertx.servicediscovery.types.MessageSource}, it becomes:
 [source, $lang]
 ----
 {@link examples.MessageSourceExamples#example3(ServiceDiscovery)}
-----
-
-=== JDBC Data source
-
-Data sources represents databases or data stores. JDBC data sources are a specialization for databases accessible
-using a JDBC driver. The client of a JDBC data source service is a {@link io.vertx.ext.jdbc.JDBCClient}.
-
-==== Publishing a JDBC service
-
-As for the other service types, publishing a JDBC data source is a 2-step process:
-
-1. create a record, using {@link io.vertx.servicediscovery.types.JDBCDataSource}
-2. publish the record
-
-[source, $lang]
-----
-{@link examples.JDBCDataSourceExamples#example1(ServiceDiscovery)}
-----
-
-As JDBC data sources can represent a high variety of databases, and their access is often different, the record is
-rather unstructured. The `location` is a simple JSON object that should provide the fields to access the data
-source (JDBC url, username...). The set of fields may depend on the database but also on the connection pool used
-in front.
-
-==== Consuming a JDBC service
-
-As stated in the previous section, how to access a data source depends on the data source itself. To build the
-{@link io.vertx.ext.jdbc.JDBCClient}, you can merge configuration: the record location, the metadata and a json object provided by
-the consumer:
-
-[source, $lang]
-----
-{@link examples.JDBCDataSourceExamples#example2(ServiceDiscovery)}
-----
-
-You can also use the {@link io.vertx.ext.jdbc.JDBCClient} class to the lookup and retrieval in one call:
-
-[source, $lang]
-----
-{@link examples.JDBCDataSourceExamples#example3(ServiceDiscovery)}
 ----
 
 === Redis Data source

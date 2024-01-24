@@ -54,7 +54,6 @@ public class PolyglotUsageTest {
 
     AtomicBoolean httpEndpointPublished = new AtomicBoolean();
     AtomicBoolean serviceProxyPublished = new AtomicBoolean();
-    AtomicBoolean jdbcDataSourcePublished = new AtomicBoolean();
     AtomicBoolean messageSource1Published = new AtomicBoolean();
     AtomicBoolean messageSource2Published = new AtomicBoolean();
     AtomicBoolean redisDataSourcePublished = new AtomicBoolean();
@@ -67,13 +66,6 @@ public class PolyglotUsageTest {
     discovery.publish(
       EventBusService.createRecord("my-service", "my-service", HelloService.class.getName())).onComplete(
       ar -> serviceProxyPublished.set(ar.succeeded()));
-
-    discovery.publish(
-      JDBCDataSource.createRecord("my-data-source",
-        new JsonObject().put("url", "jdbc:hsqldb:file:target/dumb-db;shutdown=true"),
-        new JsonObject().put("database", "some-raw-data"))).onComplete(
-      ar -> jdbcDataSourcePublished.set(ar.succeeded())
-    );
 
     discovery.publish(
       MessageSource.createRecord("my-message-source-1", "source1")).onComplete(
@@ -101,7 +93,6 @@ public class PolyglotUsageTest {
 
     await().untilAtomic(httpEndpointPublished, is(true));
     await().untilAtomic(serviceProxyPublished, is(true));
-    await().untilAtomic(jdbcDataSourcePublished, is(true));
     await().untilAtomic(messageSource1Published, is(true));
     await().untilAtomic(messageSource2Published, is(true));
     await().untilAtomic(redisDataSourcePublished, is(true));
@@ -128,8 +119,6 @@ public class PolyglotUsageTest {
     Async web_sugar = tc.async();
     Async svc_ref = tc.async();
     Async svc_sugar = tc.async();
-    Async ds_ref = tc.async();
-    Async ds_sugar = tc.async();
     Async ms_ref = tc.async();
     Async ms_sugar = tc.async();
     Async redis_ref = tc.async();
@@ -181,20 +170,6 @@ public class PolyglotUsageTest {
         tc.assertTrue(reply.result().body().getString("client").contains("HelloServiceVertxEBProxy"));
         tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
         svc_ref.complete();
-      });
-
-      vertx.eventBus().<JsonObject>request("ds-sugar", "").onComplete(reply -> {
-        tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("JDBCClientImpl"));
-        tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
-        ds_sugar.complete();
-      });
-
-      vertx.eventBus().<JsonObject>request("ds-ref", "").onComplete(reply -> {
-        tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("JDBCClientImpl"));
-        tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
-        ds_ref.complete();
       });
 
       vertx.eventBus().<JsonObject>request("redis-sugar", "").onComplete(reply -> {

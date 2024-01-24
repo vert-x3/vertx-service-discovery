@@ -25,7 +25,6 @@ import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.types.HttpEndpoint;
-import io.vertx.ext.jdbc.JDBCClient;
 
 import java.util.List;
 
@@ -186,7 +185,7 @@ public class ServiceDiscoveryExamples {
 
     // Then, gets the service object, the returned type depends on the service type:
     // For http endpoint:
-    JDBCClient client = reference.getAs(JDBCClient.class);
+    HttpClient client = reference.getAs(HttpClient.class);
 
     // Do something with the client...
 

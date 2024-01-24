@@ -17,6 +17,5 @@
 io.vertx.servicediscovery.types.impl.EventBusServiceImpl
 io.vertx.servicediscovery.types.impl.MessageSourceImpl
 io.vertx.servicediscovery.types.impl.HttpEndpointImpl
-io.vertx.servicediscovery.types.impl.JDBCDataSourceImpl
 io.vertx.servicediscovery.types.impl.RedisDataSourceImpl
 io.vertx.servicediscovery.types.impl.MongoDataSourceImpl
