@@ -38,7 +38,7 @@ public class ClassLoaderUtils {
 
     // If not found, delegate to the given classloader (if set).
     if (loaded == null && classLoader != null) {
-      return tryToLoad(className, classLoader);
+      loaded = tryToLoad(className, classLoader);
     }
 
     // Last attempt, try with the TCCL
