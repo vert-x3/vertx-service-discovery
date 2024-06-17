@@ -27,10 +27,6 @@
 
   <artifactId>vertx-service-discovery-bridge-kubernetes</artifactId>
 
-  <properties>
-    <doc.skip>false</doc.skip>
-  </properties>
-
   <dependencies>
     <dependency>
       <groupId>org.slf4j</groupId>

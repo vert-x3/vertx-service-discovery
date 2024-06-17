@@ -29,7 +29,6 @@
   <artifactId>vertx-service-discovery-bridge-docker</artifactId>
 
   <properties>
-    <doc.skip>true</doc.skip>
     <jackson.version>2.11.3</jackson.version>
   </properties>
 
@@ -78,8 +77,19 @@
   <build>
     <plugins>
       <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-compile</id>
+            <phase>compile</phase>
+            <configuration>
+              <proc>none</proc>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.19</version>
         <configuration>
           <skip>true</skip>
         </configuration>

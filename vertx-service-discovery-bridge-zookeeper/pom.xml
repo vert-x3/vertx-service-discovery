@@ -13,7 +13,6 @@
   <artifactId>vertx-service-discovery-bridge-zookeeper</artifactId>
 
   <properties>
-    <doc.skip>false</doc.skip>
     <curator.version>2.13.0</curator.version>
   </properties>
 
