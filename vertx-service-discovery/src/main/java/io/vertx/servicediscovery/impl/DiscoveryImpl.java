@@ -18,9 +18,9 @@ package io.vertx.servicediscovery.impl;
 
 import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.*;
-import io.vertx.core.impl.VertxInternal;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.internal.VertxInternal;
+import io.vertx.core.internal.logging.Logger;
+import io.vertx.core.internal.logging.LoggerFactory;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.*;
 import io.vertx.servicediscovery.Record;

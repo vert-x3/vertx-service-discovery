@@ -1,11 +1,6 @@
 package io.vertx.servicediscovery.zookeeper;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
-import io.vertx.core.impl.NoStackTraceThrowable;
+import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
@@ -190,7 +185,7 @@ public class ZookeeperBridgeTest {
     Promise<List<Record>> promise = Promise.promise();
     discovery.getRecords(x -> true).onComplete(ar -> {
       if (ar.failed()) {
-        NoStackTraceThrowable failure = new NoStackTraceThrowable("service lookup failed: " + ar.cause().getMessage());
+        VertxException failure = VertxException.noStackTrace("service lookup failed: " + ar.cause().getMessage());
         failure.initCause(ar.cause());
         promise.fail(failure);
       } else if (ar.result().size() != expected) {
