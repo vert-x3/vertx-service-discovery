@@ -16,6 +16,7 @@
 
 package io.vertx.servicediscovery.backend.redis;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.servicediscovery.spi.ServiceDiscoveryBackend;
 import io.vertx.servicediscovery.spi.ServiceDiscoveryBackendTest;
@@ -47,8 +48,7 @@ public class RedisBackendConfiguredInJsonTest extends ServiceDiscoveryBackendTes
   @Override
   protected ServiceDiscoveryBackend createBackend() {
     RedisBackendService backend = new RedisBackendService();
-    backend.init(vertx, new JsonObject().put("connectionString", "redis://localhost:" + PORT).put("key", "vertx"));
+    backend.init(vertx, new JsonObject().put("endpoints", new JsonArray().add("redis://localhost:" + PORT)).put("key", "vertx"));
     return backend;
   }
-
 }

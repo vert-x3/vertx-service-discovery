@@ -1,6 +1,7 @@
 package io.vertx.servicediscovery.types;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.redis.client.Command;
 import io.vertx.redis.client.Redis;
@@ -15,6 +16,8 @@ import org.junit.*;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -54,19 +57,20 @@ public class RedisDataSourceTest {
   }
 
   @After
-  public void tearDown() {
+  public void tearDown() throws Exception {
     discovery.close();
-    AtomicBoolean completed = new AtomicBoolean();
-    vertx.close().onComplete((v) -> completed.set(true));
-    await().untilAtomic(completed, is(true));
+    vertx.close()
+      .toCompletionStage()
+      .toCompletableFuture()
+      .get(20, TimeUnit.SECONDS);
 
     assertThat(discovery.bindings()).isEmpty();
   }
 
   @Test
-  public void test() {
+  public void test() throws Exception {
     Record record = RedisDataSource.createRecord("some-redis-data-source",
-      new JsonObject().put("endpoint", "redis://localhost:" + redis.getMappedPort(6379)),
+      new JsonObject().put("endpoints", new JsonArray().add("redis://localhost:" + redis.getMappedPort(6379))),
       new JsonObject().put("database", "some-raw-data"));
 
     discovery.publish(record);
@@ -80,20 +84,13 @@ public class RedisDataSourceTest {
     await().until(() -> found.get() != null);
     ServiceReference service = discovery.getReference(found.get());
     Redis client = service.get();
-    AtomicBoolean success = new AtomicBoolean();
-    client.connect().onComplete(connect -> {
-      if (connect.succeeded()) {
-        RedisConnection conn = connect.result();
-        conn.send(Request.cmd(Command.PING)).onComplete(ar -> {
-          if (ar.succeeded()) {
-            client.close();
-            success.set(ar.succeeded());
-          }
-        });
-      }
-    });
+    client.connect().compose(conn -> conn
+      .send(Request.cmd(Command.PING))
+      .eventually(conn::close))
+      .toCompletionStage()
+      .toCompletableFuture()
+      .get(20, TimeUnit.SECONDS);
 
-    await().untilAtomic(success, is(true));
     service.release();
     // Just there to be sure we can call it twice
     service.release();
@@ -115,7 +112,7 @@ public class RedisDataSourceTest {
   @Test
   public void testWithSugar() throws InterruptedException {
     Record record = RedisDataSource.createRecord("some-redis-data-source",
-      new JsonObject().put("endpoint", "redis://localhost:" + redis.getMappedPort(6379)),
+      new JsonObject().put("endpoints", new JsonArray().add("redis://localhost:" + redis.getMappedPort(6379))),
       new JsonObject().put("database", "some-raw-data"));
 
     discovery.publish(record);
@@ -140,5 +137,4 @@ public class RedisDataSourceTest {
       });
     await().untilAtomic(success, is(true));
   }
-
 }
