@@ -36,7 +36,7 @@
   <properties>
     <asciidoc.dir>${project.basedir}/src/main/asciidoc</asciidoc.dir>
     <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
-    <testcontainers.version>1.15.2</testcontainers.version>
+    <testcontainers.version>1.20.1</testcontainers.version>
   </properties>
 
   <modules>

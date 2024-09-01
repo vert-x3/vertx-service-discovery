@@ -2,7 +2,6 @@ package io.vertx.servicediscovery.polyglot;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.servicediscovery.ServiceDiscovery;
@@ -112,109 +111,79 @@ public class PolyglotUsageTest {
 
   @Test
   public void testJava(TestContext tc) {
-    Async deployment = tc.async();
-    Async http_ref = tc.async();
-    Async http_sugar = tc.async();
-    Async web_ref = tc.async();
-    Async web_sugar = tc.async();
-    Async svc_ref = tc.async();
-    Async svc_sugar = tc.async();
-    Async ms_ref = tc.async();
-    Async ms_sugar = tc.async();
-    Async redis_ref = tc.async();
-    Async redis_sugar = tc.async();
-    Async mongo_ref = tc.async();
-    Async mongo_sugar = tc.async();
 
-    vertx.deployVerticle(MyVerticle.class.getName()).onComplete(deployed -> {
+    vertx.deployVerticle(MyVerticle.class.getName()).onComplete(tc.asyncAssertSuccess(id -> {
+      vertx.eventBus().<JsonObject>request("http-ref", "")
+        .onComplete(tc.asyncAssertSuccess(reply -> {
+          tc.assertTrue(reply.body().getString("client").contains("HttpClient"));
+          tc.assertTrue(reply.body().getJsonArray("bindings").isEmpty());
+        }));
 
-      vertx.eventBus().<JsonObject>request("http-ref", "").onComplete(reply -> {
-        tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("HttpClient"));
-        tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
-        http_ref.complete();
-      });
+      vertx.eventBus().<JsonObject>request("http-sugar", "")
+        .onComplete(tc.asyncAssertSuccess(reply -> {
+          tc.assertTrue(reply.body().getString("client").contains("HttpClient"));
+          tc.assertTrue(reply.body().getJsonArray("bindings").isEmpty());
+        }));
 
-      vertx.eventBus().<JsonObject>request("http-sugar", "").onComplete(reply -> {
-        tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("HttpClient"));
-        tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
-        http_sugar.complete();
-      });
+      vertx.eventBus().<JsonObject>request("web-ref", "")
+        .onComplete(tc.asyncAssertSuccess(reply -> {
+          tc.assertTrue(reply.body().getString("client").contains("WebClient"));
+          tc.assertTrue(reply.body().getString("direct").contains("HttpClient"));
+          tc.assertTrue(reply.body().getJsonArray("bindings").isEmpty());
+        }));
 
+      vertx.eventBus().<JsonObject>request("web-sugar", "")
+        .onComplete(tc.asyncAssertSuccess(reply -> {
+          tc.assertTrue(reply.body().getString("client").contains("WebClient"));
+          tc.assertTrue(reply.body().getJsonArray("bindings").isEmpty());
+        }));
 
-      vertx.eventBus().<JsonObject>request("web-ref", "").onComplete(reply -> {
-        tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("WebClient"));
-        tc.assertTrue(reply.result().body().getString("direct").contains("HttpClient"));
-        tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
-        web_ref.complete();
-      });
+      vertx.eventBus().<JsonObject>request("service-sugar", "")
+        .onComplete(tc.asyncAssertSuccess(reply -> {
+          tc.assertTrue(reply.body().getString("client").contains("HelloServiceVertxEBProxy"));
+          tc.assertTrue(reply.body().getJsonArray("bindings").isEmpty());
+        }));
 
-      vertx.eventBus().<JsonObject>request("web-sugar", "").onComplete(reply -> {
-        tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("WebClient"));
-        tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
-        web_sugar.complete();
-      });
+      vertx.eventBus().<JsonObject>request("service-ref", "")
+        .onComplete(tc.asyncAssertSuccess(reply -> {
+          tc.assertTrue(reply.body().getString("client").contains("HelloServiceVertxEBProxy"));
+          tc.assertTrue(reply.body().getJsonArray("bindings").isEmpty());
+        }));
 
-      vertx.eventBus().<JsonObject>request("service-sugar", "").onComplete(reply -> {
-        tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("HelloServiceVertxEBProxy"));
-        tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
-        svc_sugar.complete();
-      });
+      vertx.eventBus().<JsonObject>request("redis-sugar", "")
+        .onComplete(tc.asyncAssertSuccess(reply -> {
+          tc.assertTrue(reply.body().getString("client").contains("RedisClient"));
+          tc.assertTrue(reply.body().getJsonArray("bindings").isEmpty());
+        }));
 
-      vertx.eventBus().<JsonObject>request("service-ref", "").onComplete(reply -> {
-        tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("HelloServiceVertxEBProxy"));
-        tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
-        svc_ref.complete();
-      });
+      vertx.eventBus().<JsonObject>request("redis-ref", "")
+        .onComplete(tc.asyncAssertSuccess(reply -> {
+          tc.assertTrue(reply.body().getString("client").contains("RedisClient"));
+          tc.assertTrue(reply.body().getJsonArray("bindings").isEmpty());
+        }));
 
-      vertx.eventBus().<JsonObject>request("redis-sugar", "").onComplete(reply -> {
-        tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("RedisClient"));
-        tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
-        redis_sugar.complete();
-      });
+      vertx.eventBus().<JsonObject>request("mongo-sugar", "").onComplete(tc
+        .asyncAssertSuccess(reply -> {
+          tc.assertTrue(reply.body().getString("client").contains("MongoClientImpl"));
+          tc.assertTrue(reply.body().getJsonArray("bindings").isEmpty());
+        }));
 
-      vertx.eventBus().<JsonObject>request("redis-ref", "").onComplete(reply -> {
-        tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("RedisClient"));
-        tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
-        redis_ref.complete();
-      });
+      vertx.eventBus().<JsonObject>request("mongo-ref", "")
+        .onComplete(tc.asyncAssertSuccess(reply -> {
+          tc.assertTrue(reply.body().getString("client").contains("MongoClientImpl"));
+          tc.assertTrue(reply.body().getJsonArray("bindings").isEmpty());
+        }));
 
-      vertx.eventBus().<JsonObject>request("mongo-sugar", "").onComplete(reply -> {
-        tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("MongoClientImpl"));
-        tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
-        mongo_sugar.complete();
-      });
+      vertx.eventBus().<JsonObject>request("source1-sugar", "")
+        .onComplete(tc.asyncAssertSuccess(reply -> {
+          tc.assertTrue(reply.body().getString("client").contains("MessageConsumerImpl"));
+          tc.assertTrue(reply.body().getJsonArray("bindings").isEmpty());
+        }));
 
-      vertx.eventBus().<JsonObject>request("mongo-ref", "").onComplete(reply -> {
-        tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("MongoClientImpl"));
-        tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
-        mongo_ref.complete();
-      });
-
-      vertx.eventBus().<JsonObject>request("source1-sugar", "").onComplete(reply -> {
-        tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("MessageConsumerImpl"));
-        tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
-        ms_sugar.complete();
-      });
-
-      vertx.eventBus().<JsonObject>request("source1-ref", "").onComplete(reply -> {
-        tc.assertTrue(reply.succeeded());
-        tc.assertTrue(reply.result().body().getString("client").contains("MessageConsumerImpl"));
-        tc.assertTrue(reply.result().body().getJsonArray("bindings").isEmpty());
-        ms_ref.complete();
-      });
-
-      deployment.complete();
-    });
+      vertx.eventBus().<JsonObject>request("source1-ref", "").onComplete(tc.asyncAssertSuccess(reply -> {
+        tc.assertTrue(reply.body().getString("client").contains("MessageConsumerImpl"));
+        tc.assertTrue(reply.body().getJsonArray("bindings").isEmpty());
+      }));
+    }));
   }
 }
