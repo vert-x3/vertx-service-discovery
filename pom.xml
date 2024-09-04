@@ -14,102 +14,181 @@
   ~
   ~ You may elect to redistribute this code under either of these licenses.
   --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-
-  <parent>
-    <groupId>io.vertx</groupId>
-    <artifactId>vertx-ext-parent</artifactId>
-    <version>38</version>
-  </parent>
-
-  <artifactId>vertx-service-discovery-parent</artifactId>
-  <version>4.5.10-SNAPSHOT</version>
-
-  <packaging>pom</packaging>
-
-  <properties>
-    <stack.version>4.5.10-SNAPSHOT</stack.version>
-    <asciidoc.dir>${project.basedir}/src/main/asciidoc</asciidoc.dir>
-    <doc.skip>true</doc.skip>
-    <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
-    <testcontainers.version>1.15.2</testcontainers.version>
-  </properties>
-
-
-  <modules>
-    <module>vertx-service-discovery</module>
-    <module>vertx-service-discovery-bridge-kubernetes</module>
-    <module>vertx-service-discovery-bridge-docker</module>
-    <module>vertx-service-discovery-bridge-docker-links</module>
-    <module>vertx-service-discovery-backend-redis</module>
-    <module>vertx-service-discovery-bridge-consul</module>
-    <module>vertx-service-discovery-bridge-zookeeper</module>
-    <module>vertx-service-discovery-backend-zookeeper</module>
-    <module>vertx-service-discovery-backend-consul</module>
-  </modules>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
+      
+    <modelVersion>4.0.0</modelVersion>
+      
+    <parent>
+            
         <groupId>io.vertx</groupId>
-        <artifactId>vertx-dependencies</artifactId>
-        <version>${stack.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
+            
+        <artifactId>vertx-ext-parent</artifactId>
+            
+        <version>38</version>
+          
+    </parent>
+      
+    <artifactId>vertx-service-discovery-parent</artifactId>
+      
+    <version>4.5.10</version>
+      
+    <packaging>pom</packaging>
+      
+    <properties>
+            
+        <stack.version>4.5.10</stack.version>
+            
+        <asciidoc.dir>${project.basedir}/src/main/asciidoc</asciidoc.dir>
+            
+        <doc.skip>true</doc.skip>
+            
+        <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
+            
+        <testcontainers.version>1.15.2</testcontainers.version>
+          
+    </properties>
+      
+    <modules>
+            
+        <module>vertx-service-discovery</module>
+            
+        <module>vertx-service-discovery-bridge-kubernetes</module>
+            
+        <module>vertx-service-discovery-bridge-docker</module>
+            
+        <module>vertx-service-discovery-bridge-docker-links</module>
+            
+        <module>vertx-service-discovery-backend-redis</module>
+            
+        <module>vertx-service-discovery-bridge-consul</module>
+            
+        <module>vertx-service-discovery-bridge-zookeeper</module>
+            
+        <module>vertx-service-discovery-backend-zookeeper</module>
+            
+        <module>vertx-service-discovery-backend-consul</module>
+          
+    </modules>
+      
+    <dependencyManagement>
+            
+        <dependencies>
+                  
+            <dependency>
+                        
+                <groupId>io.vertx</groupId>
+                        
+                <artifactId>vertx-dependencies</artifactId>
+                        
+                <version>${stack.version}</version>
+                        
+                <type>pom</type>
+                        
+                <scope>import</scope>
+                      
+            </dependency>
+                
+        </dependencies>
+          
+    </dependencyManagement>
+      
+    <dependencies>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-core</artifactId>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-service-proxy</artifactId>
+                  
+            <optional>true</optional>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-core</artifactId>
+                  
+            <type>test-jar</type>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-codegen</artifactId>
+                  
+            <optional>true</optional>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-docgen</artifactId>
+                  
+            <optional>true</optional>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-unit</artifactId>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>junit</groupId>
+                  
+            <artifactId>junit</artifactId>
+                  
+            <version>4.13.1</version>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>org.assertj</groupId>
+                  
+            <artifactId>assertj-core</artifactId>
+                  
+            <version>3.3.0</version>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>com.jayway.awaitility</groupId>
+                  
+            <artifactId>awaitility</artifactId>
+                  
+            <version>1.7.0</version>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+          
     </dependencies>
-  </dependencyManagement>
-
-  <dependencies>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-service-proxy</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-core</artifactId>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-codegen</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-docgen</artifactId>
-      <optional>true</optional>
-    </dependency>
-
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-unit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
-      <version>3.3.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.jayway.awaitility</groupId>
-      <artifactId>awaitility</artifactId>
-      <version>1.7.0</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
+    
 </project>
