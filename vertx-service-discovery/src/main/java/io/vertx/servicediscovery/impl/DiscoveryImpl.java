@@ -170,7 +170,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
   }
 
   public ServiceDiscovery registerServiceImporter(ServiceImporter importer, JsonObject configuration,
-                                                  Handler<AsyncResult<Void>> completionHandler) {
+                                                  Completable<Void> completionHandler) {
     JsonObject conf;
     if (configuration == null) {
       conf = new JsonObject();
@@ -184,14 +184,14 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
         if (ar.failed()) {
           LOGGER.error("Cannot start the service importer " + importer, ar.cause());
           if (completionHandler != null) {
-            completionHandler.handle(Future.failedFuture(ar.cause()));
+            completionHandler.fail(ar.cause());
           }
         } else {
           importers.add(importer);
           LOGGER.info("Service importer " + importer + " started");
 
           if (completionHandler != null) {
-            completionHandler.handle(Future.succeededFuture(null));
+            completionHandler.succeed();
           }
         }
       }
@@ -216,7 +216,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
   }
 
   public ServiceDiscovery registerServiceExporter(ServiceExporter exporter, JsonObject configuration,
-                                                  Handler<AsyncResult<Void>> completionHandler) {
+                                                  Completable<Void> completionHandler) {
     JsonObject conf;
     if (configuration == null) {
       conf = new JsonObject();
@@ -230,14 +230,14 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
         if (ar.failed()) {
           LOGGER.error("Cannot start the service importer " + exporter, ar.cause());
           if (completionHandler != null) {
-            completionHandler.handle(Future.failedFuture(ar.cause()));
+            completionHandler.fail(ar.cause());
           }
         } else {
           exporters.add(exporter);
           LOGGER.info("Service exporter " + exporter + " started");
 
           if (completionHandler != null) {
-            completionHandler.handle(Future.succeededFuture(null));
+            completionHandler.succeed();
           }
         }
       }
@@ -275,13 +275,13 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     });
   }
 
-  public void publish(Record record, Handler<AsyncResult<Record>> resultHandler) {
+  public void publish(Record record, Completable<Record> resultHandler) {
     Status status = record.getStatus() == null || record.getStatus() == Status.UNKNOWN
       ? Status.UP : record.getStatus();
 
     backend.store(record.setStatus(status), ar -> {
       if (ar.failed()) {
-        resultHandler.handle(Future.failedFuture(ar.cause()));
+        resultHandler.fail(ar.cause());
         return;
       }
 
@@ -294,7 +294,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
         .setStatus(status);
 
       vertx.eventBus().publish(announce, announcedRecord.toJson());
-      resultHandler.handle(Future.succeededFuture(ar.result()));
+      resultHandler.succeed(ar.result());
     });
   }
 
@@ -305,10 +305,10 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     return promise.future();
   }
 
-  public void unpublish(String id, Handler<AsyncResult<Void>> resultHandler) {
+  public void unpublish(String id, Completable<Void> resultHandler) {
     backend.remove(id, record -> {
       if (record.failed()) {
-        resultHandler.handle(Future.failedFuture(record.cause()));
+        resultHandler.fail(record.cause());
         return;
       }
 
@@ -322,7 +322,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
         .setStatus(Status.DOWN);
 
       vertx.eventBus().publish(announce, announcedRecord.toJson());
-      resultHandler.handle(Future.succeededFuture());
+      resultHandler.succeed();
     });
   }
 
@@ -334,7 +334,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
   }
 
   public void getRecord(JsonObject filter,
-                        Handler<AsyncResult<Record>> resultHandler) {
+                        Completable<Record> resultHandler) {
     boolean includeOutOfService = false;
     Function<Record, Boolean> accept;
     if (filter == null) {
@@ -354,8 +354,14 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     return promise.future();
   }
 
-  public void getRecord(String id, Handler<AsyncResult<@Nullable Record>> resultHandler) {
-    backend.getRecord(id, resultHandler);
+  public void getRecord(String id, Completable<@Nullable Record> resultHandler) {
+    backend.getRecord(id, ar -> {
+      if (ar.succeeded()) {
+        resultHandler.succeed(ar.result());
+      } else {
+        resultHandler.fail(ar.cause());
+      }
+    });
   }
 
   @Override
@@ -365,7 +371,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     return promise.future();
   }
 
-  public void getRecord(Function<Record, Boolean> filter, Handler<AsyncResult<Record>> resultHandler) {
+  public void getRecord(Function<Record, Boolean> filter, Completable<Record> resultHandler) {
     getRecord(filter, false, resultHandler);
   }
 
@@ -376,21 +382,21 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     return promise.future();
   }
 
-  public void getRecord(Function<Record, Boolean> filter, boolean includeOutOfService, Handler<AsyncResult<Record>>
+  public void getRecord(Function<Record, Boolean> filter, boolean includeOutOfService, Completable<Record>
     resultHandler) {
     Objects.requireNonNull(filter);
     backend.getRecords(list -> {
       if (list.failed()) {
-        resultHandler.handle(Future.failedFuture(list.cause()));
+        resultHandler.fail(list.cause());
       } else {
         Optional<Record> any = list.result().stream()
           .filter(filter::apply)
           .filter(record -> includeOutOfService || record.getStatus() == Status.UP)
           .findAny();
         if (any.isPresent()) {
-          resultHandler.handle(Future.succeededFuture(any.get()));
+          resultHandler.succeed(any.get());
         } else {
-          resultHandler.handle(Future.succeededFuture(null));
+          resultHandler.succeed();
         }
       }
     });
@@ -403,7 +409,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     return promise.future();
   }
 
-  public void getRecords(JsonObject filter, Handler<AsyncResult<List<Record>>> resultHandler) {
+  public void getRecords(JsonObject filter, Completable<List<Record>> resultHandler) {
     boolean includeOutOfService = false;
     Function<Record, Boolean> accept;
     if (filter == null) {
@@ -423,7 +429,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     return promise.future();
   }
 
-  public void getRecords(Function<Record, Boolean> filter, Handler<AsyncResult<List<Record>>> resultHandler) {
+  public void getRecords(Function<Record, Boolean> filter, Completable<List<Record>> resultHandler) {
     getRecords(filter, false, resultHandler);
   }
 
@@ -434,18 +440,18 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     return promise.future();
   }
 
-  public void getRecords(Function<Record, Boolean> filter, boolean includeOutOfService, Handler<AsyncResult<List<Record>>> resultHandler) {
+  public void getRecords(Function<Record, Boolean> filter, boolean includeOutOfService, Completable<List<Record>> resultHandler) {
     Objects.requireNonNull(filter);
     backend.getRecords(list -> {
       if (list.failed()) {
-        resultHandler.handle(Future.failedFuture(list.cause()));
+        resultHandler.fail(list.cause());
       } else {
-        resultHandler.handle(Future.succeededFuture(
+        resultHandler.succeed(
           list.result().stream()
             .filter(filter::apply)
             .filter(record -> includeOutOfService || record.getStatus() == Status.UP)
             .collect(Collectors.toList())
-        ));
+        );
       }
     });
   }
@@ -457,10 +463,10 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
     return promise.future();
   }
 
-  public void update(Record record, Handler<AsyncResult<Record>> resultHandler) {
+  public void update(Record record, Completable<Record> resultHandler) {
     backend.update(record, ar -> {
       if (ar.failed()) {
-        resultHandler.handle(Future.failedFuture(ar.cause()));
+        resultHandler.fail(ar.cause());
       } else {
         for (ServiceExporter exporter : exporters) {
           exporter.onUpdate(record);
@@ -468,7 +474,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
         Record announcedRecord = new Record(record);
         vertx.eventBus().publish(announce, announcedRecord.toJson());
-        resultHandler.handle(Future.succeededFuture(record));
+        resultHandler.succeed(record);
       }
     });
   }

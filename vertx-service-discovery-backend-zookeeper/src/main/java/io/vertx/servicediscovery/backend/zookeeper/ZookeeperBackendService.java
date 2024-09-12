@@ -228,7 +228,13 @@ public class ZookeeperBackendService implements ServiceDiscoveryBackend, Connect
                     List<Future<Record>> futures = new ArrayList<>();
                     for (String child : children) {
                       Promise<Record> promise = Promise.promise();
-                      getRecord(child, promise);
+                      getRecord(child, ar -> {
+                        if (ar.succeeded()) {
+                          promise.succeed(ar.result());
+                        } else {
+                          promise.fail(ar.cause());
+                        }
+                      });
                       futures.add(promise.future());
                     }
 

@@ -334,17 +334,17 @@ public class KubernetesServiceImporter implements ServiceImporter {
     return result.onSuccess(tk -> this.token = tk).mapEmpty();
   }
 
-  private void publishRecord(Record record, Handler<AsyncResult<Record>> completionHandler) {
-    publisher.publish(record).onComplete(ar -> {
+  private void publishRecord(Record record, Completable<Record> completionHandler) {
+    publisher.publish(record).onComplete((res, err) -> {
       if (completionHandler != null) {
-        completionHandler.handle(ar);
+        completionHandler.complete(res, err);
       }
-      if (ar.succeeded()) {
+      if (err == null) {
         LOGGER.info("Kubernetes service published in the vert.x service registry: "
           + record.toJson());
       } else {
         LOGGER.error("Kubernetes service not published in the vert.x service registry",
-          ar.cause());
+          err);
       }
     });
   }

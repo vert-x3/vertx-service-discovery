@@ -131,7 +131,13 @@ public class ConsulBackendService implements ServiceDiscoveryBackend {
   @Override
   public void getRecord(String uuid, Handler<AsyncResult<Record>> resultHandler) {
     Promise<List<Record>> recordList = Promise.promise();
-    getRecords(recordList);
+    getRecords(ar -> {
+      if (ar.succeeded()) {
+        recordList.succeed(ar.result());
+      } else {
+        recordList.fail(ar.cause());
+      }
+    });
     recordList.future().map(l -> l.stream().filter(r -> uuid.equals(r.getRegistration())).findFirst().orElse(null)).onComplete(resultHandler);
   }
 
