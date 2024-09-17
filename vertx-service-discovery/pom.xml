@@ -31,6 +31,11 @@
   <dependencies>
     <dependency>
       <groupId>io.vertx</groupId>
+      <artifactId>vertx-service-proxy</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
       <artifactId>vertx-web</artifactId>
       <optional>true</optional>
     </dependency>
@@ -97,6 +102,10 @@
                     <groupId>io.vertx</groupId>
                     <artifactId>vertx-codegen</artifactId>
                     <classifier>processor</classifier>
+                  </annotationProcessorPath>
+                  <annotationProcessorPath>
+                    <groupId>io.vertx</groupId>
+                    <artifactId>vertx-service-proxy</artifactId>
                   </annotationProcessorPath>
                 </annotationProcessorPaths>
               </configuration>
