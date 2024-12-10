@@ -14,7 +14,7 @@
  * You may elect to redistribute this code under either of these licenses.
  */
 
-@ModuleGen(name = "vertx-service-discovery-backend-consul", groupPackage = "io.vertx", useFutures = true)
+@ModuleGen(name = "vertx-service-discovery-backend-consul", groupPackage = "io.vertx")
 package io.vertx.servicediscovery.backend.consul;
 
 import io.vertx.codegen.annotations.ModuleGen;

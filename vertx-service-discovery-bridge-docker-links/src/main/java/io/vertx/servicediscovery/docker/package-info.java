@@ -13,7 +13,7 @@
  *
  * You may elect to redistribute this code under either of these licenses.
  */
-@ModuleGen(name = "vertx-service-discovery-docker-links", groupPackage = "io.vertx", useFutures = true)
+@ModuleGen(name = "vertx-service-discovery-docker-links", groupPackage = "io.vertx")
 package io.vertx.servicediscovery.docker;
 
 import io.vertx.codegen.annotations.ModuleGen;
