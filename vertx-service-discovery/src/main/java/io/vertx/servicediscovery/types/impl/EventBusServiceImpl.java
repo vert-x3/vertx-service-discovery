@@ -25,7 +25,7 @@ import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.types.AbstractServiceReference;
 import io.vertx.servicediscovery.types.EventBusService;
 import io.vertx.servicediscovery.utils.ClassLoaderUtils;
-import io.vertx.serviceproxy.ProxyHelper;
+import io.vertx.serviceproxy.ServiceProxyBuilder;
 
 import java.util.Objects;
 
@@ -79,7 +79,10 @@ public class EventBusServiceImpl<T> implements EventBusService {
       if (itf == null) {
         throw new IllegalStateException("Cannot load class " + serviceInterface);
       } else {
-        return ProxyHelper.createProxy(itf, vertx, record().getLocation().getString(Record.ENDPOINT), deliveryOptions);
+        return new ServiceProxyBuilder(vertx)
+          .setAddress(record().getLocation().getString(Record.ENDPOINT))
+          .setOptions(deliveryOptions)
+          .build(itf);
       }
     }
   }

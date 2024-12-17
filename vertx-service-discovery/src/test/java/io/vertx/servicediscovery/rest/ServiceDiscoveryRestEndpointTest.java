@@ -27,7 +27,7 @@ import io.vertx.servicediscovery.impl.DiscoveryImpl;
 import io.vertx.servicediscovery.service.HelloService;
 import io.vertx.servicediscovery.service.HelloServiceImpl;
 import io.vertx.servicediscovery.types.EventBusService;
-import io.vertx.serviceproxy.ProxyHelper;
+import io.vertx.serviceproxy.ServiceBinder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -83,7 +83,7 @@ public class ServiceDiscoveryRestEndpointTest {
   @Test
   public void testThatWeGetThePublishedServices() {
     HelloService svc = new HelloServiceImpl("stuff");
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    new ServiceBinder(vertx).setAddress("address").register(HelloService.class, svc);
     Record record = new Record()
       .setName("Hello")
       .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
@@ -114,7 +114,7 @@ public class ServiceDiscoveryRestEndpointTest {
   @Test
   public void testThatWeGetTheTwoPublishedServicesWithMetadata() {
     HelloService svc = new HelloServiceImpl("stuff");
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    new ServiceBinder(vertx).setAddress("address").register(HelloService.class, svc);
 
     Record record1 = EventBusService.createRecord("Hello", "address", HelloService.class,
       new JsonObject().put("key", "foo"));
@@ -146,7 +146,7 @@ public class ServiceDiscoveryRestEndpointTest {
   @Test
   public void testPublicationAndUnpublicationFromTheRestAPI() {
     HelloService svc = new HelloServiceImpl("stuff");
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    new ServiceBinder(vertx).setAddress("address").register(HelloService.class, svc);
     Record record = new Record()
       .setName("Hello")
       .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
@@ -181,7 +181,7 @@ public class ServiceDiscoveryRestEndpointTest {
   @Test
   public void testUpdate() throws UnsupportedEncodingException {
     HelloService svc = new HelloServiceImpl("stuff");
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    new ServiceBinder(vertx).setAddress("address").register(HelloService.class, svc);
     Record record = new Record()
       .setName("Hello")
       .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
@@ -218,7 +218,7 @@ public class ServiceDiscoveryRestEndpointTest {
   @Test
   public void testLookupWithQuery() throws UnsupportedEncodingException {
     HelloService svc = new HelloServiceImpl("stuff");
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    new ServiceBinder(vertx).setAddress("address").register(HelloService.class, svc);
 
     Record record1 = EventBusService.createRecord("Hello", "address", HelloService.class,
       new JsonObject().put("key", "foo"));
@@ -244,7 +244,7 @@ public class ServiceDiscoveryRestEndpointTest {
   @Test
   public void testLookupWithNonMatchingQuery() throws UnsupportedEncodingException {
     HelloService svc = new HelloServiceImpl("stuff");
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    new ServiceBinder(vertx).setAddress("address").register(HelloService.class, svc);
 
     Record record1 = EventBusService.createRecord("Hello", "address", HelloService.class,
       new JsonObject().put("key", "foo"));
@@ -268,7 +268,7 @@ public class ServiceDiscoveryRestEndpointTest {
   @Test
   public void testFailedPublication() {
     HelloService svc = new HelloServiceImpl("stuff");
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    new ServiceBinder(vertx).setAddress("address").register(HelloService.class, svc);
     Record record = new Record()
       .setName("Hello")
       .setRegistration("this-is-not-allowed")
@@ -281,7 +281,7 @@ public class ServiceDiscoveryRestEndpointTest {
   @Test
   public void testRetrievingMissingRecord() {
     HelloService svc = new HelloServiceImpl("stuff");
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    new ServiceBinder(vertx).setAddress("address").register(HelloService.class, svc);
     Record record = new Record()
       .setName("Hello")
       .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));
@@ -303,7 +303,7 @@ public class ServiceDiscoveryRestEndpointTest {
   @Test
   public void testUpdateWithUUIDMismatch() throws UnsupportedEncodingException {
     HelloService svc = new HelloServiceImpl("stuff");
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    new ServiceBinder(vertx).setAddress("address").register(HelloService.class, svc);
     Record record = new Record()
       .setName("Hello")
       .setLocation(new JsonObject().put(Record.ENDPOINT, "address"));

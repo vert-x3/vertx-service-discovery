@@ -33,7 +33,7 @@ import io.vertx.servicediscovery.spi.ServiceImporter;
 import io.vertx.servicediscovery.spi.ServicePublisher;
 import io.vertx.servicediscovery.types.EventBusService;
 import io.vertx.servicediscovery.types.HttpEndpoint;
-import io.vertx.serviceproxy.ProxyHelper;
+import io.vertx.serviceproxy.ServiceBinder;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Test;
@@ -70,7 +70,7 @@ public abstract class DiscoveryImplTestBase {
   @Test
   public void testPublicationAndLookupById() {
     HelloService svc = new HelloServiceImpl("stuff");
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    new ServiceBinder(vertx).setAddress("address").register(HelloService.class, svc);
     Record record = new Record()
       .setName("Hello")
       .setType(EventBusService.TYPE)
@@ -93,7 +93,7 @@ public abstract class DiscoveryImplTestBase {
   @Test
   public void testPublicationAndSimpleLookup() {
     HelloService svc = new HelloServiceImpl("stuff");
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    new ServiceBinder(vertx).setAddress("address").register(HelloService.class, svc);
     Record record = new Record()
       .setName("Hello")
       .setType(EventBusService.TYPE)
@@ -142,7 +142,7 @@ public abstract class DiscoveryImplTestBase {
   @Test
   public void testPublicationAndFilteredLookup() {
     HelloService svc = new HelloServiceImpl("stuff");
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    new ServiceBinder(vertx).setAddress("address").register(HelloService.class, svc);
     Record record = new Record()
       .setName("Hello")
       .setMetadata(new JsonObject().put("key", "A"))
@@ -197,7 +197,7 @@ public abstract class DiscoveryImplTestBase {
       msg -> announces.add(new Record((JsonObject) msg.body())));
 
     HelloService svc = new HelloServiceImpl("stuff");
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    new ServiceBinder(vertx).setAddress("address").register(HelloService.class, svc);
     Record record = new Record()
       .setName("Hello")
       .setMetadata(new JsonObject().put("key", "A"))
@@ -298,7 +298,7 @@ public abstract class DiscoveryImplTestBase {
       msg -> announces.add(new Record((JsonObject) msg.body())));
 
     HelloService svc = new HelloServiceImpl("stuff");
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    new ServiceBinder(vertx).setAddress("address").register(HelloService.class, svc);
     Record record = new Record()
       .setName("Hello")
       .setMetadata(new JsonObject().put("key", "A"))
@@ -327,7 +327,7 @@ public abstract class DiscoveryImplTestBase {
       msg -> usages.add(msg.body()));
 
     HelloService svc = new HelloServiceImpl("stuff");
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    new ServiceBinder(vertx).setAddress("address").register(HelloService.class, svc);
 
     Record record = new Record()
       .setName("Hello")
@@ -452,7 +452,7 @@ public abstract class DiscoveryImplTestBase {
   @Test
   public void testExporter() {
     HelloService svc = new HelloServiceImpl("stuff");
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    new ServiceBinder(vertx).setAddress("address").register(HelloService.class, svc);
     Record record = new Record()
       .setName("Hello")
       .setType(EventBusService.TYPE)

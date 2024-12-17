@@ -28,7 +28,7 @@ import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.impl.DiscoveryImpl;
 import io.vertx.servicediscovery.service.HelloService;
 import io.vertx.servicediscovery.service.HelloServiceImpl;
-import io.vertx.serviceproxy.ProxyHelper;
+import io.vertx.serviceproxy.ServiceBinder;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
@@ -70,7 +70,7 @@ public class ServiceProxiesTest {
   @Test
   public void test() {
     HelloService svc = new HelloServiceImpl("stuff");
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    new ServiceBinder(vertx).setAddress("address").register(HelloService.class, svc);
     Record record = EventBusService.createRecord("Hello", "address", HelloService.class);
 
     discovery.publish(record);
@@ -96,7 +96,7 @@ public class ServiceProxiesTest {
   @Test
   public void testUsingGetMethod() {
     HelloService svc = new HelloServiceImpl("stuff");
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    new ServiceBinder(vertx).setAddress("address").register(HelloService.class, svc);
     Record record = EventBusService.createRecord("Hello", "address", HelloService.class);
 
     discovery.publish(record).onComplete((r) -> {
@@ -124,7 +124,7 @@ public class ServiceProxiesTest {
   @Test
   public void testSeveralCallsToRelease() {
     HelloService svc = new HelloServiceImpl("stuff");
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    new ServiceBinder(vertx).setAddress("address").register(HelloService.class, svc);
     Record record = EventBusService.createRecord("Hello", "address", HelloService.class);
 
     discovery.publish(record);
@@ -154,7 +154,7 @@ public class ServiceProxiesTest {
     vertx.eventBus().registerCodec(codec);
 
     HelloService svc = new HelloServiceImpl();
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "address");
+    new ServiceBinder(vertx).setAddress("address").register(HelloService.class, svc);
     Record record = EventBusService.createRecord("Hello", "address", HelloService.class);
 
     discovery.publish(record);

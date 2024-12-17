@@ -10,7 +10,7 @@ import io.vertx.servicediscovery.impl.DiscoveryImpl;
 import io.vertx.servicediscovery.service.HelloService;
 import io.vertx.servicediscovery.service.HelloServiceImpl;
 import io.vertx.servicediscovery.types.*;
-import io.vertx.serviceproxy.ProxyHelper;
+import io.vertx.serviceproxy.ServiceBinder;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.testcontainers.containers.MongoDBContainer;
@@ -49,7 +49,7 @@ public class PolyglotUsageTest {
     vertx = Vertx.vertx();
     discovery = new DiscoveryImpl(vertx, new ServiceDiscoveryOptions());
     HelloService svc = new HelloServiceImpl();
-    ProxyHelper.registerService(HelloService.class, vertx, svc, "my-service");
+    new ServiceBinder(vertx).setAddress("my-service").register(HelloService.class, svc);
 
     AtomicBoolean httpEndpointPublished = new AtomicBoolean();
     AtomicBoolean serviceProxyPublished = new AtomicBoolean();
