@@ -78,7 +78,7 @@ public class DiscoveryImpl implements ServiceDiscovery, ServicePublisher {
 
   private String getNodeId(Vertx vertx) {
     if (vertx.isClustered()) {
-      return ((VertxInternal) vertx).getClusterManager().getNodeId();
+      return ((VertxInternal) vertx).clusterManager().getNodeId();
     } else {
       return "localhost";
     }
