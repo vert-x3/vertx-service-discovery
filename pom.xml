@@ -25,6 +25,12 @@
   <artifactId>vertx-service-discovery-parent</artifactId>
   <version>4.5.15-SNAPSHOT</version>
 
+  <scm>
+    <connection>scm:git:git@github.com:vert-x3/vertx-service-discovery.git</connection>
+    <developerConnection>scm:git:git@github.com:vert-x3/vertx-service-discovery.git</developerConnection>
+    <url>git@github.com:vert-x3/vertx-service-discovery.git</url>
+  </scm>
+
   <packaging>pom</packaging>
 
   <properties>
