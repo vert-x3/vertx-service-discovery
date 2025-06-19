@@ -24,7 +24,7 @@
 
   <artifactId>vertx-service-discovery-parent</artifactId>
   <name>Vert.x Service Discovery Parent</name>
-  <version>4.5.16</version>
+  <version>4.5.17-SNAPSHOT</version>
 
   <scm>
     <connection>scm:git:git@github.com:vert-x3/vertx-service-discovery.git</connection>
