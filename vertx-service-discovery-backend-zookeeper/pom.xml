@@ -11,6 +11,7 @@
   </parent>
 
   <artifactId>vertx-service-discovery-backend-zookeeper</artifactId>
+  <name>Vert.x Service Discovery Zookeeper Backend</name>
 
   <properties>
     <curator.version>2.13.0</curator.version>

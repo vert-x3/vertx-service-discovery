@@ -27,6 +27,7 @@
   </parent>
 
   <artifactId>vertx-service-discovery-backend-redis</artifactId>
+  <name>Vert.x Service Discovery Redis Backend</name>
 
   <properties>
     <doc.skip>false</doc.skip>

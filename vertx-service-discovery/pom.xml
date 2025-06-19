@@ -27,6 +27,7 @@
   </parent>
 
   <artifactId>vertx-service-discovery</artifactId>
+  <name>Vert.x Service Discovery</name>
 
   <properties>
     <doc.skip>false</doc.skip>

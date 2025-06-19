@@ -10,6 +10,7 @@
   </parent>
 
   <artifactId>vertx-service-discovery-backend-consul</artifactId>
+  <name>Vert.x Service Discovery Consul Backend</name>
 
   <properties>
     <doc.skip>false</doc.skip>

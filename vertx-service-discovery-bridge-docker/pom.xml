@@ -27,6 +27,7 @@
   </parent>
 
   <artifactId>vertx-service-discovery-bridge-docker</artifactId>
+  <name>Vert.x Service Discovery Docker Bridge</name>
 
   <properties>
     <doc.skip>true</doc.skip>

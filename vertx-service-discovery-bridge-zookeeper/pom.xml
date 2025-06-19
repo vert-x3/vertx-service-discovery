@@ -11,6 +11,7 @@
   </parent>
 
   <artifactId>vertx-service-discovery-bridge-zookeeper</artifactId>
+  <name>Vert.x Service Discovery Zookeeper Bridge</name>
 
   <properties>
     <doc.skip>false</doc.skip>
