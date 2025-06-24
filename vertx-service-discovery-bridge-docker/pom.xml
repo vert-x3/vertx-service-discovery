@@ -28,6 +28,8 @@
 
   <artifactId>vertx-service-discovery-bridge-docker</artifactId>
 
+  <name>Vert.x Service Discovery Bridge Docker</name>
+
   <properties>
     <jackson.version>2.11.3</jackson.version>
   </properties>

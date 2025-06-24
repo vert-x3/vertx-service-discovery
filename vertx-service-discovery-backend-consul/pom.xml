@@ -11,6 +11,8 @@
 
   <artifactId>vertx-service-discovery-backend-consul</artifactId>
 
+  <name>Vert.x Service Discovery Backend Consul</name>
+
   <dependencies>
     <dependency>
       <groupId>io.vertx</groupId>

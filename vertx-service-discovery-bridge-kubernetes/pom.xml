@@ -27,6 +27,8 @@
 
   <artifactId>vertx-service-discovery-bridge-kubernetes</artifactId>
 
+  <name>Vert.x Service Discovery Kubernetes Bridge</name>
+
   <dependencies>
     <dependency>
       <groupId>org.slf4j</groupId>

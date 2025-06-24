@@ -28,6 +28,8 @@
 
   <artifactId>vertx-service-discovery-bridge-docker-links</artifactId>
 
+  <name>Vert.x Service Discovery Bridge Docket Links</name>
+
   <dependencies>
     <dependency>
       <groupId>io.vertx</groupId>

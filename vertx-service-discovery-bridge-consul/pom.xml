@@ -28,6 +28,8 @@
 
   <artifactId>vertx-service-discovery-bridge-consul</artifactId>
 
+  <name>Vert.x Service Discovery Brige Consul</name>
+
   <dependencies>
     <dependency>
       <groupId>io.vertx</groupId>

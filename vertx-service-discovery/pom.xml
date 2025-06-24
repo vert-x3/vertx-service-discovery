@@ -28,6 +28,8 @@
 
   <artifactId>vertx-service-discovery</artifactId>
 
+  <name>Vert.x Service Discovery</name>
+
   <dependencies>
     <dependency>
       <groupId>io.vertx</groupId>

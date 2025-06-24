@@ -28,6 +28,8 @@
 
   <artifactId>vertx-service-discovery-backend-redis</artifactId>
 
+  <name>Vert.x Service Discovery Backend Redis</name>
+
   <dependencies>
     <dependency>
       <groupId>io.vertx</groupId>
