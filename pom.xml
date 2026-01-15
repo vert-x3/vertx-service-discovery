@@ -23,7 +23,7 @@
   </parent>
 
   <artifactId>vertx-service-discovery-parent</artifactId>
-  <version>5.0.7-SNAPSHOT</version>
+  <version>5.0.7</version>
 
   <name>Vert.x Service Discovery Parent</name>
 
