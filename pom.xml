@@ -19,7 +19,7 @@
   <parent>
     <groupId>io.vertx</groupId>
     <artifactId>vertx5-parent</artifactId>
-    <version>14</version>
+    <version>15</version>
   </parent>
 
   <name>vertx-service-discovery-parent</name>
