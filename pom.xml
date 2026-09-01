@@ -24,7 +24,7 @@
 
   <name>vertx-service-discovery-parent</name>
   <artifactId>vertx-service-discovery-parent</artifactId>
-  <version>5.1.7-SNAPSHOT</version>
+  <version>5.1.7</version>
 
   <scm>
     <connection>scm:git:git@github.com:vert-x3/vertx-service-discovery.git</connection>
